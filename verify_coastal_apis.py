@@ -52,6 +52,13 @@ BUOYS = [
     ("Imperial Beach Nearshore", "155", "46235"),
 ]
 
+# Endpoints confirmed dead at the source, not regressions to chase. They stay
+# in the run so we notice if they ever come back, but they do not count as
+# failures. Keyed by NDBC WMO id.
+DEAD_BUOYS = {
+    "46235": "decommissioned; station page is up but serves no realtime2 file",
+}
+
 results = []
 
 
@@ -108,7 +115,8 @@ def age_str(when):
     return f"{hours / 24:.0f}d old"
 
 
-def record(name, url, status, secs, size, note="", newest=None, err=None):
+def record(name, url, status, secs, size, note="", newest=None, err=None, dead=None):
+    """dead: reason this endpoint is known-dead, so a failure here is expected."""
     results.append(
         {
             "name": name,
@@ -119,6 +127,7 @@ def record(name, url, status, secs, size, note="", newest=None, err=None):
             "note": note,
             "age": age_str(newest),
             "err": err,
+            "dead": dead,
         }
     )
 
@@ -191,7 +200,7 @@ def check_ndbc(label, wmo):
                 note = f"{len(lines)} rows"
             except Exception as ex:
                 note = f"parse failed: {ex}"
-    record(f"NDBC {wmo} ({label})", url, s, t, n, note, newest, e)
+    record(f"NDBC {wmo} ({label})", url, s, t, n, note, newest, e, DEAD_BUOYS.get(wmo))
 
 
 def check_cdip_catalog():
@@ -241,7 +250,7 @@ def check_coops(product, station="9410230", extra=""):
     record(f"CO-OPS {product} @{station}", url, s, t, n, note, newest, e)
 
 
-def check_open_meteo_marine(host):
+def check_open_meteo_marine(host, dead=None):
     url = (
         f"https://{host}/v1/marine?latitude=33.19&longitude=-117.40"
         "&hourly=wave_height,wave_period,wave_direction,"
@@ -261,7 +270,7 @@ def check_open_meteo_marine(host):
                 note = f"{len(h.get('time', []))} hours, {len(vals)} non-null wave_height"
         except Exception as ex:
             note = f"parse failed: {ex}"
-    record(f"Open-Meteo marine ({host})", url, s, t, n, note, err=e)
+    record(f"Open-Meteo marine ({host})", url, s, t, n, note, err=e, dead=dead)
 
 
 # Real column names off .../info/HABs-ScrippsPier/index.json. Note the
@@ -506,7 +515,10 @@ CHECKS = [
     ),
     lambda: check_coops("water_level", "9410170", "&date=latest&datum=MLLW"),
     lambda: check_open_meteo_marine("marine-api.open-meteo.com"),
-    lambda: check_open_meteo_marine("api.open-meteo.com"),
+    lambda: check_open_meteo_marine(
+        "api.open-meteo.com",
+        dead="/v1/marine is served only by the marine-api host",
+    ),
     check_sccoos_live_datasets,
     check_sccoos_habs,
     lambda: check_usgs_discharge_bbox("Tijuana valley", TIJUANA_BBOX),
@@ -526,23 +538,31 @@ def main():
         list(pool.map(lambda f: f(), CHECKS))
 
     w = max(len(r["name"]) for r in results) + 2
-    print(f"{'ENDPOINT':<{w}} {'STAT':<5} {'MS':>6} {'AGE':>14}  NOTE")
-    print("-" * (w + 78))
-    ok = warn = bad = 0
+    print(f"{'ENDPOINT':<{w}} {'STAT':<7} {'MS':>6} {'AGE':>14}  NOTE")
+    print("-" * (w + 80))
+    ok = warn = bad = dead = 0
     for r in sorted(results, key=lambda x: x["name"]):
-        if r["err"] or (r["status"] and r["status"] >= 400):
+        failed = bool(r["err"]) or (r["status"] and r["status"] >= 400)
+        detail = r["err"] or r["note"]
+        if failed and r["dead"]:
+            mark, dead = "DEAD", dead + 1
+            detail = r["dead"]
+        elif failed:
             mark, bad = "FAIL", bad + 1
+        elif r["dead"]:
+            # Marked dead but answering. Worth a look -- either it came back or
+            # the reason we wrote it off no longer holds.
+            mark, ok = "REVIVED", ok + 1
         elif r["status"] is None:
             mark, warn = "SKIP", warn + 1
         else:
             mark, ok = str(r["status"]), ok + 1
-        detail = r["err"] or r["note"]
         print(
-            f"{r['name']:<{w}} {mark:<5} {r['secs'] * 1000:>6.0f} "
+            f"{r['name']:<{w}} {mark:<7} {r['secs'] * 1000:>6.0f} "
             f"{r['age']:>14}  {detail[:70]}"
         )
 
-    print(f"\n{ok} ok, {warn} skipped, {bad} failed")
+    print(f"\n{ok} ok, {warn} skipped, {dead} known-dead, {bad} failed")
     print(
         "\nFreshness beats status. Anything reading days old on a realtime feed\n"
         "is a dead station, not a working endpoint.\n"
