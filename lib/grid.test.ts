@@ -23,7 +23,18 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { HORIZON_DAYS, loadGrid, loadSpotDay, loadSpotWeek, tidepoolSpotBySlug } from './grid';
+import {
+  HORIZON_DAYS,
+  SERVABLE_DAYS_AFTER,
+  SERVABLE_DAYS_BEFORE,
+  isServableDate,
+  loadGrid,
+  loadSpotDay,
+  loadSpotWeek,
+  servableDateParam,
+  tidepoolSpotBySlug,
+} from './grid';
+import { addLocalDays } from './time';
 import coops240h from './__fixtures__/coops-9410230-20260727-240h.json';
 import coops72h from './__fixtures__/coops-9410230-20260727-6min.json';
 import { SPOTS_WITHOUT_FLOOR, TIDEPOOL_SPOTS } from '@/shared/spots.generated';
@@ -264,6 +275,72 @@ describe('tidepoolSpotBySlug', () => {
     // inventing one produces a confident state for a reef nobody has measured.
     const floorless = SPOTS_WITHOUT_FLOOR[0]!;
     expect(tidepoolSpotBySlug(floorless.slug)).toBeNull();
+  });
+});
+
+/* ===========================================================================
+ * The servable date window
+ * ========================================================================= */
+
+describe('servableDateParam', () => {
+  it('accepts today and both bounds', () => {
+    expect(servableDateParam('2026-07-28', NOW_MS)).toEqual(TODAY);
+    // 30 back, 365 forward.
+    expect(servableDateParam('2026-06-28', NOW_MS)).toEqual({ year: 2026, month: 6, day: 28 });
+    expect(servableDateParam('2027-07-28', NOW_MS)).toEqual({ year: 2027, month: 7, day: 28 });
+  });
+
+  it('refuses one day past either bound', () => {
+    expect(servableDateParam('2026-06-27', NOW_MS)).toBeNull();
+    expect(servableDateParam('2027-07-29', NOW_MS)).toBeNull();
+  });
+
+  it('refuses the dates that used to render a full chart', () => {
+    // Both of these returned 200 with real harmonic predictions -- 1900-01-01
+    // drew four turning points and a low of -1.5 ft at 3:22 pm. Correct numbers
+    // for a page that should never have been served.
+    expect(servableDateParam('1900-01-01', NOW_MS)).toBeNull();
+    expect(servableDateParam('2030-01-01', NOW_MS)).toBeNull();
+    expect(servableDateParam('9999-12-31', NOW_MS)).toBeNull();
+  });
+
+  it('still refuses anything that is not a real calendar date', () => {
+    // The range check is added to the parse, not swapped for it. 2026-02-30
+    // parses as a Date and rolls to 2 March, charting a day the URL does not name.
+    for (const bad of ['2026-02-30', '2026-13-01', '26-07-28', '2026-7-28', '2026-07-28T00:00', '']) {
+      expect(servableDateParam(bad, NOW_MS)).toBeNull();
+    }
+  });
+
+  it('moves with the local day, not with the UTC day', () => {
+    // 2026-07-28T06:00Z is 23:00 PDT on 27 July. "Today" is still the 27th, so
+    // the forward bound is a day earlier than it is an hour later.
+    const beforeLocalMidnight = Date.UTC(2026, 6, 28, 6, 0, 0);
+    expect(servableDateParam('2027-07-28', beforeLocalMidnight)).toBeNull();
+    expect(servableDateParam('2027-07-27', beforeLocalMidnight)).not.toBeNull();
+  });
+
+  it('costs no upstream request when it refuses', async () => {
+    route();
+    // The route calls this before loadSpotDay precisely so that a crawler
+    // walking the prev/next chain stops at the bound and CO-OPS never hears it.
+    expect(servableDateParam('1900-01-01', NOW_MS)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('isServableDate', () => {
+  it('brackets today by SERVABLE_DAYS_BEFORE and SERVABLE_DAYS_AFTER', () => {
+    expect(isServableDate(addLocalDays(TODAY, -SERVABLE_DAYS_BEFORE), TODAY)).toBe(true);
+    expect(isServableDate(addLocalDays(TODAY, -SERVABLE_DAYS_BEFORE - 1), TODAY)).toBe(false);
+    expect(isServableDate(addLocalDays(TODAY, SERVABLE_DAYS_AFTER), TODAY)).toBe(true);
+    expect(isServableDate(addLocalDays(TODAY, SERVABLE_DAYS_AFTER + 1), TODAY)).toBe(false);
+  });
+
+  it('covers the whole grid horizon, so no cell can link to a 404', () => {
+    for (let i = 0; i < HORIZON_DAYS; i++) {
+      expect(isServableDate(addLocalDays(TODAY, i), TODAY)).toBe(true);
+    }
   });
 });
 

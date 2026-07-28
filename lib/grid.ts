@@ -12,7 +12,14 @@ import { evaluateWindow, countUsable, type WindowResult } from './windows';
 import { fetchTideSeries, resolveSpotSwell, UpstreamError, type SpotSwell } from './upstream';
 import { swellCeilingFor, type SwellCeiling } from './thresholds';
 import { findExtrema, sliceSeries, type TideExtremum, type TideSeries } from './tide';
-import { addLocalDays, localDateInZone, localDayBounds, type LocalDate } from './time';
+import {
+  addLocalDays,
+  localDateInZone,
+  localDayBounds,
+  localDaysBetween,
+  tryParseLocalDate,
+  type LocalDate,
+} from './time';
 import {
   DISPLAY_TIME_ZONE,
   SPOT_BY_SLUG,
@@ -227,6 +234,61 @@ export function tidepoolSpotBySlug(slug: string): TidepoolSpot | null {
   // A spot with no floor is not evaluable. Returning null rather than guessing a
   // floor is the whole reason the grid is eight spots and not twenty-six.
   return isTidepoolSpot(spot) ? spot : null;
+}
+
+/* ===========================================================================
+ * What the day route will answer for
+ * ========================================================================= */
+
+/**
+ * How far either side of today `/spot/[slug]/[date]` will serve.
+ *
+ * This is NOT a claim about where the maths stops holding. Tide predictions are
+ * astronomical and CO-OPS serves them across roughly 130 years: `1900-01-01`
+ * rendered a full chart with four turning points and a low of -1.5 ft at
+ * 3:22 pm, and every one of those numbers was a real harmonic answer.
+ *
+ * It is a claim about what this app will spend someone else's bandwidth on.
+ * Each distinct date is a distinct CO-OPS request, every day page links to the
+ * day either side of it, and none of it is statically cached -- an unbounded
+ * crawl chain pointed at an upstream, about 380,000 pages of it. A repo built
+ * around not leaning on sources that quietly rot should not also be the thing
+ * leaning on them.
+ *
+ * The bounds are asymmetric because the use is. Looking a year ahead at a
+ * spring tide is a real thing to want, and loadSpotDay deliberately fetches
+ * around the requested date rather than reusing the grid's range precisely so
+ * that a deep link past the 7-day horizon works. Looking backwards is mostly
+ * checking what last weekend did. 30 back and 365 forward leaves ~2,900 pages
+ * per spot rather than ~48,000.
+ */
+export const SERVABLE_DAYS_BEFORE = 30;
+export const SERVABLE_DAYS_AFTER = 365;
+
+/** Whether the day route will answer for `date`, given the local day it is now. */
+export function isServableDate(date: LocalDate, today: LocalDate): boolean {
+  const offset = localDaysBetween(today, date);
+  return offset >= -SERVABLE_DAYS_BEFORE && offset <= SERVABLE_DAYS_AFTER;
+}
+
+/**
+ * Resolve a `[date]` route segment to a date this app will serve, or null.
+ *
+ * Two rejections, both about untrusted input, and they are different failures.
+ *
+ * The parse refuses anything that is not exactly YYYY-MM-DD or that does not
+ * round-trip: `2026-02-30` parses as a Date in JS and rolls to 2 March, which
+ * would chart a different day than the URL names.
+ *
+ * The range check then refuses a date outside the servable window. Callers run
+ * this BEFORE loadSpotDay, which is the whole point -- an out-of-range request
+ * costs a 404 and no upstream request at all, so a crawler walking the prev/next
+ * chain stops at the boundary and CO-OPS never hears about it.
+ */
+export function servableDateParam(dateParam: string, nowMs: number): LocalDate | null {
+  const date = tryParseLocalDate(dateParam);
+  if (!date) return null;
+  return isServableDate(date, localDateInZone(nowMs, DISPLAY_TIME_ZONE)) ? date : null;
 }
 
 export async function loadSpotWeek(spot: TidepoolSpot, nowMs: number): Promise<SpotWeek> {
