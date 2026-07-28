@@ -52,6 +52,19 @@ export default async function GridPage({
   const rows = sortRows(grid.rows, sort);
   const dayStarts = grid.days.map((d) => startOfLocalDay(d, grid.timeZone));
 
+  /*
+   * Derived, never hardcoded.
+   *
+   * Today all eight evaluable spots bind to 9410230, which is why every row of
+   * the grid shows the same seven lows -- and saying so is what turns that from
+   * an apparent bug into a stated fact. But it is a fact about the current
+   * contents of spots.json, not a property of the corridor. Bind one spot to
+   * another station and the sentence becomes false, so it is computed and the
+   * copy falls back when the set is not a singleton.
+   */
+  const stations = new Set(rows.map((r) => r.spot.tide_station));
+  const sharedStation = stations.size === 1 ? [...stations][0] : null;
+
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
@@ -59,19 +72,38 @@ export default async function GridPage({
           <h1 className="text-title font-semibold tracking-tight">
             Daylight low-tide windows
           </h1>
+          {/*
+            One line, not six.
+
+            This used to open with a paragraph explaining how to read a cell --
+            the arrows, the light and dark backgrounds, the 45-minute minimum --
+            which put a block of instructions between the heading and the thing
+            it was instructions for. All of it is repeated in the legend below
+            the grid, where it sits next to the swatches it describes and can be
+            checked against them. It is now only there.
+
+            What survives is the fact a reader cannot get from the grid by
+            looking, and which makes the grid legible rather than broken: every
+            row shows the same tide because every spot reads the same station.
+
+            A JSX text node spanning several lines loses its LEADING space, so
+            each number is bound to its unit inside one expression and every
+            seam between an expression and a text node is an explicit {' '}.
+          */}
           <p className="mt-1 max-w-prose text-ui text-[var(--text-dim)]">
-            {/*
-              A JSX text node spanning several lines loses its LEADING space, so
-              `{HORIZON_DAYS} days` renders as "7days" and a following text line
-              butts straight up against the expression before it. Each number is
-              therefore bound to its unit inside one expression, and every seam
-              between an expression and a text node is an explicit {' '}.
-            */}
             {`${rows.length} reef and tidepool spots over ${HORIZON_DAYS} days.`}{' '}
-            Each cell gives the low (▼) and the high that follows it (▲), light when that low
-            falls in daylight and dark when it does not: today&apos;s column is the next low from
-            now, later days that day&apos;s best daylight low.{' '}
-            {`A window needs ${MIN_WINDOW_MINUTES} minutes to count, and that judgement sits behind the badge on each cell.`}
+            {sharedStation ? (
+              <>
+                {`All of them read tide station ${sharedStation}, so the tide is the same down the
+                  whole corridor — what differs is each reef's floor, and the number under each low
+                  is how far that low sits from it.`}
+              </>
+            ) : (
+              <>
+                Each cell gives the low (▼), the high that follows it (▲), and how far that low sits
+                from the spot&apos;s own reef floor.
+              </>
+            )}
           </p>
         </div>
 
@@ -281,6 +313,20 @@ function Legend() {
           ▼ 0.2 4:41 am
         </span>
         <span>low after dark</span>
+      </p>
+
+      {/*
+        Moved down from the page intro, which was six lines of instructions
+        standing between the heading and the grid. It belongs here, beside the
+        swatches, where a reader can check each sentence against the thing it
+        describes instead of holding it in memory while scrolling past a table.
+      */}
+      <p className="mt-2 max-w-prose text-meta text-[var(--text-dim)]">
+        Each cell gives the low (▼), the high that follows it (▲), and the low&apos;s distance from
+        that spot&apos;s reef floor — negative when the low gets under the floor and uncovers reef.
+        Today&apos;s column is the next low from now; later days show that day&apos;s best daylight
+        low.{' '}
+        {`A window needs ${MIN_WINDOW_MINUTES} minutes to count, and that judgement sits behind the badge on each cell.`}
       </p>
 
       <details className="mt-2">
