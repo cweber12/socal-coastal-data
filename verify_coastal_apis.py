@@ -328,28 +328,65 @@ def check_sccoos_live_datasets(days=30):
     record("SCCOOS ERDDAP live datasets", url, s, t, n, note, newest, e)
 
 
-def check_usgs_tijuana():
-    """Tijuana River nr Nestor. VERIFY the site number against the returned name."""
+# Tijuana River valley, Nestor down to the border. 11013500 (TIJUANA R NR
+# NESTOR CA) is the right site number and the right river -- but its series
+# catalog has no unit-value series at all, and daily discharge stopped on
+# 1982-09-29. Nothing else in this box publishes realtime discharge either;
+# the live Tijuana gauge is run by the IBWC, not USGS. Probe the box rather
+# than a dead site number, so this lights up if USGS ever restores one.
+TIJUANA_BBOX = "-117.20,32.52,-116.90,32.62"
+
+
+def check_usgs_discharge_bbox(label, bbox):
     url = (
         "https://waterservices.usgs.gov/nwis/iv/?format=json"
-        "&sites=11013500&parameterCd=00060&siteStatus=all"
+        f"&bBox={bbox}&parameterCd=00060"
     )
     s, t, n, body, e = fetch(url)
     note, newest = "", None
     if body:
         try:
-            ts = json.loads(body)["value"]["timeSeries"]
-            if not ts:
-                note = "no timeseries -- check site number"
+            series = json.loads(body)["value"]["timeSeries"]
+            if not series:
+                note = "NO realtime discharge gauge in box (11013500 retired 1982)"
             else:
-                site = ts[0]["sourceInfo"]["siteName"]
-                vals = ts[0]["values"][0]["value"]
-                note = f"{site[:38]} | {len(vals)} pts"
-                if vals:
-                    newest = dt.datetime.fromisoformat(vals[-1]["dateTime"])
+                sites, stamps = [], []
+                for ser in series:
+                    sites.append(ser["sourceInfo"]["siteCode"][0]["value"])
+                    vals = ser["values"][0]["value"]
+                    if vals:
+                        stamps.append(dt.datetime.fromisoformat(vals[-1]["dateTime"]))
+                note = f"{len(series)} gauges: " + ", ".join(sites[:4])
+                if stamps:
+                    newest = max(stamps)
         except Exception as ex:
             note = f"parse failed: {ex}"
-    record("USGS IV (Tijuana R.)", url, s, t, n, note, newest, e)
+    record(f"USGS discharge bbox ({label})", url, s, t, n, note, newest, e)
+
+
+def check_usgs_iv(label, site):
+    """Realtime discharge at one gauge."""
+    url = (
+        "https://waterservices.usgs.gov/nwis/iv/?format=json"
+        f"&sites={site}&parameterCd=00060"
+    )
+    s, t, n, body, e = fetch(url)
+    note, newest = "", None
+    if body:
+        try:
+            series = json.loads(body)["value"]["timeSeries"]
+            if not series:
+                note = "no timeseries -- gauge discontinued or wrong parameter"
+            else:
+                name = series[0]["sourceInfo"]["siteName"]
+                vals = series[0]["values"][0]["value"]
+                note = f"{name[:34]} | {len(vals)} pts"
+                if vals:
+                    newest = dt.datetime.fromisoformat(vals[-1]["dateTime"])
+                    note += f" | {vals[-1]['value']} cfs"
+        except Exception as ex:
+            note = f"parse failed: {ex}"
+    record(f"USGS IV {site} ({label})", url, s, t, n, note, newest, e)
 
 
 def check_usgs_new_api():
@@ -472,7 +509,8 @@ CHECKS = [
     lambda: check_open_meteo_marine("api.open-meteo.com"),
     check_sccoos_live_datasets,
     check_sccoos_habs,
-    check_usgs_tijuana,
+    lambda: check_usgs_discharge_bbox("Tijuana valley", TIJUANA_BBOX),
+    lambda: check_usgs_iv("San Luis Rey @ Oceanside", "11042000"),
     check_usgs_new_api,
     check_inaturalist,
     check_ebird,
@@ -508,13 +546,15 @@ def main():
     print(
         "\nFreshness beats status. Anything reading days old on a realtime feed\n"
         "is a dead station, not a working endpoint.\n"
-        "\nTwo things this script cannot verify for you:\n"
-        "  1. San Diego County DEHQ beach advisories. Open sdbeachinfo.com with\n"
-        "     devtools on the network tab, find the ArcGIS FeatureServer URL it\n"
-        "     calls, then append /query?where=1%3D1&outFields=*&f=geojson.\n"
-        "     Undocumented, so pin the layer id and add a schema-drift alarm.\n"
-        "  2. USGS site 11013500 for the Tijuana River is from memory. Check the\n"
-        "     site name printed above actually says Tijuana before trusting it.\n"
+        "\nOne thing this script cannot verify for you:\n"
+        "  San Diego County DEHQ beach advisories. Open sdbeachinfo.com with\n"
+        "  devtools on the network tab, find the ArcGIS FeatureServer URL it\n"
+        "  calls, then append /query?where=1%3D1&outFields=*&f=geojson.\n"
+        "  Undocumented, so pin the layer id and add a schema-drift alarm.\n"
+        "\nAnd one gap no endpoint closes: there is no realtime USGS discharge\n"
+        "for the Tijuana River. 11013500 is the correct site and river, but it\n"
+        "stopped publishing in 1982 and no other USGS gauge in the valley has\n"
+        "replaced it. The live gauge there is IBWC's, on a separate feed.\n"
     )
     return 1 if bad else 0
 
