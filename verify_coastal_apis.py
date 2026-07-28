@@ -647,7 +647,10 @@ CHECKS = [
     check_sccoos_live_datasets,
     check_sccoos_habs,
     lambda: check_usgs_discharge_bbox("Tijuana valley", TIJUANA_BBOX),
-    lambda: check_usgs_iv("San Luis Rey @ Oceanside", "11042000"),
+    # Oceanside-area watershed signal at the NORTH end of the corridor. Not a
+    # Tijuana River substitute -- different basin, ~60 miles away, and it says
+    # nothing about border outfall conditions. Tijuana flow comes from IBWC.
+    lambda: check_usgs_iv("Oceanside watershed, north end", "11042000"),
     check_ibwc_tijuana,
     check_usgs_new_api,
     check_inaturalist,
@@ -697,10 +700,14 @@ def main():
         "  devtools on the network tab, find the ArcGIS FeatureServer URL it\n"
         "  calls, then append /query?where=1%3D1&outFields=*&f=geojson.\n"
         "  Undocumented, so pin the layer id and add a schema-drift alarm.\n"
-        "\nAnd one gap no endpoint closes: there is no realtime USGS discharge\n"
-        "for the Tijuana River. 11013500 is the correct site and river, but it\n"
-        "stopped publishing in 1982 and no other USGS gauge in the valley has\n"
-        "replaced it. The live gauge there is IBWC's, on a separate feed.\n"
+        "\nOn river flow, know which gauge answers which question:\n"
+        "  Tijuana River at the border -> IBWC 11013300 only. USGS has nothing\n"
+        "  realtime in that valley; 11013500 is the right river but stopped\n"
+        "  publishing in 1982. IBWC is an undocumented file scrape, so if it\n"
+        "  reports SCHEMA DRIFT, treat the flow number as missing, not stale.\n"
+        "  USGS 11042000 is the Oceanside watershed at the NORTH end of the\n"
+        "  corridor -- a different basin ~60 miles away. It is not a proxy for\n"
+        "  border conditions and must never be substituted for one.\n"
     )
     return 1 if bad else 0
 
