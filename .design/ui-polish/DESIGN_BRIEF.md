@@ -31,9 +31,14 @@ a type hierarchy where the data outranks its footnotes. Fix the dark-mode
 tint inversion. Set the safety caveats as designed callouts rather than raw
 slabs — without changing a word of them.
 
-The reader should be able to scan one column and see that Sunset Cliffs gets
-within 1.2 ft of workable while Cabrillo is 1.8 ft off, and understand from
+The reader should be able to scan one column and see that Cabrillo is 1.1 ft
+off a workable window while Sunset Cliffs is 1.7 ft off, and understand from
 the page itself that both numbers rest on an estimate nobody has verified.
+
+Note the direction, because it inverts the intuition: a HIGHER floor is more
+permissive. spots.json says the 1.2.0 shift moved every floor in the permissive
+direction and that Sunset Cliffs at 0.7 ft is deliberately the strictest of the
+eight. So the deepest-looking number is the easiest spot, not the hardest.
 
 ## Experience Principles
 

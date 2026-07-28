@@ -62,9 +62,11 @@ to `main`.
   into `lib/grid.ts` so it is testable, then add the tie-break: when usable
   counts tie — the current and common case — rank by smallest week gap to floor.
   _Modifies: `app/page.tsx`, `lib/grid.ts`, `lib/grid.test.ts`._
-  **Done when:** default order is Sunset Cliffs first, Cabrillo last, and a new
+  **Done when:** default order is Cabrillo first, Sunset Cliffs last, and a new
   test in `grid.test.ts` pins that. Today the control silently renders
   alphabetical order.
+  **Direction:** a HIGHER floor is more permissive, so Cabrillo at 1.3 ft is
+  nearest a window and Sunset Cliffs at 0.7 ft is furthest. Easy to invert.
 
 - [ ] **5. State the shared tide station, and cut the intro.** Add the one-line
   fact near the table caption: all spots draw on station 9410230, so the tide is

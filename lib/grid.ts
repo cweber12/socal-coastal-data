@@ -436,3 +436,83 @@ export async function loadSpotDay(
     failure: null,
   };
 }
+
+/* ===========================================================================
+ * Row order
+ * ========================================================================= */
+
+export type SortKey = 'usable' | 'geographic';
+
+/**
+ * How close this spot came to a workable window over the whole horizon.
+ *
+ * The smallest `low - floor` across the row's days, so a negative value means
+ * the tide got under the floor on at least one day and a positive one is the
+ * margin by which the best day missed. Null-day entries are skipped; a row with
+ * no evaluable day at all returns Infinity and sorts last.
+ */
+export function bestGapFt(row: SpotRow): number {
+  let best = Infinity;
+  for (const day of row.days) {
+    if (!day) continue;
+    const gap = day.lowFt - day.floorFt;
+    if (gap < best) best = gap;
+  }
+  return best;
+}
+
+/**
+ * Order the grid's rows.
+ *
+ * Lived in app/page.tsx until the tie-break below made it worth testing.
+ *
+ * ---------------------------------------------------------------------------
+ * Why the tie-break exists
+ * ---------------------------------------------------------------------------
+ *
+ * `usable` sorted by usable count, then by how much window today had left, then
+ * by name. All eight spots share tide station 9410230, so today's remaining
+ * minutes are identical across every row -- and in a week where nothing clears
+ * the floor every usable count is 0 as well. Both keys tied on every
+ * comparison and the whole sort fell through to `localeCompare`. The control
+ * rendered alphabetical order and called it "Usable windows".
+ *
+ * The floor is the one thing that genuinely differs per spot, so when the
+ * counts tie the rows are ranked by how close each got to its own floor.
+ *
+ * The direction is easy to get backwards, so: a HIGHER tidepool_floor_ft is
+ * more PERMISSIVE. It means the stack calls the reef workable at higher water.
+ * spots.json states this in its own unresolved array -- the 1.2.0 shift "moved
+ * every floor in the PERMISSIVE direction", and Sunset Cliffs at 0.7 ft is
+ * "deliberately kept the strictest of the eight".
+ *
+ * So against one shared tide, Cabrillo at 1.3 ft ranks first and Sunset Cliffs
+ * at 0.7 ft ranks last, because Cabrillo is the one nearest to a window.
+ *
+ * The remaining-minutes key is kept after it. It decides nothing while one
+ * station serves every spot, but it is correct on its own terms and would start
+ * mattering again the moment a spot binds to a different station.
+ */
+export function sortRows(rows: readonly SpotRow[], sort: SortKey): SpotRow[] {
+  if (sort === 'geographic') {
+    // spots.json is already ordered north to south, from Oceanside Harbour down
+    // to Border Field, and TIDEPOOL_SPOTS preserves that order. Geographic sort
+    // is the file's own order -- deriving it from latitude again would be a
+    // second source of truth that could disagree with the file.
+    return [...rows];
+  }
+
+  return [...rows].sort((a, b) => {
+    if (b.usableCount !== a.usableCount) return b.usableCount - a.usableCount;
+
+    const aGap = bestGapFt(a);
+    const bGap = bestGapFt(b);
+    if (aGap !== bGap) return aGap - bGap;
+
+    const aToday = a.days[0]?.minutesRemaining ?? a.days[0]?.usableMinutes ?? 0;
+    const bToday = b.days[0]?.minutesRemaining ?? b.days[0]?.usableMinutes ?? 0;
+    if (bToday !== aToday) return bToday - aToday;
+
+    return a.spot.name.localeCompare(b.spot.name);
+  });
+}

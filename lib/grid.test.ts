@@ -32,7 +32,10 @@ import {
   loadSpotDay,
   loadSpotWeek,
   servableDateParam,
+  sortRows,
+  bestGapFt,
   tidepoolSpotBySlug,
+  type SpotRow,
 } from './grid';
 import { addLocalDays } from './time';
 import coops240h from './__fixtures__/coops-9410230-20260727-240h.json';
@@ -429,5 +432,122 @@ describe('loadSpotDay', () => {
     expect(day.extrema).toEqual([]);
     // The bounds are still true even when nothing could be drawn between them.
     expect(day.dayStartMs).toBe(Date.UTC(2026, 6, 28, 7, 0, 0));
+  });
+});
+
+/* ===========================================================================
+ * Row order
+ * ========================================================================= */
+
+/**
+ * A row shaped like a real one. Only the fields the sort reads are meaningful;
+ * the rest exist so the object typechecks as a SpotRow.
+ */
+function row(name: string, floorFt: number, lows: number[], usableCount = 0): SpotRow {
+  return {
+    spot: { name, slug: name.toLowerCase().replace(/\W+/g, '-'), tidepool_floor_ft: floorFt } as SpotRow['spot'],
+    swell: {} as SpotRow['swell'],
+    ceiling: {} as SpotRow['ceiling'],
+    days: lows.map(
+      (lowFt) => ({ lowFt, floorFt, minutesRemaining: null, usableMinutes: 0 }) as SpotRow['days'][number],
+    ),
+    usableCount,
+  };
+}
+
+describe('bestGapFt', () => {
+  it('is the closest any day came to the floor, signed', () => {
+    // 2.4 - 1.3 = 1.1, and -0.5 - 1.3 = -1.8, so the best is the week's lowest low.
+    expect(bestGapFt(row('Cabrillo', 1.3, [2.4, -0.5, 0.9]))).toBeCloseTo(-1.8, 5);
+  });
+
+  it('is negative exactly when some day got under the floor', () => {
+    expect(bestGapFt(row('Under', 1.3, [1.2]))).toBeLessThan(0);
+    expect(bestGapFt(row('Over', 1.3, [1.4]))).toBeGreaterThan(0);
+  });
+
+  it('skips days that would not evaluate', () => {
+    const r = row('Gappy', 1.0, [2.0]);
+    r.days = [null, r.days[0]!, null];
+    expect(bestGapFt(r)).toBeCloseTo(1.0, 5);
+  });
+
+  it('sorts a row with no evaluable day last rather than first', () => {
+    // Infinity, not 0. A row we know nothing about must not outrank one we do.
+    const r = row('Empty', 1.0, []);
+    r.days = [null, null];
+    expect(bestGapFt(r)).toBe(Infinity);
+  });
+});
+
+describe('sortRows', () => {
+  /*
+   * The regression this exists for.
+   *
+   * Every evaluable spot binds to tide station 9410230, so the lows are
+   * identical on every row, and in a week where nothing clears the floor every
+   * usableCount is 0 too. Before the gap tie-break, both keys tied on every
+   * comparison and the sort fell through to localeCompare -- the control
+   * rendered alphabetical order while calling itself "Usable windows".
+   */
+  const identicalLows = [2.4, -0.5, -0.4];
+  const week = () => [
+    row('Cabrillo Tidepools', 1.3, identicalLows),
+    row('Cardiff Reef', 1.0, identicalLows),
+    row('Sunset Cliffs', 0.7, identicalLows),
+    row('Windansea', 1.0, identicalLows),
+  ];
+
+  it('ranks by closeness to floor when every usable count ties', () => {
+    const names = sortRows(week(), 'usable').map((r) => r.spot.name);
+    /*
+     * Cabrillo first, and the direction is worth pinning because it is easy to
+     * get backwards. A HIGHER tidepool_floor_ft is more permissive -- the reef
+     * is called workable at higher water. spots.json says so itself: the 1.2.0
+     * shift 'moved every floor in the PERMISSIVE direction', and Sunset Cliffs
+     * at 0.7 is 'deliberately kept the strictest of the eight'.
+     *
+     * So against the same tide, Cabrillo at 1.3 ft is 1.1 ft off a window and
+     * Sunset Cliffs at 0.7 ft is 1.7 ft off. The permissive floor ranks first.
+     */
+    expect(names[0]).toBe('Cabrillo Tidepools');
+    expect(names[names.length - 1]).toBe('Sunset Cliffs');
+  });
+
+  it('is not alphabetical', () => {
+    const names = sortRows(week(), 'usable').map((r) => r.spot.name);
+    expect(names).not.toEqual([...names].sort((a, b) => a.localeCompare(b)));
+  });
+
+  it('still puts usable windows above closeness to floor', () => {
+    // A spot with a real window outranks a nearer floor with none. The count is
+    // an outcome; the gap is only a proxy for one.
+    const rows = week();
+    rows[2]!.usableCount = 2; // Sunset Cliffs, the strictest floor
+    expect(sortRows(rows, 'usable')[0]!.spot.name).toBe('Sunset Cliffs');
+  });
+
+  it('breaks a full tie by name, so the order is stable', () => {
+    const rows = [row('Windansea', 1.0, [2.4]), row('Cardiff Reef', 1.0, [2.4])];
+    expect(sortRows(rows, 'usable').map((r) => r.spot.name)).toEqual([
+      'Cardiff Reef',
+      'Windansea',
+    ]);
+  });
+
+  it('leaves geographic order exactly as spots.json wrote it', () => {
+    // The file is already ordered north to south. Re-deriving it from latitude
+    // would be a second source of truth that could disagree with the file.
+    const rows = week();
+    expect(sortRows(rows, 'geographic').map((r) => r.spot.name)).toEqual(
+      rows.map((r) => r.spot.name),
+    );
+  });
+
+  it('does not mutate the array it is given', () => {
+    const rows = week();
+    const before = rows.map((r) => r.spot.name);
+    sortRows(rows, 'usable');
+    expect(rows.map((r) => r.spot.name)).toEqual(before);
   });
 });

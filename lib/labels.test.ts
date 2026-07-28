@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import {
   cellAriaLabel,
+  describeFloorGap,
   describeHeight,
   describeWindowLength,
   flagBadgeLabel,
+  formatFloorGap,
   formatHeight,
   rowAriaLabel,
   thresholdDisclosure,
@@ -69,7 +71,7 @@ describe('cellAriaLabel', () => {
     const label = cellAriaLabel('Cabrillo Tidepools', result(), ZONE);
     expect(label).toBe(
       'Cabrillo Tidepools, Thursday, December 24: go. ' +
-        'Low 1.9 feet below the datum at 3:47 pm, in daylight. ' +
+        'Low 1.9 feet below the datum at 3:47 pm, in daylight, 1.7 feet under the floor. ' +
         'Next high 3.8 feet above the datum at 10:23 pm. ' +
         '3 h of daylight window. ' +
         'Three hours of daylight window with the tide under the floor. ' +
@@ -83,13 +85,13 @@ describe('cellAriaLabel', () => {
     const sunriseMs = Date.parse('2026-12-24T14:48:00Z');
     const sunsetMs = Date.parse('2026-12-25T00:48:00Z');
 
-    expect(cellAriaLabel('X', result(), ZONE)).toContain('at 3:47 pm, in daylight.');
+    expect(cellAriaLabel('X', result(), ZONE)).toContain('at 3:47 pm, in daylight,');
 
     // 05:12 PST, an hour and a half before sunrise.
     const beforeDawn = Date.parse('2026-12-24T13:12:00Z');
     expect(
       cellAriaLabel('X', result({ lowMs: beforeDawn, sunriseMs, sunsetMs }), ZONE),
-    ).toContain('at 5:12 am, after dark.');
+    ).toContain('at 5:12 am, after dark,');
   });
 
   it('never leans on colour, which a screen reader cannot see', () => {
@@ -180,5 +182,77 @@ describe('thresholdDisclosure', () => {
     expect(thresholdDisclosure(-0.8, 'low', 3.0, 'uncalibrated')).toBe(
       'Floor −0.8 ft (low), swell ceiling 3.0 ft (uncalibrated). Neither has been field-checked.',
     );
+  });
+});
+
+describe('formatFloorGap', () => {
+  it('signs a low that gets under the floor negative', () => {
+    // Negative means the tide went BELOW the floor, which uncovers reef. The
+    // sign follows the tide, not the verdict, so it agrees with the ▼ and with
+    // heights below the datum already printing negative.
+    expect(formatFloorGap(-0.5, 1.3)).toBe('−1.8');
+  });
+
+  it('signs a low that stays over the floor positive, explicitly', () => {
+    // The + is not decoration. Without it the positive values are a glyph
+    // narrower than the negative ones and a column of gaps combs down the grid.
+    expect(formatFloorGap(2.4, 1.3)).toBe('+1.1');
+  });
+
+  it('uses a true minus sign, not a hyphen', () => {
+    expect(formatFloorGap(0, 1)).toBe('−1.0');
+    expect(formatFloorGap(0, 1).startsWith('-')).toBe(false);
+  });
+
+  it('does not render a negative zero as under the floor', () => {
+    // -0.04 rounds to "-0.0" through toFixed, which reads as under-floor when
+    // the tide is actually at or fractionally above it.
+    expect(formatFloorGap(1.26, 1.3)).toBe('+0.0');
+  });
+
+  it('is exactly zero at the floor', () => {
+    expect(formatFloorGap(1.3, 1.3)).toBe('+0.0');
+  });
+});
+
+describe('describeFloorGap', () => {
+  it('speaks the gap when the tide reaches the floor', () => {
+    // No reason string carries the floor number for these states, so this is
+    // the only place a listener gets it.
+    expect(describeFloorGap(result({ reachesFloor: true, lowFt: -1.9, floorFt: -0.2 }))).toBe(
+      '1.7 feet under the floor',
+    );
+  });
+
+  it('stays silent when the low is above the floor', () => {
+    // `above-floor` is 49 of 56 cells in a typical week here, and its reason
+    // already states both numbers -- "only reaches 2.4 ft, which does not get
+    // under the 1.3 ft floor". Speaking the subtraction as well would make
+    // every covered cell announce the same fact twice.
+    expect(describeFloorGap(result({ reachesFloor: false, lowFt: 2.4, floorFt: 1.3 }))).toBeNull();
+  });
+
+  it('is carried inside the low sentence of a cell label, not as its own', () => {
+    const label = cellAriaLabel('Windansea', result({ reachesFloor: true, floorFt: -0.2 }), ZONE);
+    expect(label).toContain('feet under the floor.');
+    // One mention only.
+    expect(label.match(/feet under the floor/g)).toHaveLength(1);
+  });
+
+  it('does not add a second floor mention to an above-floor cell', () => {
+    const label = cellAriaLabel(
+      'Cabrillo Tidepools',
+      result({
+        state: 'above-floor',
+        reachesFloor: false,
+        lowFt: 2.4,
+        floorFt: 1.3,
+        reason: 'The next low only reaches 2.4 ft, which does not get under the 1.3 ft floor.',
+      }),
+      ZONE,
+    );
+    // 'above the floor' (the spoken state) and the reason both say floor, and
+    // both predate this. What must NOT appear is the gap phrasing on top.
+    expect(label).not.toContain('feet under the floor');
   });
 });

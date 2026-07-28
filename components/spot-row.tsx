@@ -35,6 +35,7 @@ export function SpotRow({
   spotSlug,
   rowLabel,
   usableCount,
+  floorFt,
   cells,
   detail,
   columnCount,
@@ -43,12 +44,27 @@ export function SpotRow({
   spotSlug: string;
   rowLabel: string;
   usableCount: number;
+  /** The reef floor every gap in this row is measured against. */
+  floorFt: number;
   cells: React.ReactNode[];
   detail: React.ReactNode;
   columnCount: number;
 }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
+
+  /*
+   * The floor leads, ahead of the usable count.
+   *
+   * It is the only number on this row that differs from the row above it -- all
+   * eight spots share tide station 9410230, so the cells to the right carry the
+   * same seven lows on every row -- and it is the second operand of the
+   * subtraction each of those cells now prints. A reader who cannot see what
+   * `+1.1` was measured against cannot read the row at all.
+   */
+  const subtitle = `floor ${floorFt.toFixed(1)} ft · ${
+    usableCount === 0 ? 'no windows' : `${usableCount} usable`
+  }`;
 
   return (
     <tbody className="border-b border-[var(--border)] last:border-b-0">
@@ -73,9 +89,7 @@ export function SpotRow({
               <span className="block truncate text-data font-medium leading-tight">
                 {spotName}
               </span>
-              <span className="block text-meta text-[var(--text-dimmer)]">
-                {usableCount === 0 ? 'no windows' : `${usableCount} usable`}
-              </span>
+              <span className="block text-meta text-[var(--text-dimmer)]">{subtitle}</span>
             </span>
           </button>
 
@@ -87,9 +101,7 @@ export function SpotRow({
             <span className="block truncate text-data font-medium leading-tight">
               {spotName}
             </span>
-            <span className="block text-meta text-[var(--text-dimmer)]">
-              {usableCount === 0 ? 'no windows' : `${usableCount} usable`}
-            </span>
+            <span className="block text-meta text-[var(--text-dimmer)]">{subtitle}</span>
           </Link>
         </th>
 

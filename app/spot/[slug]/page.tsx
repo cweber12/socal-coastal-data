@@ -8,7 +8,7 @@ import { MidnightNotice } from '@/components/midnight-notice';
 import { WeekRibbon } from '@/components/week-ribbon';
 import { SpotProtection } from '@/components/spot-protection';
 import { UnresolvedDisclosure } from '@/components/unresolved';
-import { CellShell, TideLine } from '@/components/window-cell';
+import { CellShell, FloorGap, TideLine } from '@/components/window-cell';
 import { loadSpotWeek, tidepoolSpotBySlug } from '@/lib/grid';
 import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
 import { formatDateLong, formatLocalDate, startOfLocalDay } from '@/lib/time';
@@ -133,7 +133,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
                       <span aria-hidden className="font-medium">
                         {dayLabel}
                       </span>
-                      <span aria-hidden>
+                      <span aria-hidden className="text-right">
                         <TideLine
                           arrow="▼"
                           heightFt={result.lowFt}
@@ -141,6 +141,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
                           timeZone={week.timeZone}
                           emphasis
                         />
+                        <FloorGap lowFt={result.lowFt} floorFt={result.floorFt} />
                       </span>
                     </Link>
                   </CellShell>

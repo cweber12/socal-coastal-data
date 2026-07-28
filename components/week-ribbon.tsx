@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { FlagBadge } from '@/components/flag-badge';
 import { SpotHeader, SwellProvenance } from '@/components/spot-summary';
-import { CellShell, TideLine } from '@/components/window-cell';
+import { CellShell, FloorGap, TideLine } from '@/components/window-cell';
 import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
 import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/lib/time';
 import { lowLighting, type WindowResult } from '@/lib/windows';
@@ -122,6 +122,7 @@ export function WeekRibbon({
                           timeZone={timeZone}
                         />
                       ) : null}
+                      <FloorGap lowFt={result.lowFt} floorFt={result.floorFt} />
                     </span>
                   </span>
                 </Link>

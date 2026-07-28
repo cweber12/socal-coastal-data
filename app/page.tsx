@@ -6,7 +6,7 @@ import { SpotRow } from '@/components/spot-row';
 import { SpotDisclosure } from '@/components/spot-summary';
 import { UnresolvedDisclosure } from '@/components/unresolved';
 import { UnevaluatedCell, WindowCell } from '@/components/window-cell';
-import { HORIZON_DAYS, loadGrid, type SpotRow as SpotRowData } from '@/lib/grid';
+import { HORIZON_DAYS, loadGrid, sortRows, type SortKey } from '@/lib/grid';
 import { rowAriaLabel } from '@/lib/labels';
 import {
   formatDateLong,
@@ -28,27 +28,6 @@ import { SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
  * rendering costs a re-evaluation of the tide maths, not a re-fetch.
  */
 export const dynamic = 'force-dynamic';
-
-type SortKey = 'usable' | 'geographic';
-
-function sortRows(rows: readonly SpotRowData[], sort: SortKey): SpotRowData[] {
-  if (sort === 'geographic') {
-    // spots.json is already ordered north to south, from Oceanside Harbour down
-    // to Border Field, and TIDEPOOL_SPOTS preserves that order. Geographic sort is
-    // the file's own order -- deriving it from latitude again would be a second
-    // source of truth that could disagree with the file.
-    return [...rows];
-  }
-  return [...rows].sort((a, b) => {
-    if (b.usableCount !== a.usableCount) return b.usableCount - a.usableCount;
-    // Ties broken by how much window today actually has left, then by name, so
-    // the order is stable rather than dependent on sort implementation.
-    const aToday = a.days[0]?.minutesRemaining ?? a.days[0]?.usableMinutes ?? 0;
-    const bToday = b.days[0]?.minutesRemaining ?? b.days[0]?.usableMinutes ?? 0;
-    if (bToday !== aToday) return bToday - aToday;
-    return a.spot.name.localeCompare(b.spot.name);
-  });
-}
 
 export default async function GridPage({
   searchParams,
@@ -153,6 +132,7 @@ export default async function GridPage({
               spotName={row.spot.name}
               spotSlug={row.spot.slug}
               usableCount={row.usableCount}
+              floorFt={row.spot.tidepool_floor_ft}
               rowLabel={rowAriaLabel(row.spot.name, row.usableCount, HORIZON_DAYS)}
               columnCount={grid.days.length + 1}
               cells={row.days.map((result, i) =>

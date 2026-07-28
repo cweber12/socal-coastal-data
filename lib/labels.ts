@@ -33,6 +33,54 @@ export function describeHeight(ft: number): string {
   return `${magnitude} feet above the datum`;
 }
 
+/**
+ * The low's distance from the reef floor, for display in a cell.
+ *
+ * Signed, and the sign convention follows the tide rather than the verdict:
+ * negative means the low gets UNDER the floor, which is the direction that
+ * uncovers reef. That matches the ▼ next to it and matches heights below the
+ * datum already printing negative, so one reading of "lower is further down"
+ * holds across every number in the cell.
+ *
+ * True U+2212 for the minus, and an explicit `+` for the over case, so both
+ * signs occupy one character and a column of these stays aligned. Without the
+ * explicit plus the positive values shift left by a glyph and the column combs.
+ */
+export function formatFloorGap(lowFt: number, floorFt: number): string {
+  const gap = lowFt - floorFt;
+  // -0.04 would render "−0.0", which reads as under-floor when it is not.
+  const rounded = Number(gap.toFixed(1));
+  if (rounded < 0) return MINUS + Math.abs(rounded).toFixed(1);
+  return '+' + rounded.toFixed(1);
+}
+
+/**
+ * The same distance, for speech, or null when it must not be spoken.
+ *
+ * Null for `above-floor`, which is 49 of 56 cells in a typical week here.
+ * `result.reason` already gives both numbers and the relationship between them
+ * -- "only reaches 2.4 ft, which does not get under the 1.3 ft floor" -- and
+ * cellAriaLabel speaks the reason in full. Adding the subtraction as well would
+ * make every covered cell announce the same fact twice.
+ *
+ * When the tide DOES reach the floor no reason string carries the number, so
+ * this is the only place a listener gets it.
+ */
+export function describeFloorGap(result: WindowResult): string | null {
+  if (!result.reachesFloor) return null;
+  const under = Math.abs(result.floorFt - result.lowFt);
+  /*
+   * The gap only, never the floor's own value.
+   *
+   * Floors here run negative -- Sunset Cliffs sits at -0.8 in some revisions --
+   * and "the -0.2 foot floor" is spoken as "minus zero point two foot floor",
+   * which is the exact failure describeHeight exists upstream to prevent. The
+   * gap is the actionable number; the floor itself is on the page in the row
+   * header and in the threshold disclosure, both as text.
+   */
+  return `${under.toFixed(1)} feet under the floor`;
+}
+
 /** `1 h 36 min` of window, or the remaining time when the day is today. */
 export function describeWindowLength(result: WindowResult): string {
   if (result.isToday && result.minutesRemaining !== null) {
@@ -68,8 +116,16 @@ export function cellAriaLabel(
    */
   const lighting = lowLighting(result) === 'day' ? 'in daylight' : 'after dark';
 
+  /*
+   * The floor gap rides on the low's own sentence rather than getting one of
+   * its own, because it is a fact ABOUT that low and not a separate reading.
+   * describeFloorGap returns null for `above-floor`, where result.reason --
+   * pushed below in full -- already states both numbers.
+   */
+  const gap = describeFloorGap(result);
   parts.push(
-    `Low ${describeHeight(result.lowFt)} at ${formatClock(result.lowMs, timeZone)}, ${lighting}.`,
+    `Low ${describeHeight(result.lowFt)} at ${formatClock(result.lowMs, timeZone)}, ${lighting}` +
+      `${gap ? `, ${gap}` : ''}.`,
   );
 
   if (result.nextHighMs !== null && result.nextHighFt !== null) {
