@@ -116,8 +116,13 @@ def age_str(when):
     return f"{hours / 24:.0f}d old"
 
 
-def record(name, url, status, secs, size, note="", newest=None, err=None, dead=None):
-    """dead: reason this endpoint is known-dead, so a failure here is expected."""
+def record(name, url, status, secs, size, note="", newest=None, err=None, dead=None,
+           alive=None):
+    """dead:  reason this source is known-dead, so not delivering here is expected.
+    alive: set False when the source answered but delivered nothing usable, which
+           HTTP status alone cannot express -- a 200 carrying an empty payload is
+           a dead source, not a passing one. Leave None to judge on status.
+    """
     results.append(
         {
             "name": name,
@@ -129,6 +134,7 @@ def record(name, url, status, secs, size, note="", newest=None, err=None, dead=N
             "age": age_str(newest),
             "err": err,
             "dead": dead,
+            "alive": alive,
         }
     )
 
@@ -186,11 +192,13 @@ def check_nws_product(ptype, site="SGX"):
 def check_ndbc(label, wmo):
     url = f"https://www.ndbc.noaa.gov/data/realtime2/{wmo}.txt"
     s, t, n, body, e = fetch(url)
-    note, newest = "", None
+    note, newest, alive = "", None, None
     if body:
         lines = [l for l in body.splitlines() if l and not l.startswith("#")]
         if not lines:
+            # A buoy serving an empty file is offline, not passing.
             note = "200 but no data rows -- buoy likely offline"
+            alive = False
         else:
             f = lines[0].split()
             try:
@@ -201,7 +209,8 @@ def check_ndbc(label, wmo):
                 note = f"{len(lines)} rows"
             except Exception as ex:
                 note = f"parse failed: {ex}"
-    record(f"NDBC {wmo} ({label})", url, s, t, n, note, newest, e, DEAD_BUOYS.get(wmo))
+    record(f"NDBC {wmo} ({label})", url, s, t, n, note, newest, e,
+           DEAD_BUOYS.get(wmo), alive)
 
 
 def check_cdip_catalog():
@@ -320,7 +329,7 @@ def check_sccoos_live_datasets(days=30):
         f"?datasetID,maxTime&maxTime%3E={since}"
     )
     s, t, n, body, e = fetch(url)
-    note, newest = "", None
+    note, newest, alive = "", None, None
     if body:
         try:
             rows = [r for r in json.loads(body)["table"]["rows"] if r[1]]
@@ -331,11 +340,15 @@ def check_sccoos_live_datasets(days=30):
                 newest = max(
                     dt.datetime.fromisoformat(r[1].replace("Z", "+00:00")) for r in ours
                 )
+                alive = True
             else:
+                # The catalog is up, but SCCOOS covering nothing in our corridor
+                # is the failure this check exists to catch.
                 note += "; NONE in our corridor"
+                alive = False
         except Exception as ex:
             note = f"parse failed: {ex}"
-    record("SCCOOS ERDDAP live datasets", url, s, t, n, note, newest, e)
+    record("SCCOOS ERDDAP live datasets", url, s, t, n, note, newest, e, alive=alive)
 
 
 # Tijuana River valley, Nestor down to the border. 11013500 (TIJUANA R NR
@@ -347,18 +360,19 @@ def check_sccoos_live_datasets(days=30):
 TIJUANA_BBOX = "-117.20,32.52,-116.90,32.62"
 
 
-def check_usgs_discharge_bbox(label, bbox):
+def check_usgs_discharge_bbox(label, bbox, dead=None):
     url = (
         "https://waterservices.usgs.gov/nwis/iv/?format=json"
         f"&bBox={bbox}&parameterCd=00060"
     )
     s, t, n, body, e = fetch(url)
-    note, newest = "", None
+    note, newest, alive = "", None, None
     if body:
         try:
             series = json.loads(body)["value"]["timeSeries"]
             if not series:
-                note = "NO realtime discharge gauge in box (11013500 retired 1982)"
+                note = "no realtime discharge gauge in box"
+                alive = False
             else:
                 sites, stamps = [], []
                 for ser in series:
@@ -369,9 +383,10 @@ def check_usgs_discharge_bbox(label, bbox):
                 note = f"{len(series)} gauges: " + ", ".join(sites[:4])
                 if stamps:
                     newest = max(stamps)
+                alive = True
         except Exception as ex:
             note = f"parse failed: {ex}"
-    record(f"USGS discharge bbox ({label})", url, s, t, n, note, newest, e)
+    record(f"USGS discharge bbox ({label})", url, s, t, n, note, newest, e, dead, alive)
 
 
 def check_usgs_iv(label, site):
@@ -646,7 +661,13 @@ CHECKS = [
     ),
     check_sccoos_live_datasets,
     check_sccoos_habs,
-    lambda: check_usgs_discharge_bbox("Tijuana valley", TIJUANA_BBOX),
+    # Known empty -- kept purely as a tripwire. The day USGS commissions a
+    # realtime gauge in the Tijuana valley this flips to REVIVED instead of
+    # sitting quietly at 200 with nothing in it.
+    lambda: check_usgs_discharge_bbox(
+        "Tijuana valley", TIJUANA_BBOX,
+        dead="no USGS realtime discharge here since 11013500 retired in 1982",
+    ),
     # Oceanside-area watershed signal at the NORTH end of the corridor. Not a
     # Tijuana River substitute -- different basin, ~60 miles away, and it says
     # nothing about border outfall conditions. Tijuana flow comes from IBWC.
@@ -671,19 +692,24 @@ def main():
     print("-" * (w + 80))
     ok = warn = bad = dead = 0
     for r in sorted(results, key=lambda x: x["name"]):
-        failed = bool(r["err"]) or (r["status"] and r["status"] >= 400)
+        # "Delivered" is the real question, and HTTP status only half answers it:
+        # a source can return 200 with an empty payload. Any check that can tell
+        # the difference says so via alive=False.
+        http_failed = bool(r["err"]) or (r["status"] and r["status"] >= 400)
+        delivered = (not http_failed) and (r["alive"] is not False)
         detail = r["err"] or r["note"]
-        if failed and r["dead"]:
+        if r["status"] is None and not http_failed:
+            mark, warn = "SKIP", warn + 1
+        elif not delivered and r["dead"]:
             mark, dead = "DEAD", dead + 1
             detail = r["dead"]
-        elif failed:
+        elif not delivered:
             mark, bad = "FAIL", bad + 1
         elif r["dead"]:
-            # Marked dead but answering. Worth a look -- either it came back or
-            # the reason we wrote it off no longer holds.
+            # Written off but delivering. Either it came back or the reason we
+            # wrote it off no longer holds; both need a human look, so this must
+            # never pass silently as a plain 200.
             mark, ok = "REVIVED", ok + 1
-        elif r["status"] is None:
-            mark, warn = "SKIP", warn + 1
         else:
             mark, ok = str(r["status"]), ok + 1
         print(
