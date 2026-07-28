@@ -1,0 +1,37 @@
+{
+  "version": "0.1.0",
+  "generated": "2026-07-27",
+  "units": "ft",
+  "wave_height_definition": "NDBC WVHT, significant wave height, converted from metres on an exact 'm' unit-string match",
+
+  "_schema": {
+    "default_swell_ceiling_ft": "Significant wave height above which a reef window is called off regardless of tide. Applies to every spot with no override.",
+    "overrides": "Per-spot ceilings. Keyed by spots.json slug. Only present where spots.json's own notes already document a reason the shared buoy reading means something different at that spot.",
+    "confidence": "uncalibrated = author estimate, never field-checked, not safe to present as a threshold anyone should trust. calibrated = confirmed by someone who goes there. No value in this file is calibrated yet."
+  },
+
+  "_provenance": "These are NOT joined against any upstream authority, which is why they live here and not in spots.json. spots.json carries values resolved from data.ca.gov and CDFW ds582 and is not a place to park author guesses. Anything in this file is a guess until the confidence field says otherwise.",
+
+  "default_swell_ceiling_ft": 3.0,
+  "default_confidence": "uncalibrated",
+
+  "overrides": {
+    "blacks-beach": {
+      "swell_ceiling_ft": 2.0,
+      "confidence": "uncalibrated",
+      "reason": "spots.json: 'Scripps submarine canyon focuses swell; this spot breaks materially larger than neighbours on the same buoy reading.' A shared 46225 reading understates it, so the ceiling has to sit lower."
+    },
+    "tourmaline": {
+      "swell_ceiling_ft": 4.0,
+      "confidence": "uncalibrated",
+      "reason": "spots.json: 'Longboard and beginner-friendly; surf threshold should skew lower than neighbours.' Read as a gentler break for the same 46258 reading, so the ceiling sits higher."
+    }
+  },
+
+  "unresolved": [
+    "Neither override currently affects anything the grid renders. blacks-beach and tourmaline are both surf-only spots with a null tidepool_floor_ft, so they are outside the tide-window grid's scope. They are recorded here because they are the only two swell offsets spots.json actually justifies, and they become live the moment a surf predicate exists. Stated plainly rather than left as a silent no-op.",
+    "Every one of the 8 spots the grid does render uses default_swell_ceiling_ft. No per-spot swell calibration exists for any of them. The UI must disclose the ceiling as uncalibrated wherever it drives a veto.",
+    "3.0 ft is an author estimate of when a reef shelf stops being workable, not a measured figure. It is one number standing in for eight reefs with different exposure, orientation and shelf depth. Sunset Cliffs is the spot where being wrong matters most: spots.json already flags it as a ledge system with cliff access where a wrong floor strands people, and the same is true of a wrong ceiling.",
+    "Significant wave height at an offshore or nearshore buoy is not breaking height at the reef. No shoaling or refraction transform is applied. The ceiling is calibrated against the buoy number as reported, which is the only thing the stack actually measures."
+  ]
+}

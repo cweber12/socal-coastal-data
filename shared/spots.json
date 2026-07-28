@@ -1,6 +1,6 @@
 {
-  "version": "1.1.1",
-  "generated": "2026-07-27",
+  "version": "1.2.0",
+  "generated": "2026-07-28",
   "corridor": "Oceanside Harbor to Border Field, San Diego County, CA",
 
   "conventions": {
@@ -27,7 +27,7 @@
     "county_station_suspect": "true when the match exceeds 1000 m, meaning the station may sit on a different beach cell carrying different water. The UI must disclose a suspect match rather than render it as a clean reading. null when there is no match.",
     "county_station_null_reason": "Present only when county_station is null, and required whenever it is. States why the field is empty: out of join scope, or genuinely unresolved. A null county_station without this key is a bug.",
     "audiences": "Which audience filters include this spot. Drives column visibility, not thresholds.",
-    "tidepool_floor_ft": "Tide height below which the reef is workable. UNCALIBRATED estimates; see tidepool_floor_confidence.",
+    "tidepool_floor_ft": "Tide height below which the reef is WORKABLE -- the level at which enough of the intertidal is out of the water to be worth the trip. NOT the level at which it is at its best; that is lower, and encoding it here silently rejects every ordinary usable day. UNCALIBRATED estimates; see tidepool_floor_confidence.",
     "tidepool_floor_confidence": "low = author estimate, needs local verification. verified = confirmed by someone who goes there.",
     "mpa": "Marine protected area NAME from CDFW ds582, resolved by point-in-polygon. null means the point fell outside every MPA polygon. Do not hand-populate. Read together with mpa_resolved: a null with mpa_resolved false is unknown, not unprotected.",
     "mpa_resolved": "true once the CDFW point-in-polygon join has run AND the result survives this file's ~100 m coordinate precision. false where the spot lies within 150 m of an MPA boundary, i.e. inside the coordinate error bar, so the in/out call is not trustworthy either way. Legally load-bearing for the tidepool audience.",
@@ -188,7 +188,7 @@
       "county_station_distance_m": 67,
       "county_station_suspect": false,
       "audiences": ["surf", "tidepool", "dive"],
-      "tidepool_floor_ft": -0.6,
+      "tidepool_floor_ft": 0.9,
       "tidepool_floor_confidence": "low",
       "mpa": null, "mpa_resolved": false,
       "notes": "Reef point. MPA UNRESOLVED: point-in-polygon puts this 18 m OUTSIDE Swami's SMCA, far inside this file's ~100 m coordinate precision, so neither in nor out can be asserted. Do not present collection rules from the mpa field until the coordinate is surveyed."
@@ -203,7 +203,7 @@
       "county_station_distance_m": 177,
       "county_station_suspect": false,
       "audiences": ["surf", "tidepool"],
-      "tidepool_floor_ft": -0.5,
+      "tidepool_floor_ft": 1.0,
       "tidepool_floor_confidence": "low",
       "mpa": "Swami's SMCA", "mpa_resolved": false,
       "notes": "San Elijo lagoon mouth adjacent; post-rain water quality degrades quickly."
@@ -249,7 +249,7 @@
       "county_station_distance_m": 580,
       "county_station_suspect": false,
       "audiences": ["swim", "bird", "tidepool"],
-      "tidepool_floor_ft": -0.6,
+      "tidepool_floor_ft": 0.9,
       "tidepool_floor_confidence": "low",
       "mpa": null, "mpa_resolved": true,
       "notes": "Los Penasquitos lagoon mouth. Long beach; a single point is a poor proxy for its full length."
@@ -279,7 +279,7 @@
       "county_station_distance_m": 187,
       "county_station_suspect": false,
       "audiences": ["dive", "swim", "tidepool"],
-      "tidepool_floor_ft": -0.7,
+      "tidepool_floor_ft": 0.8,
       "tidepool_floor_confidence": "low",
       "mpa": null, "mpa_resolved": false,
       "notes": "Primary shore-dive entry for the corridor. Dike Rock tidepools at the north end. MPA UNRESOLVED: 45 m outside Matlahuayl SMR, inside the ~100 m coordinate error bar. The earlier expectation of San Diego-Scripps Coastal SMCA was simply wrong -- that boundary is 1003 m away. The open question here is Matlahuayl, not Scripps."
@@ -294,7 +294,7 @@
       "county_station_distance_m": 82,
       "county_station_suspect": false,
       "audiences": ["dive", "swim", "tidepool"],
-      "tidepool_floor_ft": -0.4,
+      "tidepool_floor_ft": 1.1,
       "tidepool_floor_confidence": "low",
       "mpa": null, "mpa_resolved": false,
       "notes": "MPA UNRESOLVED: 21 m outside Matlahuayl SMR, inside the ~100 m coordinate error bar, so no-take status cannot be asserted either way. Matlahuayl is no take of any kind if the point resolves inside, so treat it as restricted until surveyed. Pinniped closures apply seasonally and are not in any API."
@@ -309,7 +309,7 @@
       "county_station_distance_m": 242,
       "county_station_suspect": false,
       "audiences": ["surf", "tidepool"],
-      "tidepool_floor_ft": -0.5,
+      "tidepool_floor_ft": 1.0,
       "tidepool_floor_confidence": "low",
       "mpa": null, "mpa_resolved": true,
       "notes": "Reef break, rock hazard on low tide."
@@ -369,7 +369,7 @@
       "county_station_distance_m": 418,
       "county_station_suspect": false,
       "audiences": ["surf", "tidepool", "dive"],
-      "tidepool_floor_ft": -0.8,
+      "tidepool_floor_ft": 0.7,
       "tidepool_floor_confidence": "low",
       "mpa": null, "mpa_resolved": true,
       "notes": "SAFETY: ledge system with cliff access. Getting the tidepool floor wrong here strands people. Verify before shipping."
@@ -384,7 +384,7 @@
       "county_station_distance_m": 445,
       "county_station_suspect": false,
       "audiences": ["tidepool", "bird"],
-      "tidepool_floor_ft": -0.2,
+      "tidepool_floor_ft": 1.3,
       "tidepool_floor_confidence": "low",
       "mpa": "Cabrillo SMR", "mpa_resolved": false,
       "notes": "National Monument: gate hours and entry fee constrain access independently of tide. Point-in-polygon puts this INSIDE Cabrillo SMR -- an SMR, not the SMCA previously assumed, so no take of any kind -- but by only 11 m, inside the ~100 m coordinate error bar, hence mpa_resolved false. The thin margin is a reason to verify the boundary, never to relax the restriction. Best-known tidepool site in the corridor."
@@ -457,6 +457,10 @@
     "1 in-scope match exceeds 1000 m and is flagged county_station_suspect: beacons-leucadia at 1402 m. Beacon's sits in a real ~4 km monitoring gap between EH-440 and EH-420A, so no closer station exists to find.",
     "mpa point-in-polygon has run against CDFW ds582 for all 26 spots, but 7 carry mpa_resolved false: the spot lies within 150 m of an MPA boundary, inside this file's own ~100 m coordinate precision, so the in/out call cannot be trusted either way (moonlight-encinitas, swamis, cardiff-reef, la-jolla-shores, la-jolla-cove, cabrillo-tidepools, border-field). Their notes now describe the boundary state rather than asserting membership. Surveyed coordinates are the fix; nothing else resolves them.",
     "tidepool_floor_ft values are author estimates at confidence 'low'. Sunset Cliffs and Cabrillo are the two that most need local verification.",
+
+    "1.2.0 raised all 8 tidepool_floor_ft by exactly 1.5 ft. The 1.1.x values (-0.8 to -0.2) encoded EXCELLENT tidepooling, not workable tidepooling, and the difference is not cosmetic: over the 7 days from 2026-07-28, station 9410230 put 49 of the 56 grid cells in 'above-floor' -- the reef never surfaces -- and the remaining 7 in 'dark'. Not one usable window in a week, which is not what a week of San Diego tides looks like. Two independent sources put the workable threshold at about +1 ft MLLW and reserve negative tides for 'best' (tidepooling.org/learn: 'The best tidepooling happens during very low tides, typically below 1 foot'; lajollamom.com/best-san-diego-tide-pools: 'Low tide is less than 1 foot ... if you see a tide chart say -1 or lower, that's the best time to go'). The shift is a single constant applied uniformly rather than eight fresh guesses, so the author's RELATIVE ranking of the eight reefs is preserved intact and one number reverses the whole change. Band is now +0.7 to +1.3, straddling the +1 ft figure both sources give. Still confidence 'low'; still not field-checked.",
+
+    "SAFETY, stated in the direction that matters: the 1.2.0 shift moved every floor in the PERMISSIVE direction. A higher floor means the stack calls a window open at higher water than it used to. sunset-cliffs went -0.8 to +0.7 and its own notes say a wrong floor there strands people, so it is deliberately kept the strictest of the eight -- but strictest-of-eight is a ranking, not a verification. Nobody has stood on that ledge system at +0.7 ft and confirmed it. Field-check Sunset Cliffs and Cabrillo before any of these numbers is presented as advice.",
     "Per-spot surf threshold offsets are not yet modelled. Black's and Tourmaline are the clearest cases where a shared buoy reading means very different things."
   ]
 }
