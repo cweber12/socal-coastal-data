@@ -77,10 +77,10 @@ export default async function GridPage({
     <div>
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <h1 className="text-base font-semibold tracking-tight">
+          <h1 className="text-title font-semibold tracking-tight">
             Daylight low-tide windows
           </h1>
-          <p className="mt-1 max-w-prose text-xs leading-relaxed text-[var(--text-dim)]">
+          <p className="mt-1 max-w-prose text-ui text-[var(--text-dim)]">
             {/*
               A JSX text node spanning several lines loses its LEADING space, so
               `{HORIZON_DAYS} days` renders as "7days" and a following text line
@@ -96,7 +96,7 @@ export default async function GridPage({
           </p>
         </div>
 
-        <nav aria-label="Sort order" className="flex items-center gap-1 text-xs">
+        <nav aria-label="Sort order" className="flex items-center gap-1 text-ui">
           <span className="mr-1 text-[var(--text-dimmer)]">Sort</span>
           <SortLink current={sort} value="usable" label="Usable windows" />
           <SortLink current={sort} value="geographic" label="North to south" />
@@ -111,7 +111,7 @@ export default async function GridPage({
           </caption>
           <thead>
             <tr>
-              <th scope="col" className="w-[11rem] px-1.5 pb-2 text-[0.7rem] font-medium text-[var(--text-dimmer)]">
+              <th scope="col" className="w-[11rem] px-1.5 pb-2 text-meta font-medium text-[var(--text-dimmer)]">
                 Spot
               </th>
               {grid.days.map((date, i) => (
@@ -119,7 +119,7 @@ export default async function GridPage({
                   key={formatLocalDate(date)}
                   scope="col"
                   className={[
-                    'px-1.5 pb-2 text-[0.7rem] font-medium',
+                    'px-1.5 pb-2 text-meta font-medium',
                     i === 0 ? 'text-[var(--text)]' : 'hidden text-[var(--text-dimmer)] wide:table-cell',
                   ].join(' ')}
                 >
@@ -202,7 +202,7 @@ export default async function GridPage({
 
       <Legend />
 
-      <p className="mt-4 max-w-prose text-xs leading-relaxed text-[var(--text-dimmer)] wide:hidden">
+      <p className="mt-4 max-w-prose text-meta text-[var(--text-dimmer)] wide:hidden">
         Showing today only. The full week is on each spot&apos;s own page.
       </p>
 
@@ -283,10 +283,10 @@ function Legend() {
         How to read this grid
       </h2>
 
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[0.7rem] text-[var(--text-dim)]">
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-meta text-[var(--text-dim)]">
         <span
           data-lighting="day"
-          className="cell-skin rounded border px-1.5 py-0.5 font-mono text-[0.68rem]"
+          className="cell-skin rounded border px-1.5 py-0.5 font-mono text-meta"
         >
           ▼ 0.2 1:14 pm
         </span>
@@ -296,7 +296,7 @@ function Legend() {
         </span>
         <span
           data-lighting="night"
-          className="cell-skin rounded border px-1.5 py-0.5 font-mono text-[0.68rem]"
+          className="cell-skin rounded border px-1.5 py-0.5 font-mono text-meta"
         >
           ▼ 0.2 4:41 am
         </span>
@@ -304,16 +304,16 @@ function Legend() {
       </p>
 
       <details className="mt-2">
-        <summary className="cursor-pointer text-[0.7rem] text-[var(--text-dimmer)]">
+        <summary className="cursor-pointer text-meta text-[var(--text-dimmer)]">
           What the flag on each cell means
         </summary>
-        <p className="mt-1.5 max-w-prose text-[0.7rem] leading-relaxed text-[var(--text-dimmer)]">
+        <p className="mt-1.5 max-w-prose text-meta text-[var(--text-dimmer)]">
           Every cell carries an <span className="font-mono">i</span> badge. Opening it gives one of
           these six, with the sentence behind it. They are kept closed because each one is decided
           against a floor and a swell ceiling that are author estimates, never field-checked — the
           tide and the clock in the cell are the measured part.
         </p>
-        <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-[0.7rem]">
+        <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-meta">
           {WINDOW_STATES.map((state) => {
             const p = STATE_PRESENTATION[state];
             return (
@@ -360,15 +360,15 @@ function Excluded({ names }: { names: readonly string[] }) {
   if (names.length === 0) return null;
   return (
     <details className="mt-4">
-      <summary className="cursor-pointer text-xs text-[var(--text-dimmer)]">
+      <summary className="cursor-pointer text-meta text-[var(--text-dimmer)]">
         {names.length} spots are not in this grid
       </summary>
-      <p className="mt-1.5 max-w-prose text-xs leading-relaxed text-[var(--text-dimmer)]">
+      <p className="mt-1.5 max-w-prose text-meta text-[var(--text-dimmer)]">
         These carry no <code>tidepool_floor_ft</code> in spots.json. A null floor is unresolved,
         not zero, and a window cannot be computed without one. Estimating floors to fill the grid
         out would put a hand-typed number where a measurement belongs.
       </p>
-      <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-dimmer)]">{names.join(' · ')}</p>
+      <p className="mt-1.5 text-meta text-[var(--text-dimmer)]">{names.join(' · ')}</p>
     </details>
   );
 }

@@ -30,10 +30,10 @@ export function SpotProtection({ spot }: { spot: Spot }) {
         ['--tint-color' as string]: restricted ? 'var(--color-caution)' : 'var(--border-strong)',
       }}
     >
-      <h2 className="text-xs font-semibold tracking-wide uppercase">Marine protection</h2>
+      <h2 className="text-ui font-semibold tracking-wide uppercase">Marine protection</h2>
 
       {!spot.mpa_resolved ? (
-        <p className="mt-1.5 max-w-prose text-xs leading-relaxed">
+        <p className="mt-1.5 text-ui">
           <strong>Unresolved — treat as restricted.</strong> This spot lies within 150 m of a
           marine protected area boundary, which is inside the ±100 m precision of its own
           coordinate. The point-in-polygon join {spot.mpa ? `returned ${spot.mpa}` : 'returned no area'},
@@ -44,20 +44,20 @@ export function SpotProtection({ spot }: { spot: Spot }) {
           Check the CDFW regulations for this location before taking anything.
         </p>
       ) : spot.mpa !== null ? (
-        <p className="mt-1.5 max-w-prose text-xs leading-relaxed">
+        <p className="mt-1.5 text-ui">
           <strong>Inside {spot.mpa}.</strong> Resolved by point-in-polygon against CDFW ds582 and
           outside the coordinate error bar. A state marine reserve prohibits take of any kind.
           Confirm the current regulations for this area before collecting.
         </p>
       ) : (
-        <p className="mt-1.5 max-w-prose text-xs leading-relaxed">
+        <p className="mt-1.5 text-ui">
           Outside every CDFW marine protected area polygon, resolved and outside the coordinate
           error bar. That is a statement about MPA boundaries only — other closures, seasonal
           restrictions and take limits are not in this dataset.
         </p>
       )}
 
-      <p className="mt-2 max-w-prose text-xs leading-relaxed text-[var(--text-dimmer)]">
+      <p className="tint-panel-source mt-2 text-meta">
         Seasonal closures — pinniped haul-outs at La Jolla, Least Tern nesting — are in no API
         this stack reads and are not reflected here.
       </p>

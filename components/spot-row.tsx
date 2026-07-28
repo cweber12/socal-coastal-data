@@ -65,15 +65,15 @@ export function SpotRow({
           >
             <span
               aria-hidden
-              className="mt-[0.15rem] w-3 shrink-0 text-[0.7rem] text-[var(--text-dimmer)]"
+              className="mt-[0.15rem] w-3 shrink-0 text-meta text-[var(--text-dimmer)]"
             >
               {open ? '▾' : '▸'}
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-[0.82rem] font-medium leading-tight">
+              <span className="block truncate text-data font-medium leading-tight">
                 {spotName}
               </span>
-              <span className="block text-[0.68rem] text-[var(--text-dimmer)]">
+              <span className="block text-meta text-[var(--text-dimmer)]">
                 {usableCount === 0 ? 'no windows' : `${usableCount} usable`}
               </span>
             </span>
@@ -84,10 +84,10 @@ export function SpotRow({
             href={`/spot/${spotSlug}`}
             className="block rounded px-1.5 py-1 no-underline wide:hidden"
           >
-            <span className="block truncate text-[0.82rem] font-medium leading-tight">
+            <span className="block truncate text-data font-medium leading-tight">
               {spotName}
             </span>
-            <span className="block text-[0.68rem] text-[var(--text-dimmer)]">
+            <span className="block text-meta text-[var(--text-dimmer)]">
               {usableCount === 0 ? 'no windows' : `${usableCount} usable`}
             </span>
           </Link>

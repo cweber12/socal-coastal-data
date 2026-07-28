@@ -1,0 +1,174 @@
+/* =============================================================================
+ * Design tokens — tide windows UI polish pass
+ * =============================================================================
+ *
+ * This is a SPEC. It is applied to app/globals.css during the build phase, on a
+ * feature branch, per the repo's plan -> PRD -> issue -> branch -> PR workflow.
+ *
+ * It EXTENDS the existing token system rather than replacing it. The surfaces,
+ * border and text ramps, the four semantic accents and the day/night cell skins
+ * are all well-built and semantically named already; nothing here renames them.
+ *
+ * Three additions, in order of how much they change:
+ *   1. A type scale. There isn't one today — 79 font-size declarations across 9
+ *      arbitrary values, and the result is that data is set smaller than the
+ *      disclaimers about it.
+ *   2. A fix to --tint, which is inverted in dark mode.
+ *   3. Legible meta text on tinted panels, which fails contrast in both themes.
+ * ========================================================================== */
+
+
+/* -----------------------------------------------------------------------------
+ * 1. Type scale
+ * -----------------------------------------------------------------------------
+ *
+ * Five steps, named for the JOB each does rather than for its size, matching how
+ * the rest of this system names things (--surface-sunken, not --gray-100).
+ *
+ * The ordering is the point. Measured on the current build:
+ *
+ *   tide reading   text-[0.72rem]  = 11.52px
+ *   footer caveat  text-xs         = 12.00px
+ *
+ * The disclaimers are set larger than the data they disclaim. Brief principle 2
+ * — "the data outranks its caveats" — is this inversion, corrected:
+ *
+ *   before   data 11.52 <  caveat 12.00   ratio 0.96
+ *   after    data 13.00 >  caveat 11.00   ratio 1.18
+ *
+ * These live in @theme, so Tailwind 4 generates `text-data`, `text-meta` etc.
+ * as real utilities. Tailwind's own --text-xs/-sm/-base are untouched and keep
+ * working, so this is additive and nothing breaks mid-migration.
+ */
+@theme {
+  /* Existing — unchanged, repeated here so the file is a complete picture. */
+  --breakpoint-wide: 600px;
+  --font-mono:
+    ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, monospace;
+
+  /* Caveats, provenance, evaluation stamps, column-header notes.
+     The floor for any text on the page — nothing goes below this. */
+  --text-meta: 0.6875rem;              /* 11px */
+  --text-meta--line-height: 1.55;      /* loose: this is the text people read least willingly */
+
+  /* UI furniture: labels, breadcrumbs, sort links, table headers. */
+  --text-ui: 0.75rem;                  /* 12px */
+  --text-ui--line-height: 1.4;
+
+  /* THE PRODUCT. Tide heights, clock times, floor gaps, the four day facts.
+     The largest text inside any cell, and the reason for the whole page. */
+  --text-data: 0.8125rem;              /* 13px */
+  --text-data--line-height: 1.35;      /* tight: numeric, scanned in columns */
+
+  /* Section headings — "Marine protection", "Data notices", spot names. */
+  --text-section: 1rem;                /* 16px */
+  --text-section--line-height: 1.3;
+
+  /* Page title, once per page. */
+  --text-title: 1.375rem;              /* 22px */
+  --text-title--line-height: 1.2;
+
+  /* Measure for tinted panels. Constrains the PANEL, not just its text —
+     the current bug is a full-bleed panel wrapping max-w-prose contents,
+     which leaves a large empty field of colour to the right of the words. */
+  --panel-measure: 68ch;
+}
+
+
+/* -----------------------------------------------------------------------------
+ * 2. --tint, corrected
+ * -----------------------------------------------------------------------------
+ *
+ * The bug: `--tint` reads as "how much surface is left", and .tint-panel mixes
+ * `calc((1 - var(--tint)) * 100%)` of the accent. Light sets 0.92, giving 8%
+ * accent — a soft cream, correct. Dark sets 0.24, giving **76% accent** — a
+ * near-fully-saturated mustard slab, and the loudest element on the dark page.
+ *
+ * The fix is not just a new number. The variable is renamed to what it actually
+ * controls and the inversion is deleted, so the trap cannot be re-entered by
+ * anyone reading the value and reasoning forwards from it.
+ *
+ * Dark takes slightly MORE accent than light (14% vs 8%): these accents sit at
+ * mid lightness, so against a dark surface they need more presence to register
+ * as a tint at all.
+ *
+ * Only .tint-panel consumes this. The four components that set --tint-color
+ * (disclosure.tsx ×2, spot-protection.tsx, unresolved.tsx) are unaffected.
+ */
+:root {
+  --tint-strength: 8%;
+  --tint-border-strength: 45%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tint-strength: 14%;
+    --tint-border-strength: 38%;
+  }
+}
+
+.tint-panel {
+  background: color-mix(in oklch, var(--tint-color) var(--tint-strength), var(--surface-raised));
+  border-color: color-mix(in oklch, var(--tint-color) var(--tint-border-strength), var(--border));
+  /* Constrain the panel itself. See --panel-measure above. */
+  max-width: var(--panel-measure);
+}
+
+
+/* -----------------------------------------------------------------------------
+ * 3. Meta text on tinted panels
+ * -----------------------------------------------------------------------------
+ *
+ * Found while sizing the tint fix, and it is NOT only a dark-mode problem.
+ *
+ * The provenance line under each safety callout ("shared/spots.json 1.2.0,
+ * unresolved") is set in --text-dimmer, which is chosen for contrast against
+ * --surface, not against a tinted panel. Against the panel it fails in both
+ * themes:
+ *
+ *   light   --text-dimmer L 0.62 on panel L~0.976   ~3.4:1   FAIL
+ *   dark    --text-dimmer L 0.58 on panel L~0.296   ~3.2:1   FAIL
+ *
+ * So a dedicated token, targeting ~6.4:1 in both:
+ *
+ *   light   L 0.47 on L~0.976   ~6.4:1
+ *   dark    L 0.76 on L~0.296   ~6.4:1
+ *
+ * CAVEAT ON THOSE NUMBERS: they are computed with Y ≈ L³, which is a decent
+ * approximation for near-neutral OKLCH but is not exact, and the panel
+ * lightness is itself an estimate of a color-mix result. Treat them as targets.
+ * The build task for this must measure the COMPUTED colours in the browser and
+ * adjust, rather than trusting the arithmetic here.
+ */
+:root {
+  --tint-text-meta: oklch(0.47 0.02 250);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tint-text-meta: oklch(0.76 0.018 250);
+  }
+}
+
+
+/* -----------------------------------------------------------------------------
+ * Deliberately NOT added
+ * -----------------------------------------------------------------------------
+ *
+ * - A spacing scale. Tailwind 4's default 4px-based scale is already used
+ *   consistently and correctly throughout. Adding a parallel --space-* ramp
+ *   would create two sources of truth for the same decision.
+ *
+ * - Status colors (--color-status-success / -warning / -error). The four
+ *   existing accents are named for MEANING (alert, caution, accent, window) and
+ *   none of them is a verdict about a day. A success/warning/error triad is the
+ *   exact vocabulary this app refuses, because its window states rest on
+ *   uncalibrated floors. See the comment block in flag-badge.tsx.
+ *
+ * - Motion tokens. The only animation is the native popover's, and
+ *   prefers-reduced-motion is already honoured globally.
+ *
+ * - A second font family. The system stack plus --font-mono is right for an
+ *   instrument panel, and a webfont would be the first network dependency on a
+ *   page whose whole argument is that it has none.
+ */

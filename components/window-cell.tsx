@@ -69,7 +69,7 @@ export function WindowCell({
         aria-label={cellAriaLabel(spotName, result, timeZone)}
         className={[
           'cell-link block h-full rounded-md py-1.5 pl-2 pr-6 no-underline transition-colors',
-          compact ? 'text-[0.7rem]' : 'text-[0.72rem]',
+          compact ? 'text-meta' : 'text-data',
         ].join(' ')}
       >
         {/* aria-hidden throughout: the label above already says all of this in prose. */}
@@ -209,7 +209,7 @@ export function UnevaluatedCell({
     <div
       role="note"
       aria-label={unevaluatedAriaLabel(spotName, date, timeZone, dateMs)}
-      className="flex h-full items-center justify-center rounded-md border border-dashed border-[var(--border-strong)] px-2 py-1.5 text-[0.7rem] text-[var(--text-dimmer)]"
+      className="flex h-full items-center justify-center rounded-md border border-dashed border-[var(--border-strong)] px-2 py-1.5 text-ui text-[var(--text-dimmer)]"
     >
       <span aria-hidden>not evaluated</span>
     </div>

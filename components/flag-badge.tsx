@@ -73,16 +73,16 @@ export function FlagBadge({
         className="flag-popover"
         style={{ ['--flag-anchor' as string]: anchorName }}
       >
-        <p className="flex items-center gap-1.5 text-xs font-semibold">
+        <p className="flex items-center gap-1.5 text-ui font-semibold">
           <span aria-hidden className="text-[var(--text-dim)]">
             {presentation.glyph}
           </span>
           {presentation.label}
         </p>
 
-        <p className="mt-1 text-xs leading-relaxed">{result.reason}</p>
+        <p className="mt-1 text-ui">{result.reason}</p>
 
-        <p className="mt-2 border-t border-[var(--border)] pt-2 text-[0.68rem] leading-relaxed text-[var(--text-dimmer)]">
+        <p className="mt-2 border-t border-[var(--border)] pt-2 text-meta text-[var(--text-dimmer)]">
           Provisional. The floor ({result.floorFt.toFixed(1)} ft) and swell ceiling (
           {result.swellCeilingFt.toFixed(1)} ft) this is decided against are author estimates and
           have not been field-checked. Read the tide and the clock above it as the primary

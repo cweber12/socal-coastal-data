@@ -106,19 +106,19 @@ export function UnresolvedDisclosure() {
           className="tint-panel mb-2 rounded-md border p-3"
           style={{ ['--tint-color' as string]: 'var(--color-caution)' }}
         >
-          <p className="max-w-prose text-xs leading-relaxed">{text}</p>
-          <p className="mt-1.5 text-[0.68rem] text-[var(--text-dimmer)]">
+          <p className="text-ui">{text}</p>
+          <p className="tint-panel-source mt-1.5 text-meta">
             {source.file} {source.version}, <code>unresolved</code>
           </p>
         </div>
       ))}
 
       <details>
-        <summary className="cursor-pointer text-xs text-[var(--text-dimmer)]">
+        <summary className="cursor-pointer text-meta text-[var(--text-dimmer)]">
           {`${restCount} more things this stack does not know`}
         </summary>
 
-        <p className="mt-1.5 max-w-prose text-xs leading-relaxed text-[var(--text-dimmer)]">
+        <p className="mt-1.5 max-w-prose text-meta text-[var(--text-dimmer)]">
           Quoted from the <code>unresolved</code> array in each data file, unedited. These are the
           caveats that cannot be written as a null — a value that is present and usable, with a
           stated limit on what it covers.
@@ -126,13 +126,13 @@ export function UnresolvedDisclosure() {
 
         {rest.map(({ source, entries }) => (
           <div key={source.file} className="mt-3">
-            <h3 className="text-[0.7rem] font-semibold tracking-wide uppercase text-[var(--text-dim)]">
+            <h3 className="text-meta font-semibold tracking-wide uppercase text-[var(--text-dim)]">
               {source.subject}
               <span className="ml-1.5 font-normal normal-case tracking-normal text-[var(--text-dimmer)]">
                 {source.file} {source.version}
               </span>
             </h3>
-            <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-xs leading-relaxed text-[var(--text-dimmer)]">
+            <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-meta text-[var(--text-dimmer)]">
               {entries.map((entry) => (
                 <li key={entry.slice(0, 40)} className="max-w-prose">
                   {entry}

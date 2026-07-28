@@ -8,3 +8,8 @@ node_modules/
 next-env.d.ts
 *.tsbuildinfo
 .vercel
+
+# Design-flow screenshot evidence. Regenerate with the Playwright capture
+# described in .design/ui-polish/TASKS.md; 7.6 MB of @2x PNGs does not belong
+# in a repo whose whole argument is that it carries no weight it does not need.
+.design/*/screenshots/

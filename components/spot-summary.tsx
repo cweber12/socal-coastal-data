@@ -26,13 +26,13 @@ export function SpotHeader({
 }) {
   return (
     <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-      <h3 className="text-sm font-semibold tracking-tight">
+      <h3 className="text-section font-semibold tracking-tight">
         {showSpotLink ? <Link href={`/spot/${spot.slug}`}>{spot.name}</Link> : spot.name}
-        <span className="ml-2 text-xs font-normal text-[var(--text-dimmer)]">
+        <span className="ml-2 text-meta font-normal text-[var(--text-dimmer)]">
           {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
         </span>
       </h3>
-      <p className="text-xs text-[var(--text-dimmer)]">
+      <p className="text-meta text-[var(--text-dimmer)]">
         {thresholdDisclosure(
           spot.tidepool_floor_ft,
           spot.tidepool_floor_confidence,
@@ -59,7 +59,7 @@ export function SwellProvenance({
   ceiling: SwellCeiling;
 }) {
   return (
-    <p className="mt-2 text-xs leading-relaxed text-[var(--text-dimmer)]">
+    <p className="mt-2 text-meta text-[var(--text-dimmer)]">
       {swell.swellFt === null ? (
         <>
           <strong>Swell unknown.</strong> No buoy in this spot&apos;s binding is delivering a

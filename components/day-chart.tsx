@@ -54,7 +54,7 @@ export function DayChart({
 }) {
   if (daySeries.samples.length < 2) {
     return (
-      <p className="rounded-md border border-dashed border-[var(--border-strong)] p-4 text-xs text-[var(--text-dimmer)]">
+      <p className="rounded-md border border-dashed border-[var(--border-strong)] p-4 text-meta text-[var(--text-dimmer)]">
         No prediction samples for this day, so no chart is drawn. This means unknown, not flat.
       </p>
     );
@@ -280,7 +280,7 @@ export function DayChart({
         ))}
       </svg>
 
-      <figcaption className="mt-2 text-xs text-[var(--text-dimmer)]">
+      <figcaption className="mt-2 text-meta text-[var(--text-dimmer)]">
         Shaded ends are night. The tinted band is the usable window, already trimmed on the flood
         side. Predictions are astronomical and exclude weather-driven surge.
       </figcaption>
@@ -301,8 +301,8 @@ function ExtremaTable({
   timeZone: string;
 }) {
   return (
-    <table className="mt-4 w-full text-left text-xs">
-      <caption className="pb-1.5 text-left text-xs text-[var(--text-dim)]">
+    <table className="mt-4 w-full text-left text-data">
+      <caption className="pb-1.5 text-left text-meta text-[var(--text-dim)]">
         The day&apos;s turning points
       </caption>
       <thead>

@@ -11,6 +11,48 @@
 
   --font-mono:
     ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, monospace;
+
+  /*
+   * Type scale.
+   *
+   * Five steps, named for the job each does rather than for its size, matching
+   * how the rest of this file names things -- --surface-sunken, not --gray-100.
+   *
+   * The ordering is the whole point. Before this existed there were 79
+   * font-size declarations across 9 arbitrary values, and the result was that
+   * the page disclaimed its own data in larger type than the data:
+   *
+   *   tide reading   text-[0.72rem]  11.52px
+   *   footer caveat  text-xs         12.00px
+   *
+   * A caveat set larger than the measurement it qualifies tells a reader the
+   * caveat is the more important of the two. It is not. Uncertainty here is
+   * disclosed in full and never hidden, but it is apparatus, and apparatus is
+   * set small.
+   */
+
+  /* Caveats, provenance, evaluation stamps, column-header notes. The floor for
+     any text on this page -- nothing goes below it. Loose leading, because this
+     is the text people read least willingly. */
+  --text-meta: 0.6875rem;
+  --text-meta--line-height: 1.55;
+
+  /* UI furniture: labels, breadcrumbs, sort links, table headers. */
+  --text-ui: 0.75rem;
+  --text-ui--line-height: 1.4;
+
+  /* The product. Tide heights, clock times, floor gaps, the four day facts.
+     The largest text inside any cell. Tight leading: numeric, read in columns. */
+  --text-data: 0.8125rem;
+  --text-data--line-height: 1.35;
+
+  /* Section headings -- "Marine protection", "Data notices", spot names. */
+  --text-section: 1rem;
+  --text-section--line-height: 1.3;
+
+  /* Page title, once per page. */
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.2;
 }
 
 :root {
@@ -22,7 +64,35 @@
   --text: oklch(0.24 0.02 250);
   --text-dim: oklch(0.5 0.02 250);
   --text-dimmer: oklch(0.62 0.015 250);
-  --tint: 0.92;
+
+  /*
+   * Tint panel strength.
+   *
+   * This used to be `--tint`, meaning "how much surface is left", and
+   * .tint-panel mixed `calc((1 - var(--tint)) * 100%)` of the accent. Light set
+   * 0.92 for 8% accent, which was right. Dark set 0.24, which is 76% accent --
+   * a near-fully-saturated mustard slab, and it made the loudest thing on the
+   * dark page a footnote about uncertainty.
+   *
+   * Renamed to what it actually controls and the inversion deleted, so nobody
+   * can re-enter the trap by reading the number and reasoning forwards from it.
+   * Dark takes MORE accent than light, not less: these accents sit at mid
+   * lightness, so against a dark surface they need more presence to register as
+   * a tint at all.
+   */
+  --tint-strength: 8%;
+  --tint-border-strength: 45%;
+
+  /*
+   * Meta text on a tinted panel.
+   *
+   * The provenance line under each safety callout was set in --text-dimmer,
+   * which is chosen for contrast against --surface and not against a panel with
+   * an accent mixed into it. Measured on the rendered page it failed in BOTH
+   * themes, not just dark: about 3.4:1 in light and 3.2:1 in dark, against a
+   * 4.5:1 requirement.
+   */
+  --tint-text-meta: oklch(0.47 0.02 250);
 
   /*
    * Accents, named for what they mean rather than for a window state.
@@ -85,7 +155,9 @@
     --text: oklch(0.94 0.006 250);
     --text-dim: oklch(0.72 0.015 250);
     --text-dimmer: oklch(0.58 0.015 250);
-    --tint: 0.24;
+    --tint-strength: 14%;
+    --tint-border-strength: 38%;
+    --tint-text-meta: oklch(0.76 0.018 250);
 
     --chart-night: oklch(0.1 0.025 265);
     --chart-night-opacity: 0.4;
@@ -130,12 +202,23 @@ body {
  * that restricts collecting -- and never for a window state.
  */
 .tint-panel {
-  background: color-mix(
-    in oklch,
-    var(--tint-color) calc((1 - var(--tint)) * 100%),
-    var(--surface-raised)
-  );
-  border-color: color-mix(in oklch, var(--tint-color) 45%, var(--border));
+  background: color-mix(in oklch, var(--tint-color) var(--tint-strength), var(--surface-raised));
+  border-color: color-mix(in oklch, var(--tint-color) var(--tint-border-strength), var(--border));
+
+  /*
+   * The panel is constrained, not just its text.
+   *
+   * Every one of these panels wrapped `max-w-prose` contents in a full-bleed
+   * box, so the copy occupied the left third and the remaining two thirds were
+   * an empty field of colour. At the width of a 1280px page that reads as a
+   * layout fault rather than as emphasis.
+   */
+  max-width: 68ch;
+}
+
+/* The provenance line inside a tint panel. See --tint-text-meta. */
+.tint-panel-source {
+  color: var(--tint-text-meta);
 }
 
 /* ---------------------------------------------------------------------------

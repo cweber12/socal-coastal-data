@@ -86,7 +86,7 @@ export default async function DayPage({
 
   return (
     <div>
-      <nav aria-label="Breadcrumb" className="text-xs">
+      <nav aria-label="Breadcrumb" className="text-ui">
         <Link href="/">All spots</Link>
         <span aria-hidden className="mx-1.5 text-[var(--text-dimmer)]">/</span>
         <Link href={`/spot/${spot.slug}`}>{spot.name}</Link>
@@ -96,16 +96,16 @@ export default async function DayPage({
 
       <div className="mt-2 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <div>
-          <h1 className="text-base font-semibold tracking-tight">
+          <h1 className="text-title font-semibold tracking-tight">
             {spot.name}
-            <span className="ml-2 font-normal text-[var(--text-dim)]">{dayLabel}</span>
+            <span className="ml-2 text-section font-normal text-[var(--text-dim)]">{dayLabel}</span>
             {isToday ? (
-              <span className="ml-2 rounded bg-[var(--surface-sunken)] px-1.5 py-0.5 text-[0.65rem] font-medium tracking-wide uppercase text-[var(--text-dim)]">
+              <span className="ml-2 rounded bg-[var(--surface-sunken)] px-1.5 py-0.5 text-meta font-medium tracking-wide uppercase text-[var(--text-dim)]">
                 today
               </span>
             ) : null}
           </h1>
-          <p className="mt-1 text-xs text-[var(--text-dimmer)]">
+          <p className="mt-1 text-meta text-[var(--text-dimmer)]">
             {thresholdDisclosure(
               spot.tidepool_floor_ft,
               spot.tidepool_floor_confidence,
@@ -115,7 +115,7 @@ export default async function DayPage({
           </p>
         </div>
 
-        <nav aria-label="Nearby days" className="flex items-center gap-1 text-xs">
+        <nav aria-label="Nearby days" className="flex items-center gap-1 text-ui">
           {hasPrevious ? (
             <Link
               href={`/spot/${spot.slug}/${formatLocalDate(previous)}`}
@@ -166,7 +166,7 @@ export default async function DayPage({
                 className="absolute right-2.5 top-2.5"
               />
 
-              <dl className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs wide:grid-cols-4">
+              <dl className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-data wide:grid-cols-4">
                 <Fact label="Low" value={`${formatHeight(result.lowFt)} ft at ${formatClock(result.lowMs, day.timeZone)}`} />
                 <Fact
                   label="Next high"
@@ -216,7 +216,7 @@ export default async function DayPage({
 
           <div className="mt-4 max-w-prose">
             <SwellProvenance swell={day.swell} ceiling={day.ceiling} />
-            <p className="mt-2 text-xs leading-relaxed text-[var(--text-dimmer)]">
+            <p className="mt-2 text-meta text-[var(--text-dimmer)]">
               A window needs {MIN_WINDOW_MINUTES} minutes to count, and the flood side is trimmed
               to 60% of the time it takes the tide to come back up to the floor. The trim is a
               safety margin, not a measurement: on the flood the water is returning and a return
@@ -249,7 +249,7 @@ export default async function DayPage({
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[0.68rem] tracking-wide uppercase text-[var(--text-dimmer)]">{label}</dt>
+      <dt className="text-meta tracking-wide uppercase text-[var(--text-dimmer)]">{label}</dt>
       <dd className="mt-0.5 font-mono tabular-nums">{value}</dd>
     </div>
   );
