@@ -6,7 +6,7 @@ import { DayChart } from '@/components/day-chart';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
 import { FlagBadge } from '@/components/flag-badge';
 import { SwellProvenance } from '@/components/week-ribbon';
-import { loadSpotDay, tidepoolSpotBySlug } from '@/lib/grid';
+import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/lib/grid';
 import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/lib/labels';
 import {
   addLocalDays,
@@ -16,8 +16,6 @@ import {
   formatLocalDate,
   localDateInZone,
   sameLocalDate,
-  startOfLocalDay,
-  tryParseLocalDate,
 } from '@/lib/time';
 import { MIN_WINDOW_MINUTES } from '@/lib/windows';
 import { DISPLAY_TIME_ZONE, SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
@@ -31,7 +29,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, date } = await params;
   const spot = tidepoolSpotBySlug(slug);
-  return { title: spot ? `${spot.name}, ${date} — tide chart` : 'Not found' };
+  return {
+    title: spot ? `${spot.name}, ${date} — tide chart` : 'Not found',
+    /*
+     * Not indexed, and not followed.
+     *
+     * app/robots.ts already disallows this path, but robots.txt is a request
+     * and this is the belt to its braces. Every day page links to the day
+     * either side of it, so a crawler that ignores robots.txt would otherwise
+     * walk the chain out to the servable bound in both directions, once per
+     * spot -- and each new date it reaches is a fresh CO-OPS request.
+     *
+     * There is nothing lost. A tide chart for one spot on one day is not a
+     * search result anyone wants; the grid and the spot pages are, and both
+     * stay indexable.
+     */
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function DayPage({
@@ -44,21 +58,29 @@ export default async function DayPage({
   const spot = tidepoolSpotBySlug(slug);
   if (!spot) notFound();
 
+  const now = Date.now();
+
   /*
-   * A route segment is untrusted input. `2026-02-30` parses as a Date in JS and
-   * rolls to 2 March, which would silently chart a different day than the URL
-   * names, so parsing rejects anything that does not round-trip.
+   * A route segment is untrusted input, and this rejects on two separate
+   * grounds. `2026-02-30` parses as a Date in JS and rolls to 2 March, which
+   * would silently chart a different day than the URL names. And a date outside
+   * the servable window is refused here, BEFORE loadSpotDay, so an out-of-range
+   * request costs a 404 and never becomes a CO-OPS fetch.
    */
-  const date = tryParseLocalDate(dateParam);
+  const date = servableDateParam(dateParam, now);
   if (!date) notFound();
 
-  const now = Date.now();
   const day = await loadSpotDay(spot, date, now);
   const dayLabel = formatDateLong(day.dayStartMs, day.timeZone);
-  const isToday = sameLocalDate(localDateInZone(now, DISPLAY_TIME_ZONE), date);
+  const today = localDateInZone(now, DISPLAY_TIME_ZONE);
+  const isToday = sameLocalDate(today, date);
 
+  // The nav must not offer a link the route will refuse. At each bound the arrow
+  // is dropped rather than rendered dead, so nothing on the page points at a 404.
   const previous = addLocalDays(date, -1);
   const next = addLocalDays(date, 1);
+  const hasPrevious = isServableDate(previous, today);
+  const hasNext = isServableDate(next, today);
   const result = day.window;
 
   return (
@@ -93,18 +115,27 @@ export default async function DayPage({
         </div>
 
         <nav aria-label="Nearby days" className="flex items-center gap-1 text-xs">
-          <Link
-            href={`/spot/${spot.slug}/${formatLocalDate(previous)}`}
-            className="rounded border border-[var(--border)] px-2 py-1 no-underline"
-          >
-            ← {previous.month}/{previous.day}
-          </Link>
-          <Link
-            href={`/spot/${spot.slug}/${formatLocalDate(next)}`}
-            className="rounded border border-[var(--border)] px-2 py-1 no-underline"
-          >
-            {next.month}/{next.day} →
-          </Link>
+          {hasPrevious ? (
+            <Link
+              href={`/spot/${spot.slug}/${formatLocalDate(previous)}`}
+              className="rounded border border-[var(--border)] px-2 py-1 no-underline"
+            >
+              ← {previous.month}/{previous.day}
+            </Link>
+          ) : null}
+          {hasNext ? (
+            <Link
+              href={`/spot/${spot.slug}/${formatLocalDate(next)}`}
+              className="rounded border border-[var(--border)] px-2 py-1 no-underline"
+            >
+              {next.month}/{next.day} →
+            </Link>
+          ) : null}
+          {!hasPrevious || !hasNext ? (
+            <span className="text-[var(--text-dimmer)]">
+              {`This is as far ${hasPrevious ? 'forward' : 'back'} as charts go.`}
+            </span>
+          ) : null}
         </nav>
       </div>
 
