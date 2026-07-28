@@ -6,7 +6,7 @@ that all eight spots share one tide station gets stated, and what stops being
 repeated on every page.
 
 Companion documents: [DESIGN_BRIEF.md](DESIGN_BRIEF.md),
-[DESIGN_REVIEW.md](DESIGN_REVIEW.md).
+[DESIGN_AUDIT.md](DESIGN_AUDIT.md).
 
 ## Site Map
 

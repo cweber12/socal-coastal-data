@@ -37,20 +37,30 @@ export function SpotHeader({
 }) {
   return (
     <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-      <h3 className="text-section font-semibold tracking-tight">
-        {nameOnPage ? (
-          <span className="text-meta font-normal text-[var(--text-dimmer)]">
+      {/*
+        The heading goes away with the name, rather than staying and holding
+        the coordinates.
+
+        The first version of nameOnPage swapped the h3's CONTENTS and left the
+        element, which produced `<h3>32.669, -117.245</h3>`. A heading whose
+        text is a coordinate pair is not a heading: it breaks the document
+        outline for anyone navigating by headings, and it does not name the
+        panel it sits in either. When the host page already carries the spot as
+        its h1, there is no second heading to write here -- the coordinates are
+        a caption.
+      */}
+      {nameOnPage ? (
+        <p className="text-meta text-[var(--text-dimmer)]">
+          {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
+        </p>
+      ) : (
+        <h3 className="text-section font-semibold tracking-tight">
+          {showSpotLink ? <Link href={`/spot/${spot.slug}`}>{spot.name}</Link> : spot.name}
+          <span className="ml-2 text-meta font-normal text-[var(--text-dimmer)]">
             {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
           </span>
-        ) : (
-          <>
-            {showSpotLink ? <Link href={`/spot/${spot.slug}`}>{spot.name}</Link> : spot.name}
-            <span className="ml-2 text-meta font-normal text-[var(--text-dimmer)]">
-              {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
-            </span>
-          </>
-        )}
-      </h3>
+        </h3>
+      )}
       <p className="text-meta text-[var(--text-dimmer)]">
         {thresholdDisclosure(
           spot.tidepool_floor_ft,

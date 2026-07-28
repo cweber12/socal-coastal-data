@@ -1,7 +1,7 @@
 # Build Tasks: Tide windows — UI/UX polish pass
 
 Generated from: [DESIGN_BRIEF.md](DESIGN_BRIEF.md)
-Also reads: [INFORMATION_ARCHITECTURE.md](INFORMATION_ARCHITECTURE.md) · [DESIGN_TOKENS.css](DESIGN_TOKENS.css) · [DESIGN_REVIEW.md](DESIGN_REVIEW.md)
+Also reads: [INFORMATION_ARCHITECTURE.md](INFORMATION_ARCHITECTURE.md) · [DESIGN_TOKENS.css](DESIGN_TOKENS.css) · [DESIGN_AUDIT.md](DESIGN_AUDIT.md)
 Date: 2026-07-28
 
 **Aesthetic philosophy: instrument panel.** A calibrated scientific readout —
@@ -147,12 +147,12 @@ to `main`.
 
 ## Review
 
-- [ ] **13. Design review.** Re-run the Playwright capture across three pages ×
+- [x] **13. Design review.** Re-run the Playwright capture across three pages ×
   three breakpoints × both themes plus interaction states, then run
   `/design-review` against the brief. Compare directly to the before/ shots in
   `screenshots/`.
 
-- [ ] **14. Ship it.** Commit per the repo's convention — body explains cause
+- [x] **14. Ship it.** Commit per the repo's convention — body explains cause
   not change, records what was verified with counts and values, ends with the
   `Co-Authored-By` trailer. Push, open the PR against `main`, and state plainly
   in the PR body what was verified and what was not.

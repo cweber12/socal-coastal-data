@@ -2,7 +2,7 @@
 
 Scope: a polish pass over the three existing pages (`/`, `/spot/[slug]`,
 `/spot/[slug]/[date]`). The information model, the data layer and the window
-predicate are not changing. Findings and evidence: [DESIGN_REVIEW.md](DESIGN_REVIEW.md).
+predicate are not changing. Findings and evidence: [DESIGN_AUDIT.md](DESIGN_AUDIT.md).
 
 ## Problem
 
