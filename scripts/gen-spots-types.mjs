@@ -286,6 +286,40 @@ export function isTidepoolSpot(spot: Spot): spot is TidepoolSpot {
 }
 `;
 
+/*
+ * The comparison is on LF-NORMALISED content, not raw bytes.
+ *
+ * This check compares generator output against a file git handed back, and git
+ * is entitled to rewrite line endings on the way. It did: with core.autocrlf=true
+ * and no .gitattributes, every checkout produced CRLF while this generator writes
+ * LF, so a raw byte comparison called the file stale on every run -- and the
+ * "fix" it prescribed rewrote all 6708 bytes and produced a whole-file diff.
+ *
+ * .gitattributes now pins eol=lf so that should not recur, but a contributor can
+ * always clone with different settings, and a drift guard that cries wolf gets
+ * ignored, which costs more than the drift it was watching for. Line endings are
+ * not what this check is about: whether the TYPES match the inventory is. So a
+ * pure line-ending difference reports as a warning against a clean exit, naming
+ * the actual remedy, which is `git add --renormalize .` and never `gen:types`.
+ */
+const stripCr = (s) => s.replace(/\r\n/g, '\n');
+
+/** Where two texts first differ, as a line number and both sides of it. */
+function firstDifference(a, b) {
+  const al = a.split('\n');
+  const bl = b.split('\n');
+  for (let i = 0; i < Math.max(al.length, bl.length); i++) {
+    if (al[i] !== bl[i]) {
+      return {
+        line: i + 1,
+        committed: al[i] === undefined ? '(end of file)' : al[i],
+        generated: bl[i] === undefined ? '(end of file)' : bl[i],
+      };
+    }
+  }
+  return null;
+}
+
 if (process.argv.includes('--check')) {
   let current = '';
   try {
@@ -294,12 +328,30 @@ if (process.argv.includes('--check')) {
     console.error('shared/spots.generated.ts is missing. Run: npm run gen:types');
     process.exit(1);
   }
-  if (current !== out) {
+
+  const diff = firstDifference(stripCr(current), stripCr(out));
+
+  if (diff) {
     console.error(
-      'shared/spots.generated.ts is stale relative to shared/spots.json.\nRun: npm run gen:types',
+      `shared/spots.generated.ts is stale relative to shared/spots.json ` +
+        `(version ${data.version}, generated ${data.generated}).\n\n` +
+        `  first difference at line ${diff.line}\n` +
+        `    committed: ${diff.committed.slice(0, 160)}\n` +
+        `    generated: ${diff.generated.slice(0, 160)}\n\n` +
+        `Run: npm run gen:types`,
     );
     process.exit(1);
   }
+
+  if (current !== out) {
+    console.warn(
+      'shared/spots.generated.ts matches shared/spots.json, but its line endings ' +
+        'differ from what this generator writes (it writes LF).\n' +
+        'The types are current -- do NOT run gen:types, which would rewrite the ' +
+        'whole file. Run: git add --renormalize .',
+    );
+  }
+
   console.log(`shared/spots.generated.ts is current (${data.spots.length} spots, version ${data.version}).`);
   process.exit(0);
 }
