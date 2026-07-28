@@ -16,6 +16,7 @@ import datetime as dt
 import gzip
 import json
 import os
+import re
 import ssl
 import sys
 import time
@@ -398,6 +399,130 @@ def check_usgs_iv(label, site):
     record(f"USGS IV {site} ({label})", url, s, t, n, note, newest, e)
 
 
+# ------------------------------------------------- IBWC Tijuana River gauge
+#
+# The only realtime flow on the Tijuana River. There is no documented API.
+# waterdata.ibwc.gov is an Aquarius WebPortal: its Publish/v2 endpoints answer
+# 200 with an empty body, and the Location Summary HTML carries no values at
+# all (the chart loads behind an authenticated JS bundle), so the portal is not
+# a data source. What IS machine-readable is the telemetry text product linked
+# off ibwc.gov/water-data/active-gaging-stations -- a fixed four-line header
+# over whitespace-delimited 15-minute rows, ~30 days deep, refreshed hourly by
+# GOES.
+#
+# This is a scrape of an undocumented file, so every assumption is pinned and
+# any drift is a hard failure. A plausible-looking wrong flow number is worse
+# than no number at all.
+IBWC_TJ_STATION = "11013300"
+IBWC_TJ_NAME = "Tijuana River At International Boundary"
+IBWC_TJ_URL = (
+    f"https://ibwcsftpstg.blob.core.windows.net/wad/TelemetryTXT/{IBWC_TJ_STATION}.txt"
+)
+IBWC_COLUMNS = ["Date", "Time", "Stage", "Discharge"]
+
+# The header labels the clock PST and means it: fixed UTC-8 year round, no DST.
+# Publish lag confirms it -- against an hourly GOES cycle the newest row sits
+# 56 min behind Last-Modified under UTC-8 but an implausible 116 min under
+# UTC-7. TRNERR, which republishes this same feed, states UTC-08:00 outright.
+IBWC_TZ_LABEL = "PST"
+IBWC_TZ = dt.timezone(dt.timedelta(hours=-8))
+
+# IBWC publishes discharge in cubic meters per second here -- NOT cfs, and not
+# the million gallons per day the downstream TRNERR dashboard renders. The unit
+# is read out of the header every run rather than assumed. Conversion to cfs is
+# gated on an exact string match so a unit change can never be silently
+# mis-scaled; an unrecognised unit fails the check instead of guessing.
+IBWC_DISCHARGE_UNITS = {
+    "cubic meters per second": ("cms", 35.3146667),
+    "cubic feet per second": ("cfs", 1.0),
+}
+IBWC_STALE_HOURS = 3  # GOES delivers hourly; beyond this the gauge is not reporting
+
+
+def parse_ibwc_telemetry(body):
+    """(note, newest_utc) from the telemetry file. ValueError on any drift."""
+    lines = [l for l in body.splitlines() if l.strip()]
+    if len(lines) < 5:
+        raise ValueError(f"expected header plus rows, got {len(lines)} lines")
+
+    head = lines[:6]
+    station_line = next((l for l in head if IBWC_TJ_STATION in l), None)
+    if station_line is None:
+        raise ValueError(f"station {IBWC_TJ_STATION} absent from header")
+    if IBWC_TJ_NAME.lower() not in station_line.lower():
+        raise ValueError(f"station renamed: {station_line.strip()[:50]!r}")
+
+    ci = next((i for i, l in enumerate(head) if l.split() == IBWC_COLUMNS), None)
+    if ci is None:
+        raise ValueError(f"columns are no longer {IBWC_COLUMNS}")
+
+    # Units and timezone live on the line directly under the column names.
+    unit_line = lines[ci + 1]
+    tz_label = unit_line.split()[0] if unit_line.split() else ""
+    if tz_label != IBWC_TZ_LABEL:
+        raise ValueError(f"timezone label {tz_label!r} != {IBWC_TZ_LABEL!r}")
+    units = re.findall(r"\(([^)]+)\)", unit_line)
+    if len(units) != 2:
+        raise ValueError(f"expected stage and discharge units, found {units}")
+    stage_unit, discharge_unit = (u.strip() for u in units)
+    if discharge_unit not in IBWC_DISCHARGE_UNITS:
+        raise ValueError(
+            f"unknown discharge unit {discharge_unit!r} -- add it to "
+            "IBWC_DISCHARGE_UNITS before trusting the number"
+        )
+    unit_label, to_cfs = IBWC_DISCHARGE_UNITS[discharge_unit]
+
+    rows = [
+        f for f in (l.split() for l in lines[ci + 2:])
+        if len(f) == 4 and re.fullmatch(r"\d{2}/\d{2}/\d{4}", f[0])
+    ]
+    if not rows:
+        raise ValueError("no data rows matched the pinned row shape")
+
+    # Rows run newest first. Skip any leading gap markers rather than treating a
+    # missing reading as drift, but a file with no numeric discharge anywhere is.
+    gaps = 0
+    for date_s, time_s, stage_s, q_s in rows:
+        try:
+            flow = float(q_s)
+        except ValueError:
+            gaps += 1
+            continue
+        try:
+            stamp = dt.datetime.strptime(f"{date_s} {time_s}", "%m/%d/%Y %H:%M")
+        except ValueError:
+            raise ValueError(f"unparseable timestamp {date_s!r} {time_s!r}")
+        stamp = stamp.replace(tzinfo=IBWC_TZ)
+
+        note = f"{flow} {unit_label}"
+        if to_cfs is not None and to_cfs != 1.0:
+            note += f" = {flow * to_cfs:.1f} cfs"
+        note += f" | stage {stage_s} {stage_unit.split()[0]} | {len(rows)} rows"
+        if gaps:
+            note += f" | {gaps} gap rows skipped"
+        if (NOW - stamp).total_seconds() / 3600 > IBWC_STALE_HOURS:
+            note = f"STALE >{IBWC_STALE_HOURS}h: " + note
+        return note, stamp
+
+    raise ValueError(f"no numeric discharge in any of {len(rows)} rows")
+
+
+def check_ibwc_tijuana():
+    s, t, n, body, e = fetch(IBWC_TJ_URL)
+    note, newest = "", None
+    if body and not e:
+        try:
+            note, newest = parse_ibwc_telemetry(body)
+        except ValueError as ex:
+            # Loud on purpose: an undocumented scrape that drifts must not fall
+            # through to a number that merely looks reasonable.
+            e = f"SCHEMA DRIFT: {ex}"
+    record(
+        f"IBWC {IBWC_TJ_STATION} (Tijuana R. @ border)",
+        IBWC_TJ_URL, s, t, n, note, newest, e,
+    )
+
+
 def check_usgs_new_api():
     url = "https://api.waterdata.usgs.gov/ogcapi/v0/collections?f=json"
     s, t, n, body, e = fetch(url)
@@ -523,6 +648,7 @@ CHECKS = [
     check_sccoos_habs,
     lambda: check_usgs_discharge_bbox("Tijuana valley", TIJUANA_BBOX),
     lambda: check_usgs_iv("San Luis Rey @ Oceanside", "11042000"),
+    check_ibwc_tijuana,
     check_usgs_new_api,
     check_inaturalist,
     check_ebird,
