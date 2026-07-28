@@ -246,6 +246,19 @@ describe('tidepoolSpotBySlug', () => {
     expect(tidepoolSpotBySlug('')).toBeNull();
   });
 
+  it('does not serve Object.prototype keys as spots', () => {
+    /*
+     * The slug arrives from a URL segment. While SPOT_BY_SLUG inherited
+     * Object.prototype these four all returned something truthy, and the guard
+     * in tidepoolSpotBySlug is `tidepool_floor_ft !== null` -- which `undefined`
+     * satisfies. So each one got past notFound() and was handed on as a Spot,
+     * then threw on `spot.wave.intended_primary`: a 500 where a 404 belongs.
+     */
+    for (const key of ['constructor', 'toString', 'valueOf', '__proto__', 'hasOwnProperty']) {
+      expect(tidepoolSpotBySlug(key)).toBeNull();
+    }
+  });
+
   it('returns null for a real spot with no floor rather than guessing one', () => {
     // Eighteen of twenty-six are in this state. A null floor is unresolved, and
     // inventing one produces a confident state for a reef nobody has measured.

@@ -263,8 +263,24 @@ export const WAVE_UNITS = ${JSON.stringify(data.conventions.wave_units)};
  */
 export const DEAD_BUOY_IDS: readonly BuoyId[] = [${deadBuoys.map((b) => `'${b}'`).join(', ')}];
 
+/**
+ * Null prototype, deliberately.
+ *
+ * This map is looked up by a URL segment, which is untrusted input. Built with
+ * a bare Object.fromEntries it inherits Object.prototype, so \`constructor\`,
+ * \`toString\`, \`valueOf\` and \`__proto__\` all answer with something truthy.
+ * tidepoolSpotBySlug's guard is \`tidepool_floor_ft !== null\`, and \`undefined
+ * !== null\` is true, so every one of those inherited values passed as an
+ * evaluable spot: /spot/constructor got past notFound() and then threw on
+ * \`spot.wave.intended_primary\`, serving a 500 where a 404 belongs.
+ *
+ * Object.create(null) has no such keys, so a miss is a miss.
+ */
 export const SPOT_BY_SLUG: Readonly<Record<SpotSlug, Spot>> = Object.freeze(
-  Object.fromEntries(SPOTS.map((s) => [s.slug, s])) as Record<SpotSlug, Spot>,
+  Object.assign(
+    Object.create(null),
+    Object.fromEntries(SPOTS.map((s) => [s.slug, s])),
+  ) as Record<SpotSlug, Spot>,
 );
 
 /**
