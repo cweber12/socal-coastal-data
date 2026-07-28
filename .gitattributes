@@ -1,0 +1,28 @@
+# Line endings are LF everywhere, in the repository AND in the working tree.
+#
+# `text=auto` alone is not enough. It normalises to LF on commit, which git has
+# been doing here already, but it leaves checkout to core.autocrlf -- and on a
+# Windows clone with core.autocrlf=true that writes CRLF. That combination
+# silently broke the one guard this repo has over its generated types:
+#
+#   scripts/gen-spots-types.mjs writes LF. Git handed the committed file back as
+#   CRLF. `npm run gen:types:check` compares the two as bytes, so it reported
+#   shared/spots.generated.ts as stale on a file that was current in every
+#   respect except line endings -- and `npm run gen:types` then "fixed" it by
+#   rewriting all 6708 bytes to LF, producing a whole-file diff.
+#
+# `eol=lf` pins the checkout side too, so the generator's output and the
+# checked-out file agree on every platform. CI runs the check on windows-latest
+# as well as ubuntu-latest, which is what would have caught this.
+#
+# text=auto still applies first, so genuinely binary files are detected and left
+# alone rather than being corrupted by conversion.
+* text=auto eol=lf
+
+# Generated from shared/spots.json. Collapsed in review by default so a
+# regenerated union does not bury the change that caused it.
+shared/spots.generated.ts linguist-generated=true
+
+# Captured upstream payloads, kept byte-for-byte as the endpoint served them.
+# They are evidence, not source, and reviewing them line by line is noise.
+lib/__fixtures__/** linguist-vendored=true
