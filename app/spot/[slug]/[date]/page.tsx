@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { DayChart } from '@/components/day-chart';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
 import { FlagBadge } from '@/components/flag-badge';
+import { UnresolvedDisclosure } from '@/components/unresolved';
 import { SwellProvenance } from '@/components/week-ribbon';
 import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/lib/grid';
 import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/lib/labels';
@@ -224,6 +225,13 @@ export default async function DayPage({
           </div>
         </>
       )}
+
+      {/*
+        The day page is where the ceiling actually decides something -- the flag
+        badge on this panel is where a swell veto gets explained -- so the
+        caveats on that ceiling belong here rather than only on the grid.
+      */}
+      <UnresolvedDisclosure />
 
       <Notices notices={day.notices} />
 

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
 import { MidnightNotice } from '@/components/midnight-notice';
 import { SpotRow } from '@/components/spot-row';
+import { UnresolvedDisclosure } from '@/components/unresolved';
 import { UnevaluatedCell, WindowCell } from '@/components/window-cell';
 import { WeekRibbon } from '@/components/week-ribbon';
 import { HORIZON_DAYS, loadGrid, type SpotRow as SpotRowData } from '@/lib/grid';
@@ -195,6 +196,20 @@ export default async function GridPage({
       </p>
 
       <Excluded names={grid.excludedSpotNames} />
+
+      {/*
+        Two different kinds of caveat, kept apart deliberately.
+
+        Notices are about THIS render: a buoy that did not answer just now, a
+        day that would not evaluate, a format that has drifted. They change
+        between requests.
+
+        UnresolvedDisclosure is about the data itself and is the same on every
+        request -- what the floors and the ceiling do not cover. Folding them
+        together would let a standing limitation read as a transient upstream
+        problem, and a reader would wait for it to clear.
+      */}
+      <UnresolvedDisclosure />
 
       <Notices notices={grid.notices} />
 
