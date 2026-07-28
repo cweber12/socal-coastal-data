@@ -4,11 +4,19 @@ import Link from 'next/link';
 import { useId, useState } from 'react';
 
 /**
- * A grid row with its ribbon disclosed inline.
+ * A grid row with its detail panel disclosed inline.
  *
  * The only reason this is a client component is the open/closed state. The cells
- * and the ribbon are both rendered on the server and handed in as props, so no
+ * and the panel are both rendered on the server and handed in as props, so no
  * tide maths and no upstream data cross into the browser bundle.
+ *
+ * That server rendering has a cost worth naming, since it is not obvious: a prop
+ * handed to a client component is serialised into the RSC flight payload
+ * whether or not it is ever displayed. `detail` ships on every request, closed
+ * or not. It used to be a full seven-day ribbon, which made it 47% of the
+ * payload for content behind a click, and the fix was to stop putting the
+ * duplicated cells in it rather than to defer the rendering. Anything added
+ * here is paid for by every reader, including the ones who never open a row.
  *
  * Structure matters here. The spot name is a <button> and each day is its own
  * <a>, and they are SIBLINGS in the row. Nesting a link inside the toggle -- or a
@@ -16,7 +24,7 @@ import { useId, useState } from 'react';
  * keyboard and that assistive technology announces as one thing while it behaves
  * as two.
  *
- * Below 600px the toggle is replaced by a plain link to the spot page: the ribbon
+ * Below 600px the toggle is replaced by a plain link to the spot page: the panel
  * is skipped at that width, so offering a control that discloses nothing would be
  * a dead end. Both elements are in the markup and CSS picks one, which keeps the
  * server and client renders identical -- `display: none` also takes the hidden one
@@ -28,7 +36,7 @@ export function SpotRow({
   rowLabel,
   usableCount,
   cells,
-  ribbon,
+  detail,
   columnCount,
 }: {
   spotName: string;
@@ -36,7 +44,7 @@ export function SpotRow({
   rowLabel: string;
   usableCount: number;
   cells: React.ReactNode[];
-  ribbon: React.ReactNode;
+  detail: React.ReactNode;
   columnCount: number;
 }) {
   const [open, setOpen] = useState(false);
@@ -46,7 +54,7 @@ export function SpotRow({
     <tbody className="border-b border-[var(--border)] last:border-b-0">
       <tr>
         <th scope="row" className="w-[11rem] p-1 text-left align-middle font-normal">
-          {/* >= 600px: disclosure toggle for the inline ribbon. */}
+          {/* >= 600px: disclosure toggle for the inline detail panel. */}
           <button
             type="button"
             aria-expanded={open}
@@ -71,7 +79,7 @@ export function SpotRow({
             </span>
           </button>
 
-          {/* < 600px: no ribbon to disclose, so go straight to the spot page. */}
+          {/* < 600px: nothing to disclose, so go straight to the spot page. */}
           <Link
             href={`/spot/${spotSlug}`}
             className="block rounded px-1.5 py-1 no-underline wide:hidden"
@@ -107,7 +115,7 @@ export function SpotRow({
       {open ? (
         <tr id={panelId} className="hidden wide:table-row">
           <td colSpan={columnCount} className="px-1 pb-3">
-            {ribbon}
+            {detail}
           </td>
         </tr>
       ) : null}

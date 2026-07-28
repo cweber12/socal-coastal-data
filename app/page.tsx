@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
 import { MidnightNotice } from '@/components/midnight-notice';
 import { SpotRow } from '@/components/spot-row';
+import { SpotDisclosure } from '@/components/spot-summary';
 import { UnresolvedDisclosure } from '@/components/unresolved';
 import { UnevaluatedCell, WindowCell } from '@/components/window-cell';
-import { WeekRibbon } from '@/components/week-ribbon';
 import { HORIZON_DAYS, loadGrid, type SpotRow as SpotRowData } from '@/lib/grid';
 import { rowAriaLabel } from '@/lib/labels';
 import {
@@ -174,15 +174,26 @@ export default async function GridPage({
                   />
                 ),
               )}
-              ribbon={
-                <WeekRibbon
-                  spot={row.spot}
-                  days={row.days}
-                  dates={grid.days}
-                  timeZone={grid.timeZone}
-                  swell={row.swell}
-                  ceiling={row.ceiling}
-                />
+              /*
+                Deliberately NOT the week ribbon.
+
+                SpotRow is a client component, and a prop handed to one is
+                serialised into the flight payload whether the row is open or
+                not -- so every collapsed ribbon shipped in full. That was
+                163,926 bytes of a 345,152-byte RSC stream, 47%, for eight
+                strips nobody had expanded.
+
+                And the strip was redundant where it appeared. The disclosure
+                row is `hidden wide:table-row`, so it only exists at >= 600px,
+                and at >= 600px this row already shows all seven days. Opening
+                it printed the same seven lows and highs again, one row lower.
+
+                What a table row has nowhere to put is where the spot is, which
+                floor and ceiling its verdicts are decided against, and which
+                buoy the swell came from. That is what it discloses now.
+              */
+              detail={
+                <SpotDisclosure spot={row.spot} swell={row.swell} ceiling={row.ceiling} />
               }
             />
           ))}
