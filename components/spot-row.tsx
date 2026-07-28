@@ -1,0 +1,116 @@
+'use client';
+
+import Link from 'next/link';
+import { useId, useState } from 'react';
+
+/**
+ * A grid row with its ribbon disclosed inline.
+ *
+ * The only reason this is a client component is the open/closed state. The cells
+ * and the ribbon are both rendered on the server and handed in as props, so no
+ * tide maths and no upstream data cross into the browser bundle.
+ *
+ * Structure matters here. The spot name is a <button> and each day is its own
+ * <a>, and they are SIBLINGS in the row. Nesting a link inside the toggle -- or a
+ * toggle inside a link -- gives a control that cannot be operated predictably by
+ * keyboard and that assistive technology announces as one thing while it behaves
+ * as two.
+ *
+ * Below 600px the toggle is replaced by a plain link to the spot page: the ribbon
+ * is skipped at that width, so offering a control that discloses nothing would be
+ * a dead end. Both elements are in the markup and CSS picks one, which keeps the
+ * server and client renders identical -- `display: none` also takes the hidden one
+ * out of the accessibility tree and out of the tab order.
+ */
+export function SpotRow({
+  spotName,
+  spotSlug,
+  rowLabel,
+  usableCount,
+  cells,
+  ribbon,
+  columnCount,
+}: {
+  spotName: string;
+  spotSlug: string;
+  rowLabel: string;
+  usableCount: number;
+  cells: React.ReactNode[];
+  ribbon: React.ReactNode;
+  columnCount: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+
+  return (
+    <tbody className="border-b border-[var(--border)] last:border-b-0">
+      <tr>
+        <th scope="row" className="w-[11rem] p-1 text-left align-middle font-normal">
+          {/* >= 600px: disclosure toggle for the inline ribbon. */}
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={panelId}
+            aria-label={rowLabel}
+            onClick={() => setOpen((v) => !v)}
+            className="hidden w-full items-start gap-1.5 rounded px-1.5 py-1 text-left hover:bg-[var(--surface-sunken)] wide:flex"
+          >
+            <span
+              aria-hidden
+              className="mt-[0.15rem] w-3 shrink-0 text-[0.7rem] text-[var(--text-dimmer)]"
+            >
+              {open ? '▾' : '▸'}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-[0.82rem] font-medium leading-tight">
+                {spotName}
+              </span>
+              <span className="block text-[0.68rem] text-[var(--text-dimmer)]">
+                {usableCount === 0 ? 'no windows' : `${usableCount} usable`}
+              </span>
+            </span>
+          </button>
+
+          {/* < 600px: no ribbon to disclose, so go straight to the spot page. */}
+          <Link
+            href={`/spot/${spotSlug}`}
+            className="block rounded px-1.5 py-1 no-underline wide:hidden"
+          >
+            <span className="block truncate text-[0.82rem] font-medium leading-tight">
+              {spotName}
+            </span>
+            <span className="block text-[0.68rem] text-[var(--text-dimmer)]">
+              {usableCount === 0 ? 'no windows' : `${usableCount} usable`}
+            </span>
+          </Link>
+        </th>
+
+        {cells.map((cell, i) => (
+          <td
+            key={i}
+            // Only today's column survives below 600px.
+            className={i === 0 ? 'p-1 align-top' : 'hidden p-1 align-top wide:table-cell'}
+          >
+            {cell}
+          </td>
+        ))}
+      </tr>
+
+      {/*
+        Rendered only when open, rather than kept in the DOM with the `hidden`
+        attribute. Those two do not compose: `hidden` is a UA rule of
+        `display: none`, and any author display utility beats it, so a
+        `wide:table-row` class would force the panel visible at >= 600px however
+        the attribute was set. Conditional rendering also keeps aria-expanded
+        truthful without relying on the accessibility tree following a CSS rule.
+      */}
+      {open ? (
+        <tr id={panelId} className="hidden wide:table-row">
+          <td colSpan={columnCount} className="px-1 pb-3">
+            {ribbon}
+          </td>
+        </tr>
+      ) : null}
+    </tbody>
+  );
+}
