@@ -22,11 +22,19 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import zoneinfo
 
 # NWS requires a descriptive User-Agent with contact info or it rejects you.
 UA = "coastal-conditions-verifier/0.1 (you@example.com)"
 TIMEOUT = 25
 NOW = dt.datetime.now(dt.timezone.utc)
+
+# Some feeds (eBird) stamp observations in the local time of the observation
+# with no offset attached. Tagging those UTC makes everything read 7-8h stale.
+try:
+    PACIFIC = zoneinfo.ZoneInfo("America/Los_Angeles")
+except zoneinfo.ZoneInfoNotFoundError:  # no system tzdata (bare Windows/containers)
+    PACIFIC = dt.timezone(dt.timedelta(hours=-8))
 
 # Bounding box for the corridor: Oceanside pier down to the border.
 NORTH, SOUTH = 33.22, 32.53
@@ -193,9 +201,11 @@ def check_cdip_catalog():
 
 def check_coops(product, station="9410230", extra=""):
     base = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
+    # time_zone=gmt, not lst_ldt: the returned "t" strings carry no offset, so
+    # asking for local time and then tagging it UTC made every row read 7h stale.
     q = (
         f"?product={product}&application=verifier&station={station}"
-        f"&time_zone=lst_ldt&units=english&format=json{extra}"
+        f"&time_zone=gmt&units=english&format=json{extra}"
     )
     url = base + q
     s, t, n, body, e = fetch(url)
@@ -211,7 +221,9 @@ def check_coops(product, station="9410230", extra=""):
                 if rows:
                     ts = rows[-1].get("t")
                     if ts:
-                        newest = dt.datetime.strptime(ts, "%Y-%m-%d %H:%M")
+                        newest = dt.datetime.strptime(ts, "%Y-%m-%d %H:%M").replace(
+                            tzinfo=dt.timezone.utc
+                        )
         except Exception as ex:
             note = f"parse failed: {ex}"
     record(f"CO-OPS {product} @{station}", url, s, t, n, note, newest, e)
@@ -310,10 +322,20 @@ def check_inaturalist():
         try:
             d = json.loads(body)
             note = f"{d.get('total_results', 0)} obs in bbox/14d"
-            if d.get("results"):
-                od = d["results"][0].get("time_observed_at")
-                if od:
-                    newest = dt.datetime.fromisoformat(od)
+            # time_observed_at carries a real offset, so no tz guessing needed --
+            # but results[0] is not the newest. order_by=observed_on sorts by date
+            # only, and hand-entered times are routinely in the future. Take the
+            # newest observation that isn't ahead of the clock.
+            stamps = [
+                dt.datetime.fromisoformat(r["time_observed_at"])
+                for r in d.get("results", [])
+                if r.get("time_observed_at")
+            ]
+            sane = [x for x in stamps if x <= NOW]
+            if sane:
+                newest = max(sane)
+            if len(sane) < len(stamps):
+                note += f" ({len(stamps) - len(sane)} future-dated)"
         except Exception as ex:
             note = f"parse failed: {ex}"
     record("iNaturalist observations", url, s, t, n, note, newest, e)
@@ -332,8 +354,9 @@ def check_ebird():
             obs = json.loads(body)
             note = f"{len(obs)} recent obs"
             if obs:
+                # obsDt is local time at the observation, offset omitted.
                 newest = dt.datetime.fromisoformat(obs[0]["obsDt"]).replace(
-                    tzinfo=dt.timezone.utc
+                    tzinfo=PACIFIC
                 )
         except Exception as ex:
             note = f"parse failed: {ex}"
