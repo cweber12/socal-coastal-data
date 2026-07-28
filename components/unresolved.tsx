@@ -106,8 +106,18 @@ export function UnresolvedDisclosure() {
           className="tint-panel mb-2 rounded-md border p-3"
           style={{ ['--tint-color' as string]: 'var(--color-caution)' }}
         >
-          <p className="text-ui">{text}</p>
-          <p className="tint-panel-source mt-1.5 text-meta">
+          {/*
+            A heading, which this never had -- the panel began mid-sentence with
+            the word SAFETY and read as a pasted log line. The heading is UI
+            chrome around the quote, not a summary of it: summarising a safety
+            caveat would put a second wording of it in a second place, which is
+            the thing the file-verbatim rule exists to prevent.
+          */}
+          <h3 className="text-ui font-semibold tracking-wide uppercase">
+            Safety — these floors are unverified
+          </h3>
+          <p className="mt-1.5 text-ui">{text}</p>
+          <p className="tint-panel-source mt-2 text-meta">
             {source.file} {source.version}, <code>unresolved</code>
           </p>
         </div>

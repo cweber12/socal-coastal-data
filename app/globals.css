@@ -336,6 +336,35 @@ body {
     translate: none;
     margin: 0.25rem 0;
   }
+
+}
+
+/*
+ * Which cell is this popover about?
+ *
+ * A real question here, and one the panel could not answer. Every cell in the
+ * grid resembles every other -- that is what one tide station serving eight
+ * spots produces -- and the panel opens over the rows BELOW its own badge, so
+ * the reader is looking at a card floating across three cells that are not the
+ * one it describes.
+ *
+ * A drawn tail was the first attempt and it is not sound: `position-try` can
+ * flip the panel above its badge or across to the other inline edge, and a tail
+ * pinned to one edge then points confidently at the wrong thing. A tail that
+ * lies is worse than no tail.
+ *
+ * So the badge marks itself instead. The popover is the badge's immediate next
+ * sibling -- FlagBadge renders them adjacent in one fragment, deliberately, so
+ * that neither is nested inside the other -- which makes `:has(+ ...)` able to
+ * select exactly the button whose own panel is open. It is correct in every
+ * position the panel can take, needs no anchor arithmetic, and degrades to
+ * nothing rather than to something wrong.
+ */
+.flag-badge:has(+ [popover]:popover-open) {
+  opacity: 1;
+  background: var(--cell-fg, var(--text));
+  color: var(--cell-bg, var(--surface-raised));
+  border-color: var(--cell-fg, var(--text));
 }
 
 @media (prefers-reduced-motion: reduce) {

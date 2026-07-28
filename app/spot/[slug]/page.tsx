@@ -79,6 +79,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
               swell={week.swell}
               ceiling={week.ceiling}
               showSpotLink={false}
+              nameOnPage
             />
           </div>
 

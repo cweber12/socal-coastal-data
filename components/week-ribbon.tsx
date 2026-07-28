@@ -37,6 +37,7 @@ export function WeekRibbon({
   swell,
   ceiling,
   showSpotLink = true,
+  nameOnPage = false,
 }: {
   spot: TidepoolSpot;
   days: readonly (WindowResult | null)[];
@@ -45,10 +46,12 @@ export function WeekRibbon({
   swell: SpotSwell;
   ceiling: SwellCeiling;
   showSpotLink?: boolean;
+  /** The host page already has the spot name as its h1. */
+  nameOnPage?: boolean;
 }) {
   return (
     <div className="rounded-md border border-[var(--border)] bg-[var(--surface-sunken)] p-3">
-      <SpotHeader spot={spot} ceiling={ceiling} showSpotLink={showSpotLink} />
+      <SpotHeader spot={spot} ceiling={ceiling} showSpotLink={showSpotLink} nameOnPage={nameOnPage} />
 
       <ol className="flex list-none gap-1.5 overflow-x-auto pb-1">
         {/*

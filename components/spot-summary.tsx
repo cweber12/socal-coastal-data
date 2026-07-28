@@ -19,18 +19,37 @@ export function SpotHeader({
   spot,
   ceiling,
   showSpotLink,
+  /**
+   * True when the host page already carries the spot's name as its `h1`.
+   *
+   * The spot page did: an `h1` reading "Cabrillo Tidepools" with an `h3`
+   * repeating it verbatim in the panel directly beneath. The coordinates and
+   * the thresholds still belong here; the name is the only part that was
+   * already on the page. The grid's row disclosure passes false, because there
+   * this heading is the panel's only label.
+   */
+  nameOnPage = false,
 }: {
   spot: TidepoolSpot;
   ceiling: SwellCeiling;
   showSpotLink: boolean;
+  nameOnPage?: boolean;
 }) {
   return (
     <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
       <h3 className="text-section font-semibold tracking-tight">
-        {showSpotLink ? <Link href={`/spot/${spot.slug}`}>{spot.name}</Link> : spot.name}
-        <span className="ml-2 text-meta font-normal text-[var(--text-dimmer)]">
-          {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
-        </span>
+        {nameOnPage ? (
+          <span className="text-meta font-normal text-[var(--text-dimmer)]">
+            {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
+          </span>
+        ) : (
+          <>
+            {showSpotLink ? <Link href={`/spot/${spot.slug}`}>{spot.name}</Link> : spot.name}
+            <span className="ml-2 text-meta font-normal text-[var(--text-dimmer)]">
+              {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
+            </span>
+          </>
+        )}
       </h3>
       <p className="text-meta text-[var(--text-dimmer)]">
         {thresholdDisclosure(
