@@ -1,0 +1,73 @@
+# The four checks that already existed and that nothing ran.
+#
+# Ordered cheapest-first so the fastest signal comes back first, and so a stale
+# generated file is reported before three minutes of build.
+#
+# The windows-latest leg is not symmetry for its own sake. This repo is
+# developed on Windows with core.autocrlf=true, and until .gitattributes pinned
+# eol=lf the generator wrote LF while git checked out CRLF -- which made
+# `gen:types:check` fail on a file that was current, on the author's machine
+# and nowhere else. A Linux-only CI would have stayed green through all of it
+# and reported nothing. That is exactly the class of failure this leg exists to
+# catch, so it stays even though it doubles the matrix.
+#
+# Deliberately NOT here: verify_coastal_apis.py. It probes live NOAA, IBWC and
+# USGS endpoints, so running it per push would be both flaky and rude to the
+# upstreams. It wants a weekly schedule of its own, which is a separate change.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # A new push to the same branch supersedes the old run.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Never cancel the other leg: when the two platforms disagree, which one
+      # failed is the whole finding.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # package.json declares engines >=20.9.0; 22 is what this is developed on.
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # shared/spots.generated.ts is derived from shared/spots.json. If it has
+      # drifted, the compiler is enforcing rules the inventory no longer states,
+      # so this runs before anything that trusts those types.
+      - name: Generated types are in step with the inventory
+        run: npm run gen:types:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # lib/ reaches no network: the CO-OPS and NDBC payloads are captured
+      # fixtures, and the upstream and grid suites stub global fetch. A test that
+      # starts needing a live endpoint is a design regression, not a flake, so
+      # this job has no retry and no network allowance.
+      - name: Tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
