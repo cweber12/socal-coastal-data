@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.1.1",
   "generated": "2026-07-27",
   "corridor": "Oceanside Harbor to Border Field, San Diego County, CA",
 
@@ -22,7 +22,7 @@
     "wave.fallback": "Used when primary is not delivering. May be geographically distant; UI must disclose substitution.",
     "wave.intended_primary": "Buoy that SHOULD serve this spot but is currently dead. Reassign here when the REVIVED tripwire fires.",
     "tide_station": "NOAA CO-OPS station id.",
-    "county_station": "State/county beach water quality monitoring station code (e.g. OC-080) from the data.ca.gov Beach Water Quality Monitoring Stations resource. Resolved by nearest-neighbour against Active, located stations only, and ONLY for spots tagged swim, surf or dive. null means unresolved OR out of join scope -- read county_station_null_reason to tell which. Must never render as a pass.",
+    "county_station": "State/county beach water quality monitoring station code (e.g. OC-080) from the data.ca.gov Beach Water Quality Monitoring Stations resource. Resolved by nearest-neighbour against Active, located stations only, and ONLY for spots tagged swim, surf, dive or tidepool. null means unresolved OR out of join scope -- read county_station_null_reason to tell which. Must never render as a pass.",
     "county_station_distance_m": "Great-circle metres from the spot to its matched station; null when there is no match. Replaces the 1.0.0 field county_station_distance_km.",
     "county_station_suspect": "true when the match exceeds 1000 m, meaning the station may sit on a different beach cell carrying different water. The UI must disclose a suspect match rather than render it as a clean reading. null when there is no match.",
     "county_station_null_reason": "Present only when county_station is null, and required whenever it is. States why the field is empty: out of join scope, or genuinely unresolved. A null county_station without this key is a bug.",
@@ -380,10 +380,9 @@
       "lat": 32.669, "lon": -117.245,
       "wave": { "primary": "46232", "fallback": "46258" },
       "tide_station": "9410230",
-      "county_station": null,
-      "county_station_distance_m": null,
-      "county_station_suspect": null,
-      "county_station_null_reason": "outside join scope: tagged tidepool/bird, not swim/surf/dive. Tidepooling is water contact in practice -- revisit if the scope rule is widened",
+      "county_station": "PL-040",
+      "county_station_distance_m": 445,
+      "county_station_suspect": false,
       "audiences": ["tidepool", "bird"],
       "tidepool_floor_ft": -0.2,
       "tidepool_floor_confidence": "low",
@@ -454,8 +453,7 @@
   ],
 
   "unresolved": [
-    "county_station is resolved on 22 of 26 spots. As of 1.1.0 the nearest-neighbour join runs only for spots tagged swim, surf or dive; the other 4 (batiquitos-lagoon, san-elijo-lagoon, cabrillo-tidepools, border-field) carry null plus county_station_null_reason. The source resource needs filtering before use as a point set: of 287 San Diego records only 123 are Active, 12 have no coordinates, and All_SanDiego_County_Beaches and Northern_SanDiego_County_Beaches are county-wide aggregates holding one coordinate near San Onofre. Pool: 121.",
-    "cabrillo-tidepools lost its PL-040 match at 445 m to the swim/surf/dive scope rule, being tagged tidepool/bird. It is the only out-of-scope spot that is not bird-only, and tidepooling is water contact in practice. If the rule was meant to cover tidepoolers, widen it and re-run the join rather than hand-filling.",
+    "county_station is resolved on 23 of 26 spots. The nearest-neighbour join runs only for spots tagged swim, surf, dive or tidepool (tidepool added in 1.1.1); the other 3 (batiquitos-lagoon, san-elijo-lagoon, border-field) are bird-only and carry null plus county_station_null_reason. The source resource needs filtering before use as a point set: of 287 San Diego records only 123 are Active, 12 have no coordinates, and All_SanDiego_County_Beaches and Northern_SanDiego_County_Beaches are county-wide aggregates holding one coordinate near San Onofre. Pool: 121.",
     "1 in-scope match exceeds 1000 m and is flagged county_station_suspect: beacons-leucadia at 1402 m. Beacon's sits in a real ~4 km monitoring gap between EH-440 and EH-420A, so no closer station exists to find.",
     "mpa point-in-polygon has run against CDFW ds582 for all 26 spots, but 7 carry mpa_resolved false: the spot lies within 150 m of an MPA boundary, inside this file's own ~100 m coordinate precision, so the in/out call cannot be trusted either way (moonlight-encinitas, swamis, cardiff-reef, la-jolla-shores, la-jolla-cove, cabrillo-tidepools, border-field). Their notes now describe the boundary state rather than asserting membership. Surveyed coordinates are the fix; nothing else resolves them.",
     "tidepool_floor_ft values are author estimates at confidence 'low'. Sunset Cliffs and Cabrillo are the two that most need local verification.",
