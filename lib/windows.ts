@@ -408,10 +408,16 @@ export function evaluateWindow(input: WindowInput): WindowResult {
   /* -----------------------------------------------------------------------
    * Which low is this day about?
    *
-   * Today: the next one from the current time -- but a low whose window is
+   * Today: the NEXT one from the current time -- but a low whose window is
    * still open counts as "next", because being partway through a window is the
    * commonest way to look at this page and reporting the following low would
    * hide the time actually left.
+   *
+   * "Next" is meant literally, including when the next low is a poor one. A
+   * cell headed "today" that reports a low which happened at 03:49 this morning
+   * is answering a question nobody asked; whether this afternoon's 2.4 ft low
+   * uncovers anything is the question, and `above-floor` is a perfectly good
+   * answer to it.
    *
    * Any other day: the best daylight low, meaning the one with the most usable
    * daylight window, breaking ties on the lower tide.
@@ -439,12 +445,20 @@ export function evaluateWindow(input: WindowInput): WindowResult {
     });
 
     /*
-     * Nothing left today. Fall back to the day's best low rather than its last
-     * one, so the cell reports on the low that mattered -- the window that has
-     * just closed -- instead of a shallow evening low that was never workable.
-     * The now-clip then drives the state to `dark`.
+     * No window still open, so fall through to the next low from now whether or
+     * not it reaches the floor. The now-clip drives the state, and for a low that
+     * never gets under the floor that is `above-floor` -- which is the honest
+     * report on the tide someone actually has ahead of them today.
      */
-    low = stillOpen ?? bestByDaylight;
+    const nextFromNow = lowsToday.find((candidate) => candidate.tMs >= nowMs);
+
+    /*
+     * Past the day's last low. There is no "next" left to report, so the last
+     * one stands, and the now-clip puts the cell in `dark`: nothing more is
+     * coming today. Picking the day's BEST low here instead would report a
+     * window that closed this morning as though it were still the news.
+     */
+    low = stillOpen ?? nextFromNow ?? lowsToday[lowsToday.length - 1]!;
   } else {
     low = bestByDaylight;
   }
@@ -463,8 +477,9 @@ export function evaluateWindow(input: WindowInput): WindowResult {
   if (!geometry.reachesFloor) {
     state = 'above-floor';
     reason =
-      `The day's best low only reaches ${low.ft.toFixed(1)} ft, which does not get ` +
-      `under the ${floorFt.toFixed(1)} ft floor. The reef stays covered.`;
+      `${isToday ? 'The next low' : "The day's best low"} only reaches ` +
+      `${low.ft.toFixed(1)} ft, which does not get under the ${floorFt.toFixed(1)} ft floor. ` +
+      'The reef stays covered.';
   } else if (decisiveMinutes <= 0) {
     state = 'dark';
     reason = isToday
@@ -528,7 +543,13 @@ export interface StatePresentation {
   label: string;
   /** Word used in the aria-label sentence. */
   spoken: string;
-  /** Glyph, so colour is never the only channel carrying the state. */
+  /**
+   * Glyph, so colour is never the only channel carrying the state.
+   *
+   * None of these may be `▲` or `▼`. Those two are the tide arrows a cell puts
+   * against its high and its low, and a state glyph that collides with one reads
+   * as a second, contradictory tide reading in the same cell.
+   */
   glyph: string;
   /** CSS custom property holding this state's colour. */
   colorVar: string;
@@ -560,9 +581,12 @@ export const STATE_PRESENTATION: Readonly<Record<WindowState, StatePresentation>
     usable: false,
   },
   'above-floor': {
-    label: 'Too high',
+    // "Covered", not "too high". The cell already prints the height next to a ▼,
+    // so a reader can see for themselves that it is high; what the state adds is
+    // what that means -- the reef stays under water.
+    label: 'Covered',
     spoken: 'above the floor',
-    glyph: '▲',
+    glyph: '≈',
     colorVar: 'var(--color-state-above-floor)',
     usable: false,
   },

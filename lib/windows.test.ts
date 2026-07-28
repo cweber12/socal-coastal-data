@@ -173,6 +173,11 @@ describe('constants', () => {
       // Colour is never the only channel: every state carries a glyph too.
       expect(p.glyph.length).toBeGreaterThan(0);
       expect(p.label.length).toBeGreaterThan(0);
+      // ...and never one of the tide arrows. A cell prints ▼ against its low and
+      // ▲ against its high, so a state glyph colliding with either reads as a
+      // second tide marker contradicting the one beside it.
+      expect(p.glyph, `glyph for ${state}`).not.toBe('▲');
+      expect(p.glyph, `glyph for ${state}`).not.toBe('▼');
       expect(p.spoken.length).toBeGreaterThan(0);
     }
   });
@@ -259,13 +264,23 @@ describe('state: dark', () => {
     expectNearMinute(result.lowMs, pacific(TODAY, 23, 30));
   });
 
-  it("is dark once today's windows have all closed, even in broad daylight", () => {
-    // 17:00, with the day's deep low at 13:00. The window shut before now, so
-    // there is no daylight left while the tide is low -- which is what `dark`
-    // means here: the window and the AVAILABLE daylight do not overlap. On a
-    // future day "available" is the whole day, which is the ordinary reading.
-    const result = evaluateWindow(baseInput({ nowMs: pacific(TODAY, 18, 30) }));
+  it("is dark past the day's last low, with no further low to move on to", () => {
+    // 21:00, after a 16:00 low whose window shut in daylight. There is no later
+    // low to report, so the one that has just gone stands and the now-clip says
+    // what is true: nothing more is coming today. That is what `dark` means here
+    // -- the window and the AVAILABLE daylight do not overlap. On a future day
+    // "available" is the whole day, which is the ordinary reading.
+    const series = seriesFromTurns(TODAY, [
+      { hour: 20, ft: 4.0, dayOffset: -1 },
+      { hour: 5, ft: 2.0 }, // above the floor
+      { hour: 10, ft: 4.4 },
+      { hour: 16, ft: -1.6 }, // the day's only sub-floor low, in daylight
+      { hour: 23, minute: 30, ft: 4.2 },
+      { hour: 5, ft: 2.0, dayOffset: 1 },
+    ]);
+    const result = evaluateWindow(baseInput({ series, nowMs: pacific(TODAY, 21, 0) }));
     expect(result.state).toBe('dark');
+    expectPickedTurn(result.lowMs, pacific(TODAY, 16, 0), pacific(TODAY, 5, 0));
     expect(result.minutesRemaining).toBe(0);
     expect(result.usableMinutes).toBeGreaterThan(0); // the window existed, it is just over
     expect(result.reason).toMatch(/no daylight left today/);
@@ -487,6 +502,20 @@ describe('today, partway through the window', () => {
     expect(late.minutesRemaining!).toBeLessThan(early.minutesRemaining!);
   });
 
+  it('moves on to the next low once a window has closed, even when that low is above the floor', () => {
+    // 18:30. The deep 13:00 low is covered again and the next one -- 23:30, at
+    // 2.1 ft -- is nowhere near the floor. Reporting the 13:00 low would answer a
+    // question about this afternoon under a heading that says "today"; what the
+    // reader has ahead of them is a low that never uncovers the reef, and saying
+    // so is the point of `above-floor`.
+    const result = evaluateWindow(baseInput({ nowMs: pacific(TODAY, 18, 30) }));
+    expect(result.state).toBe('above-floor');
+    expectPickedTurn(result.lowMs, pacific(TODAY, 23, 30), pacific(TODAY, 13, 0));
+    expect(result.lowFt).toBeCloseTo(2.1, 1);
+    expect(result.reachesFloor).toBe(false);
+    expect(result.reason).toMatch(/^The next low/);
+  });
+
   it('picks the low whose window is still open, not the following one', () => {
     // Two sub-floor lows in one day, now sitting inside the first window. The
     // "next low from current time" is strictly the second, but reporting it would
@@ -655,13 +684,23 @@ describe('the real 27 July corridor tide', () => {
   );
   const series = parseCoopsSeries(payload, CONTRACT);
 
-  // spots.json floors, verbatim.
+  /*
+   * spots.json 1.2.0 floors, verbatim.
+   *
+   * All five read `dark`, and that is the 1.2.0 change showing up: under the
+   * 1.1.x floors (-0.2 to -0.8) four of these five read `above-floor` -- the reef
+   * never surfaces at all -- because only Cabrillo's -0.2 was shallow enough for
+   * the 03:21 low at -0.324 ft to clear. Raising the band to +0.7..+1.3 puts every
+   * spot under its floor that morning, which moves the reason a reader is given
+   * from "this reef does not surface" to the true one: it surfaces at 03:21, in
+   * the dark. The verdict is the same. The explanation was wrong.
+   */
   const cases = [
-    { slug: 'cabrillo-tidepools', floorFt: -0.2, lat: 32.669, lon: -117.245, expected: 'dark' },
-    { slug: 'la-jolla-cove', floorFt: -0.4, lat: 32.85, lon: -117.272, expected: 'above-floor' },
-    { slug: 'windansea', floorFt: -0.5, lat: 32.832, lon: -117.28, expected: 'above-floor' },
-    { slug: 'la-jolla-shores', floorFt: -0.7, lat: 32.857, lon: -117.257, expected: 'above-floor' },
-    { slug: 'sunset-cliffs', floorFt: -0.8, lat: 32.723, lon: -117.256, expected: 'above-floor' },
+    { slug: 'cabrillo-tidepools', floorFt: 1.3, lat: 32.669, lon: -117.245, expected: 'dark' },
+    { slug: 'la-jolla-cove', floorFt: 1.1, lat: 32.85, lon: -117.272, expected: 'dark' },
+    { slug: 'windansea', floorFt: 1.0, lat: 32.832, lon: -117.28, expected: 'dark' },
+    { slug: 'la-jolla-shores', floorFt: 0.8, lat: 32.857, lon: -117.257, expected: 'dark' },
+    { slug: 'sunset-cliffs', floorFt: 0.7, lat: 32.723, lon: -117.256, expected: 'dark' },
   ] as const;
 
   for (const c of cases) {
@@ -681,12 +720,14 @@ describe('the real 27 July corridor tide', () => {
     });
   }
 
-  it("puts Cabrillo's only sub-floor low at 3:21 am, which is why it is dark not above-floor", () => {
-    // The distinction the phantom-window bug erased. Cabrillo's floor of -0.2 ft
-    // IS cleared that day -- by the 03:21 low at -0.324 ft -- so the honest answer
-    // is that the workable window is in the dark, not that the reef never
-    // surfaces. The afternoon low at 2.581 ft must not be selected just because
-    // it happens to sit in daylight.
+  it('puts the only sub-floor low at 3:21 am, which is why it is dark not above-floor', () => {
+    // The distinction the phantom-window bug erased, held at -0.2 ft -- Cabrillo's
+    // floor before 1.2.0 -- because that is the exact configuration the bug
+    // appeared in: the shallowest floor in the corridor, cleared by one low and
+    // one low only. -0.2 IS cleared that day, by the 03:21 low at -0.324 ft, so
+    // the honest answer is that the workable window is in the dark, not that the
+    // reef never surfaces. The afternoon low at 2.581 ft must not be selected
+    // just because it happens to sit in daylight.
     const result = evaluateWindow({
       series,
       date: TODAY,
@@ -708,8 +749,11 @@ describe('the real 27 July corridor tide', () => {
 
   it('no corridor tidepool spot has a usable window on 2026-07-27', () => {
     // Worth stating plainly: the day this was built, every one of the eight spots
-    // was unusable. A grid that showed a green cell here would be wrong.
-    const floors = [-0.2, -0.4, -0.5, -0.5, -0.6, -0.6, -0.7, -0.8];
+    // was unusable. A grid that showed a green cell here would be wrong. This
+    // survived the 1.2.0 floor raise unchanged -- the raise was about giving the
+    // right reason on an ordinary day, not about manufacturing green cells, and
+    // 27 July stays a no at every floor in the new band.
+    const floors = [0.7, 0.8, 0.9, 0.9, 1.0, 1.0, 1.1, 1.3];
     const states = floors.map(
       (floorFt) =>
         evaluateWindow({

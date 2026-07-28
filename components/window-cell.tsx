@@ -12,10 +12,26 @@ import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
  * disclosure toggle IS a button, and the two are siblings in the row rather than
  * nested, so there is never an interactive element inside another one.
  *
+ * ---------------------------------------------------------------------------
+ * What the cell leads with, and why it changed
+ * ---------------------------------------------------------------------------
+ *
+ * The tide is the headline; the state is a footnote on it. The first draft had
+ * this the other way round -- state label across the top in its own colour, tide
+ * underneath -- and on an ordinary week that reads as a wall of verdicts. The
+ * grid's own worked example: over the seven days from 2026-07-28, 49 of 56 cells
+ * came back `above-floor` and the other 7 `dark`. Fifty-six coloured refusals
+ * carrying, between them, no information a reader could act on.
+ *
+ * So the two tide lines come first at full contrast, and the state sits under
+ * them, small, with only its glyph tinted -- unless the state is USABLE, which is
+ * the one a reader is scanning for and the one worth catching the eye. The
+ * background tint still carries state across the whole cell either way.
+ *
  * State is carried by three channels, not one: a tint, a glyph, and the word
  * itself. Colour alone fails for anyone who cannot distinguish these hues, and
  * fails entirely for a screen reader, which gets the full sentence from
- * cellAriaLabel.
+ * cellAriaLabel. Demoting the label changes its size, never its presence.
  */
 export function WindowCell({
   spotSlug,
@@ -47,26 +63,35 @@ export function WindowCell({
     >
       {/* aria-hidden throughout: the label above already says all of this in prose. */}
       <span aria-hidden className="block">
-        <span
-          className="flex items-center gap-1 font-medium"
-          style={{ color: presentation.colorVar }}
-        >
-          <span className="text-[0.85em] leading-none">{presentation.glyph}</span>
-          <span className="truncate">{presentation.label}</span>
-        </span>
-
-        <span className="mt-1 flex items-baseline gap-1.5 font-mono">
-          <span className="text-[1.05em] font-semibold tabular-nums">
-            {formatHeight(result.lowFt)}
-          </span>
-          <span className="text-[var(--text-dim)]">{formatClock(result.lowMs, timeZone)}</span>
-        </span>
+        <TideLine
+          arrow="▼"
+          heightFt={result.lowFt}
+          tMs={result.lowMs}
+          timeZone={timeZone}
+          emphasis
+        />
 
         {result.nextHighMs !== null && result.nextHighFt !== null ? (
-          <span className="mt-0.5 block font-mono text-[0.92em] text-[var(--text-dimmer)]">
-            ▲ {formatHeight(result.nextHighFt)} {formatClock(result.nextHighMs, timeZone)}
-          </span>
+          <TideLine
+            arrow="▲"
+            heightFt={result.nextHighFt}
+            tMs={result.nextHighMs}
+            timeZone={timeZone}
+          />
         ) : null}
+
+        <span
+          className={[
+            'mt-1 flex items-center gap-1 text-[0.9em]',
+            presentation.usable ? 'font-medium' : 'text-[var(--text-dimmer)]',
+          ].join(' ')}
+          style={presentation.usable ? { color: presentation.colorVar } : undefined}
+        >
+          <span className="leading-none" style={{ color: presentation.colorVar }}>
+            {presentation.glyph}
+          </span>
+          <span className="truncate">{presentation.label}</span>
+        </span>
 
         {result.isToday && result.minutesRemaining !== null && result.minutesRemaining > 0 ? (
           <span className="mt-0.5 block font-medium" style={{ color: presentation.colorVar }}>
@@ -75,6 +100,48 @@ export function WindowCell({
         ) : null}
       </span>
     </Link>
+  );
+}
+
+/**
+ * One tide event: an arrow, a height, a clock time.
+ *
+ * The arrow is which way the tide is going at that turn -- ▼ for the low, ▲ for
+ * the high -- and it is the reason the low needed one at all. Without it the two
+ * lines are a pair of unlabelled numbers, and which of them is the low is exactly
+ * the thing a reader is trying to find. Shared with the week ribbon so the two
+ * views cannot drift into showing tides differently.
+ *
+ * Both lines are tabular mono so heights and clock times line up down a column,
+ * which is what makes a seven-day row scannable at all. `formatHeight` gives a
+ * true U+2212 minus so a negative height stays column-aligned with a positive
+ * one.
+ */
+export function TideLine({
+  arrow,
+  heightFt,
+  tMs,
+  timeZone,
+  emphasis = false,
+}: {
+  arrow: '▼' | '▲';
+  heightFt: number;
+  tMs: number;
+  timeZone: string;
+  /** The low gets it: this is the event the whole page is about. */
+  emphasis?: boolean;
+}) {
+  return (
+    <span
+      className={[
+        'flex items-baseline gap-1 font-mono tabular-nums',
+        emphasis ? 'text-[1.05em] font-semibold' : 'mt-0.5 text-[0.95em] text-[var(--text-dim)]',
+      ].join(' ')}
+    >
+      <span className="text-[0.8em] text-[var(--text-dimmer)]">{arrow}</span>
+      <span>{formatHeight(heightFt)}</span>
+      <span className="text-[var(--text-dim)]">{formatClock(tMs, timeZone)}</span>
+    </span>
   );
 }
 

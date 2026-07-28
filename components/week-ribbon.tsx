@@ -1,7 +1,8 @@
 import Link from 'next/link';
 
-import { formatHeight, thresholdDisclosure } from '@/lib/labels';
-import { formatClock, formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/lib/time';
+import { TideLine } from '@/components/window-cell';
+import { thresholdDisclosure } from '@/lib/labels';
+import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/lib/time';
 import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
 import type { SwellCeiling } from '@/lib/thresholds';
 import type { SpotSwell } from '@/lib/upstream';
@@ -61,13 +62,19 @@ export function WeekRibbon({
       </div>
 
       <ol className="flex list-none gap-1.5 overflow-x-auto pb-1">
+        {/*
+          Same order as a grid cell: tide first, state under it, small. Widened
+          from 5.5rem when the high tide line was added -- the ribbon and the grid
+          have to show the same thing, and a ribbon that dropped the high would be
+          a second, quieter answer to the same question.
+        */}
         {dates.map((date, i) => {
           const result = days[i] ?? null;
           const presentation = result ? STATE_PRESENTATION[result.state] : null;
           const dateMs = result?.lowMs ?? null;
 
           return (
-            <li key={formatLocalDate(date)} className="min-w-[5.5rem] flex-1">
+            <li key={formatLocalDate(date)} className="min-w-[7rem] flex-1">
               <Link
                 href={`/spot/${spot.slug}/${formatLocalDate(date)}`}
                 className="state-tint block rounded border px-2 py-1.5 text-[0.7rem] no-underline"
@@ -91,15 +98,34 @@ export function WeekRibbon({
                   </span>
                   {result && presentation ? (
                     <>
-                      <span
-                        className="mt-1 flex items-center gap-1 font-medium"
-                        style={{ color: presentation.colorVar }}
-                      >
-                        <span className="leading-none">{presentation.glyph}</span>
-                        <span className="truncate">{presentation.label}</span>
+                      <span className="mt-1 block">
+                        <TideLine
+                          arrow="▼"
+                          heightFt={result.lowFt}
+                          tMs={result.lowMs}
+                          timeZone={timeZone}
+                          emphasis
+                        />
+                        {result.nextHighMs !== null && result.nextHighFt !== null ? (
+                          <TideLine
+                            arrow="▲"
+                            heightFt={result.nextHighFt}
+                            tMs={result.nextHighMs}
+                            timeZone={timeZone}
+                          />
+                        ) : null}
                       </span>
-                      <span className="mt-0.5 block font-mono tabular-nums">
-                        {formatHeight(result.lowFt)} {formatClock(result.lowMs, timeZone)}
+                      <span
+                        className={[
+                          'mt-1 flex items-center gap-1',
+                          presentation.usable ? 'font-medium' : 'text-[var(--text-dimmer)]',
+                        ].join(' ')}
+                        style={presentation.usable ? { color: presentation.colorVar } : undefined}
+                      >
+                        <span className="leading-none" style={{ color: presentation.colorVar }}>
+                          {presentation.glyph}
+                        </span>
+                        <span className="truncate">{presentation.label}</span>
                       </span>
                     </>
                   ) : (

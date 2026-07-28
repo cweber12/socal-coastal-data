@@ -80,9 +80,17 @@ export default async function GridPage({
             Daylight low-tide windows
           </h1>
           <p className="mt-1 max-w-prose text-xs leading-relaxed text-[var(--text-dim)]">
-            {rows.length} reef and tidepool spots over {HORIZON_DAYS} days. Today&apos;s column
-            is the next low from now; later days show that day&apos;s best daylight low. A window
-            needs {MIN_WINDOW_MINUTES} minutes to count.
+            {/*
+              A JSX text node spanning several lines loses its LEADING space, so
+              `{HORIZON_DAYS} days` renders as "7days" and a following text line
+              butts straight up against the expression before it. Each number is
+              therefore bound to its unit inside one expression, and every seam
+              between an expression and a text node is an explicit {' '}.
+            */}
+            {`${rows.length} reef and tidepool spots over ${HORIZON_DAYS} days.`}{' '}
+            Each cell gives the low (▼) and the high that follows it (▲): today&apos;s column is
+            the next low from now, later days that day&apos;s best daylight low.{' '}
+            {`A window needs ${MIN_WINDOW_MINUTES} minutes to count.`}
           </p>
         </div>
 
@@ -259,7 +267,7 @@ function legendGloss(state: (typeof WINDOW_STATES)[number]): string {
     case 'dark':
       return 'window falls outside the daylight left';
     case 'above-floor':
-      return 'the low never uncovers the reef';
+      return 'this low does not uncover the reef';
     case 'swell-tbd':
       return 'swell unknown — never a pass';
   }
