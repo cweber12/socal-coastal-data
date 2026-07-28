@@ -295,24 +295,35 @@ function Legend() {
         How to read this grid
       </h2>
 
+      {/*
+        Each swatch and its label are one unwrappable unit.
+
+        The flex row wrapped between them at 375px, which left "low after dark"
+        stranded on its own line under the DAY swatch -- a legend that, read
+        straight down, said the opposite of what it means.
+      */}
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-meta text-[var(--text-dim)]">
-        <span
-          data-lighting="day"
-          className="cell-skin rounded border px-1.5 py-0.5 font-mono text-meta"
-        >
-          ▼ 0.2 1:14 pm
+        <span className="inline-flex items-center gap-2 whitespace-nowrap">
+          <span
+            data-lighting="day"
+            className="cell-skin rounded border px-1.5 py-0.5 font-mono text-meta"
+          >
+            ▼ 0.2 1:14 pm
+          </span>
+          <span>low in daylight</span>
         </span>
-        <span>low in daylight</span>
         <span aria-hidden className="text-[var(--text-dimmer)]">
           ·
         </span>
-        <span
-          data-lighting="night"
-          className="cell-skin rounded border px-1.5 py-0.5 font-mono text-meta"
-        >
-          ▼ 0.2 4:41 am
+        <span className="inline-flex items-center gap-2 whitespace-nowrap">
+          <span
+            data-lighting="night"
+            className="cell-skin rounded border px-1.5 py-0.5 font-mono text-meta"
+          >
+            ▼ 0.2 4:41 am
+          </span>
+          <span>low after dark</span>
         </span>
-        <span>low after dark</span>
       </p>
 
       {/*
