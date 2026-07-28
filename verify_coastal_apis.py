@@ -76,7 +76,19 @@ def fetch(url, headers=None):
                 text = None
             return r.status, secs, len(raw), text, None
     except urllib.error.HTTPError as e:
-        return e.code, time.perf_counter() - t0, 0, None, f"HTTP {e.code} {e.reason}"
+        # Keep the error body: ERDDAP answers "no rows matched" with a 404 whose
+        # payload is the only way to tell a data gap from a missing dataset.
+        secs = time.perf_counter() - t0
+        raw = b""
+        text = None
+        try:
+            raw = e.read()
+            if e.headers.get("Content-Encoding") == "gzip":
+                raw = gzip.decompress(raw)
+            text = raw.decode("utf-8", errors="replace")
+        except Exception:
+            pass
+        return e.code, secs, len(raw), text, f"HTTP {e.code} {e.reason}"
     except Exception as e:
         return None, time.perf_counter() - t0, 0, None, f"{type(e).__name__}: {e}"
 
@@ -252,24 +264,68 @@ def check_open_meteo_marine(host):
     record(f"Open-Meteo marine ({host})", url, s, t, n, note, err=e)
 
 
-def check_sccoos(dataset, station=None):
-    since = (NOW - dt.timedelta(days=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    cols = "time,temperature" if dataset == "autoss" else "time"
-    q = f"{cols}&time%3E={since}"
-    if station:
-        q += f"&station=%22{station}%22"
-    url = f"https://erddap.sccoos.org/erddap/tabledap/{dataset}.json?{q}"
+# Real column names off .../info/HABs-ScrippsPier/index.json. Note the
+# capitalised Temp -- the old query asked for "temperature", which does not
+# exist on any SCCOOS dataset.
+SCCOOS_HAB_COLS = "time,Temp,Salinity,Avg_Chloro,Pseudo_nitzschia_seriata_group"
+
+
+def check_sccoos_habs(dataset="HABs-ScrippsPier", days=30):
+    """Scripps Pier HAB grab samples. Weekly, so a 3-day window returns nothing.
+
+    Station is keyed by Location_Code here, not the "station" column the old
+    query filtered on -- and with one site per dataset it needs no filter.
+    """
+    since = (NOW - dt.timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    url = (
+        f"https://erddap.sccoos.org/erddap/tabledap/{dataset}.json"
+        f"?{SCCOOS_HAB_COLS}&time%3E={since}"
+    )
+    s, t, n, body, e = fetch(url)
+    note, newest = "", None
+    if s == 404 and body and "no matching results" in body:
+        e = f"HTTP 404: query valid, no samples in last {days}d"
+    elif body:
+        try:
+            rows = json.loads(body)["table"]["rows"]
+            note = f"{len(rows)} samples/{days}d"
+            if rows:
+                newest = dt.datetime.fromisoformat(rows[-1][0].replace("Z", "+00:00"))
+                if rows[-1][1] is not None:
+                    note += f", {rows[-1][1]}C"
+        except Exception as ex:
+            note = f"parse failed: {ex}"
+    record(f"SCCOOS ERDDAP {dataset}", url, s, t, n, note, newest, e)
+
+
+def check_sccoos_live_datasets(days=30):
+    """Replaces the old autoss probe -- that dataset is gone from this ERDDAP.
+
+    Rather than hardcode another ID that may be retired next, ask the catalog
+    which datasets are still updating and flag if none serve our corridor.
+    """
+    since = (NOW - dt.timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    url = (
+        "https://erddap.sccoos.org/erddap/tabledap/allDatasets.json"
+        f"?datasetID,maxTime&maxTime%3E={since}"
+    )
     s, t, n, body, e = fetch(url)
     note, newest = "", None
     if body:
         try:
-            rows = json.loads(body)["table"]["rows"]
-            note = f"{len(rows)} rows"
-            if rows:
-                newest = dt.datetime.fromisoformat(rows[-1][0].replace("Z", "+00:00"))
+            rows = [r for r in json.loads(body)["table"]["rows"] if r[1]]
+            note = f"{len(rows)} datasets updated <{days}d"
+            ours = [r for r in rows if "Scripps" in r[0] or "delmar" in r[0]]
+            if ours:
+                note += "; corridor: " + ", ".join(r[0] for r in ours)
+                newest = max(
+                    dt.datetime.fromisoformat(r[1].replace("Z", "+00:00")) for r in ours
+                )
+            else:
+                note += "; NONE in our corridor"
         except Exception as ex:
-            note = f"parse failed (may be 'no data' 404): {ex}"
-    record(f"SCCOOS ERDDAP {dataset}", url, s, t, n, note, newest, e)
+            note = f"parse failed: {ex}"
+    record("SCCOOS ERDDAP live datasets", url, s, t, n, note, newest, e)
 
 
 def check_usgs_tijuana():
@@ -414,8 +470,8 @@ CHECKS = [
     lambda: check_coops("water_level", "9410170", "&date=latest&datum=MLLW"),
     lambda: check_open_meteo_marine("marine-api.open-meteo.com"),
     lambda: check_open_meteo_marine("api.open-meteo.com"),
-    lambda: check_sccoos("autoss", "scripps_pier"),
-    lambda: check_sccoos("HABs-ScrippsPier"),
+    check_sccoos_live_datasets,
+    check_sccoos_habs,
     check_usgs_tijuana,
     check_usgs_new_api,
     check_inaturalist,
