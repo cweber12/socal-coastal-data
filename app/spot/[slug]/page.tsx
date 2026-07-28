@@ -7,6 +7,7 @@ import { FlagBadge } from '@/components/flag-badge';
 import { MidnightNotice } from '@/components/midnight-notice';
 import { WeekRibbon } from '@/components/week-ribbon';
 import { SpotProtection } from '@/components/spot-protection';
+import { UnresolvedDisclosure } from '@/components/unresolved';
 import { CellShell, TideLine } from '@/components/window-cell';
 import { loadSpotWeek, tidepoolSpotBySlug } from '@/lib/grid';
 import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
@@ -162,6 +163,8 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
           </p>
         </section>
       ) : null}
+
+      <UnresolvedDisclosure />
 
       <Notices notices={week.notices} />
 
