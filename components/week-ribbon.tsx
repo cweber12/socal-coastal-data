@@ -1,8 +1,9 @@
 import Link from 'next/link';
 
 import { FlagBadge } from '@/components/flag-badge';
+import { SpotHeader, SwellProvenance } from '@/components/spot-summary';
 import { CellShell, TideLine } from '@/components/window-cell';
-import { cellAriaLabel, flagBadgeLabel, thresholdDisclosure } from '@/lib/labels';
+import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
 import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/lib/time';
 import { lowLighting, type WindowResult } from '@/lib/windows';
 import type { SwellCeiling } from '@/lib/thresholds';
@@ -12,9 +13,15 @@ import type { TidepoolSpot } from '@/shared/spots.generated';
 /**
  * A spot's week at a glance.
  *
- * Shared verbatim between the grid's inline row disclosure and /spot/[slug], so
- * expanding a row and navigating to the spot page show the same thing rather than
- * two views that drift apart.
+ * Used by /spot/[slug], where this strip IS the week view.
+ *
+ * NOT used by the grid's row disclosure any more. It was, and the seven cells
+ * it drew there duplicated the seven the grid row already showed at that width
+ * -- at a cost of 47% of the page's RSC payload, since a prop handed to a
+ * client component is serialised whether the row is open or not. The grid row
+ * now discloses SpotDisclosure in components/spot-summary.tsx, which carries
+ * the parts a table row has nowhere to put. Both still share SpotHeader and
+ * SwellProvenance, so the two views cannot drift on what they do have in common.
  *
  * Skipped below 600px. The caller hides it, because at that width the grid has
  * already collapsed to a single day column and a seven-day strip inside it would
@@ -41,26 +48,7 @@ export function WeekRibbon({
 }) {
   return (
     <div className="rounded-md border border-[var(--border)] bg-[var(--surface-sunken)] p-3">
-      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-sm font-semibold tracking-tight">
-          {showSpotLink ? (
-            <Link href={`/spot/${spot.slug}`}>{spot.name}</Link>
-          ) : (
-            spot.name
-          )}
-          <span className="ml-2 text-xs font-normal text-[var(--text-dimmer)]">
-            {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
-          </span>
-        </h3>
-        <p className="text-xs text-[var(--text-dimmer)]">
-          {thresholdDisclosure(
-            spot.tidepool_floor_ft,
-            spot.tidepool_floor_confidence,
-            ceiling.ceilingFt,
-            ceiling.confidence,
-          )}
-        </p>
-      </div>
+      <SpotHeader spot={spot} ceiling={ceiling} showSpotLink={showSpotLink} />
 
       <ol className="flex list-none gap-1.5 overflow-x-auto pb-1">
         {/*
@@ -145,52 +133,5 @@ export function WeekRibbon({
 
       <SwellProvenance swell={swell} ceiling={ceiling} />
     </div>
-  );
-}
-
-/**
- * Where the swell number came from.
- *
- * spots.json's schema requires the UI to disclose a fallback substitution, since
- * a fallback "may be geographically distant". A null reading says unknown, never
- * calm.
- */
-export function SwellProvenance({
-  swell,
-  ceiling,
-}: {
-  swell: SpotSwell;
-  ceiling: SwellCeiling;
-}) {
-  return (
-    <p className="mt-2 text-xs leading-relaxed text-[var(--text-dimmer)]">
-      {swell.swellFt === null ? (
-        <>
-          <strong>Swell unknown.</strong> No buoy in this spot&apos;s binding is delivering a
-          wave height, so no day can read as a pass. Unknown is not calm.
-        </>
-      ) : (
-        <>
-          Swell {swell.swellFt.toFixed(1)} ft from {swell.sourceBuoyId}{' '}
-          ({swell.sourceBuoyName})
-          {swell.ageMinutes !== null ? `, ${Math.round(swell.ageMinutes)} min old` : ''}
-          {swell.substituted ? (
-            <>
-              . <strong>Substituted:</strong> this spot&apos;s primary buoy is not delivering,
-              so a fallback is standing in. It may be geographically distant and read
-              differently for the same conditions
-            </>
-          ) : null}
-          {swell.intendedBuoyId && swell.intendedBuoyId !== swell.sourceBuoyId ? (
-            <>
-              . The buoy that should serve this spot is {swell.intendedBuoyId}, which is marked
-              dead
-            </>
-          ) : null}
-          . Against an {ceiling.confidence} ceiling of {ceiling.ceilingFt.toFixed(1)} ft
-          {ceiling.isDefault ? ' (corridor default, no per-spot calibration)' : ''}.
-        </>
-      )}
-    </p>
   );
 }

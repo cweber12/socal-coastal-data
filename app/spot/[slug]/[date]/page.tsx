@@ -5,8 +5,8 @@ import type { Metadata } from 'next';
 import { DayChart } from '@/components/day-chart';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
 import { FlagBadge } from '@/components/flag-badge';
+import { SwellProvenance } from '@/components/spot-summary';
 import { UnresolvedDisclosure } from '@/components/unresolved';
-import { SwellProvenance } from '@/components/week-ribbon';
 import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/lib/grid';
 import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/lib/labels';
 import {
