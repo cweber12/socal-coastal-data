@@ -4,6 +4,7 @@ import {
   cellAriaLabel,
   describeHeight,
   describeWindowLength,
+  flagBadgeLabel,
   formatHeight,
   rowAriaLabel,
   thresholdDisclosure,
@@ -68,12 +69,27 @@ describe('cellAriaLabel', () => {
     const label = cellAriaLabel('Cabrillo Tidepools', result(), ZONE);
     expect(label).toBe(
       'Cabrillo Tidepools, Thursday, December 24: go. ' +
-        'Low 1.9 feet below the datum at 3:47 pm. ' +
+        'Low 1.9 feet below the datum at 3:47 pm, in daylight. ' +
         'Next high 3.8 feet above the datum at 10:23 pm. ' +
         '3 h of daylight window. ' +
         'Three hours of daylight window with the tide under the floor. ' +
         'Select for the day chart.',
     );
+  });
+
+  it('speaks the lighting the cell background shows', () => {
+    // The background is light or dark and says nothing else. Two cells differing
+    // only in that would be identical to a listener if this were left out.
+    const sunriseMs = Date.parse('2026-12-24T14:48:00Z');
+    const sunsetMs = Date.parse('2026-12-25T00:48:00Z');
+
+    expect(cellAriaLabel('X', result(), ZONE)).toContain('at 3:47 pm, in daylight.');
+
+    // 05:12 PST, an hour and a half before sunrise.
+    const beforeDawn = Date.parse('2026-12-24T13:12:00Z');
+    expect(
+      cellAriaLabel('X', result({ lowMs: beforeDawn, sunriseMs, sunsetMs }), ZONE),
+    ).toContain('at 5:12 am, after dark.');
   });
 
   it('never leans on colour, which a screen reader cannot see', () => {
@@ -119,6 +135,21 @@ describe('cellAriaLabel', () => {
     for (const state of ['above-floor', 'dark', 'veto'] as WindowState[]) {
       expect(cellAriaLabel('X', result({ state }), ZONE)).not.toContain('daylight window.');
     }
+  });
+});
+
+describe('flagBadgeLabel', () => {
+  it('names the cell without repeating the verdict', () => {
+    // The cell's own label already spoke the state in full. A badge that said it
+    // again would make every cell in the grid announce its state twice.
+    const label = flagBadgeLabel('Cabrillo Tidepools', result({ state: 'veto' }), ZONE);
+    expect(label).toBe('Why this reading — Cabrillo Tidepools, Thursday, December 24');
+    expect(label.toLowerCase()).not.toContain('swell');
+    expect(label.toLowerCase()).not.toContain('veto');
+  });
+
+  it('says today rather than the date when the day is today', () => {
+    expect(flagBadgeLabel('X', result({ isToday: true }), ZONE)).toBe('Why this reading — X, today');
   });
 });
 

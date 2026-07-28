@@ -25,9 +25,9 @@ export function SpotProtection({ spot }: { spot: Spot }) {
 
   return (
     <section
-      className="state-tint mt-5 rounded-md border p-3"
+      className="tint-panel mt-5 rounded-md border p-3"
       style={{
-        ['--state' as string]: restricted ? 'var(--color-state-brief)' : 'var(--border-strong)',
+        ['--tint-color' as string]: restricted ? 'var(--color-caution)' : 'var(--border-strong)',
       }}
     >
       <h2 className="text-xs font-semibold tracking-wide uppercase">Marine protection</h2>

@@ -84,8 +84,6 @@ export function DayChart({
     daySeries.samples.map((s) => `L${x(s.tMs).toFixed(2)} ${y(s.ft).toFixed(2)}`).join(' ') +
     ` L${x(daySeries.samples[daySeries.samples.length - 1]!.tMs).toFixed(2)} ${(PAD.top + PLOT_H).toFixed(2)} Z`;
 
-  const stateColor = result ? STATE_PRESENTATION[result.state].colorVar : 'var(--border-strong)';
-
   /** Three-hourly ticks across the local day. */
   const ticks = Array.from({ length: 9 }, (_, i) => dayStartMs + ((dayEndMs - dayStartMs) * i) / 8);
 
@@ -107,25 +105,34 @@ export function DayChart({
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         className="block h-auto w-full rounded-md border border-[var(--border)] bg-[var(--surface-raised)]"
       >
-        {/* Night, before sunrise and after sunset. */}
+        {/*
+          Night, before sunrise and after sunset. Set through `style` rather than
+          as presentation attributes because the opacity is a custom property:
+          the shade has to darken the plot in both themes, and one fixed value
+          cannot do that from opposite sides of the surface.
+        */}
         <rect
           x={PAD.left}
           y={PAD.top}
           width={Math.max(0, clampX(sunriseMs) - PAD.left)}
           height={PLOT_H}
-          fill="var(--color-state-dark)"
-          opacity="0.14"
+          style={{ fill: 'var(--chart-night)', opacity: 'var(--chart-night-opacity)' }}
         />
         <rect
           x={clampX(sunsetMs)}
           y={PAD.top}
           width={Math.max(0, PAD.left + PLOT_W - clampX(sunsetMs))}
           height={PLOT_H}
-          fill="var(--color-state-dark)"
-          opacity="0.14"
+          style={{ fill: 'var(--chart-night)', opacity: 'var(--chart-night-opacity)' }}
         />
 
-        {/* The usable window, tinted with the day's own state colour. */}
+        {/*
+          The usable window. One colour, always -- it used to be tinted with the
+          day's state, which made the band red on a swell veto and amber on a
+          brief one. That is a lot of alarm for a verdict resting on an
+          uncalibrated ceiling, and the band's job is to show WHERE the window
+          falls, which is the same job whatever the verdict.
+        */}
         {result && result.reachesFloor && result.usableEndMs > result.usableStartMs ? (
           <g>
             <rect
@@ -133,15 +140,15 @@ export function DayChart({
               y={PAD.top}
               width={Math.max(0, clampX(result.usableEndMs) - clampX(result.usableStartMs))}
               height={PLOT_H}
-              fill={stateColor}
-              opacity="0.2"
+              fill="var(--color-window)"
+              opacity="0.18"
             />
             <line
               x1={clampX(result.usableStartMs)}
               y1={PAD.top}
               x2={clampX(result.usableStartMs)}
               y2={PAD.top + PLOT_H}
-              stroke={stateColor}
+              stroke="var(--color-window)"
               strokeWidth="1.5"
             />
             <line
@@ -149,7 +156,7 @@ export function DayChart({
               y1={PAD.top}
               x2={clampX(result.usableEndMs)}
               y2={PAD.top + PLOT_H}
-              stroke={stateColor}
+              stroke="var(--color-window)"
               strokeWidth="1.5"
             />
           </g>
@@ -185,7 +192,7 @@ export function DayChart({
           y1={y(floorFt)}
           x2={PAD.left + PLOT_W}
           y2={y(floorFt)}
-          stroke="var(--color-state-go)"
+          stroke="var(--color-accent)"
           strokeWidth="1.5"
           strokeDasharray="5 3"
         />
@@ -194,7 +201,7 @@ export function DayChart({
           y={y(floorFt) - 5}
           textAnchor="end"
           fontSize="9.5"
-          fill="var(--color-state-go)"
+          fill="var(--color-accent)"
           fontWeight="600"
         >
           floor {formatHeight(floorFt)} ft
@@ -233,7 +240,7 @@ export function DayChart({
               y1={PAD.top - 4}
               x2={x(nowMs)}
               y2={PAD.top + PLOT_H}
-              stroke="var(--color-state-veto)"
+              stroke="var(--color-alert)"
               strokeWidth="1.75"
             />
             <text
@@ -242,7 +249,7 @@ export function DayChart({
               textAnchor="middle"
               fontSize="9"
               fontWeight="600"
-              fill="var(--color-state-veto)"
+              fill="var(--color-alert)"
             >
               now
             </text>

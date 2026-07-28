@@ -49,8 +49,8 @@ export function Notices({ notices }: { notices: readonly Notice[] }) {
 
       {drift.length > 0 ? (
         <div
-          className="state-tint mt-2 rounded-md border p-3"
-          style={{ ['--state' as string]: 'var(--color-state-veto)' }}
+          className="tint-panel mt-2 rounded-md border p-3"
+          style={{ ['--tint-color' as string]: 'var(--color-alert)' }}
         >
           <p className="text-xs font-semibold">
             An upstream format has changed. Wave height is being reported as unknown rather than
@@ -104,8 +104,8 @@ export function UpstreamFailure({
 }) {
   return (
     <div
-      className="state-tint rounded-md border p-4"
-      style={{ ['--state' as string]: 'var(--color-state-veto)' }}
+      className="tint-panel rounded-md border p-4"
+      style={{ ['--tint-color' as string]: 'var(--color-alert)' }}
     >
       <h2 className="text-sm font-semibold">{what} could not be loaded</h2>
       <p className="mt-1.5 text-xs leading-relaxed">

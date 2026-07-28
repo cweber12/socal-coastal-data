@@ -3,11 +3,15 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
+import { FlagBadge } from '@/components/flag-badge';
 import { MidnightNotice } from '@/components/midnight-notice';
 import { WeekRibbon } from '@/components/week-ribbon';
 import { SpotProtection } from '@/components/spot-protection';
+import { CellShell, TideLine } from '@/components/window-cell';
 import { loadSpotWeek, tidepoolSpotBySlug } from '@/lib/grid';
-import { formatDateLong, startOfLocalDay } from '@/lib/time';
+import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
+import { formatDateLong, formatLocalDate, startOfLocalDay } from '@/lib/time';
+import { lowLighting } from '@/lib/windows';
 import { SPOTS_VERSION, TIDE_DATUM, TIDEPOOL_SPOTS } from '@/shared/spots.generated';
 
 export const dynamic = 'force-dynamic';
@@ -77,23 +81,68 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
             />
           </div>
 
-          {/* Below 600px, the week becomes a vertical list of days. */}
+          {/*
+            Below 600px, the week becomes a vertical list of days.
+
+            This used to print `result.reason` in full against each date, which
+            put the whole verdict -- the thing the grid now keeps behind a badge
+            -- back on the page as its only content. It carries the same things a
+            grid cell does instead: the low, the light, and the flag one tap away.
+          */}
           <ol className="list-none space-y-1.5 wide:hidden">
             {week.dates.map((date, i) => {
+              const dateKey = formatLocalDate(date);
               const result = week.days[i];
+              const dayLabel = formatDateLong(dayStarts[i]!, week.timeZone);
+
+              if (!result) {
+                return (
+                  <li key={dateKey}>
+                    <div
+                      role="note"
+                      aria-label={`${spot.name}, ${dayLabel}: not evaluated.`}
+                      className="flex items-baseline justify-between gap-3 rounded-md border border-dashed border-[var(--border-strong)] px-3 py-2 text-xs text-[var(--text-dimmer)]"
+                    >
+                      <span aria-hidden className="font-medium">
+                        {dayLabel}
+                      </span>
+                      <span aria-hidden>not evaluated</span>
+                    </div>
+                  </li>
+                );
+              }
+
               return (
-                <li key={`${date.year}-${date.month}-${date.day}`}>
-                  <Link
-                    href={`/spot/${spot.slug}/${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`}
-                    className="flex items-baseline justify-between gap-3 rounded-md border border-[var(--border)] px-3 py-2 text-xs no-underline"
+                <li key={dateKey}>
+                  <CellShell
+                    lighting={lowLighting(result)}
+                    badge={
+                      <FlagBadge
+                        id={`day-list-${spot.slug}-${dateKey}`}
+                        label={flagBadgeLabel(spot.name, result, week.timeZone)}
+                        result={result}
+                      />
+                    }
                   >
-                    <span className="font-medium">
-                      {formatDateLong(dayStarts[i]!, week.timeZone)}
-                    </span>
-                    <span className="text-[var(--text-dim)]">
-                      {result ? result.reason : 'not evaluated'}
-                    </span>
-                  </Link>
+                    <Link
+                      href={`/spot/${spot.slug}/${dateKey}`}
+                      aria-label={cellAriaLabel(spot.name, result, week.timeZone)}
+                      className="cell-link flex items-baseline justify-between gap-3 rounded-md py-2 pl-3 pr-8 text-xs no-underline"
+                    >
+                      <span aria-hidden className="font-medium">
+                        {dayLabel}
+                      </span>
+                      <span aria-hidden>
+                        <TideLine
+                          arrow="▼"
+                          heightFt={result.lowFt}
+                          tMs={result.lowMs}
+                          timeZone={week.timeZone}
+                          emphasis
+                        />
+                      </span>
+                    </Link>
+                  </CellShell>
                 </li>
               );
             })}

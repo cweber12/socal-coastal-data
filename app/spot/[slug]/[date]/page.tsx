@@ -4,9 +4,10 @@ import type { Metadata } from 'next';
 
 import { DayChart } from '@/components/day-chart';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
+import { FlagBadge } from '@/components/flag-badge';
 import { SwellProvenance } from '@/components/week-ribbon';
 import { loadSpotDay, tidepoolSpotBySlug } from '@/lib/grid';
-import { describeWindowLength, formatHeight, thresholdDisclosure } from '@/lib/labels';
+import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/lib/labels';
 import {
   addLocalDays,
   formatClock,
@@ -18,7 +19,7 @@ import {
   startOfLocalDay,
   tryParseLocalDate,
 } from '@/lib/time';
-import { MIN_WINDOW_MINUTES, STATE_PRESENTATION } from '@/lib/windows';
+import { MIN_WINDOW_MINUTES } from '@/lib/windows';
 import { DISPLAY_TIME_ZONE, SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
 
 export const dynamic = 'force-dynamic';
@@ -59,7 +60,6 @@ export default async function DayPage({
   const previous = addLocalDays(date, -1);
   const next = addLocalDays(date, 1);
   const result = day.window;
-  const presentation = result ? STATE_PRESENTATION[result.state] : null;
 
   return (
     <div>
@@ -114,18 +114,27 @@ export default async function DayPage({
         </div>
       ) : (
         <>
-          {result && presentation ? (
-            <div
-              className="state-tint mt-4 rounded-md border p-3"
-              style={{ ['--state' as string]: presentation.colorVar }}
-            >
-              <p className="flex items-center gap-2 text-sm font-semibold" style={{ color: presentation.colorVar }}>
-                <span aria-hidden>{presentation.glyph}</span>
-                {presentation.label}
-              </p>
-              <p className="mt-1 max-w-prose text-xs leading-relaxed">{result.reason}</p>
+          {/*
+            The day's facts, untinted.
+            ------------------------------------------------------------------
+            This panel used to lead with the state in its own colour across the
+            full width -- red for a swell veto, amber for a brief window. At this
+            size that is the loudest thing on the page, and what it is loud about
+            is a verdict from an uncalibrated floor and a corridor-default
+            ceiling. The four facts below are measurements; they now carry the
+            panel on their own, and the verdict is one badge in the corner, in
+            the same place and with the same glyph as every badge in the grid.
+          */}
+          {result ? (
+            <div className="relative mt-4 rounded-md border border-[var(--border)] bg-[var(--surface-raised)] p-3 pr-10">
+              <FlagBadge
+                id="day"
+                label={flagBadgeLabel(spot.name, result, day.timeZone)}
+                result={result}
+                className="absolute right-2.5 top-2.5"
+              />
 
-              <dl className="mt-2.5 grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs wide:grid-cols-4">
+              <dl className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs wide:grid-cols-4">
                 <Fact label="Low" value={`${formatHeight(result.lowFt)} ft at ${formatClock(result.lowMs, day.timeZone)}`} />
                 <Fact
                   label="Next high"

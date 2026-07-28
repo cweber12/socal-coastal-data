@@ -1,37 +1,41 @@
 import Link from 'next/link';
 
-import { cellAriaLabel, formatHeight, unevaluatedAriaLabel } from '@/lib/labels';
+import { FlagBadge } from '@/components/flag-badge';
+import { cellAriaLabel, flagBadgeLabel, formatHeight, unevaluatedAriaLabel } from '@/lib/labels';
 import { formatClock, formatDuration, formatLocalDate, type LocalDate } from '@/lib/time';
-import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
+import { lowLighting, type WindowResult } from '@/lib/windows';
 
 /**
  * One spot on one day.
  *
- * A link, not a button: it navigates to the day chart, and a real anchor gets
+ * The link is not a button: it navigates to the day chart, and a real anchor gets
  * middle-click, open-in-new-tab and a status-bar preview for free. The row's
  * disclosure toggle IS a button, and the two are siblings in the row rather than
- * nested, so there is never an interactive element inside another one.
+ * nested, so there is never an interactive element inside another one. The flag
+ * badge is a third sibling, for the same reason.
  *
  * ---------------------------------------------------------------------------
- * What the cell leads with, and why it changed
+ * What a cell shows, and what it stopped showing
  * ---------------------------------------------------------------------------
  *
- * The tide is the headline; the state is a footnote on it. The first draft had
- * this the other way round -- state label across the top in its own colour, tide
- * underneath -- and on an ordinary week that reads as a wall of verdicts. The
- * grid's own worked example: over the seven days from 2026-07-28, 49 of 56 cells
- * came back `above-floor` and the other 7 `dark`. Fifty-six coloured refusals
- * carrying, between them, no information a reader could act on.
+ * It shows the tide: the low, the high that follows it, and -- through the
+ * background -- whether that low lands in daylight or after dark. All of that is
+ * observation. Every one of those numbers comes from a CO-OPS prediction or from
+ * a sunrise computation, and a reader can act on them directly.
  *
- * So the two tide lines come first at full contrast, and the state sits under
- * them, small, with only its glyph tinted -- unless the state is USABLE, which is
- * the one a reader is scanning for and the one worth catching the eye. The
- * background tint still carries state across the whole cell either way.
+ * It no longer shows the window state. The state used to be a tinted background
+ * plus a word: "No light", "Swell TBD", "Covered". Two problems with that. The
+ * first is volume -- over the seven days from 2026-07-28, 49 of 56 cells came
+ * back `above-floor` and the other 7 `dark`, so the grid was 56 coloured
+ * refusals carrying nothing a reader could act on. The second is confidence: a
+ * red cell reads as a measurement, and the state behind it is decided against a
+ * floor and a ceiling that are both uncalibrated estimates. Until those are real
+ * the state is a footnote, and it now lives where footnotes live -- behind a
+ * badge, closed.
  *
- * State is carried by three channels, not one: a tint, a glyph, and the word
- * itself. Colour alone fails for anyone who cannot distinguish these hues, and
- * fails entirely for a screen reader, which gets the full sentence from
- * cellAriaLabel. Demoting the label changes its size, never its presence.
+ * The state is still in the cell's aria-label in full. Demoting it visually must
+ * not demote it for a screen reader, which cannot open a popover to find out what
+ * a cell means.
  */
 export function WindowCell({
   spotSlug,
@@ -46,60 +50,93 @@ export function WindowCell({
   timeZone: string;
   compact?: boolean;
 }) {
-  const presentation = STATE_PRESENTATION[result.state];
-  const href = `/spot/${spotSlug}/${formatLocalDate(result.date)}`;
+  const dateKey = formatLocalDate(result.date);
+  const href = `/spot/${spotSlug}/${dateKey}`;
 
   return (
-    <Link
-      href={href}
-      aria-label={cellAriaLabel(spotName, result, timeZone)}
-      title={result.reason}
-      className={[
-        'state-tint block h-full rounded-md border px-2 py-1.5 no-underline',
-        'transition-colors hover:brightness-105',
-        compact ? 'text-[0.7rem]' : 'text-[0.72rem]',
-      ].join(' ')}
-      style={{ ['--state' as string]: presentation.colorVar }}
-    >
-      {/* aria-hidden throughout: the label above already says all of this in prose. */}
-      <span aria-hidden className="block">
-        <TideLine
-          arrow="▼"
-          heightFt={result.lowFt}
-          tMs={result.lowMs}
-          timeZone={timeZone}
-          emphasis
+    <CellShell
+      lighting={lowLighting(result)}
+      badge={
+        <FlagBadge
+          id={`grid-${spotSlug}-${dateKey}`}
+          label={flagBadgeLabel(spotName, result, timeZone)}
+          result={result}
         />
-
-        {result.nextHighMs !== null && result.nextHighFt !== null ? (
+      }
+    >
+      <Link
+        href={href}
+        aria-label={cellAriaLabel(spotName, result, timeZone)}
+        className={[
+          'cell-link block h-full rounded-md py-1.5 pl-2 pr-6 no-underline transition-colors',
+          compact ? 'text-[0.7rem]' : 'text-[0.72rem]',
+        ].join(' ')}
+      >
+        {/* aria-hidden throughout: the label above already says all of this in prose. */}
+        <span aria-hidden className="block">
           <TideLine
-            arrow="▲"
-            heightFt={result.nextHighFt}
-            tMs={result.nextHighMs}
+            arrow="▼"
+            heightFt={result.lowFt}
+            tMs={result.lowMs}
             timeZone={timeZone}
+            emphasis
           />
-        ) : null}
 
-        <span
-          className={[
-            'mt-1 flex items-center gap-1 text-[0.9em]',
-            presentation.usable ? 'font-medium' : 'text-[var(--text-dimmer)]',
-          ].join(' ')}
-          style={presentation.usable ? { color: presentation.colorVar } : undefined}
-        >
-          <span className="leading-none" style={{ color: presentation.colorVar }}>
-            {presentation.glyph}
-          </span>
-          <span className="truncate">{presentation.label}</span>
+          {result.nextHighMs !== null && result.nextHighFt !== null ? (
+            <TideLine
+              arrow="▲"
+              heightFt={result.nextHighFt}
+              tMs={result.nextHighMs}
+              timeZone={timeZone}
+            />
+          ) : null}
+
+          {result.isToday && result.minutesRemaining !== null && result.minutesRemaining > 0 ? (
+            <span className="mt-1 block font-medium">
+              {formatDuration(result.minutesRemaining)} left
+            </span>
+          ) : null}
         </span>
+      </Link>
+    </CellShell>
+  );
+}
 
-        {result.isToday && result.minutesRemaining !== null && result.minutesRemaining > 0 ? (
-          <span className="mt-0.5 block font-medium" style={{ color: presentation.colorVar }}>
-            {formatDuration(result.minutesRemaining)} left
-          </span>
-        ) : null}
-      </span>
-    </Link>
+/**
+ * The skinned box a cell's link and badge sit in.
+ *
+ * The skin lives here rather than on the link so the badge inherits it: the badge
+ * has to be legible on a near-white day cell and on a dark night one, and it does
+ * that by taking its colour from `--cell-fg-dim`, which only exists inside a
+ * `.cell-skin`.
+ *
+ * Badge in the top right. That is where a badge goes, it is furthest from the
+ * numbers the cell leads with, and it puts every badge in the grid on the same
+ * rhythm so the affordance is learnable after one click. The link is padded on
+ * that side so no tide text can run underneath it.
+ *
+ * Shared with the week ribbon: expanding a grid row and opening a spot page must
+ * not produce two different-looking answers to the same question.
+ */
+export function CellShell({
+  lighting,
+  badge,
+  children,
+  className,
+}: {
+  lighting: 'day' | 'night';
+  badge: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      data-lighting={lighting}
+      className={['cell-skin relative h-full rounded-md border', className].filter(Boolean).join(' ')}
+    >
+      {children}
+      <span className="absolute right-1 top-1">{badge}</span>
+    </div>
   );
 }
 
@@ -116,6 +153,9 @@ export function WindowCell({
  * which is what makes a seven-day row scannable at all. `formatHeight` gives a
  * true U+2212 minus so a negative height stays column-aligned with a positive
  * one.
+ *
+ * The dim tones come from the cell skin, falling back to the page ramp: a night
+ * cell is genuinely dark and the page's --text-dim would disappear into it.
  */
 export function TideLine({
   arrow,
@@ -135,12 +175,14 @@ export function TideLine({
     <span
       className={[
         'flex items-baseline gap-1 font-mono tabular-nums',
-        emphasis ? 'text-[1.05em] font-semibold' : 'mt-0.5 text-[0.95em] text-[var(--text-dim)]',
+        emphasis
+          ? 'text-[1.05em] font-semibold'
+          : 'mt-0.5 text-[0.95em] text-[var(--cell-fg-dim,var(--text-dim))]',
       ].join(' ')}
     >
-      <span className="text-[0.8em] text-[var(--text-dimmer)]">{arrow}</span>
+      <span className="text-[0.8em] text-[var(--cell-fg-dimmer,var(--text-dimmer))]">{arrow}</span>
       <span>{formatHeight(heightFt)}</span>
-      <span className="text-[var(--text-dim)]">{formatClock(tMs, timeZone)}</span>
+      <span className="text-[var(--cell-fg-dim,var(--text-dim))]">{formatClock(tMs, timeZone)}</span>
     </span>
   );
 }
@@ -148,9 +190,9 @@ export function TideLine({
 /**
  * A day that could not be evaluated.
  *
- * Not a seventh state -- an absence. It is rendered as visibly different from
- * every real state so it cannot be mistaken for one, and it is not a link,
- * because there is nothing to show.
+ * Not a seventh state -- an absence. It carries no skin, because there is no low
+ * to say anything about the lighting of, and it is not a link, because there is
+ * nothing to show.
  */
 export function UnevaluatedCell({
   spotName,

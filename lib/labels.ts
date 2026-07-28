@@ -10,7 +10,7 @@
  */
 
 import { formatClock, formatDateLong, formatDuration, formatWeekdayLong, type LocalDate } from './time';
-import { STATE_PRESENTATION, type WindowResult } from './windows';
+import { lowLighting, STATE_PRESENTATION, type WindowResult } from './windows';
 
 /** U+2212 MINUS SIGN, not a hyphen: it aligns with digits and reads as a sign. */
 const MINUS = '−';
@@ -59,8 +59,17 @@ export function cellAriaLabel(
 
   const parts: string[] = [`${spotName}, ${day}: ${spoken}.`];
 
+  /*
+   * The lighting is spoken because the cell says it with a background colour and
+   * nothing else. A light cell and a dark one are the only difference between two
+   * otherwise identical cells, so leaving it out would make them identical to a
+   * listener. Says "after dark" rather than naming the colour: the fact is about
+   * the sun, not about the pixel.
+   */
+  const lighting = lowLighting(result) === 'day' ? 'in daylight' : 'after dark';
+
   parts.push(
-    `Low ${describeHeight(result.lowFt)} at ${formatClock(result.lowMs, timeZone)}.`,
+    `Low ${describeHeight(result.lowFt)} at ${formatClock(result.lowMs, timeZone)}, ${lighting}.`,
   );
 
   if (result.nextHighMs !== null && result.nextHighFt !== null) {
@@ -77,6 +86,24 @@ export function cellAriaLabel(
   parts.push('Select for the day chart.');
 
   return parts.join(' ');
+}
+
+/**
+ * Label for the flag badge on a cell.
+ *
+ * Deliberately does NOT name the state. The badge is the affordance, not the
+ * answer, and the cell it sits on already spoke the whole verdict through
+ * `cellAriaLabel` -- a badge that repeated it would make every cell announce its
+ * state twice. What this adds is which cell the button belongs to, which is the
+ * one thing focus on a bare button in a grid does not tell you.
+ */
+export function flagBadgeLabel(
+  spotName: string,
+  result: WindowResult,
+  timeZone: string,
+): string {
+  const day = result.isToday ? 'today' : formatDateLong(result.lowMs, timeZone);
+  return `Why this reading — ${spotName}, ${day}`;
 }
 
 /** Label for a cell that could not be evaluated. Absence, not a seventh state. */

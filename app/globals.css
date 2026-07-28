@@ -11,18 +11,6 @@
 
   --font-mono:
     ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, monospace;
-
-  /*
-   * One colour per window state. Colour is never the only channel -- every
-   * state also carries a glyph and the cell's aria-label spells the state out
-   * in words. See STATE_PRESENTATION in lib/state-presentation.ts.
-   */
-  --color-state-go: oklch(0.62 0.13 162);
-  --color-state-brief: oklch(0.7 0.14 75);
-  --color-state-veto: oklch(0.58 0.19 25);
-  --color-state-dark: oklch(0.5 0.07 275);
-  --color-state-above-floor: oklch(0.6 0.02 250);
-  --color-state-swell-tbd: oklch(0.62 0.09 310);
 }
 
 :root {
@@ -35,6 +23,56 @@
   --text-dim: oklch(0.5 0.02 250);
   --text-dimmer: oklch(0.62 0.015 250);
   --tint: 0.92;
+
+  /*
+   * Accents, named for what they mean rather than for a window state.
+   *
+   * There used to be one colour per state -- go green, brief amber, veto red --
+   * painted across every cell in the grid. That made a wall of coloured verdicts
+   * out of a predicate whose floor and ceiling are both uncalibrated author
+   * estimates: it looked far more certain than it is. State is now carried by
+   * words and a glyph inside a popover the reader opens deliberately, so these
+   * four are the only colours that survive, and none of them is a verdict about
+   * a day.
+   */
+  --color-accent: oklch(0.62 0.13 162); /* focus ring, the workable floor line */
+  --color-alert: oklch(0.58 0.19 25); /* upstream failure, format drift, the "now" rule */
+  --color-caution: oklch(0.7 0.14 75); /* an MPA restriction on a real place */
+  --color-window: oklch(0.6 0.11 232); /* the usable window band on the day chart */
+
+  /* Night shading on the day chart. Darkens the plot in both themes. */
+  --chart-night: oklch(0.45 0.05 265);
+  --chart-night-opacity: 0.16;
+
+  /*
+   * Cell skins.
+   *
+   * A cell is light when the low it reports falls between sunrise and sunset and
+   * dark when it does not. That is the one thing the background says, and it is
+   * an observation rather than a judgement: it comes straight from the clock time
+   * printed inside the cell.
+   *
+   * Each skin carries its own foreground ramp, because a night cell in light mode
+   * is genuinely dark and the page's --text-* ramp would vanish into it.
+   */
+  --cell-day-bg: oklch(1 0 0);
+  --cell-day-fg: oklch(0.24 0.02 250);
+  --cell-day-fg-dim: oklch(0.48 0.02 250);
+  --cell-day-fg-dimmer: oklch(0.55 0.018 250);
+  --cell-day-border: oklch(0.86 0.012 240);
+
+  /*
+   * Slate rather than black. Most weeks in this corridor put the good low before
+   * dawn -- over the seven days from 2026-07-28 every column but one did -- so
+   * the night skin is the common case, not the exception, and a near-black card
+   * repeated 56 times reads as an error state. Light enough to sit calmly on a
+   * white page, dark enough to keep the small dim type above 4.5:1.
+   */
+  --cell-night-bg: oklch(0.36 0.035 262);
+  --cell-night-fg: oklch(0.96 0.01 262);
+  --cell-night-fg-dim: oklch(0.85 0.022 262);
+  --cell-night-fg-dimmer: oklch(0.75 0.028 262);
+  --cell-night-border: oklch(0.46 0.042 262);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -48,6 +86,27 @@
     --text-dim: oklch(0.72 0.015 250);
     --text-dimmer: oklch(0.58 0.015 250);
     --tint: 0.24;
+
+    --chart-night: oklch(0.1 0.025 265);
+    --chart-night-opacity: 0.4;
+
+    /*
+     * Both skins move down, and the ordering is what matters: the day cell stays
+     * the lighter of the two and sits above the page surface, the night cell
+     * stays the darker and sits below it. "Light means daylight" has to hold in
+     * both themes or the grid teaches two different things.
+     */
+    --cell-day-bg: oklch(0.335 0.02 252);
+    --cell-day-fg: oklch(0.96 0.006 250);
+    --cell-day-fg-dim: oklch(0.8 0.014 250);
+    --cell-day-fg-dimmer: oklch(0.73 0.016 250);
+    --cell-day-border: oklch(0.46 0.024 250);
+
+    --cell-night-bg: oklch(0.135 0.018 262);
+    --cell-night-fg: oklch(0.87 0.012 262);
+    --cell-night-fg-dim: oklch(0.68 0.018 262);
+    --cell-night-fg-dimmer: oklch(0.58 0.02 262);
+    --cell-night-border: oklch(0.26 0.025 262);
   }
 }
 
@@ -60,19 +119,140 @@ body {
 
 /* Focus is load-bearing here -- the whole grid is keyboard navigable. */
 :focus-visible {
-  outline: 2px solid var(--color-state-go);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 3px;
 }
 
 /*
- * State tint. Each cell sets --state to one of the state colours above; the
- * tint mixes it into the surface so light and dark both stay legible without a
- * second palette.
+ * A panel tinted toward one accent. Used for the handful of things that really
+ * are alerts -- an upstream fetch that failed, a parser that hit drift, an MPA
+ * that restricts collecting -- and never for a window state.
  */
-.state-tint {
-  background: color-mix(in oklch, var(--state) calc((1 - var(--tint)) * 100%), var(--surface-raised));
-  border-color: color-mix(in oklch, var(--state) 45%, var(--border));
+.tint-panel {
+  background: color-mix(
+    in oklch,
+    var(--tint-color) calc((1 - var(--tint)) * 100%),
+    var(--surface-raised)
+  );
+  border-color: color-mix(in oklch, var(--tint-color) 45%, var(--border));
+}
+
+/* ---------------------------------------------------------------------------
+ * Day/night cell skin
+ * ------------------------------------------------------------------------- */
+
+.cell-skin {
+  background: var(--cell-bg);
+  color: var(--cell-fg);
+  border-color: var(--cell-border);
+}
+
+.cell-skin[data-lighting='day'] {
+  --cell-bg: var(--cell-day-bg);
+  --cell-fg: var(--cell-day-fg);
+  --cell-fg-dim: var(--cell-day-fg-dim);
+  --cell-fg-dimmer: var(--cell-day-fg-dimmer);
+  --cell-border: var(--cell-day-border);
+}
+
+.cell-skin[data-lighting='night'] {
+  --cell-bg: var(--cell-night-bg);
+  --cell-fg: var(--cell-night-fg);
+  --cell-fg-dim: var(--cell-night-fg-dim);
+  --cell-fg-dimmer: var(--cell-night-fg-dimmer);
+  --cell-border: var(--cell-night-border);
+}
+
+/*
+ * Hover mixed from the cell's own foreground rather than a fixed colour, so one
+ * rule reads correctly on a white day cell and on a navy night one.
+ */
+.cell-link:hover {
+  background: color-mix(in oklch, var(--cell-fg) 8%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+ * Flag badge and its popover
+ * ------------------------------------------------------------------------- */
+
+/*
+ * The badge. Deliberately uniform: the same dim `i` on every cell whatever the
+ * state, because a badge that changed shape or colour per state would put the
+ * verdict back on the face of the grid, which is the thing being taken off it.
+ * It is a sibling of the cell's link, never a child -- a button inside an anchor
+ * is not operable by keyboard in any predictable way.
+ */
+.flag-badge {
+  anchor-name: var(--flag-anchor);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1px solid currentColor;
+  border-radius: 9999px;
+  color: var(--cell-fg-dim, var(--text-dim));
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.65;
+  cursor: pointer;
+}
+
+.flag-badge:hover,
+.flag-badge:focus-visible {
+  opacity: 1;
+}
+
+/*
+ * Native `popover`, so the panel lives in the top layer.
+ *
+ * That is not a detail: the grid scrolls horizontally inside an `overflow-x`
+ * container, and an absolutely positioned panel hanging off a cell in the last
+ * column would be clipped at exactly the edge it needs to cross. The top layer
+ * escapes every ancestor's overflow and stacking context. Light dismiss, Escape
+ * and focus return all come from the platform, so this needs no JavaScript and
+ * no client component.
+ *
+ * Base rule is a centred card, which is correct everywhere. Where anchor
+ * positioning is supported the card is pinned under its own badge instead; the
+ * @supports test names both properties the anchored layout actually needs, so a
+ * browser with half the feature gets the centred card rather than a panel
+ * stranded in a corner.
+ */
+.flag-popover {
+  position: fixed;
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  margin: 0;
+  width: max-content;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  box-shadow: 0 10px 30px oklch(0 0 0 / 0.25);
+}
+
+@supports (anchor-name: --a) and (position-area: block-end) {
+  .flag-popover {
+    position: absolute;
+    position-anchor: var(--flag-anchor);
+    position-area: block-end span-inline-start;
+    position-try-fallbacks:
+      block-start span-inline-start,
+      block-end span-inline-end,
+      block-start span-inline-end;
+    top: auto;
+    left: auto;
+    translate: none;
+    margin: 0.25rem 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

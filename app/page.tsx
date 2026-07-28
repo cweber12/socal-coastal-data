@@ -88,9 +88,10 @@ export default async function GridPage({
               between an expression and a text node is an explicit {' '}.
             */}
             {`${rows.length} reef and tidepool spots over ${HORIZON_DAYS} days.`}{' '}
-            Each cell gives the low (▼) and the high that follows it (▲): today&apos;s column is
-            the next low from now, later days that day&apos;s best daylight low.{' '}
-            {`A window needs ${MIN_WINDOW_MINUTES} minutes to count.`}
+            Each cell gives the low (▼) and the high that follows it (▲), light when that low
+            falls in daylight and dark when it does not: today&apos;s column is the next low from
+            now, later days that day&apos;s best daylight low.{' '}
+            {`A window needs ${MIN_WINDOW_MINUTES} minutes to count, and that judgement sits behind the badge on each cell.`}
           </p>
         </div>
 
@@ -127,10 +128,14 @@ export default async function GridPage({
                   <span className="block font-normal text-[var(--text-dimmer)]">
                     {formatDayMonth(dayStarts[i]!, grid.timeZone)}
                   </span>
+                  {/*
+                    Past the swell horizon. Dim rather than coloured: it is a
+                    limit of the data, not an alarm about the day, and the cells
+                    below it stopped shouting so the header should too.
+                  */}
                   {i >= SWELL_HORIZON_DAYS ? (
                     <span
-                      className="block font-normal"
-                      style={{ color: 'var(--color-state-swell-tbd)' }}
+                      className="block font-normal text-[var(--text-dimmer)]"
                       title={`Past the ${SWELL_HORIZON_DAYS}-day swell horizon: there is no swell forecast in this stack, so no day beyond it can read as a pass.`}
                     >
                       no swell
@@ -236,23 +241,68 @@ function SortLink({
   );
 }
 
-/** Every state, with its glyph, so the grid is readable without knowing the code. */
+/**
+ * The key.
+ *
+ * Two parts, and the split is the point. What a cell actually says -- light or
+ * dark -- is one sentence, always visible, because a reader has to know what the
+ * background means to read the grid at all. What the flags mean is a list of six
+ * verdicts, collapsed, because the flags themselves are collapsed: a legend for
+ * something hidden by default would be louder than the thing it explains.
+ */
 function Legend() {
   return (
-    <dl className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[0.7rem]">
-      {WINDOW_STATES.map((state) => {
-        const p = STATE_PRESENTATION[state];
-        return (
-          <div key={state} className="flex items-center gap-1.5">
-            <dt className="flex items-center gap-1 font-medium" style={{ color: p.colorVar }}>
-              <span aria-hidden>{p.glyph}</span>
-              {p.label}
-            </dt>
-            <dd className="text-[var(--text-dimmer)]">{legendGloss(state)}</dd>
-          </div>
-        );
-      })}
-    </dl>
+    <section aria-labelledby="key-heading" className="mt-4">
+      <h2 id="key-heading" className="sr-only">
+        How to read this grid
+      </h2>
+
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[0.7rem] text-[var(--text-dim)]">
+        <span
+          data-lighting="day"
+          className="cell-skin rounded border px-1.5 py-0.5 font-mono text-[0.68rem]"
+        >
+          ▼ 0.2 1:14 pm
+        </span>
+        <span>low in daylight</span>
+        <span aria-hidden className="text-[var(--text-dimmer)]">
+          ·
+        </span>
+        <span
+          data-lighting="night"
+          className="cell-skin rounded border px-1.5 py-0.5 font-mono text-[0.68rem]"
+        >
+          ▼ 0.2 4:41 am
+        </span>
+        <span>low after dark</span>
+      </p>
+
+      <details className="mt-2">
+        <summary className="cursor-pointer text-[0.7rem] text-[var(--text-dimmer)]">
+          What the flag on each cell means
+        </summary>
+        <p className="mt-1.5 max-w-prose text-[0.7rem] leading-relaxed text-[var(--text-dimmer)]">
+          Every cell carries an <span className="font-mono">i</span> badge. Opening it gives one of
+          these six, with the sentence behind it. They are kept closed because each one is decided
+          against a floor and a swell ceiling that are author estimates, never field-checked — the
+          tide and the clock in the cell are the measured part.
+        </p>
+        <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-[0.7rem]">
+          {WINDOW_STATES.map((state) => {
+            const p = STATE_PRESENTATION[state];
+            return (
+              <div key={state} className="flex items-center gap-1.5">
+                <dt className="flex items-center gap-1 font-medium text-[var(--text-dim)]">
+                  <span aria-hidden>{p.glyph}</span>
+                  {p.label}
+                </dt>
+                <dd className="text-[var(--text-dimmer)]">{legendGloss(state)}</dd>
+              </div>
+            );
+          })}
+        </dl>
+      </details>
+    </section>
   );
 }
 

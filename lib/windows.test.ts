@@ -6,6 +6,7 @@ import {
   countUsable,
   evaluateWindow,
   FLOOD_SIDE_TRIM,
+  lowLighting,
   MIN_WINDOW_MINUTES,
   STATE_PRESENTATION,
   SWELL_HORIZON_DAYS,
@@ -185,6 +186,38 @@ describe('constants', () => {
   it('counts only `go` as usable', () => {
     const usable = WINDOW_STATES.filter((s) => STATE_PRESENTATION[s].usable);
     expect(usable).toEqual(['go']);
+  });
+});
+
+/* =========================================================================
+ * Cell lighting
+ * ======================================================================= */
+
+describe('lowLighting', () => {
+  it('is decided by the low against sunrise and sunset, not by the state', () => {
+    // This is what a cell's background says, and it must stay an observation.
+    // `dark` is a verdict about the whole window and can disagree: a low can be
+    // in daylight while the usable part of its window is not.
+    const midday = evaluateWindow(baseInput());
+    expect(midday.state).toBe('go');
+    expect(lowLighting(midday)).toBe('day');
+
+    const preDawn = evaluateWindow(
+      baseInput({ date: { year: 2026, month: 7, day: 27 } }),
+    );
+    expect(lowLighting(preDawn)).toBe(
+      preDawn.lowMs >= preDawn.sunriseMs && preDawn.lowMs <= preDawn.sunsetMs ? 'day' : 'night',
+    );
+  });
+
+  it('reads only lowMs, sunriseMs and sunsetMs', () => {
+    const base = evaluateWindow(baseInput());
+    const oneMinute = 60_000;
+
+    expect(lowLighting({ ...base, lowMs: base.sunriseMs - oneMinute })).toBe('night');
+    expect(lowLighting({ ...base, lowMs: base.sunriseMs })).toBe('day');
+    expect(lowLighting({ ...base, lowMs: base.sunsetMs })).toBe('day');
+    expect(lowLighting({ ...base, lowMs: base.sunsetMs + oneMinute })).toBe('night');
   });
 });
 
