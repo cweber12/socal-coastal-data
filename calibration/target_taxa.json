@@ -1,0 +1,176 @@
+{
+  "version": "1.0.0",
+  "resolved_at": "2026-07-28",
+  "resolved_from": "https://api.inaturalist.org/v1/taxa?q=<name> — exact match on `name`, one active result each. Re-verify with `node calibration/resolve-taxa.mjs --check`. Never hand-typed.",
+
+  "definition": "The animals people go to a tidepool to see. A product choice, not an ecological zonation. Frozen before any rate is computed and never revised within a run.",
+
+  "_schema": {
+    "targets": "The NUMERATOR. A visit is labelled a hit when it recorded at least one of these, matched on taxon.id OR taxon.ancestor_ids so a genus-level target catches species-level records.",
+    "denominator": "Taxa that establish a visit HAPPENED without counting as a hit. Common, present at the reef whatever the tide. Without these the denominator would be the target taxa themselves and every rate would be 1.0.",
+    "rejected": "Considered and ruled out, with the reason, so the next person does not re-propose it.",
+    "taxon_id": "Resolved from the iNaturalist taxa endpoint by exact name match. Recorded with the name it resolved from.",
+    "resolved_from_name": "The exact `q=` string the id was resolved from.",
+    "rationale": "Why this entry is in this list. A product claim about what a visitor wants to see, NOT a claim about where the animal lives.",
+    "source": "Where the entry came from. NPS zone assignments are recorded as provenance, never as authority — see nps_divergence."
+  },
+
+  "_why_this_list_is_the_probe_list": "Every measured figure in PRD #30 -- the per-bin rates, the amplitude ratios, the leave-one-out shifts, the refusal verdicts for five of eight spots -- was computed against the 13-taxon probe list in its Appendix A. Authoring a different list would leave none of those numbers checkable against this pipeline's output, which is the opposite of what freezing a list is for. So the membership is Appendix A's, unchanged, and the work done here is the part Appendix A did not do: resolving every id from the API rather than trusting the transcribed ones, splitting the 13 into a numerator and a denominator, giving each entry a rationale, and recording what it disagrees with. #30's own claim -- 'of 387 recorded visits to Cabrillo, 68% logged one of these seven species' -- is what fixes the split at 7 targets and 6 denominator.",
+
+  "_ids_were_verified_not_trusted": "All 14 names were re-resolved from the API on 2026-07-28 and every id agreed with Appendix A, each on exactly one active exact-name match. That is a check that passed, not a transcription.",
+
+  "_nps_divergence": "The NPS Cabrillo page (source below, read 2026-07-28) divides the reef into three zones and files four of this file's entries differently from the way they are used here. Its Middle Zone 'hosts anemones, keyhole limpets, Black tegula snails, Kellet's whelks, Sandcastle worms, surf grass'; its Low Zone holds 'octopus, sea stars, nudibranchs, sea hares, spiny lobsters, urchins, and various types of fish'. So Megathura crenulata, Kelletia kelletii and Phyllospadix are NPS MID zone and are targets here, while Phragmatopoma californica is NPS mid zone and is in the denominator. This is recorded as a finding and changes nothing: the targets are a product choice about what a visitor wants to see, and NO ZONATION CLAIM IS BEING MADE by this file or by anything derived from it. #30 measured Megathura as the single strongest low-tide signal in the corridor -- 176 visits at Cabrillo, 106 at Sunset Cliffs -- and that measurement is a reason to REPORT the divergence, never a licence to reassign membership. Assigning taxa by their observed tide distribution and then deriving a tide statistic from them is circular.",
+
+  "_weakest_entry": "Phyllospadix. It is the one target that fails this file's own definition on its face: surfgrass is a plant, and nobody drives to a reef to see it. It is also the one genus among six species, and #32 warns that a genus spanning zones is a bad target. It stays for this version because dropping it would break comparability with every figure in #30, and because the published leave-one-out table is exactly the instrument that makes its influence visible -- #30 measured its removal moving Cabrillo's crossing by -0.25 ft and Sunset Cliffs' by -0.12 ft. If a version 2.0.0 of this file changes one entry, it should be this one. Naming the doubt is not the same as acting on it mid-run.",
+
+  "targets": [
+    {
+      "taxon_id": 48645,
+      "resolved_from_name": "Megathura crenulata",
+      "name": "Megathura crenulata",
+      "rank": "species",
+      "common_name": "Giant Keyhole Limpet",
+      "rationale": "Large -- to 25 cm -- conspicuous and unmistakable. One of the few intertidal animals a first-time visitor will point at and ask about.",
+      "source": "NPS Cabrillo rocky intertidal page, filed MIDDLE zone. See _nps_divergence."
+    },
+    {
+      "taxon_id": 48035,
+      "resolved_from_name": "Strongylocentrotus purpuratus",
+      "name": "Strongylocentrotus purpuratus",
+      "rank": "species",
+      "common_name": "Purple Sea Urchin",
+      "rationale": "The urchin of the California intertidal, and one of the handful of animals a visitor arrives already hoping to see.",
+      "source": "NPS Cabrillo rocky intertidal page, LOW zone ('urchins')."
+    },
+    {
+      "taxon_id": 54509,
+      "resolved_from_name": "Octopus bimaculoides",
+      "name": "Octopus bimaculoides",
+      "rank": "species",
+      "common_name": "California Two-spot Octopus",
+      "rationale": "The animal people most want to find in a tidepool, and the one a sighting gets talked about for.",
+      "source": "NPS Cabrillo rocky intertidal page, LOW zone ('octopus')."
+    },
+    {
+      "taxon_id": 125663,
+      "resolved_from_name": "Kelletia kelletii",
+      "name": "Kelletia kelletii",
+      "rank": "species",
+      "common_name": "Kellet's Whelk",
+      "rationale": "A large, heavy-shelled snail, obvious to a visitor in a way most gastropods are not.",
+      "source": "NPS Cabrillo rocky intertidal page, filed MIDDLE zone. See _nps_divergence. #30 measured it at a median +2.50 ft at La Jolla Cove against -0.38 ft at Cabrillo; that is a spot-level contamination signal the amplitude gate exists to catch, not a property of the taxon."
+    },
+    {
+      "taxon_id": 48655,
+      "resolved_from_name": "Aplysia californica",
+      "name": "Aplysia californica",
+      "rank": "species",
+      "common_name": "California Sea Hare",
+      "rationale": "Large, soft-bodied and strange-looking. Reliably the thing a family photographs.",
+      "source": "NPS Cabrillo rocky intertidal page, LOW zone ('sea hares')."
+    },
+    {
+      "taxon_id": 72297,
+      "resolved_from_name": "Phyllospadix",
+      "name": "Phyllospadix",
+      "rank": "genus",
+      "common_name": "Surfgrasses",
+      "rationale": "The weakest entry in this list, kept for comparability rather than on its merits. See _weakest_entry. A genus, deliberately: the corridor's Phyllospadix records are split across P. torreyi and P. scouleri and species-level identification from a photograph is not reliable, so a genus target is the honest rank rather than a convenience.",
+      "source": "NPS Cabrillo rocky intertidal page, filed MIDDLE zone ('surf grass'). See _nps_divergence."
+    },
+    {
+      "taxon_id": 49699,
+      "resolved_from_name": "Pisaster ochraceus",
+      "name": "Pisaster ochraceus",
+      "rank": "species",
+      "common_name": "Ochre Sea Star",
+      "rationale": "The iconic sea star of this coast. Kept despite being nearly absent from the corpus -- #30 found 1 record at Cabrillo, all time, after sea star wasting syndrome. Its absence is a fact about the reef worth carrying, and dropping a taxon because it is rare would let the list quietly track abundance instead of desirability.",
+      "source": "NPS Cabrillo rocky intertidal page, LOW zone ('sea stars')."
+    }
+  ],
+
+  "denominator": [
+    {
+      "taxon_id": 49051,
+      "resolved_from_name": "Anthopleura sola",
+      "name": "Anthopleura sola",
+      "rank": "species",
+      "common_name": "Starburst Anemone",
+      "rationale": "Present and photographable at any tide the reef is walkable at, so a record of it means somebody was there rather than that the water was low.",
+      "source": "NPS Cabrillo rocky intertidal page, MIDDLE zone ('anemones')."
+    },
+    {
+      "taxon_id": 52564,
+      "resolved_from_name": "Anthopleura elegantissima",
+      "name": "Anthopleura elegantissima",
+      "rank": "species",
+      "common_name": "Aggregating Anemone",
+      "rationale": "As above, and the more abundant of the two Anthopleura in the corridor.",
+      "source": "NPS Cabrillo rocky intertidal page, MIDDLE zone ('anemones')."
+    },
+    {
+      "taxon_id": 460365,
+      "resolved_from_name": "Tegula funebralis",
+      "name": "Tegula funebralis",
+      "rank": "species",
+      "common_name": "Black Turban Snail",
+      "rationale": "Abundant across the mid zone and exposed on almost any visit.",
+      "source": "NPS Cabrillo rocky intertidal page, MIDDLE zone ('Black tegula snails')."
+    },
+    {
+      "taxon_id": 53750,
+      "resolved_from_name": "Lottia gigantea",
+      "name": "Lottia gigantea",
+      "rank": "species",
+      "common_name": "Owl Limpet",
+      "rationale": "High and mid zone, out of the water for most of the tidal cycle.",
+      "source": "NPS Cabrillo rocky intertidal page, HIGH zone ('limpets')."
+    },
+    {
+      "taxon_id": 47188,
+      "resolved_from_name": "Pachygrapsus crassipes",
+      "name": "Pachygrapsus crassipes",
+      "rank": "species",
+      "common_name": "Striped Shore Crab",
+      "rationale": "High zone, and active above the waterline, so its presence is close to independent of tide height.",
+      "source": "NPS Cabrillo rocky intertidal page, HIGH zone ('crabs')."
+    },
+    {
+      "taxon_id": 59635,
+      "resolved_from_name": "Phragmatopoma californica",
+      "name": "Phragmatopoma californica",
+      "rank": "species",
+      "common_name": "Sandcastle Worm",
+      "rationale": "Colonial reefs that stay visible across a wide range of tide heights.",
+      "source": "NPS Cabrillo rocky intertidal page, MIDDLE zone ('Sandcastle worms')."
+    }
+  ],
+
+  "rejected": [
+    {
+      "name": "Panulirus interruptus",
+      "taxon_id": 61371,
+      "resolved_from_name": "Panulirus interruptus",
+      "reason": "Predominantly recorded by DIVERS in this corridor, not by tidepoolers. #30 measured its median predicted height at La Jolla Cove at +3.40 ft, p75 +5.00 -- nobody sees a lobster in a tidepool at +3.4 ft. It passes every quality, timing, precision and privacy filter, so no filter can remove it. Excluding it from the target set is the only available answer, and it is why the amplitude gate exists as a refusal criterion rather than a repair. See #30."
+    },
+    {
+      "name": "Nudibranchia",
+      "taxon_id": 47113,
+      "resolved_from_name": "Nudibranchia",
+      "reason": "An ORDER, and the clearest case of the rank rule in #32: hundreds of species with very different depth distributions, so a target that spans them asserts nothing about the tide. It is also exactly what a reader would propose adding, since NPS files nudibranchs in its Low Zone and they are unambiguously something people go to see. The right form of this proposal is a specific species, argued individually and added in a new version of this file -- not the order."
+    },
+    {
+      "name": "fish",
+      "taxon_id": null,
+      "resolved_from_name": null,
+      "reason": "Not a taxon. NPS's Low Zone description ends '...and various types of fish', which is where this proposal comes from. The corridor's intertidal fish are mostly clingfishes and kelpfishes and would each have to be resolved and argued separately. Recorded here so the vernacular does not get turned into an id by someone reading the NPS page."
+    }
+  ],
+
+  "sources": [
+    "https://api.inaturalist.org/v1/taxa — every taxon_id above, resolved by exact name match on 2026-07-28.",
+    "https://www.nps.gov/cabr/learn/nature/tidepools.htm — 'The Rocky Intertidal Zone', Cabrillo National Monument, read 2026-07-28. Seeds the list and supplies the zone assignments recorded above. NOT an authority for membership; see _nps_divergence.",
+    "GitHub issue #30 — the PRD, carrying every measured figure this file is comparable against.",
+    "GitHub issue #32 — the constraints this file is written under."
+  ]
+}
