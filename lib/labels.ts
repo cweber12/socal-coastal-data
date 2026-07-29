@@ -289,9 +289,10 @@ export function describeSighting(
       : `Recorded ${sighting.observedOn.year}-${String(sighting.observedOn.month).padStart(2, '0')}-${String(sighting.observedOn.day).padStart(2, '0')}, time not stated`,
   );
 
-  parts.push(
-    `by ${sighting.observerName ?? sighting.observerLogin}.`,
-  );
+  // Observer names are free text and a good many end in an initial -- "Heidi H."
+  // -- so a blindly appended full stop reads back as "Heidi H dot dot".
+  const observer = sighting.observerName ?? sighting.observerLogin;
+  parts.push(observer.endsWith('.') ? `by ${observer}` : `by ${observer}.`);
 
   if (sighting.tide) {
     const { heightFt, minutesFromLow } = sighting.tide;

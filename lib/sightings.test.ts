@@ -227,6 +227,17 @@ describe('describeSighting', () => {
     expect(s).not.toContain('-0.6');
   });
 
+  it('does not double the full stop after a name ending in an initial', () => {
+    // "Heidi H." is a real observer in the fixture, and "by Heidi H.." reads
+    // back as "Heidi H dot dot".
+    const s = describeSighting(
+      { ...annotated[0]!, observerName: 'Heidi H.' },
+      'America/Los_Angeles',
+    );
+    expect(s).toContain('by Heidi H. ');
+    expect(s).not.toContain('..');
+  });
+
   it('says why a photo is absent', () => {
     const withheld = annotated.find((s) => s.photo === null)!;
     expect(describeSighting(withheld, 'America/Los_Angeles')).toContain(

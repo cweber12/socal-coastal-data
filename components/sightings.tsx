@@ -277,9 +277,19 @@ function SightingCard({
           className="aspect-[4/3] w-full bg-[var(--surface-sunken)] object-cover"
         />
       ) : (
+        /*
+          A strip, not a 4:3 placeholder.
+
+          The first version reserved the photo's own box and filled it with the
+          reason, which at 375px gave a text entry the visual weight of a
+          photograph and left a phone screen mostly empty boxes -- Windansea's
+          four records are two photos and two of these. The entry is text, so it
+          takes the room text takes, and the ragged card height is the honest
+          shape of a list where some records carry a photo and some do not.
+        */
         <div
           aria-hidden
-          className="flex aspect-[4/3] w-full items-center justify-center bg-[var(--surface-sunken)] px-3 text-center text-meta text-[var(--text-dimmer)]"
+          className="border-b border-[var(--border)] bg-[var(--surface-sunken)] px-2.5 py-1.5 text-meta text-[var(--text-dimmer)]"
         >
           No photo — {sighting.photoWithheldReason}
         </div>
