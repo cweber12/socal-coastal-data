@@ -1,6 +1,6 @@
 {
-  "version": "1.2.0",
-  "generated": "2026-07-28",
+  "version": "1.3.0",
+  "generated": "2026-07-29",
   "corridor": "Oceanside Harbor to Border Field, San Diego County, CA",
 
   "conventions": {
@@ -29,6 +29,15 @@
     "audiences": "Which audience filters include this spot. Drives column visibility, not thresholds.",
     "tidepool_floor_ft": "Tide height below which the reef is WORKABLE -- the level at which enough of the intertidal is out of the water to be worth the trip. NOT the level at which it is at its best; that is lower, and encoding it here silently rejects every ordinary usable day. UNCALIBRATED estimates; see tidepool_floor_confidence.",
     "tidepool_floor_confidence": "low = author estimate, needs local verification. verified = confirmed by someone who goes there.",
+    "floor_evidence": "Append-only ledger of every method that has been run against this spot's floor, oldest entry first. Present on the 8 spots that carry a floor. It does NOT set tidepool_floor_ft -- that field is the value in force, a human sets it against this ledger, and the newest entry is not automatically the answer. Promotion of tidepool_floor_confidence to 'verified' takes two entries from DIFFERENT methods agreeing within 0.3 ft, at least one of them instrumented (lidar hypsometry, pressure logger, MARINe transect topography); two author_estimate or two inat_revealed entries are one method run twice. See calibration/floor-calibration.md section 7.",
+    "floor_evidence[].method": "Which method produced the entry: author_estimate | lidar_hypsometry | inat_revealed | pressure_logger | marine_topography | published_threshold. Not free text; that list is the whole set.",
+    "floor_evidence[].source": "The artifact the entry came from, named precisely enough to find again: dataset and product name, or the committed file and its version.",
+    "floor_evidence[].source_date": "When the underlying data was acquired, not when it was downloaded. For an author estimate, the date that estimate was written.",
+    "floor_evidence[].value_ft": "The floor this method produced, in ft above MLLW per conventions.datum. null means the run yielded no usable value -- read note to tell 'has not run' from 'ran and produced nothing usable'. A null value_ft with an empty note is a bug, on the same terms as county_station_null_reason.",
+    "floor_evidence[].datum_transform": "The vertical datum transformation applied, with its version pinned, e.g. 'VDatum 4.7, NAVD88 -> MLLW'. null where none was applied because the source is already MLLW ft.",
+    "floor_evidence[].n": "Sample count in whatever unit the method counts in; the note states the unit. null where the method has no sample count.",
+    "floor_evidence[].run_date": "When this entry's value was computed or set.",
+    "floor_evidence[].note": "What the run established, in prose. Required whenever value_ft is null. Figures that came from a generated file are summarised here, never copied, because a re-run rewrites them.",
     "mpa": "Marine protected area NAME from CDFW ds582, resolved by point-in-polygon. null means the point fell outside every MPA polygon. Do not hand-populate. Read together with mpa_resolved: a null with mpa_resolved false is unknown, not unprotected.",
     "mpa_resolved": "true once the CDFW point-in-polygon join has run AND the result survives this file's ~100 m coordinate precision. false where the spot lies within 150 m of an MPA boundary, i.e. inside the coordinate error bar, so the in/out call is not trustworthy either way. Legally load-bearing for the tidepool audience.",
     "notes": "Free text. Not parsed."
@@ -190,6 +199,18 @@
       "audiences": ["surf", "tidepool", "dive"],
       "tidepool_floor_ft": 0.9,
       "tidepool_floor_confidence": "low",
+      "floor_evidence": [
+        {
+          "method": "author_estimate",
+          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
+          "source_date": "2026-07-27",
+          "value_ft": 0.9,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-28",
+          "note": "1.1.1 set -0.6 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.9 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        }
+      ],
       "mpa": null, "mpa_resolved": false,
       "notes": "Reef point. MPA UNRESOLVED: point-in-polygon puts this 18 m OUTSIDE Swami's SMCA, far inside this file's ~100 m coordinate precision, so neither in nor out can be asserted. Do not present collection rules from the mpa field until the coordinate is surveyed."
     },
@@ -205,6 +226,28 @@
       "audiences": ["surf", "tidepool"],
       "tidepool_floor_ft": 1.0,
       "tidepool_floor_confidence": "low",
+      "floor_evidence": [
+        {
+          "method": "author_estimate",
+          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
+          "source_date": "2026-07-27",
+          "value_ft": 1.0,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-28",
+          "note": "1.1.1 set -0.5 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.0 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        },
+        {
+          "method": "inat_revealed",
+          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": 74,
+          "run_date": "2026-07-29",
+          "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (too-few-usable-bins, amplitude-below-gate). 2 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 1.00x against the 2.0x gate. n is 74 collapsed visits, from 98 records by 50 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        }
+      ],
       "mpa": "Swami's SMCA", "mpa_resolved": false,
       "notes": "San Elijo lagoon mouth adjacent; post-rain water quality degrades quickly."
     },
@@ -251,6 +294,28 @@
       "audiences": ["swim", "bird", "tidepool"],
       "tidepool_floor_ft": 0.9,
       "tidepool_floor_confidence": "low",
+      "floor_evidence": [
+        {
+          "method": "author_estimate",
+          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
+          "source_date": "2026-07-27",
+          "value_ft": 0.9,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-28",
+          "note": "1.1.1 set -0.6 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.9 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        },
+        {
+          "method": "inat_revealed",
+          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": 31,
+          "run_date": "2026-07-29",
+          "note": "Ran and refused, so no floor is set from it here: refused on 3 of 4 criteria (too-few-usable-bins, not-declining, amplitude-below-gate). 0 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and the amplitude ratio could not be computed at all, for want of two usable bins. n is 31 collapsed visits, from 35 records by 28 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        }
+      ],
       "mpa": null, "mpa_resolved": true,
       "notes": "Los Penasquitos lagoon mouth. Long beach; a single point is a poor proxy for its full length."
     },
@@ -281,6 +346,28 @@
       "audiences": ["dive", "swim", "tidepool"],
       "tidepool_floor_ft": 0.8,
       "tidepool_floor_confidence": "low",
+      "floor_evidence": [
+        {
+          "method": "author_estimate",
+          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
+          "source_date": "2026-07-27",
+          "value_ft": 0.8,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-28",
+          "note": "1.1.1 set -0.7 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.8 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        },
+        {
+          "method": "inat_revealed",
+          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": 239,
+          "run_date": "2026-07-29",
+          "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (not-declining, amplitude-below-gate). 6 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 0.67x against the 2.0x gate. n is 239 collapsed visits, from 310 records by 115 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        }
+      ],
       "mpa": null, "mpa_resolved": false,
       "notes": "Primary shore-dive entry for the corridor. Dike Rock tidepools at the north end. MPA UNRESOLVED: 45 m outside Matlahuayl SMR, inside the ~100 m coordinate error bar. The earlier expectation of San Diego-Scripps Coastal SMCA was simply wrong -- that boundary is 1003 m away. The open question here is Matlahuayl, not Scripps."
     },
@@ -296,6 +383,28 @@
       "audiences": ["dive", "swim", "tidepool"],
       "tidepool_floor_ft": 1.1,
       "tidepool_floor_confidence": "low",
+      "floor_evidence": [
+        {
+          "method": "author_estimate",
+          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
+          "source_date": "2026-07-27",
+          "value_ft": 1.1,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-28",
+          "note": "1.1.1 set -0.4 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.1 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        },
+        {
+          "method": "inat_revealed",
+          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": 354,
+          "run_date": "2026-07-29",
+          "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (not-declining, amplitude-below-gate). 6 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 0.85x against the 2.0x gate. n is 354 collapsed visits, from 545 records by 307 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        }
+      ],
       "mpa": null, "mpa_resolved": false,
       "notes": "MPA UNRESOLVED: 21 m outside Matlahuayl SMR, inside the ~100 m coordinate error bar, so no-take status cannot be asserted either way. Matlahuayl is no take of any kind if the point resolves inside, so treat it as restricted until surveyed. Pinniped closures apply seasonally and are not in any API."
     },
@@ -311,6 +420,28 @@
       "audiences": ["surf", "tidepool"],
       "tidepool_floor_ft": 1.0,
       "tidepool_floor_confidence": "low",
+      "floor_evidence": [
+        {
+          "method": "author_estimate",
+          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
+          "source_date": "2026-07-27",
+          "value_ft": 1.0,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-28",
+          "note": "1.1.1 set -0.5 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.0 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        },
+        {
+          "method": "inat_revealed",
+          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": 99,
+          "run_date": "2026-07-29",
+          "note": "Ran and refused, so no floor is set from it here: refused on 1 of 4 criteria (amplitude-below-gate). 3 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 1.38x against the 2.0x gate. n is 99 collapsed visits, from 158 records by 89 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        }
+      ],
       "mpa": null, "mpa_resolved": true,
       "notes": "Reef break, rock hazard on low tide."
     },
@@ -371,6 +502,18 @@
       "audiences": ["surf", "tidepool", "dive"],
       "tidepool_floor_ft": 0.7,
       "tidepool_floor_confidence": "low",
+      "floor_evidence": [
+        {
+          "method": "author_estimate",
+          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
+          "source_date": "2026-07-27",
+          "value_ft": 0.7,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-28",
+          "note": "1.1.1 set -0.8 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.7 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        }
+      ],
       "mpa": null, "mpa_resolved": true,
       "notes": "SAFETY: ledge system with cliff access. Getting the tidepool floor wrong here strands people. Verify before shipping."
     },
@@ -386,6 +529,18 @@
       "audiences": ["tidepool", "bird"],
       "tidepool_floor_ft": 1.3,
       "tidepool_floor_confidence": "low",
+      "floor_evidence": [
+        {
+          "method": "author_estimate",
+          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
+          "source_date": "2026-07-27",
+          "value_ft": 1.3,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-28",
+          "note": "1.1.1 set -0.2 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.3 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        }
+      ],
       "mpa": "Cabrillo SMR", "mpa_resolved": false,
       "notes": "National Monument: gate hours and entry fee constrain access independently of tide. Point-in-polygon puts this INSIDE Cabrillo SMR -- an SMR, not the SMCA previously assumed, so no take of any kind -- but by only 11 m, inside the ~100 m coordinate error bar, hence mpa_resolved false. The thin margin is a reason to verify the boundary, never to relax the restriction. Best-known tidepool site in the corridor."
     },
@@ -461,6 +616,7 @@
     "1.2.0 raised all 8 tidepool_floor_ft by exactly 1.5 ft. The 1.1.x values (-0.8 to -0.2) encoded EXCELLENT tidepooling, not workable tidepooling, and the difference is not cosmetic: over the 7 days from 2026-07-28, station 9410230 put 49 of the 56 grid cells in 'above-floor' -- the reef never surfaces -- and the remaining 7 in 'dark'. Not one usable window in a week, which is not what a week of San Diego tides looks like. Two independent sources put the workable threshold at about +1 ft MLLW and reserve negative tides for 'best' (tidepooling.org/learn: 'The best tidepooling happens during very low tides, typically below 1 foot'; lajollamom.com/best-san-diego-tide-pools: 'Low tide is less than 1 foot ... if you see a tide chart say -1 or lower, that's the best time to go'). The shift is a single constant applied uniformly rather than eight fresh guesses, so the author's RELATIVE ranking of the eight reefs is preserved intact and one number reverses the whole change. Band is now +0.7 to +1.3, straddling the +1 ft figure both sources give. Still confidence 'low'; still not field-checked.",
 
     "SAFETY, stated in the direction that matters: the 1.2.0 shift moved every floor in the PERMISSIVE direction. A higher floor means the stack calls a window open at higher water than it used to. sunset-cliffs went -0.8 to +0.7 and its own notes say a wrong floor there strands people, so it is deliberately kept the strictest of the eight -- but strictest-of-eight is a ranking, not a verification. Nobody has stood on that ledge system at +0.7 ft and confirmed it. Field-check Sunset Cliffs and Cabrillo before any of these numbers is presented as advice.",
-    "Per-spot surf threshold offsets are not yet modelled. Black's and Tourmaline are the clearest cases where a shared buoy reading means very different things."
+    "Per-spot surf threshold offsets are not yet modelled. Black's and Tourmaline are the clearest cases where a shared buoy reading means very different things.",
+    "floor_evidence is populated on all 8 tidepool spots as of 1.3.0, and what it records is that not one floor has instrumented evidence behind it. Every spot's first entry is method 'author_estimate', carrying the 1.1.1 value and the uniform +1.5 ft raise 1.2.0 applied to all 8. The 5 spots that refuse the revealed-preference method in shared/calibration.json 1.0.0 (cardiff-reef, torrey-pines-beach, la-jolla-shores, la-jolla-cove, windansea) carry a second entry recording that it RAN and refused, so 'no evidence gathered' can be told apart from 'evidence gathered and it refused'. The 3 that publish (swamis, sunset-cliffs, cabrillo-tidepools) have no floor set from that run yet. All 8 stay tidepool_floor_confidence 'low': the promotion rule needs two different methods agreeing within 0.3 ft with at least one instrumented, and nothing in this repo is instrumented. Adding the ledger changed no floor value and no confidence value."
   ]
 }
