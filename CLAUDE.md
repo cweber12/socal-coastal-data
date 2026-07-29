@@ -80,7 +80,38 @@ The PR body must state what you actually verified and what you did not. If a
 part of the issue is unfinished or blocked, say so in the PR rather than
 letting the reviewer discover it.
 
-## Commit conventions
+Issue-closing keywords need a line of their own. `Part of #20. Closes #26.` on
+one line closed only the first reference and left #26 open through a merge.
+
+### 6. Hand the PR over, and stop
+
+Opening the PR is where the work stops being yours and starts being the
+reviewer's. Say so explicitly.
+
+**Every completion message names the PR** — number and URL, not "done". With it:
+what changed, what you verified and how, and anything you left out, got wrong,
+or are unsure about. A reviewer should not have to find those in the diff.
+
+**Then say what is waiting on them**, in one line. For example:
+
+> #27 is open and ready for review. Say the word and I'll merge and clean up.
+
+**Do not merge.** Not the PR, not a branch deletion, not a hand-closed issue,
+not a force-push. Approval to open a PR is not approval to land it, and a merge
+to `main` is outward-facing and awkward to undo. Wait for the reviewer to
+confirm in this conversation.
+
+On confirmation, merge and clean up in one pass:
+
+```bash
+gh pr merge <n> --merge --delete-branch    # merge commits, matching this history
+git switch main && git pull && git remote prune origin
+```
+
+Then check the ledger rather than assuming: `gh issue list --state open` should
+be empty of the issues the PR claimed, and anything left open gets closed by
+hand with a comment naming the PR and the merge commit. Stop any dev server or
+background process you started.
 
 Commits here are the durable record of *why* something is the way it is —
 several are the only place a hard-won upstream finding is written down. Match
