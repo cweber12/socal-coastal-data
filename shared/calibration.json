@@ -1,0 +1,534 @@
+{
+  "_generated": "GENERATED FILE — written by calibration/run.ts --fetch. Do not edit by hand.",
+  "_what_this_is": "The observed rate at which a recorded visit logged one of the frozen target taxa, binned by that day's lowest predicted tide. A count, not a model output. No ecological claim is made and no zonation is asserted.",
+  "_units": "Bin edges are feet above MLLW at station 9410230, the same coordinate system lib/windows.ts consumes. Adding subordinate-station offsets would silently invalidate every rate here.",
+  "version": "1.0.0",
+  "taxa_version": "1.0.0",
+  "spots_version": "1.2.0",
+  "pulled_at": "2026-07-29",
+  "corpus_from": "2016-01-01",
+  "radius_m": 500,
+  "tide_station": "9410230",
+  "datum": "MLLW",
+  "tide_years": "2016-2026",
+  "content_hash": "b541c2498b7819dce9ff88ce900db46a232021447b0f63abf287cdb62ac16d91",
+  "bin_edges": [
+    -2.5,
+    -1,
+    -0.5,
+    0,
+    0.5,
+    1,
+    3
+  ],
+  "constants": {
+    "usable_bin_min_visits": 15,
+    "min_usable_bins": 3,
+    "min_concordant_pairs": 0.7,
+    "min_amplitude_ratio": 2,
+    "max_single_observer_share": 0.3
+  },
+  "queries": [
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20160101&range=8784",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20170101&range=8760",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20180101&range=8760",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20190101&range=8760",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20200101&range=8784",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20210101&range=8760",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20220101&range=8760",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20230101&range=8760",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20240101&range=8784",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20250101&range=8760",
+    "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&application=socal-coastal-data-calibration&station=9410230&time_zone=gmt&units=english&format=json&datum=MLLW&begin_date=20260101&range=8760",
+    "https://api.inaturalist.org/v2/observations?lat=33.035&lng=-117.293&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids",
+    "https://api.inaturalist.org/v2/observations?lat=33.017&lng=-117.283&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids",
+    "https://api.inaturalist.org/v2/observations?lat=32.933&lng=-117.256&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids",
+    "https://api.inaturalist.org/v2/observations?lat=32.857&lng=-117.257&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids",
+    "https://api.inaturalist.org/v2/observations?lat=32.85&lng=-117.272&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids",
+    "https://api.inaturalist.org/v2/observations?lat=32.832&lng=-117.28&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids",
+    "https://api.inaturalist.org/v2/observations?lat=32.723&lng=-117.256&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids",
+    "https://api.inaturalist.org/v2/observations?lat=32.669&lng=-117.245&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+  ],
+  "spots": [
+    {
+      "slug": "swamis",
+      "visits": 237,
+      "records": 558,
+      "observers": 185,
+      "amplitude_ratio": 5.0366300366300365,
+      "published": true,
+      "null_reason": null,
+      "bins": [
+        {
+          "lo_ft": -2.5,
+          "hi_ft": -1,
+          "visits": 91,
+          "hits": 55,
+          "rate": 0.6043956043956044,
+          "usable": true
+        },
+        {
+          "lo_ft": -1,
+          "hi_ft": -0.5,
+          "visits": 55,
+          "hits": 29,
+          "rate": 0.5272727272727272,
+          "usable": true
+        },
+        {
+          "lo_ft": -0.5,
+          "hi_ft": 0,
+          "visits": 51,
+          "hits": 16,
+          "rate": 0.3137254901960784,
+          "usable": true
+        },
+        {
+          "lo_ft": 0,
+          "hi_ft": 0.5,
+          "visits": 25,
+          "hits": 3,
+          "rate": 0.12,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.5,
+          "hi_ft": 1,
+          "visits": 11,
+          "hits": 1,
+          "rate": 0.09090909090909091,
+          "usable": false
+        },
+        {
+          "lo_ft": 1,
+          "hi_ft": 3,
+          "visits": 4,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
+        }
+      ],
+      "query": "https://api.inaturalist.org/v2/observations?lat=33.035&lng=-117.293&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+    },
+    {
+      "slug": "cardiff-reef",
+      "visits": 74,
+      "records": 98,
+      "observers": 50,
+      "amplitude_ratio": 1.0048076923076923,
+      "published": false,
+      "null_reason": "Refused on 2 of 4 criteria. too-few-usable-bins: 2 of 6 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. amplitude-below-gate: the lowest usable bin's rate is 1.00x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "bins": [
+        {
+          "lo_ft": -2.5,
+          "hi_ft": -1,
+          "visits": 16,
+          "hits": 11,
+          "rate": 0.6875,
+          "usable": true
+        },
+        {
+          "lo_ft": -1,
+          "hi_ft": -0.5,
+          "visits": 19,
+          "hits": 13,
+          "rate": 0.6842105263157895,
+          "usable": true
+        },
+        {
+          "lo_ft": -0.5,
+          "hi_ft": 0,
+          "visits": 14,
+          "hits": 10,
+          "rate": 0.7142857142857143,
+          "usable": false
+        },
+        {
+          "lo_ft": 0,
+          "hi_ft": 0.5,
+          "visits": 12,
+          "hits": 9,
+          "rate": 0.75,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.5,
+          "hi_ft": 1,
+          "visits": 9,
+          "hits": 8,
+          "rate": 0.8888888888888888,
+          "usable": false
+        },
+        {
+          "lo_ft": 1,
+          "hi_ft": 3,
+          "visits": 4,
+          "hits": 4,
+          "rate": 1,
+          "usable": false
+        }
+      ],
+      "query": "https://api.inaturalist.org/v2/observations?lat=33.017&lng=-117.283&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+    },
+    {
+      "slug": "torrey-pines-beach",
+      "visits": 31,
+      "records": 35,
+      "observers": 28,
+      "amplitude_ratio": null,
+      "published": false,
+      "null_reason": "Refused on 3 of 4 criteria. too-few-usable-bins: 0 of 6 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. not-declining: no usable pair of bins differs in rate, so the table is flat rather than declining. amplitude-below-gate: the amplitude ratio could not be computed: fewer than two usable bins, or the highest usable bin has no hits at all.",
+      "bins": [
+        {
+          "lo_ft": -2.5,
+          "hi_ft": -1,
+          "visits": 3,
+          "hits": 1,
+          "rate": 0.3333333333333333,
+          "usable": false
+        },
+        {
+          "lo_ft": -1,
+          "hi_ft": -0.5,
+          "visits": 4,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
+        },
+        {
+          "lo_ft": -0.5,
+          "hi_ft": 0,
+          "visits": 7,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
+        },
+        {
+          "lo_ft": 0,
+          "hi_ft": 0.5,
+          "visits": 8,
+          "hits": 4,
+          "rate": 0.5,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.5,
+          "hi_ft": 1,
+          "visits": 7,
+          "hits": 3,
+          "rate": 0.42857142857142855,
+          "usable": false
+        },
+        {
+          "lo_ft": 1,
+          "hi_ft": 3,
+          "visits": 2,
+          "hits": 1,
+          "rate": 0.5,
+          "usable": false
+        }
+      ],
+      "query": "https://api.inaturalist.org/v2/observations?lat=32.933&lng=-117.256&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+    },
+    {
+      "slug": "la-jolla-shores",
+      "visits": 239,
+      "records": 310,
+      "observers": 115,
+      "amplitude_ratio": 0.6666666666666666,
+      "published": false,
+      "null_reason": "Refused on 2 of 4 criteria. not-declining: 2 of 15 comparable bin pairs decline with height (13%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.67x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "bins": [
+        {
+          "lo_ft": -2.5,
+          "hi_ft": -1,
+          "visits": 33,
+          "hits": 17,
+          "rate": 0.5151515151515151,
+          "usable": true
+        },
+        {
+          "lo_ft": -1,
+          "hi_ft": -0.5,
+          "visits": 50,
+          "hits": 35,
+          "rate": 0.7,
+          "usable": true
+        },
+        {
+          "lo_ft": -0.5,
+          "hi_ft": 0,
+          "visits": 49,
+          "hits": 36,
+          "rate": 0.7346938775510204,
+          "usable": true
+        },
+        {
+          "lo_ft": 0,
+          "hi_ft": 0.5,
+          "visits": 50,
+          "hits": 36,
+          "rate": 0.72,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.5,
+          "hi_ft": 1,
+          "visits": 35,
+          "hits": 31,
+          "rate": 0.8857142857142857,
+          "usable": true
+        },
+        {
+          "lo_ft": 1,
+          "hi_ft": 3,
+          "visits": 22,
+          "hits": 17,
+          "rate": 0.7727272727272727,
+          "usable": true
+        }
+      ],
+      "query": "https://api.inaturalist.org/v2/observations?lat=32.857&lng=-117.257&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+    },
+    {
+      "slug": "la-jolla-cove",
+      "visits": 354,
+      "records": 545,
+      "observers": 307,
+      "amplitude_ratio": 0.85,
+      "published": false,
+      "null_reason": "Refused on 2 of 4 criteria. not-declining: 6 of 15 comparable bin pairs decline with height (40%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.85x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "bins": [
+        {
+          "lo_ft": -2.5,
+          "hi_ft": -1,
+          "visits": 56,
+          "hits": 14,
+          "rate": 0.25,
+          "usable": true
+        },
+        {
+          "lo_ft": -1,
+          "hi_ft": -0.5,
+          "visits": 73,
+          "hits": 19,
+          "rate": 0.2602739726027397,
+          "usable": true
+        },
+        {
+          "lo_ft": -0.5,
+          "hi_ft": 0,
+          "visits": 95,
+          "hits": 26,
+          "rate": 0.2736842105263158,
+          "usable": true
+        },
+        {
+          "lo_ft": 0,
+          "hi_ft": 0.5,
+          "visits": 71,
+          "hits": 18,
+          "rate": 0.2535211267605634,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.5,
+          "hi_ft": 1,
+          "visits": 42,
+          "hits": 6,
+          "rate": 0.14285714285714285,
+          "usable": true
+        },
+        {
+          "lo_ft": 1,
+          "hi_ft": 3,
+          "visits": 17,
+          "hits": 5,
+          "rate": 0.29411764705882354,
+          "usable": true
+        }
+      ],
+      "query": "https://api.inaturalist.org/v2/observations?lat=32.85&lng=-117.272&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+    },
+    {
+      "slug": "windansea",
+      "visits": 99,
+      "records": 158,
+      "observers": 89,
+      "amplitude_ratio": 1.375,
+      "published": false,
+      "null_reason": "Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.38x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "bins": [
+        {
+          "lo_ft": -2.5,
+          "hi_ft": -1,
+          "visits": 32,
+          "hits": 8,
+          "rate": 0.25,
+          "usable": true
+        },
+        {
+          "lo_ft": -1,
+          "hi_ft": -0.5,
+          "visits": 22,
+          "hits": 5,
+          "rate": 0.22727272727272727,
+          "usable": true
+        },
+        {
+          "lo_ft": -0.5,
+          "hi_ft": 0,
+          "visits": 22,
+          "hits": 4,
+          "rate": 0.18181818181818182,
+          "usable": true
+        },
+        {
+          "lo_ft": 0,
+          "hi_ft": 0.5,
+          "visits": 11,
+          "hits": 1,
+          "rate": 0.09090909090909091,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.5,
+          "hi_ft": 1,
+          "visits": 7,
+          "hits": 3,
+          "rate": 0.42857142857142855,
+          "usable": false
+        },
+        {
+          "lo_ft": 1,
+          "hi_ft": 3,
+          "visits": 5,
+          "hits": 2,
+          "rate": 0.4,
+          "usable": false
+        }
+      ],
+      "query": "https://api.inaturalist.org/v2/observations?lat=32.832&lng=-117.28&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+    },
+    {
+      "slug": "sunset-cliffs",
+      "visits": 404,
+      "records": 794,
+      "observers": 264,
+      "amplitude_ratio": 9.629629629629628,
+      "published": true,
+      "null_reason": null,
+      "bins": [
+        {
+          "lo_ft": -2.5,
+          "hi_ft": -1,
+          "visits": 162,
+          "hits": 120,
+          "rate": 0.7407407407407407,
+          "usable": true
+        },
+        {
+          "lo_ft": -1,
+          "hi_ft": -0.5,
+          "visits": 102,
+          "hits": 73,
+          "rate": 0.7156862745098039,
+          "usable": true
+        },
+        {
+          "lo_ft": -0.5,
+          "hi_ft": 0,
+          "visits": 63,
+          "hits": 26,
+          "rate": 0.4126984126984127,
+          "usable": true
+        },
+        {
+          "lo_ft": 0,
+          "hi_ft": 0.5,
+          "visits": 45,
+          "hits": 20,
+          "rate": 0.4444444444444444,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.5,
+          "hi_ft": 1,
+          "visits": 26,
+          "hits": 2,
+          "rate": 0.07692307692307693,
+          "usable": true
+        },
+        {
+          "lo_ft": 1,
+          "hi_ft": 3,
+          "visits": 6,
+          "hits": 2,
+          "rate": 0.3333333333333333,
+          "usable": false
+        }
+      ],
+      "query": "https://api.inaturalist.org/v2/observations?lat=32.723&lng=-117.256&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+    },
+    {
+      "slug": "cabrillo-tidepools",
+      "visits": 1223,
+      "records": 3132,
+      "observers": 806,
+      "amplitude_ratio": 11.834203655352482,
+      "published": true,
+      "null_reason": null,
+      "bins": [
+        {
+          "lo_ft": -2.5,
+          "hi_ft": -1,
+          "visits": 383,
+          "hits": 259,
+          "rate": 0.6762402088772846,
+          "usable": true
+        },
+        {
+          "lo_ft": -1,
+          "hi_ft": -0.5,
+          "visits": 247,
+          "hits": 142,
+          "rate": 0.5748987854251012,
+          "usable": true
+        },
+        {
+          "lo_ft": -0.5,
+          "hi_ft": 0,
+          "visits": 330,
+          "hits": 139,
+          "rate": 0.4212121212121212,
+          "usable": true
+        },
+        {
+          "lo_ft": 0,
+          "hi_ft": 0.5,
+          "visits": 148,
+          "hits": 38,
+          "rate": 0.25675675675675674,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.5,
+          "hi_ft": 1,
+          "visits": 80,
+          "hits": 12,
+          "rate": 0.15,
+          "usable": true
+        },
+        {
+          "lo_ft": 1,
+          "hi_ft": 3,
+          "visits": 35,
+          "hits": 2,
+          "rate": 0.05714285714285714,
+          "usable": true
+        }
+      ],
+      "query": "https://api.inaturalist.org/v2/observations?lat=32.669&lng=-117.245&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
+    }
+  ]
+}

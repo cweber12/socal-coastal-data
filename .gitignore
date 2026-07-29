@@ -17,3 +17,14 @@ next-env.d.ts
 # Claude Code: settings.json is the shared project allowlist and is tracked.
 # settings.local.json is per-machine by convention and must not be.
 .claude/settings.local.json
+
+# Calibration raw pulls. Roughly a third of the iNaturalist corpus is All Rights
+# Reserved or No Derivatives, so the joined rows cannot be redistributed. What IS
+# committed is the counts, the queries and the content hash -- everything needed
+# to check a number without republishing the records behind it.
+calibration/cache/
+
+# The offline run's report. Regenerated on every `npm run calibrate` and on every
+# CI run, and it is not the deliverable -- calibration/out/report.md, written by
+# the live run against the whole corpus, is.
+calibration/out/report.fixtures.md

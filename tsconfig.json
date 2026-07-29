@@ -16,6 +16,11 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    // calibration/ runs under `node --experimental-strip-types`, which resolves
+    // imports the way the runtime does: the specifier must name the file that
+    // exists, extension and all. Next's own modules keep their extensionless
+    // imports -- this only permits the explicit form, it does not require it.
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [

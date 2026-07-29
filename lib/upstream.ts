@@ -36,6 +36,7 @@
 import 'server-only';
 
 import {
+  coopsPredictionsUrl,
   parseCoopsSeries,
   type CoopsRequestContract,
   type TideSeries,
@@ -73,30 +74,29 @@ const USER_AGENT =
  * CO-OPS predictions
  * ========================================================================= */
 
-const COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
+/**
+ * This app's courtesy identifier to NOAA. The calibration pipeline sends its
+ * own, so the two are distinguishable in NOAA's logs.
+ */
+const COOPS_APPLICATION = 'socal-coastal-data-web';
 
 /**
- * The request contract, pinned in one place.
+ * The request contract now lives in lib/tide.ts, beside the parser that demands
+ * the same three undeclarable facts -- time_zone, units and datum. Issue #32
+ * needed the builder from outside a React Server Component, and restating it
+ * there would have been the second source of truth that eventually disagrees.
  *
- * time_zone=gmt because the payload's timestamps carry no offset and gmt is the
- * one setting under which reading them as UTC is correct. units=english because
- * the payload does not state its unit either. Both are then handed to the parser
- * as declared facts. verify_coastal_apis.py pins the identical values, and its
- * comment records the 7-hour bug that came of getting the first one wrong.
+ * The URL this produces is byte-identical to what this file built before,
+ * asserted in upstream.test.ts against every parameter.
  */
 function predictionsUrl(stationId: string, beginDate: LocalDate, rangeHours: number): string {
-  const params = new URLSearchParams({
-    product: 'predictions',
-    application: 'socal-coastal-data-web',
-    station: stationId,
-    time_zone: 'gmt',
-    units: 'english',
-    format: 'json',
+  return coopsPredictionsUrl({
+    stationId,
+    beginDate,
+    rangeHours,
     datum: TIDE_DATUM,
-    begin_date: formatLocalDate(beginDate).replace(/-/g, ''),
-    range: String(rangeHours),
+    application: COOPS_APPLICATION,
   });
-  return `${COOPS_BASE}?${params.toString()}`;
 }
 
 export class UpstreamError extends Error {

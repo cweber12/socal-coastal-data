@@ -26,3 +26,14 @@ shared/spots.generated.ts linguist-generated=true
 # Captured upstream payloads, kept byte-for-byte as the endpoint served them.
 # They are evidence, not source, and reviewing them line by line is noise.
 lib/__fixtures__/** linguist-vendored=true
+
+# Generated from shared/calibration.json, on the same terms as the spots union.
+shared/calibration.generated.ts linguist-generated=true
+
+# The calibration's captured payloads. A deliberate cc0/cc-by-only capture, kept
+# byte-for-byte, so it can be redistributed at all -- roughly a third of the full
+# corpus is All Rights Reserved or No Derivatives and is never committed.
+calibration/__fixtures__/** linguist-vendored=true
+
+# Written by calibration/run.ts. Reviewed as a diff, not authored.
+calibration/out/** linguist-generated=true
