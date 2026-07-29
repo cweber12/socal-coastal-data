@@ -59,6 +59,13 @@ jobs:
       - name: Generated types are in step with the inventory
         run: npm run gen:types:check
 
+      # shared/calibration.generated.ts is derived from shared/calibration.json,
+      # and its discriminated union is what stops a refused spot's rate being
+      # read without its reason. Same argument as the spots union above, and the
+      # same reason it runs on windows-latest too.
+      - name: Generated calibration types are in step with the calibration
+        run: npm run gen:calibration:check
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -68,6 +75,13 @@ jobs:
       # this job has no retry and no network allowance.
       - name: Tests
         run: npm run test
+
+      # The calibration pipeline, offline against its committed cc0/cc-by
+      # fixtures. It reaches no network -- that is the whole point of the default
+      # mode -- and it cannot write shared/calibration.json, which only --fetch
+      # does. What this catches is a pipeline that stopped running at all.
+      - name: Calibration runs offline
+        run: npm run calibrate
 
       - name: Build
         run: npm run build

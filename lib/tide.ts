@@ -36,7 +36,7 @@
  *    response and throws here, so it can never be mistaken for a flat tide.
  */
 
-import type { LocalDate } from './time';
+import { formatLocalDate, type LocalDate } from './time';
 
 /* ===========================================================================
  * Types
@@ -98,6 +98,59 @@ export interface TideCrossing {
   tMs: number;
   /** Which way the tide was moving through the level. */
   direction: 'falling' | 'rising';
+}
+
+/* ===========================================================================
+ * The request, pinned in the same module as the parser
+ * ========================================================================= */
+
+export const COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
+
+/**
+ * Build a predictions request.
+ *
+ * This lives beside the parser rather than beside the fetch, because the three
+ * parameters the payload cannot tell you about -- time_zone, units and datum --
+ * are the same three the parser demands as a declared contract. Splitting them
+ * across two files is how they drift apart, and the whole cost of them drifting
+ * is a silently wrong number.
+ *
+ * lib/upstream.ts and the calibration pipeline both call this. upstream.ts
+ * cannot be imported outside a React Server Component -- it opens with
+ * `import 'server-only'` and passes `next: { revalidate }` to fetch -- so
+ * without this the calibration pipeline would have had to restate the contract,
+ * which is exactly the second source of truth issue #32 forbids.
+ *
+ * `application` is the caller's own courtesy identifier and is deliberately not
+ * defaulted: it is how NOAA tells the web app's traffic from the pipeline's,
+ * and a default would make both of them look like whichever was written first.
+ *
+ * `beginDate` is interpreted by CO-OPS in the requested zone, which is GMT
+ * here, so a date means 00:00 UTC on that date.
+ */
+export function coopsPredictionsUrl(options: {
+  stationId: string;
+  beginDate: LocalDate;
+  rangeHours: number;
+  datum: string;
+  application: string;
+}): string {
+  const params = new URLSearchParams({
+    product: 'predictions',
+    application: options.application,
+    station: options.stationId,
+    // The one setting under which reading the offsetless timestamps as UTC is
+    // correct. lst_ldt returns the same shape with Pacific digits and ages every
+    // reading by 7 hours; verify_coastal_apis.py carries a comment about exactly
+    // that bug.
+    time_zone: 'gmt',
+    units: 'english',
+    format: 'json',
+    datum: options.datum,
+    begin_date: formatLocalDate(options.beginDate).replace(/-/g, ''),
+    range: String(options.rangeHours),
+  });
+  return `${COOPS_BASE}?${params.toString()}`;
 }
 
 /* ===========================================================================

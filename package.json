@@ -12,7 +12,12 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "gen:types": "node scripts/gen-spots-types.mjs",
-    "gen:types:check": "node scripts/gen-spots-types.mjs --check"
+    "gen:types:check": "node scripts/gen-spots-types.mjs --check",
+    "gen:calibration": "node scripts/gen-calibration-types.mjs",
+    "gen:calibration:check": "node scripts/gen-calibration-types.mjs --check",
+    "calibrate": "node --import ./calibration/loader.mjs calibration/run.ts",
+    "calibrate:fetch": "node --import ./calibration/loader.mjs calibration/run.ts --fetch",
+    "calibrate:taxa:check": "node calibration/resolve-taxa.mjs --check"
   },
   "dependencies": {
     "next": "^16.2.12",
