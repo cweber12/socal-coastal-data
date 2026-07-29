@@ -19,20 +19,49 @@ export function SpotHeader({
   spot,
   ceiling,
   showSpotLink,
+  /**
+   * True when the host page already carries the spot's name as its `h1`.
+   *
+   * The spot page did: an `h1` reading "Cabrillo Tidepools" with an `h3`
+   * repeating it verbatim in the panel directly beneath. The coordinates and
+   * the thresholds still belong here; the name is the only part that was
+   * already on the page. The grid's row disclosure passes false, because there
+   * this heading is the panel's only label.
+   */
+  nameOnPage = false,
 }: {
   spot: TidepoolSpot;
   ceiling: SwellCeiling;
   showSpotLink: boolean;
+  nameOnPage?: boolean;
 }) {
   return (
     <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-      <h3 className="text-sm font-semibold tracking-tight">
-        {showSpotLink ? <Link href={`/spot/${spot.slug}`}>{spot.name}</Link> : spot.name}
-        <span className="ml-2 text-xs font-normal text-[var(--text-dimmer)]">
+      {/*
+        The heading goes away with the name, rather than staying and holding
+        the coordinates.
+
+        The first version of nameOnPage swapped the h3's CONTENTS and left the
+        element, which produced `<h3>32.669, -117.245</h3>`. A heading whose
+        text is a coordinate pair is not a heading: it breaks the document
+        outline for anyone navigating by headings, and it does not name the
+        panel it sits in either. When the host page already carries the spot as
+        its h1, there is no second heading to write here -- the coordinates are
+        a caption.
+      */}
+      {nameOnPage ? (
+        <p className="text-meta text-[var(--text-dimmer)]">
           {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
-        </span>
-      </h3>
-      <p className="text-xs text-[var(--text-dimmer)]">
+        </p>
+      ) : (
+        <h3 className="text-section font-semibold tracking-tight">
+          {showSpotLink ? <Link href={`/spot/${spot.slug}`}>{spot.name}</Link> : spot.name}
+          <span className="ml-2 text-meta font-normal text-[var(--text-dimmer)]">
+            {spot.lat.toFixed(3)}, {spot.lon.toFixed(3)}
+          </span>
+        </h3>
+      )}
+      <p className="text-meta text-[var(--text-dimmer)]">
         {thresholdDisclosure(
           spot.tidepool_floor_ft,
           spot.tidepool_floor_confidence,
@@ -59,7 +88,22 @@ export function SwellProvenance({
   ceiling: SwellCeiling;
 }) {
   return (
-    <p className="mt-2 text-xs leading-relaxed text-[var(--text-dimmer)]">
+    /*
+      text-ui, not text-meta.
+      -----------------------------------------------------------------------
+      The type migration swept this to 11px along with the evaluation stamps
+      and the file-provenance footnotes, which was a misreading of the brief's
+      own principle. That principle demotes CAVEATS -- statements about how
+      much to trust a number. This is not one. Which buoy the reading came
+      from, how old it is, whether a fallback is standing in for a dead primary
+      and "may be geographically distant and read differently for the same
+      conditions", and whether the swell is unknown rather than calm -- those
+      are facts about the data being shown, and one of them can invalidate
+      every verdict on the page.
+
+      Apparatus is set small. This is not apparatus.
+    */
+    <p className="mt-2 text-ui text-[var(--text-dim)]">
       {swell.swellFt === null ? (
         <>
           <strong>Swell unknown.</strong> No buoy in this spot&apos;s binding is delivering a

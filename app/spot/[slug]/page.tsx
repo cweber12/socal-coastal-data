@@ -8,7 +8,7 @@ import { MidnightNotice } from '@/components/midnight-notice';
 import { WeekRibbon } from '@/components/week-ribbon';
 import { SpotProtection } from '@/components/spot-protection';
 import { UnresolvedDisclosure } from '@/components/unresolved';
-import { CellShell, TideLine } from '@/components/window-cell';
+import { CellShell, FloorGap, TideLine } from '@/components/window-cell';
 import { loadSpotWeek, tidepoolSpotBySlug } from '@/lib/grid';
 import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
 import { formatDateLong, formatLocalDate, startOfLocalDay } from '@/lib/time';
@@ -45,7 +45,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
 
   return (
     <div>
-      <nav aria-label="Breadcrumb" className="text-xs">
+      <nav aria-label="Breadcrumb" className="text-ui">
         <Link href="/">All spots</Link>
         <span aria-hidden className="mx-1.5 text-[var(--text-dimmer)]">
           /
@@ -53,8 +53,8 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
         <span className="text-[var(--text-dim)]">{spot.name}</span>
       </nav>
 
-      <h1 className="mt-2 text-base font-semibold tracking-tight">{spot.name}</h1>
-      <p className="mt-1 text-xs text-[var(--text-dim)]">
+      <h1 className="mt-2 text-title font-semibold tracking-tight">{spot.name}</h1>
+      <p className="mt-1 text-meta text-[var(--text-dim)]">
         {spot.audiences.join(' · ')} · tide station {spot.tide_station} · coordinates are ±100 m
       </p>
 
@@ -79,6 +79,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
               swell={week.swell}
               ceiling={week.ceiling}
               showSpotLink={false}
+              nameOnPage
             />
           </div>
 
@@ -102,7 +103,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
                     <div
                       role="note"
                       aria-label={`${spot.name}, ${dayLabel}: not evaluated.`}
-                      className="flex items-baseline justify-between gap-3 rounded-md border border-dashed border-[var(--border-strong)] px-3 py-2 text-xs text-[var(--text-dimmer)]"
+                      className="flex items-baseline justify-between gap-3 rounded-md border border-dashed border-[var(--border-strong)] px-3 py-2 text-ui text-[var(--text-dimmer)]"
                     >
                       <span aria-hidden className="font-medium">
                         {dayLabel}
@@ -128,12 +129,12 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
                     <Link
                       href={`/spot/${spot.slug}/${dateKey}`}
                       aria-label={cellAriaLabel(spot.name, result, week.timeZone)}
-                      className="cell-link flex items-baseline justify-between gap-3 rounded-md py-2 pl-3 pr-8 text-xs no-underline"
+                      className="cell-link flex items-baseline justify-between gap-3 rounded-md py-2 pl-3 pr-8 text-data no-underline"
                     >
                       <span aria-hidden className="font-medium">
                         {dayLabel}
                       </span>
-                      <span aria-hidden>
+                      <span aria-hidden className="text-right">
                         <TideLine
                           arrow="▼"
                           heightFt={result.lowFt}
@@ -141,6 +142,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
                           timeZone={week.timeZone}
                           emphasis
                         />
+                        <FloorGap lowFt={result.lowFt} floorFt={result.floorFt} />
                       </span>
                     </Link>
                   </CellShell>
@@ -155,10 +157,10 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
 
       {spot.notes ? (
         <section className="mt-5">
-          <h2 className="text-xs font-semibold tracking-wide uppercase text-[var(--text-dim)]">
+          <h2 className="text-ui font-semibold tracking-wide uppercase text-[var(--text-dim)]">
             From the inventory
           </h2>
-          <p className="mt-1.5 max-w-prose text-xs leading-relaxed text-[var(--text-dim)]">
+          <p className="mt-1.5 max-w-prose text-ui text-[var(--text-dim)]">
             {spot.notes}
           </p>
         </section>

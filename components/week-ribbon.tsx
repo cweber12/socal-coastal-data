@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { FlagBadge } from '@/components/flag-badge';
 import { SpotHeader, SwellProvenance } from '@/components/spot-summary';
-import { CellShell, TideLine } from '@/components/window-cell';
+import { CellShell, FloorGap, TideLine } from '@/components/window-cell';
 import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
 import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/lib/time';
 import { lowLighting, type WindowResult } from '@/lib/windows';
@@ -37,6 +37,7 @@ export function WeekRibbon({
   swell,
   ceiling,
   showSpotLink = true,
+  nameOnPage = false,
 }: {
   spot: TidepoolSpot;
   days: readonly (WindowResult | null)[];
@@ -45,10 +46,12 @@ export function WeekRibbon({
   swell: SpotSwell;
   ceiling: SwellCeiling;
   showSpotLink?: boolean;
+  /** The host page already has the spot name as its h1. */
+  nameOnPage?: boolean;
 }) {
   return (
     <div className="rounded-md border border-[var(--border)] bg-[var(--surface-sunken)] p-3">
-      <SpotHeader spot={spot} ceiling={ceiling} showSpotLink={showSpotLink} />
+      <SpotHeader spot={spot} ceiling={ceiling} showSpotLink={showSpotLink} nameOnPage={nameOnPage} />
 
       <ol className="flex list-none gap-1.5 overflow-x-auto pb-1">
         {/*
@@ -76,7 +79,7 @@ export function WeekRibbon({
                 <div
                   role="note"
                   aria-label={`${spot.name}, day ${i + 1}: not evaluated.`}
-                  className="rounded border border-dashed border-[var(--border-strong)] px-2 py-1.5 text-[0.7rem] text-[var(--text-dimmer)]"
+                  className="rounded border border-dashed border-[var(--border-strong)] px-2 py-1.5 text-ui text-[var(--text-dimmer)]"
                 >
                   <span aria-hidden className="block">
                     {heading}
@@ -101,7 +104,7 @@ export function WeekRibbon({
               >
                 <Link
                   href={`/spot/${spot.slug}/${dateKey}`}
-                  className="cell-link block rounded py-1.5 pl-2 pr-6 text-[0.7rem] no-underline transition-colors"
+                  className="cell-link block rounded py-1.5 pl-2 pr-6 text-data no-underline transition-colors"
                   aria-label={cellAriaLabel(spot.name, result, timeZone)}
                 >
                   <span aria-hidden className="block">
@@ -122,6 +125,7 @@ export function WeekRibbon({
                           timeZone={timeZone}
                         />
                       ) : null}
+                      <FloorGap lowFt={result.lowFt} floorFt={result.floorFt} />
                     </span>
                   </span>
                 </Link>

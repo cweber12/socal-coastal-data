@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen antialiased">
         <a
           href="#content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-[var(--surface-raised)] focus:px-3 focus:py-2 focus:text-sm"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-[var(--surface-raised)] focus:px-3 focus:py-2 focus:text-data"
         >
           Skip to content
         </a>
@@ -29,11 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-baseline gap-x-3 gap-y-1 px-3 py-3 wide:px-5">
             <Link
               href="/"
-              className="text-[0.95rem] font-semibold tracking-tight no-underline"
+              className="text-section font-semibold tracking-tight no-underline"
             >
               Tide windows
             </Link>
-            <span className="text-xs text-[var(--text-dimmer)]">
+            <span className="text-ui text-[var(--text-dimmer)]">
               Oceanside Harbor → Border Field
             </span>
           </div>
@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
 
-        <footer className="mx-auto max-w-[1400px] px-3 pt-2 pb-10 text-xs leading-relaxed text-[var(--text-dimmer)] wide:px-5">
+        <footer className="mx-auto max-w-[1400px] px-3 pt-2 pb-10 text-meta text-[var(--text-dimmer)] wide:px-5">
           <p>
             Tide predictions: NOAA CO-OPS, datum MLLW, feet. Swell: NDBC realtime2,
             significant wave height. Predictions are astronomical and do not

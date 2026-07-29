@@ -100,7 +100,7 @@ export function MidnightNotice({
       className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-strong)] bg-[var(--surface-raised)] px-3 py-2.5 shadow-lg"
     >
       <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <p className="text-xs leading-relaxed">
+        <p className="text-ui">
           <strong>The date has changed.</strong> This page is still showing the week from{' '}
           {evaluatedDateLabel}, and its first column is no longer today. Nothing has moved on
           its own — reload when you are ready.
@@ -108,7 +108,7 @@ export function MidnightNotice({
         <button
           type="button"
           onClick={() => router.refresh()}
-          className="shrink-0 rounded border border-[var(--border-strong)] bg-[var(--surface-sunken)] px-3 py-1.5 text-xs font-medium hover:brightness-110"
+          className="shrink-0 rounded border border-[var(--border-strong)] bg-[var(--surface-sunken)] px-3 py-1.5 text-ui font-medium hover:brightness-110"
         >
           Roll the window forward
         </button>

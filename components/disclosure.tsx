@@ -19,7 +19,7 @@ export function EvaluationStamp({
   extra?: string;
 }) {
   return (
-    <p className="text-xs text-[var(--text-dimmer)]">
+    <p className="text-meta text-[var(--text-dimmer)]">
       Evaluated <time dateTime={new Date(evaluatedAtMs).toISOString()}>{formatStamp(evaluatedAtMs, timeZone)}</time>
       {extra ? ` · ${extra}` : ''}
     </p>
@@ -43,7 +43,7 @@ export function Notices({ notices }: { notices: readonly Notice[] }) {
 
   return (
     <section aria-labelledby="notices-heading" className="mt-6">
-      <h2 id="notices-heading" className="text-xs font-semibold tracking-wide uppercase text-[var(--text-dim)]">
+      <h2 id="notices-heading" className="text-ui font-semibold tracking-wide uppercase text-[var(--text-dim)]">
         Data notices ({notices.length})
       </h2>
 
@@ -52,11 +52,11 @@ export function Notices({ notices }: { notices: readonly Notice[] }) {
           className="tint-panel mt-2 rounded-md border p-3"
           style={{ ['--tint-color' as string]: 'var(--color-alert)' }}
         >
-          <p className="text-xs font-semibold">
+          <p className="text-ui font-semibold">
             An upstream format has changed. Wave height is being reported as unknown rather than
             guessed at, so no day can read as a pass on swell.
           </p>
-          <ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed">
+          <ul className="mt-1.5 list-disc space-y-1 pl-4 text-meta">
             {drift.map((n, i) => (
               <li key={i}>{n.message}</li>
             ))}
@@ -65,7 +65,7 @@ export function Notices({ notices }: { notices: readonly Notice[] }) {
       ) : null}
 
       {warn.length > 0 ? (
-        <ul className="mt-2 list-disc space-y-1 pl-4 text-xs leading-relaxed text-[var(--text-dim)]">
+        <ul className="mt-2 list-disc space-y-1 pl-4 text-meta text-[var(--text-dim)]">
           {warn.map((n, i) => (
             <li key={i}>{n.message}</li>
           ))}
@@ -74,10 +74,10 @@ export function Notices({ notices }: { notices: readonly Notice[] }) {
 
       {info.length > 0 ? (
         <details className="mt-2">
-          <summary className="cursor-pointer text-xs text-[var(--text-dimmer)]">
+          <summary className="cursor-pointer text-meta text-[var(--text-dimmer)]">
             {info.length} more upstream {info.length === 1 ? 'note' : 'notes'}
           </summary>
-          <ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed text-[var(--text-dimmer)]">
+          <ul className="mt-1.5 list-disc space-y-1 pl-4 text-meta text-[var(--text-dimmer)]">
             {info.map((n, i) => (
               <li key={i}>{n.message}</li>
             ))}
@@ -107,15 +107,15 @@ export function UpstreamFailure({
       className="tint-panel rounded-md border p-4"
       style={{ ['--tint-color' as string]: 'var(--color-alert)' }}
     >
-      <h2 className="text-sm font-semibold">{what} could not be loaded</h2>
-      <p className="mt-1.5 text-xs leading-relaxed">
+      <h2 className="text-section font-semibold">{what} could not be loaded</h2>
+      <p className="mt-1.5 text-ui">
         No tide window is shown, which means unknown — not that there are no windows.
       </p>
-      <p className="mt-2 font-mono text-[0.7rem] leading-relaxed break-all text-[var(--text-dim)]">
+      <p className="mt-2 font-mono text-meta break-all text-[var(--text-dim)]">
         {failure.message}
       </p>
       {failure.url ? (
-        <p className="mt-1.5 font-mono text-[0.7rem] leading-relaxed break-all text-[var(--text-dimmer)]">
+        <p className="mt-1.5 font-mono text-meta break-all text-[var(--text-dimmer)]">
           {failure.url}
         </p>
       ) : null}

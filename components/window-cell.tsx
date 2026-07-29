@@ -1,7 +1,13 @@
 import Link from 'next/link';
 
 import { FlagBadge } from '@/components/flag-badge';
-import { cellAriaLabel, flagBadgeLabel, formatHeight, unevaluatedAriaLabel } from '@/lib/labels';
+import {
+  cellAriaLabel,
+  flagBadgeLabel,
+  formatFloorGap,
+  formatHeight,
+  unevaluatedAriaLabel,
+} from '@/lib/labels';
 import { formatClock, formatDuration, formatLocalDate, type LocalDate } from '@/lib/time';
 import { lowLighting, type WindowResult } from '@/lib/windows';
 
@@ -69,7 +75,7 @@ export function WindowCell({
         aria-label={cellAriaLabel(spotName, result, timeZone)}
         className={[
           'cell-link block h-full rounded-md py-1.5 pl-2 pr-6 no-underline transition-colors',
-          compact ? 'text-[0.7rem]' : 'text-[0.72rem]',
+          compact ? 'text-meta' : 'text-data',
         ].join(' ')}
       >
         {/* aria-hidden throughout: the label above already says all of this in prose. */}
@@ -90,6 +96,8 @@ export function WindowCell({
               timeZone={timeZone}
             />
           ) : null}
+
+          <FloorGap lowFt={result.lowFt} floorFt={result.floorFt} />
 
           {result.isToday && result.minutesRemaining !== null && result.minutesRemaining > 0 ? (
             <span className="mt-1 block font-medium">
@@ -174,7 +182,8 @@ export function TideLine({
   return (
     <span
       className={[
-        'flex items-baseline gap-1 font-mono tabular-nums',
+        // nowrap: a clock time may not break across two lines.
+        'flex items-baseline gap-1 font-mono tabular-nums whitespace-nowrap',
         emphasis
           ? 'text-[1.05em] font-semibold'
           : 'mt-0.5 text-[0.95em] text-[var(--cell-fg-dim,var(--text-dim))]',
@@ -183,6 +192,71 @@ export function TideLine({
       <span className="text-[0.8em] text-[var(--cell-fg-dimmer,var(--text-dimmer))]">{arrow}</span>
       <span>{formatHeight(heightFt)}</span>
       <span className="text-[var(--cell-fg-dim,var(--text-dim))]">{formatClock(tMs, timeZone)}</span>
+    </span>
+  );
+}
+
+/**
+ * How far this low sits from the spot's reef floor.
+ *
+ * ---------------------------------------------------------------------------
+ * Why a grid of identical rows needed this
+ * ---------------------------------------------------------------------------
+ *
+ * All eight evaluable spots bind to tide station 9410230, so every row of the
+ * grid printed the same seven lows and the same seven highs: 56 cells carrying
+ * 7 distinct values. The axis the table varies on is the spot, and nothing
+ * displayed varied with it. What actually differs per spot is the floor --
+ * 0.7 ft at Sunset Cliffs to 1.3 ft at Cabrillo -- and it was on no page at all.
+ *
+ * ---------------------------------------------------------------------------
+ * Why this is not the verdict coming back
+ * ---------------------------------------------------------------------------
+ *
+ * window-cell and flag-badge both argue that window STATE stays off the face of
+ * the grid, because a coloured verdict reads as a measurement while resting on
+ * a floor and a ceiling nobody has field-checked. That argument holds and this
+ * does not breach it.
+ *
+ * A verdict hides its inputs: a red cell tells you the answer and not which
+ * number was a guess. This prints a subtraction with both operands on the page
+ * -- the low is in the same line, the floor is in the row header -- so a reader
+ * can check it and can see that the floor is the estimated half.
+ *
+ * Which is also why it is monochrome. Colour is what turned the old state grid
+ * into 56 confident-looking refusals. Weight alone marks the under-floor case,
+ * and weight is not a claim about certainty.
+ */
+export function FloorGap({ lowFt, floorFt }: { lowFt: number; floorFt: number }) {
+  const reachesFloor = lowFt < floorFt;
+  return (
+    <span
+      className={[
+        /*
+         * Its own line, right-aligned, rather than inline with the low.
+         *
+         * Inline was the first attempt and it does not fit. Measured on the
+         * rendered grid: the table wanted 1454px against a container that caps
+         * at 1360px even on a wide viewport, because the layout is
+         * max-w-[1400px]. Day columns went from ~150px to 178-186px, and they
+         * have to stay at or under 151px for seven of them plus the 181px spot
+         * column to fit. The gap costs about 30px and there were 13px going
+         * spare, so no arrangement of it on an existing line works.
+         *
+         * On its own line it costs height instead of width -- about 18px a row
+         * -- and every column fits again.
+         *
+         * Right-aligned so the gaps form a column of their own down the grid.
+         * That is the comparison a reader is making: not this gap against the
+         * clock beside it, but this spot's gap against the seven under it.
+         */
+        'mt-0.5 block text-right font-mono tabular-nums',
+        reachesFloor
+          ? 'font-semibold'
+          : 'font-normal text-[var(--cell-fg-dim,var(--text-dim))]',
+      ].join(' ')}
+    >
+      {formatFloorGap(lowFt, floorFt)}
     </span>
   );
 }
@@ -209,7 +283,7 @@ export function UnevaluatedCell({
     <div
       role="note"
       aria-label={unevaluatedAriaLabel(spotName, date, timeZone, dateMs)}
-      className="flex h-full items-center justify-center rounded-md border border-dashed border-[var(--border-strong)] px-2 py-1.5 text-[0.7rem] text-[var(--text-dimmer)]"
+      className="flex h-full items-center justify-center rounded-md border border-dashed border-[var(--border-strong)] px-2 py-1.5 text-ui text-[var(--text-dimmer)]"
     >
       <span aria-hidden>not evaluated</span>
     </div>

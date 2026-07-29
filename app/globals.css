@@ -11,6 +11,80 @@
 
   --font-mono:
     ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, monospace;
+
+  /*
+   * Type scale.
+   *
+   * Five steps, named for the job each does rather than for its size, matching
+   * how the rest of this file names things -- --surface-sunken, not --gray-100.
+   *
+   * The ordering is the whole point. Before this existed there were 79
+   * font-size declarations across 9 arbitrary values, and the result was that
+   * the page disclaimed its own data in larger type than the data:
+   *
+   *   tide reading   text-[0.72rem]  11.52px
+   *   footer caveat  text-xs         12.00px
+   *
+   * A caveat set larger than the measurement it qualifies tells a reader the
+   * caveat is the more important of the two. It is not. Uncertainty here is
+   * disclosed in full and never hidden, but it is apparatus, and apparatus is
+   * set small.
+   */
+
+  /* Caveats, provenance, evaluation stamps, column-header notes. The floor for
+     any text on this page -- nothing goes below it. Loose leading, because this
+     is the text people read least willingly. */
+  --text-meta: 0.6875rem;
+  --text-meta--line-height: 1.55;
+
+  /* UI furniture: labels, breadcrumbs, sort links, table headers. */
+  --text-ui: 0.75rem;
+  --text-ui--line-height: 1.4;
+
+  /* The product. Tide heights, clock times, floor gaps, the four day facts.
+     The largest text inside any cell. Tight leading: numeric, read in columns. */
+  --text-data: 0.8125rem;
+  --text-data--line-height: 1.35;
+
+  /* Section headings -- "Marine protection", "Data notices", spot names. */
+  --text-section: 1rem;
+  --text-section--line-height: 1.3;
+
+  /* Page title, once per page. */
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.2;
+
+  /*
+   * One reading width for the whole page.
+   *
+   * The spot page ran three: Tailwind's `max-w-prose` (65ch) on the inventory
+   * notes, a hand-written 68ch on the tinted panels, and full container width
+   * on the ribbon. Three left-aligned blocks with three different right edges
+   * down a single column reads as drift rather than as rhythm.
+   *
+   * 65ch, matching `max-w-prose`, so the two agree wherever both are used.
+   * Panels add their own padding on top -- see --panel-measure.
+   */
+  --measure: 65ch;
+}
+
+/*
+ * The panel equivalent, which has to be wider than the text inside it.
+ *
+ * A .tint-panel carries p-3, so a panel capped at --measure would set its TEXT
+ * to 65ch minus 1.5rem and its right edge would land short of every bare
+ * paragraph on the page. Adding the padding back is what makes the text edges
+ * line up rather than the box edges.
+ *
+ * `ch` resolves against the font-size of the element it is DECLARED on, not the
+ * text inside it. The panel div inherits 16px from body while its paragraphs
+ * are 12px, so `65ch` on the panel measured 65 sixteen-pixel characters and put
+ * its text edge at 592px against 440px for a bare paragraph -- 150px past
+ * everything it was supposed to line up with. Pinning the panel's own font-size
+ * to the size its text actually uses makes the unit resolve on the same basis.
+ */
+:root {
+  --panel-measure: calc(var(--measure) + 1.5rem);
 }
 
 :root {
@@ -22,7 +96,35 @@
   --text: oklch(0.24 0.02 250);
   --text-dim: oklch(0.5 0.02 250);
   --text-dimmer: oklch(0.62 0.015 250);
-  --tint: 0.92;
+
+  /*
+   * Tint panel strength.
+   *
+   * This used to be `--tint`, meaning "how much surface is left", and
+   * .tint-panel mixed `calc((1 - var(--tint)) * 100%)` of the accent. Light set
+   * 0.92 for 8% accent, which was right. Dark set 0.24, which is 76% accent --
+   * a near-fully-saturated mustard slab, and it made the loudest thing on the
+   * dark page a footnote about uncertainty.
+   *
+   * Renamed to what it actually controls and the inversion deleted, so nobody
+   * can re-enter the trap by reading the number and reasoning forwards from it.
+   * Dark takes MORE accent than light, not less: these accents sit at mid
+   * lightness, so against a dark surface they need more presence to register as
+   * a tint at all.
+   */
+  --tint-strength: 8%;
+  --tint-border-strength: 45%;
+
+  /*
+   * Meta text on a tinted panel.
+   *
+   * The provenance line under each safety callout was set in --text-dimmer,
+   * which is chosen for contrast against --surface and not against a panel with
+   * an accent mixed into it. Measured on the rendered page it failed in BOTH
+   * themes, not just dark: about 3.4:1 in light and 3.2:1 in dark, against a
+   * 4.5:1 requirement.
+   */
+  --tint-text-meta: oklch(0.47 0.02 250);
 
   /*
    * Accents, named for what they mean rather than for a window state.
@@ -85,7 +187,9 @@
     --text: oklch(0.94 0.006 250);
     --text-dim: oklch(0.72 0.015 250);
     --text-dimmer: oklch(0.58 0.015 250);
-    --tint: 0.24;
+    --tint-strength: 14%;
+    --tint-border-strength: 38%;
+    --tint-text-meta: oklch(0.76 0.018 250);
 
     --chart-night: oklch(0.1 0.025 265);
     --chart-night-opacity: 0.4;
@@ -130,12 +234,123 @@ body {
  * that restricts collecting -- and never for a window state.
  */
 .tint-panel {
-  background: color-mix(
-    in oklch,
-    var(--tint-color) calc((1 - var(--tint)) * 100%),
-    var(--surface-raised)
-  );
-  border-color: color-mix(in oklch, var(--tint-color) 45%, var(--border));
+  background: color-mix(in oklch, var(--tint-color) var(--tint-strength), var(--surface-raised));
+  border-color: color-mix(in oklch, var(--tint-color) var(--tint-border-strength), var(--border));
+
+  /*
+   * The panel is constrained, not just its text.
+   *
+   * Every one of these panels wrapped `max-w-prose` contents in a full-bleed
+   * box, so the copy occupied the left third and the remaining two thirds were
+   * an empty field of colour. At the width of a 1280px page that reads as a
+   * layout fault rather than as emphasis.
+   *
+   * Derived from --measure rather than hand-set, so panel text and bare prose
+   * share a right edge. It was 68ch against prose at 65ch, which put a panel's
+   * text three characters past every paragraph near it.
+   */
+  /* So the ch in --panel-measure resolves against the size the panel's own
+     text is set at. See the note on --panel-measure. */
+  font-size: var(--text-ui);
+  max-width: var(--panel-measure);
+}
+
+/* The provenance line inside a tint panel. See --tint-text-meta. */
+.tint-panel-source {
+  color: var(--tint-text-meta);
+}
+
+/* ---------------------------------------------------------------------------
+ * The grid's horizontal scroll
+ * -------------------------------------------------------------------------
+ *
+ * `wide:` reveals all seven day columns at 600px, but the table's minimum
+ * content width is 1160px and it does not fit until the viewport reaches
+ * 1200px. Measured, table against container:
+ *
+ *    600px  container  560  clips 600px      1024px  container  984  clips 176px
+ *    768px  container  728  clips 432px      1200px  container 1160  fits
+ *
+ * So there is a 600px-wide band -- every tablet and every small laptop -- where
+ * the grid scrolls. `overflow-x: auto` meant the page itself never overflowed,
+ * so this was a silently scrollable region that did not look scrollable: at
+ * 768px the Fri column was sliced down its middle and three more were off
+ * screen with nothing on the page to say so.
+ *
+ * Three rules make that scroll honest, and none of them needs JavaScript.
+ */
+.grid-scroller {
+  overflow-x: auto;
+
+  /*
+   * Snap on column edges, so a scroll never comes to rest with a cell cut in
+   * half. `proximity` rather than `mandatory`: mandatory fights keyboard
+   * navigation, dragging focus to the nearest column every time a badge or a
+   * link inside a cell is tabbed to.
+   */
+  scroll-snap-type: x proximity;
+
+  /*
+   * Snap points start clear of the sticky spot column, not at the scrollport
+   * edge. Without this the column a scroll snaps to comes to rest UNDERNEATH
+   * the sticky header and the reader lands on a cell they cannot see. 11rem is
+   * the spot column's own width.
+   */
+  scroll-padding-left: 11rem;
+
+  /* A deliberate, always-present scrollbar rather than an overlay one that
+     only appears once the reader has already started scrolling. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+
+  /*
+   * Scroll shadow on the right edge, which extinguishes itself at the end of
+   * the scroll with no scroll listener.
+   *
+   * Two layers. The radial one is `scroll`, so it is painted against the
+   * scrollport and stays pinned to the right edge. The linear one is `local`,
+   * so it travels with the content -- and when the reader reaches the end it
+   * arrives over the radial layer and covers it. The shadow is therefore
+   * visible exactly when there is more table to the right.
+   */
+  background:
+    linear-gradient(to left, var(--surface), transparent) right center / 2.5rem 100% no-repeat
+      local,
+    radial-gradient(farthest-side at 100% 50%, oklch(0 0 0 / 0.18), transparent) right center /
+      0.75rem 100% no-repeat scroll;
+}
+
+.grid-scroller td {
+  scroll-snap-align: start;
+}
+
+/*
+ * The last column snaps flush right instead.
+ *
+ * Every column snapping to `start` leaves the end of the scroll unreachable:
+ * the final snap point is the last column's leading edge, which parks it with
+ * its tail still past the scrollport. Measured at 768px before this rule, a
+ * scroll to the end settled at 318 of a possible 432 and left Monday cut.
+ */
+.grid-scroller tr > td:last-child {
+  scroll-snap-align: end;
+}
+
+/*
+ * The spot column stays put.
+ *
+ * Without this the scroll is legible but useless: reaching Sun and Mon means
+ * pushing every spot name off the left edge, and the reader is then looking at
+ * eight rows of numbers with no way to tell which reef each belongs to. The
+ * floor lives in this column too, and the floor is the second operand of every
+ * gap in the row.
+ */
+.grid-scroller th[scope='row'],
+.grid-scroller thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
 }
 
 /* ---------------------------------------------------------------------------
@@ -243,16 +458,58 @@ body {
   .flag-popover {
     position: absolute;
     position-anchor: var(--flag-anchor);
-    position-area: block-end span-inline-start;
+    /*
+     * Above the badge, not below it.
+     *
+     * The badge sits in the top-right corner of its cell, so `block-end` --
+     * which is what this was -- opened the panel a few pixels under the badge
+     * and therefore ON TOP of the rest of its own cell, hiding the low, the
+     * high and the floor gap the panel is explaining. `block-start` opens
+     * upward from the badge, which clears the whole cell, because there is
+     * nothing of the cell above its own top-right corner.
+     *
+     * `block-end` stays as the first fallback for the top row, where there is
+     * no room above and covering the cell is better than being clipped.
+     */
+    position-area: block-start span-inline-start;
     position-try-fallbacks:
-      block-start span-inline-start,
-      block-end span-inline-end,
-      block-start span-inline-end;
+      block-end span-inline-start,
+      block-start span-inline-end,
+      block-end span-inline-end;
     top: auto;
     left: auto;
     translate: none;
     margin: 0.25rem 0;
   }
+
+}
+
+/*
+ * Which cell is this popover about?
+ *
+ * A real question here, and one the panel could not answer. Every cell in the
+ * grid resembles every other -- that is what one tide station serving eight
+ * spots produces -- and the panel opens over the rows BELOW its own badge, so
+ * the reader is looking at a card floating across three cells that are not the
+ * one it describes.
+ *
+ * A drawn tail was the first attempt and it is not sound: `position-try` can
+ * flip the panel above its badge or across to the other inline edge, and a tail
+ * pinned to one edge then points confidently at the wrong thing. A tail that
+ * lies is worse than no tail.
+ *
+ * So the badge marks itself instead. The popover is the badge's immediate next
+ * sibling -- FlagBadge renders them adjacent in one fragment, deliberately, so
+ * that neither is nested inside the other -- which makes `:has(+ ...)` able to
+ * select exactly the button whose own panel is open. It is correct in every
+ * position the panel can take, needs no anchor arithmetic, and degrades to
+ * nothing rather than to something wrong.
+ */
+.flag-badge:has(+ [popover]:popover-open) {
+  opacity: 1;
+  background: var(--cell-fg, var(--text));
+  color: var(--cell-bg, var(--surface-raised));
+  border-color: var(--cell-fg, var(--text));
 }
 
 @media (prefers-reduced-motion: reduce) {

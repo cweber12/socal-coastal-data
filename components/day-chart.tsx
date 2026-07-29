@@ -8,8 +8,12 @@ import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
  *
  * No charting library: the whole drawing is four paths, a few rules and some
  * labels, and a library would add a client bundle to render something that never
- * changes after paint. It scales by viewBox, so it stays sharp and readable at any
- * width without measuring the viewport.
+ * changes after paint. It scales by viewBox, so it stays sharp at any width
+ * without measuring the viewport -- but "sharp" and "readable" are not the same
+ * claim, and this comment used to make the second one. Text scales with the box
+ * too, so the labels rendered at ~22px on a wide desktop and ~4px at 375px. The
+ * min-width/max-width pair on the svg is what actually bounds that; see the
+ * comment there.
  *
  * The SVG carries `role="img"` and a one-sentence label, and the four extrema are
  * repeated underneath as a real table. A chart is not readable by a screen reader
@@ -54,7 +58,7 @@ export function DayChart({
 }) {
   if (daySeries.samples.length < 2) {
     return (
-      <p className="rounded-md border border-dashed border-[var(--border-strong)] p-4 text-xs text-[var(--text-dimmer)]">
+      <p className="rounded-md border border-dashed border-[var(--border-strong)] p-4 text-meta text-[var(--text-dimmer)]">
         No prediction samples for this day, so no chart is drawn. This means unknown, not flat.
       </p>
     );
@@ -99,11 +103,29 @@ export function DayChart({
 
   return (
     <figure className="m-0">
+      {/*
+        The chart is never scaled below 1:1, and never far above it.
+        ----------------------------------------------------------------------
+        Text inside a viewBox scales with the box, so a 760-unit-wide chart
+        stretched to a 1780px container rendered its 9-unit labels at about
+        22px -- larger than the page title -- while at 375px it squeezed the
+        same labels to roughly 4px, which is not readable by anyone. It was the
+        only type on the page untethered from the type scale, and it was wrong
+        in both directions at once.
+
+        min-width equal to the viewBox width pins the floor of that scale at
+        exactly 1.0, so the 11-unit labels render at 11px -- the same
+        --text-meta as every other caption on the page -- and below 600px the
+        chart scrolls inside its container instead of shrinking into
+        illegibility. max-width caps the ceiling at 900px, about 1.18, so the
+        labels land near 13px and stay inside one step of the scale.
+      */}
+      <div className="overflow-x-auto">
       <svg
         role="img"
         aria-label={label}
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        className="block h-auto w-full rounded-md border border-[var(--border)] bg-[var(--surface-raised)]"
+        className="block h-auto w-full min-w-[760px] max-w-[900px] rounded-md border border-[var(--border)] bg-[var(--surface-raised)]"
       >
         {/*
           Night, before sunrise and after sunset. Set through `style` rather than
@@ -177,7 +199,7 @@ export function DayChart({
               x={PAD.left - 6}
               y={y(ft) + 3.5}
               textAnchor="end"
-              fontSize="9"
+              fontSize="11"
               fill="var(--text-dimmer)"
               fontFamily="ui-monospace, monospace"
             >
@@ -200,9 +222,13 @@ export function DayChart({
           x={PAD.left + PLOT_W - 3}
           y={y(floorFt) - 5}
           textAnchor="end"
-          fontSize="9.5"
+          fontSize="11.5"
           fill="var(--color-accent)"
           fontWeight="600"
+          paintOrder="stroke"
+          stroke="var(--surface-raised)"
+          strokeWidth="3.5"
+          strokeLinejoin="round"
         >
           floor {formatHeight(floorFt)} ft
         </text>
@@ -218,13 +244,31 @@ export function DayChart({
           return (
             <g key={e.tMs}>
               <circle cx={cx} cy={cy} r="3.2" fill="var(--text)" />
+              {/*
+                Knockout halo, not a repositioning rule.
+
+                The 2:51 pm label was struck clean through by the red `now`
+                rule, and the general case is worse than that one collision:
+                these labels can also land on a gridline, on the dashed floor
+                line, or on the curve itself. Nudging them away from `now`
+                would fix one of four.
+
+                paint-order="stroke" draws a fat stroke in the panel colour
+                first and the fill over it, so the glyphs carry their own
+                background and stay legible on top of anything the chart draws
+                underneath -- without moving from the point they label.
+              */}
               <text
                 x={Math.min(WIDTH - PAD.right - 26, Math.max(PAD.left + 24, cx))}
                 y={above ? cy + 15 : cy - 8}
                 textAnchor="middle"
-                fontSize="9.5"
+                fontSize="11.5"
                 fill="var(--text-dim)"
                 fontFamily="ui-monospace, monospace"
+                paintOrder="stroke"
+                stroke="var(--surface-raised)"
+                strokeWidth="3.5"
+                strokeLinejoin="round"
               >
                 {formatHeight(e.ft)} {formatClock(e.tMs, timeZone)}
               </text>
@@ -247,9 +291,13 @@ export function DayChart({
               x={x(nowMs)}
               y={PAD.top - 7}
               textAnchor="middle"
-              fontSize="9"
+              fontSize="11"
               fontWeight="600"
               fill="var(--color-alert)"
+              paintOrder="stroke"
+              stroke="var(--surface-raised)"
+              strokeWidth="3.5"
+              strokeLinejoin="round"
             >
               now
             </text>
@@ -271,7 +319,7 @@ export function DayChart({
             x={x(tMs)}
             y={PAD.top + PLOT_H + 14}
             textAnchor={i === 0 ? 'start' : i === ticks.length - 1 ? 'end' : 'middle'}
-            fontSize="9"
+            fontSize="11"
             fill="var(--text-dimmer)"
             fontFamily="ui-monospace, monospace"
           >
@@ -279,8 +327,9 @@ export function DayChart({
           </text>
         ))}
       </svg>
+      </div>
 
-      <figcaption className="mt-2 text-xs text-[var(--text-dimmer)]">
+      <figcaption className="mt-2 text-meta text-[var(--text-dimmer)]">
         Shaded ends are night. The tinted band is the usable window, already trimmed on the flood
         side. Predictions are astronomical and exclude weather-driven surge.
       </figcaption>
@@ -301,8 +350,8 @@ function ExtremaTable({
   timeZone: string;
 }) {
   return (
-    <table className="mt-4 w-full text-left text-xs">
-      <caption className="pb-1.5 text-left text-xs text-[var(--text-dim)]">
+    <table className="mt-4 w-full text-left text-data">
+      <caption className="pb-1.5 text-left text-meta text-[var(--text-dim)]">
         The day&apos;s turning points
       </caption>
       <thead>
