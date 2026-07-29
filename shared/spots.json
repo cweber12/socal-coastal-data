@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.3.1",
   "generated": "2026-07-29",
   "corridor": "Oceanside Harbor to Border Field, San Diego County, CA",
 
@@ -209,6 +209,16 @@
           "n": null,
           "run_date": "2026-07-28",
           "note": "1.1.1 set -0.6 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.9 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        },
+        {
+          "method": "marine_topography",
+          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Swami's Beach site page, read for network membership and survey type; nearest Biodiversity Survey site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-29",
+          "note": "Ran and found no Biodiversity Survey site here, so no surveyed elevation exists at this spot at any distance. A MARINe site named 'Swami's Beach' does exist, but it runs Long-Term Monitoring only, established 2017 by National Park Service staff, and LTM has no topography component -- elevation along transects belongs to the Biodiversity Survey, which has never been run there. Its coordinate cannot be checked against ours either: MARINe's public LTM extracts hold no record south of 33.2 degrees N, so the San Diego LTM sites are absent from the machine-readable feed entirely. Name-matching would have misled twice over, because MARINe places its Swami's Beach site 'within Cardiff State Beach and the Swami's State Marine Conservation Area', which is south of Swami's proper. Nearest Biodiversity Survey site of any kind is MARINe's 'Cardiff Reef' at 32.99984, -117.27867, 4132 m away and a different reef by any reading. The instrumented route here remains lidar hypsometry."
         }
       ],
       "mpa": null, "mpa_resolved": false,
@@ -246,6 +256,16 @@
           "n": 74,
           "run_date": "2026-07-29",
           "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (too-few-usable-bins, amplitude-below-gate). 2 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 1.00x against the 2.0x gate. n is 74 collapsed visits, from 98 records by 50 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        },
+        {
+          "method": "marine_topography",
+          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Cardiff Reef site page, read for network membership and survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-29",
+          "note": "Ran and found no Biodiversity Survey site at THIS reef, so no surveyed elevation exists here. A Biodiversity Survey site named 'Cardiff Reef' does exist, surveyed once in 2012, but it is a different reef 1950 m away at 32.99984, -117.27867: MARINe describes it as 'at the south end of Cardiff State Beach' and 'roughly 1.7 km south of the entrance to San Elijo Lagoon, and about 100 meters south of a large beach parking lot', whereas this spot is the break at the lagoon mouth. The prose corroborates the published coordinate, so this is a genuine name collision and not a coordinate error, and 1950 m is 5.4x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record. Binding the two on the strength of the shared name would have imported a stranger's elevation into this spot's floor. The instrumented route here remains lidar hypsometry."
         }
       ],
       "mpa": "Swami's SMCA", "mpa_resolved": false,
@@ -314,6 +334,16 @@
           "n": 31,
           "run_date": "2026-07-29",
           "note": "Ran and refused, so no floor is set from it here: refused on 3 of 4 criteria (too-few-usable-bins, not-declining, amplitude-below-gate). 0 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and the amplitude ratio could not be computed at all, for want of two usable bins. n is 31 collapsed visits, from 35 records by 28 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        },
+        {
+          "method": "marine_topography",
+          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/), read for absence; nearest Biodiversity Survey site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-29",
+          "note": "Ran and found no Biodiversity Survey site here, so no surveyed elevation exists at this spot. This is a closed-world result rather than a failed search: MARINe's California South region list holds 46 sites, 12 of them in San Diego County, and in coastline order there is nothing at all between 'Cardiff Reef' and 'Scripps' -- no Del Mar, no Torrey Pines, no Black's. Nearest Biodiversity Survey site is 'Scripps Reef' at 32.87165, -117.25328, 6826 m south, which is 18.8x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record. The instrumented route here remains lidar hypsometry."
         }
       ],
       "mpa": null, "mpa_resolved": true,
@@ -366,6 +396,16 @@
           "n": 239,
           "run_date": "2026-07-29",
           "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (not-declining, amplitude-below-gate). 6 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 0.67x against the 2.0x gate. n is 239 collapsed visits, from 310 records by 115 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        },
+        {
+          "method": "marine_topography",
+          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Scripps Reef site page, read for absence at this coordinate and for the nearest site's survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-29",
+          "note": "Ran and found no Biodiversity Survey site at this coordinate, so no surveyed elevation exists here. Nearest is 'Scripps Reef' at 32.87165, -117.25328, surveyed in 2002, 2006, 2010, 2013, 2020 and 2025, but it is 1666 m away -- 4.6x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record -- and MARINe places it 'midway between the Scripps Institution of Oceanography Pier and Black's Canyon', which is the far north end of the La Jolla Shores stretch and past the Dike Rock pools this spot's notes mention. Same beach, different bench, and too far to stand in for this coordinate. The instrumented route here remains lidar hypsometry."
         }
       ],
       "mpa": null, "mpa_resolved": false,
@@ -403,6 +443,16 @@
           "n": 354,
           "run_date": "2026-07-29",
           "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (not-declining, amplitude-below-gate). 6 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 0.85x against the 2.0x gate. n is 354 collapsed visits, from 545 records by 307 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        },
+        {
+          "method": "marine_topography",
+          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the La Jolla Caves site page, read for network membership and survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-29",
+          "note": "UNRESOLVED in both directions, and deliberately not decided here. The Biodiversity Survey site 'La Jolla Caves', surveyed in 2009, 2013 and 2020, may or may not be this reef, because MARINe's own two accounts of where it is do not agree. Its published coordinate is 32.84323, -117.28120, which is 1142 m south of this spot on a west-facing stretch -- 3.1x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record -- so on the coordinate alone it is a different reef. But MARINe's prose puts the site 'within the Matlahuayl State Marine Reserve' and describes it as north-facing on relatively flat terrain, which describes the Cove and Goldfish Point, essentially on top of this coordinate; and the ds582 join puts this spot 21 m from the Matlahuayl boundary, so the prose reading is entirely consistent with this being the site. One of the two is wrong and nothing public arbitrates: this spot's own mpa is null with mpa_resolved false, so the file cannot check the reserve claim either. Recorded as a conflict rather than as a distance, because picking either reading would either claim a reef that is not ours or discard one that is. Resolving it needs the survey's benchmark-bolt coordinate, which is not published. Highest-value follow-up of the eight, since this spot also refuses the revealed-preference method and is otherwise unreached."
         }
       ],
       "mpa": null, "mpa_resolved": false,
@@ -440,6 +490,16 @@
           "n": 99,
           "run_date": "2026-07-29",
           "note": "Ran and refused, so no floor is set from it here: refused on 1 of 4 criteria (amplitude-below-gate). 3 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 1.38x against the 2.0x gate. n is 99 collapsed visits, from 158 records by 89 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
+        },
+        {
+          "method": "marine_topography",
+          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Wind and Sea site page, read for network membership and survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-29",
+          "note": "IN the Biodiversity Surveys network, and the second-closest match of the eight. Site 'Wind and Sea' at 32.83285, -117.28231 is 236 m from this spot, which is 0.65x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record, so the separation is not distinguishable from zero and this is the same reef. Surveyed four times: 2012, 2018, 2020 and 2025. A surveyed elevation therefore exists, and Biodiversity Survey topography is an instrumented method under the section 7 promotion rule, which makes this the most valuable hit of the sweep: this spot refuses the revealed-preference method, so nothing else in this repo reaches it. value_ft is null because the number is not obtainable, NOT because it does not exist. No public MARINe product carries an elevation -- the point contact, quadrat and swath extracts all carry coordinates, event dates and depth 0.0, and no elevation or vertical-datum field of any kind -- topography is not among the assets the data-request page offers, and the datum is stated inconsistently: the survey-methods page says elevation is recorded relative to MLLW, while the Data Assets PDF of 2025-10-21 describes it as referenced to a per-site benchmark bolt and names no vertical datum anywhere in the document. A direct request to the survey PI is required, it must name the vertical datum explicitly or the answer is unusable, and none has been made. This entry does not promote anything: with value_ft null there is nothing for a second method to agree with."
         }
       ],
       "mpa": null, "mpa_resolved": true,
@@ -512,6 +572,16 @@
           "n": null,
           "run_date": "2026-07-28",
           "note": "1.1.1 set -0.8 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.7 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        },
+        {
+          "method": "marine_topography",
+          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Sunset Cliffs site page, read for network membership and survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-29",
+          "note": "In the Biodiversity Surveys network, but the distance is explicitly NOT resolved as the same bench. Site 'Sunset Cliffs' at 32.71913, -117.25683, surveyed once, in 2022, is 437 m from this spot. That is 1.2x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record, which is the awkward middle: the separation can be neither confirmed as zero nor ruled out. Sunset Cliffs is a roughly 3 km run of many separate ledges where being one bench off is easy, and this spot's own notes say a wrong floor here strands people, so same-bench must not be assumed on a 437 m match. Treat as a candidate needing the survey's benchmark-bolt coordinate, not as this spot's elevation. value_ft is null for the reason it is null everywhere in this sweep: no public MARINe product carries an elevation, topography is not among the assets the data-request page offers, and the datum is stated inconsistently between the survey-methods page (relative to MLLW) and the Data Assets PDF of 2025-10-21 (referenced to a per-site benchmark bolt, no vertical datum named). A direct request to the survey PI is required, it must name the vertical datum explicitly, and none has been made."
         }
       ],
       "mpa": null, "mpa_resolved": true,
@@ -539,6 +609,16 @@
           "n": null,
           "run_date": "2026-07-28",
           "note": "1.1.1 set -0.2 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.3 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
+        },
+        {
+          "method": "marine_topography",
+          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Cabrillo I, Cabrillo II and Cabrillo III site pages, read for network membership and survey years; site coordinates from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
+          "source_date": "2026-07-29",
+          "value_ft": null,
+          "datum_transform": null,
+          "n": null,
+          "run_date": "2026-07-29",
+          "note": "IN the Biodiversity Surveys network, and the best-matched spot of the eight. Site 'Cabrillo I' at 32.66947, -117.24550 is 70 m from this spot -- 0.19x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record, so indistinguishable from zero -- and has been surveyed six times: 2002, 2004, 2009, 2013, 2020 and 2025. A second Biodiversity Survey site, 'Cabrillo III', is 361 m away at 32.66583, -117.24417, surveyed in 2002, 2012, 2017 and 2024; both sit inside Cabrillo National Monument, whose benches are separate reefs, so WHICH of the two this coordinate denotes is a question for whoever requests the data rather than one this entry settles. Cabrillo II is Long-Term Monitoring only and carries no topography component. This matters beyond one floor: section 6 spends the NPS 0.7 ft check here exactly once against lidar hypsometry, and a MARINe transect elevation would be a third independent instrumented reading at the one spot that also has a revealed-preference entry, so it could corroborate without consuming that check. value_ft is null because no public MARINe product carries an elevation, topography is not among the assets the data-request page offers, and the datum is stated inconsistently between the survey-methods page (relative to MLLW) and the Data Assets PDF of 2025-10-21 (referenced to a per-site benchmark bolt, no vertical datum named); the data-request page also warns that processing takes longer for NPS sites, which this is. A direct request to the survey PI is required, it must name the vertical datum explicitly, and none has been made."
         }
       ],
       "mpa": "Cabrillo SMR", "mpa_resolved": false,
@@ -617,6 +697,8 @@
 
     "SAFETY, stated in the direction that matters: the 1.2.0 shift moved every floor in the PERMISSIVE direction. A higher floor means the stack calls a window open at higher water than it used to. sunset-cliffs went -0.8 to +0.7 and its own notes say a wrong floor there strands people, so it is deliberately kept the strictest of the eight -- but strictest-of-eight is a ranking, not a verification. Nobody has stood on that ledge system at +0.7 ft and confirmed it. Field-check Sunset Cliffs and Cabrillo before any of these numbers is presented as advice.",
     "Per-spot surf threshold offsets are not yet modelled. Black's and Tourmaline are the clearest cases where a shared buoy reading means very different things.",
-    "floor_evidence is populated on all 8 tidepool spots as of 1.3.0, and what it records is that not one floor has instrumented evidence behind it. Every spot's first entry is method 'author_estimate', carrying the 1.1.1 value and the uniform +1.5 ft raise 1.2.0 applied to all 8. The 5 spots that refuse the revealed-preference method in shared/calibration.json 1.0.0 (cardiff-reef, torrey-pines-beach, la-jolla-shores, la-jolla-cove, windansea) carry a second entry recording that it RAN and refused, so 'no evidence gathered' can be told apart from 'evidence gathered and it refused'. The 3 that publish (swamis, sunset-cliffs, cabrillo-tidepools) have no floor set from that run yet. All 8 stay tidepool_floor_confidence 'low': the promotion rule needs two different methods agreeing within 0.3 ft with at least one instrumented, and nothing in this repo is instrumented. Adding the ledger changed no floor value and no confidence value."
+    "floor_evidence is populated on all 8 tidepool spots as of 1.3.0, and what it records is that not one floor has instrumented evidence behind it. Every spot's first entry is method 'author_estimate', carrying the 1.1.1 value and the uniform +1.5 ft raise 1.2.0 applied to all 8. The 5 spots that refuse the revealed-preference method in shared/calibration.json 1.0.0 (cardiff-reef, torrey-pines-beach, la-jolla-shores, la-jolla-cove, windansea) carry a second entry recording that it RAN and refused, so 'no evidence gathered' can be told apart from 'evidence gathered and it refused'. The 3 that publish (swamis, sunset-cliffs, cabrillo-tidepools) have no floor set from that run yet. All 8 stay tidepool_floor_confidence 'low': the promotion rule needs two different methods agreeing within 0.3 ft with at least one instrumented, and nothing in this repo is instrumented. Adding the ledger changed no floor value and no confidence value.",
+
+    "The MARINe Biodiversity Surveys site list has been checked against all 8 tidepool spots as of 1.3.1, and every spot now carries a marine_topography entry -- but not one of them carries an elevation, so the sweep changed no floor and promoted nothing. What it found: 3 spots sit on a Biodiversity Survey site (cabrillo-tidepools 70 m from 'Cabrillo I', windansea 236 m from 'Wind and Sea', sunset-cliffs 437 m from 'Sunset Cliffs'); 1 is unresolved (la-jolla-cove, where the published coordinate for 'La Jolla Caves' is 1142 m away but MARINe's prose places that site inside Matlahuayl SMR, essentially on top of this spot, and nothing public arbitrates); and 4 are not in the network at all (swamis, cardiff-reef, torrey-pines-beach, la-jolla-shores). Distances are read against a combined 1-sigma of 364 m -- this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record -- so 70 m and 236 m are not distinguishable from zero, 437 m is the awkward middle and is deliberately NOT called same-bench, and anything past 1 km is a different reef. Two spots would have been bound to the wrong reef by name alone: MARINe's 'Cardiff Reef' is 1950 m from ours, at the south end of Cardiff State Beach by MARINe's own description, and MARINe's 'Swami's Beach' runs Long-Term Monitoring only, which has no topography component. The elevation itself is NOT PUBLISHED anywhere: the three Coastal Biodiversity Survey extracts carry coordinates, event dates and depth 0.0 and no elevation or vertical-datum field, topography is not among the assets MARINe's data-request page offers, and the datum is stated inconsistently between the survey-methods page (elevation relative to MLLW) and the Data Assets PDF of 2025-10-21 (referenced to a per-site benchmark bolt, no vertical datum named anywhere in the document). So MARINe does not remove the lidar deliverable anywhere. At 3 spots it converts that work from modelling an elevation to requesting one and pinning its datum, and THAT REQUEST HAS NOT BEEN MADE; for la-jolla-shores, cardiff-reef and torrey-pines-beach lidar remains the only instrumented route. n is null on all 8 entries because a site-list lookup has no sample count: the survey-round counts are stated in each note rather than borrowed into a field that means collapsed visits on the inat_revealed entries. All 8 stay tidepool_floor_confidence 'low'. Section 7 does list MARINe transect topography as an instrumented method, so this sweep looks like it unlocks promotion, and it does not: with value_ft null there is nothing for a second method to agree with."
   ]
 }
