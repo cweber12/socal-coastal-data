@@ -80,8 +80,11 @@ The PR body must state what you actually verified and what you did not. If a
 part of the issue is unfinished or blocked, say so in the PR rather than
 letting the reviewer discover it.
 
-Issue-closing keywords need a line of their own. `Part of #20. Closes #26.` on
-one line closed only the first reference and left #26 open through a merge.
+**A PR body carries one issue number — the one its closing keyword closes.
+Every other issue goes in by full URL**, which cross-references without being
+parsed as a keyword. Separate lines are not enough: #47 put `Closes #39.` and
+`Part of #40.` two lines apart, the merge closed both, and #40 was reopened by
+hand with no work in it. Long version: `docs/concurrent-agents.md`.
 
 ### 6. Hand the PR over, and stop
 

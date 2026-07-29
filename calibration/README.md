@@ -52,11 +52,33 @@ pure modules. Only `--fetch` may write `shared/calibration.json`.
 | `__fixtures__/` | A `cc0`/`cc-by`-only capture, byte-for-byte, `linguist-vendored`. |
 | `out/report.md` | Every diagnostic, per spot. Written by the live run. |
 | `../shared/calibration.json` | The counts, the queries, the content hash, and a `null_reason` for every refusal. |
-| `cache/` | **Gitignored.** Raw joined rows. Roughly a third of the corpus is All Rights Reserved or No Derivatives and cannot be redistributed. |
+| `cache/` | **Gitignored**, so it exists only in the clone that wrote it. Raw upstream payloads, not joined rows — and only half of it survives a new day, see below. Roughly a third of the corpus is All Rights Reserved or No Derivatives and cannot be redistributed. |
 
 Filtering the committed rows to CC-only while computing on everything was
 rejected: the committed artifact would then not reproduce the published number,
 which is worse than committing nothing because it looks like it should.
+
+### The cache is only half date-stable
+
+`cache/` holds raw upstream payloads rather than joined rows, and its two halves
+key differently:
+
+| Pull | Cache key | Survives a new day? |
+|---|---|---|
+| CO-OPS tide | the URL hash alone (`run.ts:160`) | **yes**, indefinitely — and it is the bulk of the bytes |
+| iNaturalist, per spot | `pull <slug> <PULLED_AT>` (`run.ts:180`) | **no** |
+
+`PULLED_AT` is today's date from `Date.now()` with no override (`run.ts:121`),
+so the eight per-spot iNat pulls miss on any day after the one that wrote them.
+Re-binning the next morning is therefore a re-run for the tide and a **re-fetch**
+for iNaturalist: budget eight live pulls, and do not retry them in a loop. This
+is the behaviour as it stands, not a defect being worked around — giving
+`Date.now()` an override would change what the run is deterministic in, and that
+is a decision for whoever next re-bins, not a caching tweak.
+
+Because the directory is gitignored, a fresh clone or worktree starts with no
+cache at all and re-pulls both halves — eleven years of CO-OPS (`CORPUS_START`
+is 2016) for nothing. Copy it across rather than re-pulling it.
 
 ## The standing constraints
 
