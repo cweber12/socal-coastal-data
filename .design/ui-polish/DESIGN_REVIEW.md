@@ -4,7 +4,7 @@ Reviewed against: [DESIGN_BRIEF.md](DESIGN_BRIEF.md)
 Philosophy: **Instrument panel** — a calibrated scientific readout, NOAA station
 page rather than surf app
 Date: 2026-07-28
-Branch: `feat/20-ui-polish` · PR #27 · commits `9fc56d1`…`0d1b1e1`
+Branch: `feat/20-ui-polish` · PR #27 · commits `9fc56d1`…`26e76f1`
 
 The pre-build audit is [DESIGN_AUDIT.md](DESIGN_AUDIT.md); its evidence is the
 "before" set in `screenshots/`. This review covers what was actually built.
@@ -55,7 +55,7 @@ much as a design one: the evidence was in the folder the whole time.
 Second: the fix that removed the spot page's duplicate heading left an `<h3>`
 containing nothing but a coordinate pair.
 
-**Both must-fixes have since been resolved** — `0d1b1e1` and `483d92f`. The
+**Both must-fixes have since been resolved** — `26e76f1` and `483d92f`. The
 three should-fix items below are open.
 
 ## Must Fix
@@ -91,7 +91,7 @@ since a clock time should not break across lines — removed that squeeze, so
 cells now hold full width and the cut is a hard mid-cell slice at four columns. The
 band is not new; the way it fails is partly this pass’s doing.
 
-**Resolved in `0d1b1e1`.** The band itself is a property of the data -- seven
+**Resolved in `26e76f1`.** The band itself is a property of the data -- seven
 day columns of tabular figures need 1160px -- so the fix makes the scroll honest
 rather than pretending it is not there:
 
