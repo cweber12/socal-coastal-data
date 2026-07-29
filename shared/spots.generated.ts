@@ -1,6 +1,6 @@
 // GENERATED FILE -- do not edit by hand.
 //
-// Source:    shared/spots.json (version 1.2.0, generated 2026-07-28)
+// Source:    shared/spots.json (version 1.3.0, generated 2026-07-29)
 // Generator: scripts/gen-spots-types.mjs
 // Regen:     npm run gen:types      Verify: npm run gen:types:check
 //
@@ -132,8 +132,8 @@ export const BUOYS = SPOTS_FILE.buoys;
 export const TIDE_STATIONS = SPOTS_FILE.tide_stations;
 
 /** Inventory version, surfaced in the UI so a stale deploy is visible. */
-export const SPOTS_VERSION = '1.2.0';
-export const SPOTS_GENERATED = '2026-07-28';
+export const SPOTS_VERSION = '1.3.0';
+export const SPOTS_GENERATED = '2026-07-29';
 
 /** Display timezone for the whole corridor, read from the file's conventions. */
 export const DISPLAY_TIME_ZONE = "America/Los_Angeles";
