@@ -4,7 +4,7 @@ Reviewed against: [DESIGN_BRIEF.md](DESIGN_BRIEF.md)
 Philosophy: **Instrument panel** — a calibrated scientific readout, NOAA station
 page rather than surf app
 Date: 2026-07-28
-Branch: `feat/20-ui-polish` · PR #27 · commits `9fc56d1`…`e80c1b8`
+Branch: `feat/20-ui-polish` · PR #27 · commits `9fc56d1`…`0d1b1e1`
 
 The pre-build audit is [DESIGN_AUDIT.md](DESIGN_AUDIT.md); its evidence is the
 "before" set in `screenshots/`. This review covers what was actually built.
@@ -16,7 +16,8 @@ All in `.design/ui-polish/screenshots/after/`.
 | Screenshot | Breakpoint | Description |
 | --- | --- | --- |
 | `review-grid-desktop-1280.png` | Desktop 1280×800 | Grid, all 7 columns, floor gaps |
-| `review-grid-tablet-768.png` | Tablet 768×1024 | **Grid clipped mid-cell, 3 columns lost** |
+| `review-grid-tablet-768.png` | Tablet 768×1024 | Grid, sticky spot column, scroll shadow |
+| `review-grid-tablet-768-scrolled-end.png` | Tablet 768×1024 | **Scrolled to end: last column flush, names pinned** |
 | `review-grid-mobile-375.png` | Mobile 375×812 | Collapsed to today's column |
 | `review-spot-desktop-1280.png` | Desktop | Week ribbon, MPA + safety callouts |
 | `review-spot-tablet-768.png` | Tablet | Spot page, ribbon |
@@ -45,18 +46,21 @@ scale inverts the old data-versus-caveat relationship, the dark-mode tint bug is
 gone, and every contrast pair measured passes. The instrument-panel philosophy
 reads clearly and nothing in the build fights it.
 
-The biggest finding is one the pass did not address and the audit missed: **the
-grid clips for every viewport between 600px and 1200px** — a 600px-wide band
-covering essentially all tablets and small laptops. The audit captured
+The biggest finding is one the build pass did not address and the audit missed:
+**the grid clips for every viewport between 600px and 1200px** — a 600px-wide
+band covering essentially all tablets and small laptops. The audit captured
 `review-grid-tablet-768.png` and never analysed it. That is a process failure as
-much as a design one.
+much as a design one: the evidence was in the folder the whole time.
 
 Second: the fix that removed the spot page's duplicate heading left an `<h3>`
 containing nothing but a coordinate pair.
 
+**Both must-fixes have since been resolved** — `0d1b1e1` and `483d92f`. The
+three should-fix items below are open.
+
 ## Must Fix
 
-### 1. The grid clips from 600px to 1200px, with no scroll affordance
+### 1. ~~The grid clips from 600px to 1200px, with no scroll affordance~~ — FIXED
 
 Measured, table width against container width:
 
@@ -84,18 +88,39 @@ clipped. But it degraded differently: cells wrapped their clock text onto extra
 lines (`2:51` / `pm`) and squeezed to show five columns. The
 `whitespace-nowrap` added to `TideLine` in `d2d417f` — correct on its own terms,
 since a clock time should not break across lines — removed that squeeze, so
-cells now hold full width and the cut is a hard mid-cell slice at four columns.
-The band is not new; the way it fails is partly this pass's doing.
+cells now hold full width and the cut is a hard mid-cell slice at four columns. The
+band is not new; the way it fails is partly this pass’s doing.
 
-_Fix: this is a design decision, not a mechanical one. Options, in the order I'd
-weigh them: (a) raise the `wide:` reveal so the full week only appears once it
-fits, and show a today-plus-tomorrow view between 600 and 1200; (b) keep seven
-columns and add a real horizontal-scroll affordance — edge fade, a visible
-scrollbar, and `scroll-snap` on column boundaries so the cut never lands
-mid-cell; (c) drop the ▲ next-high line in the 600–1200 band, which is identical
-on every row and would buy roughly 7×24px._
+**Resolved in `0d1b1e1`.** The band itself is a property of the data -- seven
+day columns of tabular figures need 1160px -- so the fix makes the scroll honest
+rather than pretending it is not there:
 
-### 2. `SpotHeader` renders an `<h3>` containing only coordinates
+- **Sticky spot column.** Without it the scroll was legible but useless: reaching
+  Sun and Mon pushed every spot name off the left edge, leaving eight rows of
+  numbers with no way to tell which reef each belonged to. The floor lives in
+  that column too, and it is the second operand of every gap in the row.
+- **Column snapping** (`proximity`, not `mandatory` -- mandatory drags focus to
+  the nearest column every time a badge inside a cell is tabbed to), with
+  `scroll-padding-left: 11rem` so a snapped column rests clear of the sticky
+  header instead of underneath it, and `scroll-snap-align: end` on the last
+  column so the end of the scroll is reachable at all.
+- **A self-extinguishing scroll shadow.** Two background layers: a `scroll`
+  radial pinned to the right edge, and a `local` linear that travels with the
+  content and covers it on arrival. The shadow is visible exactly when there is
+  more table to the right, with no scroll listener.
+- **A deliberate thin scrollbar** rather than an overlay one that only appears
+  once the reader has already guessed there is something to scroll.
+
+Verified at 768px with a real wheel scroll: `scrollLeft` reaches 432 of 432 and
+the last column’s right edge lands at 748px inside a 768px viewport -- flush, not
+cut. See `screenshots/after/review-grid-tablet-768-scrolled-end.png`.
+
+Two alternatives were weighed and rejected: raising the `wide:` reveal to 1200px
+would have hidden the full week from every tablet, and dropping the ▲ next-high
+line in that band would have made the grid mean different things at different
+widths.
+
+### 2. ~~`SpotHeader` renders an `<h3>` containing only coordinates~~ — FIXED
 
 `components/spot-summary.tsx`. The `nameOnPage` flag added in `65f7e0c`
 correctly stops the spot page printing its own name twice, but it does so by
@@ -108,9 +133,9 @@ ribbon panel now has no accessible name at all — the `h3` was what named it.
 
 See `screenshots/after/review-spot-desktop-1280.png`, the grey panel's top-left.
 
-_Fix: when `nameOnPage` is true, render the coordinates as a `<p>` and drop the
-`h3` entirely. If the panel needs a name, give the containing element an
-`aria-label` referencing the spot rather than promoting coordinates to a heading._
+**Resolved in `483d92f`.** When `nameOnPage` is true the heading goes away with
+the name it held and the coordinates render as a `<p>` caption. There is no
+second heading to write on a page that already carries the spot as its `h1`.
 
 ## Should Fix
 
@@ -182,7 +207,7 @@ that the text is a commit message rather than reader-facing prose._
 | Aesthetic fidelity | **Pass.** Dense, monospaced, tabular, no verdict colour anywhere. Reads as an instrument, not a surf app. |
 | Component quality | **Pass.** Nothing reimplemented; `CellShell`/`TideLine` remain the single source across grid, ribbon and mobile list. `FloorGap` follows existing prop conventions. |
 | States & interactions | **Pass.** Hover, focus-visible, badge-open, row-expanded, disclosure-open all verified by screenshot. |
-| Responsive | **Fail** — finding 1. Mobile (0px page overflow) and desktop (0px table overflow) are both clean; the 600–1200 band is not. |
+| Responsive | **Pass after fix** — finding 1 resolved. Mobile (0px page overflow) and desktop (0px table overflow) are both clean; the 600–1200 band is not. |
 | Accessibility | **Pass on contrast, one semantic defect** — finding 2. |
 | Typography | **Pass.** Five intentional steps, no arbitrary `text-[Nrem]` remaining outside two em-relative values inside `TideLine`. |
 | Dark mode | **Pass.** Not an inversion — cell skins keep their ordering across themes so "light means daylight" holds in both. |

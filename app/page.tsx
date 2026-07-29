@@ -114,7 +114,7 @@ export default async function GridPage({
         </nav>
       </div>
 
-      <div className="mt-4 overflow-x-auto">
+      <div className="grid-scroller mt-4">
         <table className="w-full border-separate border-spacing-0 text-left">
           <caption className="sr-only">
             Daylight low-tide windows by spot and day. Each spot&apos;s name expands to its full

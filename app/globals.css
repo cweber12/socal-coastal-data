@@ -222,6 +222,99 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+ * The grid's horizontal scroll
+ * -------------------------------------------------------------------------
+ *
+ * `wide:` reveals all seven day columns at 600px, but the table's minimum
+ * content width is 1160px and it does not fit until the viewport reaches
+ * 1200px. Measured, table against container:
+ *
+ *    600px  container  560  clips 600px      1024px  container  984  clips 176px
+ *    768px  container  728  clips 432px      1200px  container 1160  fits
+ *
+ * So there is a 600px-wide band -- every tablet and every small laptop -- where
+ * the grid scrolls. `overflow-x: auto` meant the page itself never overflowed,
+ * so this was a silently scrollable region that did not look scrollable: at
+ * 768px the Fri column was sliced down its middle and three more were off
+ * screen with nothing on the page to say so.
+ *
+ * Three rules make that scroll honest, and none of them needs JavaScript.
+ */
+.grid-scroller {
+  overflow-x: auto;
+
+  /*
+   * Snap on column edges, so a scroll never comes to rest with a cell cut in
+   * half. `proximity` rather than `mandatory`: mandatory fights keyboard
+   * navigation, dragging focus to the nearest column every time a badge or a
+   * link inside a cell is tabbed to.
+   */
+  scroll-snap-type: x proximity;
+
+  /*
+   * Snap points start clear of the sticky spot column, not at the scrollport
+   * edge. Without this the column a scroll snaps to comes to rest UNDERNEATH
+   * the sticky header and the reader lands on a cell they cannot see. 11rem is
+   * the spot column's own width.
+   */
+  scroll-padding-left: 11rem;
+
+  /* A deliberate, always-present scrollbar rather than an overlay one that
+     only appears once the reader has already started scrolling. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+
+  /*
+   * Scroll shadow on the right edge, which extinguishes itself at the end of
+   * the scroll with no scroll listener.
+   *
+   * Two layers. The radial one is `scroll`, so it is painted against the
+   * scrollport and stays pinned to the right edge. The linear one is `local`,
+   * so it travels with the content -- and when the reader reaches the end it
+   * arrives over the radial layer and covers it. The shadow is therefore
+   * visible exactly when there is more table to the right.
+   */
+  background:
+    linear-gradient(to left, var(--surface), transparent) right center / 2.5rem 100% no-repeat
+      local,
+    radial-gradient(farthest-side at 100% 50%, oklch(0 0 0 / 0.18), transparent) right center /
+      0.75rem 100% no-repeat scroll;
+}
+
+.grid-scroller td {
+  scroll-snap-align: start;
+}
+
+/*
+ * The last column snaps flush right instead.
+ *
+ * Every column snapping to `start` leaves the end of the scroll unreachable:
+ * the final snap point is the last column's leading edge, which parks it with
+ * its tail still past the scrollport. Measured at 768px before this rule, a
+ * scroll to the end settled at 318 of a possible 432 and left Monday cut.
+ */
+.grid-scroller tr > td:last-child {
+  scroll-snap-align: end;
+}
+
+/*
+ * The spot column stays put.
+ *
+ * Without this the scroll is legible but useless: reaching Sun and Mon means
+ * pushing every spot name off the left edge, and the reader is then looking at
+ * eight rows of numbers with no way to tell which reef each belongs to. The
+ * floor lives in this column too, and the floor is the second operand of every
+ * gap in the row.
+ */
+.grid-scroller th[scope='row'],
+.grid-scroller thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+}
+
+/* ---------------------------------------------------------------------------
  * Day/night cell skin
  * ------------------------------------------------------------------------- */
 
