@@ -5,8 +5,11 @@ import type { Metadata } from 'next';
 import { DayChart } from '@/components/day-chart';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
 import { FlagBadge } from '@/components/flag-badge';
+import { RateRefusal } from '@/components/rate-panel';
 import { SwellProvenance } from '@/components/spot-summary';
 import { UnresolvedDisclosure } from '@/components/unresolved';
+import { calibrationFor, CALIBRATION_PULLED_AT, TAXA_VERSION } from '@/lib/calibration';
+import TARGET_TAXA from '@/calibration/target_taxa.json';
 import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/lib/grid';
 import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/lib/labels';
 import {
@@ -83,6 +86,14 @@ export default async function DayPage({
   const hasPrevious = isServableDate(previous, today);
   const hasNext = isServableDate(next, today);
   const result = day.window;
+
+  /*
+   * Read straight from the committed calibration. No network in this component,
+   * and no fallback: `calibrationFor` returns null for a spot the pipeline never
+   * ran against, and the discriminated union makes a refusal impossible to read
+   * as a rate.
+   */
+  const calibration = calibrationFor(spot.slug);
 
   return (
     <div>
@@ -211,8 +222,24 @@ export default async function DayPage({
               isToday={isToday}
               spotName={spot.name}
               dateLabel={dayLabel}
+              calibration={calibration}
+              dayLowFt={day.dayLowFt}
+              taxaCount={TARGET_TAXA.targets.length}
             />
           </div>
+
+          {/*
+            A refused spot renders no panel and says why, in words.
+
+            Five of the eight refuse on the current corpus, so this is the common
+            branch rather than the edge one. A default band or a corridor
+            fallback here would be the null-rendering-as-a-pass failure
+            spots.json warns about, and there is no accessor in lib/calibration.ts
+            that could produce one.
+          */}
+          {calibration && !calibration.published ? (
+            <RateRefusal calibration={calibration} spotName={spot.name} />
+          ) : null}
 
           <div className="mt-4 max-w-prose">
             <SwellProvenance swell={day.swell} ceiling={day.ceiling} />
@@ -239,7 +266,13 @@ export default async function DayPage({
         <EvaluationStamp
           evaluatedAtMs={day.evaluatedAtMs}
           timeZone={day.timeZone}
-          extra={`spots.json ${SPOTS_VERSION} · datum ${TIDE_DATUM} · station ${spot.tide_station} · ${day.daySeries.samples.length} samples`}
+          extra={
+            `spots.json ${SPOTS_VERSION} · datum ${TIDE_DATUM} · station ${spot.tide_station} · ` +
+            `${day.daySeries.samples.length} samples` +
+            (calibration
+              ? ` · calibration pulled ${CALIBRATION_PULLED_AT}, taxa ${TAXA_VERSION}`
+              : '')
+          }
         />
       </div>
     </div>

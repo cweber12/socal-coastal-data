@@ -531,8 +531,41 @@ export interface SpotDay {
   extrema: TideExtremum[];
   dayStartMs: number;
   dayEndMs: number;
+  /**
+   * The lowest predicted height over `[dayStartMs, dayEndMs)`, and when it fell.
+   *
+   * NOT `window.lowFt`. That is the next low from now on today's page and the
+   * best DAYLIGHT low on any other, both of which are the right answer for the
+   * window predicate and the wrong one here: shared/calibration.json is binned
+   * by the minimum over the whole local day, night included. Reading the
+   * window's low against a calibration bin would put a day in the wrong bin
+   * roughly whenever the day's two lows straddle a bin edge.
+   *
+   * Half-open on the end to match the pipeline exactly. `daySeries` is inclusive
+   * of `dayEndMs`, which is one sample -- the next day's midnight -- and on a
+   * day whose minimum sits at midnight that one sample decides the bin.
+   *
+   * null only when predictions could not be fetched.
+   */
+  dayLowFt: number | null;
+  dayLowMs: number | null;
   notices: Notice[];
   failure: { message: string; url: string } | null;
+}
+
+/** The lowest sample in `[startMs, endMs)`, or null when there are none. */
+function lowestOverLocalDay(
+  series: TideSeries,
+  startMs: number,
+  endMs: number,
+): { ft: number; tMs: number } | null {
+  let best: { ft: number; tMs: number } | null = null;
+  for (const sample of series.samples) {
+    if (sample.tMs < startMs) continue;
+    if (sample.tMs >= endMs) break;
+    if (!best || sample.ft < best.ft) best = { ft: sample.ft, tMs: sample.tMs };
+  }
+  return best;
 }
 
 export async function loadSpotDay(
@@ -585,6 +618,8 @@ export async function loadSpotDay(
       window: null,
       daySeries: emptySeries,
       extrema: [],
+      dayLowFt: null,
+      dayLowMs: null,
       notices,
       failure: {
         message: cause instanceof Error ? cause.message : String(cause),
@@ -599,11 +634,15 @@ export async function loadSpotDay(
   const daySeries = sliceSeries(series, dayStartMs, dayEndMs);
   const extrema = findExtrema(series).filter((e) => e.tMs >= dayStartMs && e.tMs < dayEndMs);
 
+  const dayLow = lowestOverLocalDay(series, dayStartMs, dayEndMs);
+
   return {
     ...shell,
     window: window ?? null,
     daySeries,
     extrema,
+    dayLowFt: dayLow?.ft ?? null,
+    dayLowMs: dayLow?.tMs ?? null,
     notices,
     failure: null,
   };

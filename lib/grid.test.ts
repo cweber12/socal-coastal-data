@@ -624,6 +624,69 @@ describe('loadSpotDay', () => {
 });
 
 /* ===========================================================================
+ * The day's lowest low, which is not the window's low
+ * ========================================================================= */
+
+describe("loadSpotDay's dayLowFt", () => {
+  const spot = TIDEPOOL_SPOTS.find((s) => s.slug === 'cabrillo-tidepools')!;
+
+  it('is the minimum over the whole local day, night included', async () => {
+    route();
+    const day = await loadSpotDay(spot, TODAY, NOW_MS);
+
+    const inDay = day.daySeries.samples.filter((s) => s.tMs < day.dayEndMs);
+    expect(day.dayLowFt).toBe(Math.min(...inDay.map((s) => s.ft)));
+    expect(day.dayLowMs).not.toBeNull();
+    expect(day.dayLowMs!).toBeGreaterThanOrEqual(day.dayStartMs);
+    expect(day.dayLowMs!).toBeLessThan(day.dayEndMs);
+  });
+
+  it('is not the window low, which is what makes it worth computing', async () => {
+    /*
+     * Two separate reasons the two differ, and both matter for a calibration
+     * bin.
+     *
+     * SCOPE. window.lowFt is the next low from now on today's page and the best
+     * DAYLIGHT low on any other. Both are correct for the window predicate and
+     * wrong for a bin, because shared/calibration.json is binned by the minimum
+     * over the whole local day, night included -- so a day whose two lows
+     * straddle a bin edge would land in the wrong band.
+     *
+     * PRECISION. window.lowFt comes from findExtrema, which fits a parabola
+     * through the three samples around the turn and recovers a value slightly
+     * BELOW any sample -- here -0.4310833 against a sampled -0.431. The
+     * calibration pipeline scans raw samples, so the chart's marker scans raw
+     * samples too. It is the smaller of the two differences by four orders of
+     * magnitude, and it is the one that would be invisible: on a day whose low
+     * sits within a thousandth of a foot of an edge, the refined value and the
+     * sampled one fall in different bins, and the marker would sit in a band
+     * the published counts were never computed for.
+     */
+    route();
+    const day = await loadSpotDay(spot, TODAY, NOW_MS);
+
+    expect(day.window).not.toBeNull();
+    expect(day.dayLowFt).not.toBeNull();
+    // The sampled minimum is at or above the refined extremum, never below it.
+    expect(day.dayLowFt!).toBeGreaterThanOrEqual(day.window!.lowFt);
+    expect(day.dayLowFt).not.toBe(day.window!.lowFt);
+    // And it really is a sample, not a fitted value.
+    expect(day.daySeries.samples.some((s) => s.ft === day.dayLowFt)).toBe(true);
+  });
+
+  it('is null, never zero, when predictions could not be fetched', async () => {
+    // Zero is a height. "No predictions" is not, and a zero here would place
+    // every failed day in the [0.0, 0.5) bin.
+    route({ predictions: new Error('no route to host') });
+    const day = await loadSpotDay(spot, TODAY, NOW_MS);
+
+    expect(day.failure).not.toBeNull();
+    expect(day.dayLowFt).toBeNull();
+    expect(day.dayLowMs).toBeNull();
+  });
+});
+
+/* ===========================================================================
  * Row order
  * ========================================================================= */
 

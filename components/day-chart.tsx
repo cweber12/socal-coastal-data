@@ -2,6 +2,8 @@ import { formatHeight } from '@/lib/labels';
 import { formatClock } from '@/lib/time';
 import type { TideExtremum, TideSeries } from '@/lib/tide';
 import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
+import { binFor, type SpotCalibration } from '@/lib/calibration';
+import { PANEL, RateBands, RateTable } from '@/components/rate-panel';
 
 /**
  * One local day of tide, drawn server-side as plain SVG.
@@ -24,8 +26,25 @@ import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
 const WIDTH = 760;
 const HEIGHT = 280;
 const PAD = { top: 16, right: 16, bottom: 30, left: 38 };
-const PLOT_W = WIDTH - PAD.left - PAD.right;
 const PLOT_H = HEIGHT - PAD.top - PAD.bottom;
+
+/**
+ * The plot's width, with the rate panel carved out of it when there is one.
+ *
+ * The viewBox does NOT grow. Its width is what the min-w-[760px] /
+ * max-w-[900px] pair is calibrated against: those two numbers pin the render
+ * scale between 1.0 and about 1.18, which is what keeps the 11-unit labels
+ * rendering between 11px and 13px instead of the 22px-on-desktop and
+ * 4px-at-375px they once did. Widening the box to make room for the panel would
+ * silently move both ends of that.
+ *
+ * So the panel costs plot width -- 706 units down to 584, about 17% -- and a
+ * spot with no published rate keeps the full 706. That is the right way round:
+ * the chart is the page's subject and the panel is an addition to it.
+ */
+function plotWidth(hasPanel: boolean): number {
+  return WIDTH - PAD.left - PAD.right - (hasPanel ? PANEL.width : 0);
+}
 
 export function DayChart({
   daySeries,
@@ -41,6 +60,9 @@ export function DayChart({
   isToday,
   spotName,
   dateLabel,
+  calibration,
+  dayLowFt,
+  taxaCount,
 }: {
   daySeries: TideSeries;
   extrema: readonly TideExtremum[];
@@ -55,6 +77,19 @@ export function DayChart({
   isToday: boolean;
   spotName: string;
   dateLabel: string;
+  /**
+   * This spot's calibration, or null when it was never calibrated.
+   *
+   * Three states, and they are not the same. `null` means absent -- the pipeline
+   * never ran against this spot. `published: false` means it ran and REFUSED,
+   * which is a measured verdict and gets said in words. Only `published: true`
+   * draws a panel.
+   */
+  calibration: SpotCalibration | null;
+  /** The lowest predicted height over the whole local day. The predictor. */
+  dayLowFt: number | null;
+  /** How many target species the rate is an OR across. */
+  taxaCount: number;
 }) {
   if (daySeries.samples.length < 2) {
     return (
@@ -63,6 +98,9 @@ export function DayChart({
       </p>
     );
   }
+
+  const published = calibration?.published === true ? calibration : null;
+  const PLOT_W = plotWidth(published !== null);
 
   const heights = daySeries.samples.map((s) => s.ft);
   // The floor must always be on the chart even when the tide never reaches it --
@@ -99,7 +137,9 @@ export function DayChart({
     (result
       ? `${STATE_PRESENTATION[result.state].spoken}. ${result.reason}`
       : 'This day could not be evaluated.') +
-    ' The turning points are listed in the table below this chart.';
+    rateSentence(published, dayLowFt, taxaCount) +
+    ' The turning points are listed in the table below this chart.' +
+    (published ? ' The sighting rates are in a second table under that one.' : '');
 
   return (
     <figure className="m-0">
@@ -304,6 +344,26 @@ export function DayChart({
           </g>
         ) : null}
 
+        {/*
+          The marginal rate panel. Last, so its marker sits over the curve rather
+          than under it, and inside the same viewBox -- it is a few rects and text
+          nodes, not a second chart.
+        */}
+        {published ? (
+          <RateBands
+            calibration={published}
+            geometry={{
+              x: PAD.left + PLOT_W,
+              y,
+              yMin,
+              yMax,
+              plotTop: PAD.top,
+              plotH: PLOT_H,
+            }}
+            dayLowFt={dayLowFt}
+          />
+        ) : null}
+
         {/* Time axis. */}
         <line
           x1={PAD.left}
@@ -329,12 +389,32 @@ export function DayChart({
       </svg>
       </div>
 
-      <figcaption className="mt-2 text-meta text-[var(--text-dimmer)]">
+      <figcaption className="mt-2 max-w-prose text-meta text-[var(--text-dimmer)]">
         Shaded ends are night. The tinted band is the usable window, already trimmed on the flood
-        side. Predictions are astronomical and exclude weather-driven surge.
+        side — a geometric claim about where the tide is under the floor, and nothing to do with
+        the rates on the right. Predictions are astronomical and exclude weather-driven surge.
+        {published ? (
+          <>
+            {' '}
+            The right-hand column is the observed share of recorded visits that logged a target
+            species, against the day&apos;s lowest low; the marker is this day&apos;s.
+            {' '}
+            Every band&apos;s number is in the table below, including the ones this day&apos;s tide
+            range leaves too little room to label.
+          </>
+        ) : null}
       </figcaption>
 
       <ExtremaTable extrema={extrema} floorFt={floorFt} timeZone={timeZone} />
+
+      {published ? (
+        <RateTable
+          calibration={published}
+          dayLowFt={dayLowFt}
+          spotName={spotName}
+          taxaCount={taxaCount}
+        />
+      ) : null}
     </figure>
   );
 }
@@ -377,6 +457,35 @@ function ExtremaTable({
         ))}
       </tbody>
     </table>
+  );
+}
+
+/**
+ * The sighting rate, as a clause for the chart's spoken label.
+ *
+ * Named in the same sentence as the day's own low, because the claim is
+ * per-day and detaching it would leave a listener with a rate and nothing to
+ * attach it to. Silent when the spot has no published rate: a refused spot says
+ * so in words elsewhere on the page, and repeating a refusal inside the chart's
+ * label would make the chart announce something it does not draw.
+ */
+function rateSentence(
+  published: Extract<SpotCalibration, { published: true }> | null,
+  dayLowFt: number | null,
+  taxaCount: number,
+): string {
+  if (!published || dayLowFt === null) return '';
+  const bin = binFor(published, dayLowFt);
+  if (!bin || bin.rate === null) {
+    return (
+      ` This day's lowest low is ${formatHeight(dayLowFt)} feet, which falls outside every ` +
+      'band the sighting record covers, so no rate is given for it.'
+    );
+  }
+  return (
+    ` This day's lowest low is ${formatHeight(dayLowFt)} feet. Of ${bin.visits} recorded visits ` +
+    `on days whose low fell between ${formatHeight(bin.lo_ft)} and ${formatHeight(bin.hi_ft)} ` +
+    `feet, ${Math.round(bin.rate * 100)} percent logged one of ${taxaCount} target species.`
   );
 }
 
