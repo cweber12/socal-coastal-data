@@ -25,12 +25,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   MAX_SWELL_AGE_MINUTES,
+  SIGHTINGS_REVALIDATE_SECONDS,
   UpstreamError,
+  fetchSpotSightings,
   fetchSwell,
   fetchTideSeries,
   resolveSpotSwell,
 } from './upstream';
 import coops6min from './__fixtures__/coops-9410230-20260727-6min.json';
+import sunsetCliffsPage from './__fixtures__/inat-sunset-cliffs-20260728.json';
 import { SPOT_BY_SLUG, type BuoyId, type Spot } from '@/shared/spots.generated';
 import { readFileSync } from 'node:fs';
 
@@ -400,5 +403,127 @@ describe('resolveSpotSwell', () => {
 
     expect(swell.intendedBuoyId).toBe('46235');
     expect(swell.sourceBuoyId).toBe('46232');
+  });
+});
+
+/* ===========================================================================
+ * iNaturalist sightings: failing is not fatal, and empty is not failing
+ * ========================================================================= */
+
+describe('fetchSpotSightings', () => {
+  const spot = { slug: 'sunset-cliffs', lat: 32.723, lon: -117.256 };
+  const today = { year: 2026, month: 7, day: 28 };
+
+  it('pins the query and asks for exactly the fields the parser reads', async () => {
+    fetchMock.mockResolvedValue(reply('', { json: sunsetCliffsPage }));
+
+    await fetchSpotSightings(spot, today);
+
+    const url = new URL(fetchMock.mock.calls[0]![0] as string);
+    // v2, not v1: v1 ignores `fields` and serves ~75 kB per record. See lib/inat.ts.
+    expect(url.pathname).toBe('/v2/observations');
+    expect(url.searchParams.get('lat')).toBe('32.723');
+    expect(url.searchParams.get('radius')).toBe('0.5');
+    expect(url.searchParams.get('quality_grade')).toBe('research');
+    expect(url.searchParams.get('captive')).toBe('false');
+    expect(url.searchParams.get('geoprivacy')).toBe('open');
+    expect(url.searchParams.get('taxon_geoprivacy')).toBe('open');
+    // 14 days back from 2026-07-28.
+    expect(url.searchParams.get('d1')).toBe('2026-07-14');
+    expect(url.searchParams.get('fields')).not.toContain('time_zone_offset');
+  });
+
+  it('sends the custom User-Agent iNaturalist asks for', async () => {
+    fetchMock.mockResolvedValue(reply('', { json: sunsetCliffsPage }));
+
+    await fetchSpotSightings(spot, today);
+
+    const init = fetchMock.mock.calls[0]![1] as RequestInit & { next?: { revalidate: number } };
+    expect((init.headers as Record<string, string>)['User-Agent']).toContain(
+      'socal-coastal-data',
+    );
+    expect(init.next?.revalidate).toBe(SIGHTINGS_REVALIDATE_SECONDS);
+  });
+
+  it('parses a captured page', async () => {
+    fetchMock.mockResolvedValue(reply('', { json: sunsetCliffsPage }));
+
+    const result = await fetchSpotSightings(spot, today);
+
+    expect(result.kind).toBe('ok');
+    if (result.kind !== 'ok') throw new Error('unreachable');
+    expect(result.observations.totalResults).toBe(95);
+    expect(result.observations.sightings).toHaveLength(30);
+    expect(result.windowDays).toBe(14);
+  });
+
+  it('never throws when the transport fails', async () => {
+    fetchMock.mockRejectedValue(new Error('getaddrinfo ENOTFOUND'));
+
+    const result = await fetchSpotSightings(spot, today);
+
+    // Unlike fetchTideSeries, which is fatal. A spot page's subject is the tide;
+    // sightings are an addition, and an addition must not take out its host.
+    expect(result.kind).toBe('unavailable');
+    if (result.kind !== 'unavailable') throw new Error('unreachable');
+    expect(result.reason).toContain('ENOTFOUND');
+    expect(result.drift).toBe(false);
+  });
+
+  it('names a 422 as a rejected query rather than an empty one', async () => {
+    // Measured: a duplicated per_page earns 422 from this endpoint. That means
+    // this app built a bad URL, which is not the same as a quiet reef.
+    fetchMock.mockResolvedValue(reply('', { status: 422, json: {} }));
+
+    const result = await fetchSpotSightings(spot, today);
+
+    expect(result.kind).toBe('unavailable');
+    if (result.kind !== 'unavailable') throw new Error('unreachable');
+    expect(result.reason).toContain('422');
+    expect(result.reason).toContain('rejected query');
+  });
+
+  it('reports a body that is not JSON', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => '<html>maintenance</html>',
+      json: async () => {
+        throw new SyntaxError('Unexpected token <');
+      },
+    } as unknown as Response);
+
+    const result = await fetchSpotSightings(spot, today);
+
+    expect(result.kind).toBe('unavailable');
+    if (result.kind !== 'unavailable') throw new Error('unreachable');
+    expect(result.reason).toContain('not JSON');
+  });
+
+  it('separates drift from a quiet feed', async () => {
+    fetchMock.mockResolvedValue(
+      reply('', { json: { total_results: 1, results: [{ quality_grade: 'research', id: null }] } }),
+    );
+
+    const result = await fetchSpotSightings(spot, today);
+
+    expect(result.kind).toBe('unavailable');
+    if (result.kind !== 'unavailable') throw new Error('unreachable');
+    expect(result.drift).toBe(true);
+  });
+
+  it('reports an empty page as ok with a zero count, never as unavailable', async () => {
+    fetchMock.mockResolvedValue(
+      reply('', { json: { total_results: 0, page: 1, per_page: 30, results: [] } }),
+    );
+
+    const result = await fetchSpotSightings(spot, today);
+
+    // A 200 carrying an empty array is a fact about the reef. Reporting it as a
+    // failure would be the exact confusion this repo is built to prevent.
+    expect(result.kind).toBe('ok');
+    if (result.kind !== 'ok') throw new Error('unreachable');
+    expect(result.observations.totalResults).toBe(0);
+    expect(result.observations.sightings).toEqual([]);
   });
 });

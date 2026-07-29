@@ -15,6 +15,11 @@
  *                 the window forward as days pass.
  *   Swell         15 min. These buoys publish every 30 min or so, so a 15-minute
  *                 revalidate never serves a reading more than one cycle stale.
+ *   Sightings     60 min. A record has to be uploaded AND confirmed by the
+ *                 community before it can appear here at all, which takes hours
+ *                 at best, so an hour of cache never withholds something that
+ *                 could have been shown. Measured newest-record ages on
+ *                 2026-07-28 were 0 to 10 days across the eight spots.
  *
  * Failure policy, which follows from the repo's rules rather than from
  * convenience:
@@ -36,12 +41,22 @@ import {
   type TideSeries,
 } from './tide';
 import { NdbcDriftError, NdbcNoDataError, parseNdbcRealtime2, type Wvht } from './ndbc';
-import { formatLocalDate, type LocalDate } from './time';
+import {
+  INAT_RADIUS_KM,
+  INAT_WINDOW_DAYS,
+  InatDriftError,
+  inatObservationsUrl,
+  parseInatObservations,
+  type InatObservations,
+  type InatRequestContract,
+} from './inat';
+import { addLocalDays, formatLocalDate, type LocalDate } from './time';
 import type { BuoyId, Spot, TideStationId } from '@/shared/spots.generated';
 import { BUOYS, TIDE_DATUM } from '@/shared/spots.generated';
 
 export const PREDICTIONS_REVALIDATE_SECONDS = 6 * 60 * 60;
 export const SWELL_REVALIDATE_SECONDS = 15 * 60;
+export const SIGHTINGS_REVALIDATE_SECONDS = 60 * 60;
 
 /**
  * Beyond this, a "current" reading is not current. These buoys publish about
@@ -333,4 +348,120 @@ export async function resolveSpotSwell(spot: Spot, nowMs: number): Promise<SpotS
   }
 
   return empty();
+}
+
+/* ===========================================================================
+ * iNaturalist sightings
+ * ===========================================================================
+ *
+ * One request per spot, on the spot's own lat/lng/radius, rather than the one
+ * corridor-bbox query issue #31 specified. lib/inat.ts carries the measurement
+ * that forced the change; the short version is that the bbox needs twelve pages
+ * and ~144 MB to cover the window, and even then six of the eight spots get
+ * nothing because the newest records in the corridor are inland. Eight per-spot
+ * requests total 142 kB and cover every spot completely -- fewer requests than
+ * paging the bbox, which is the ground the issue picked the bbox on.
+ *
+ * Rate: the grid page issues all eight in parallel once per revalidate period.
+ * Against iNaturalist's published 100 requests/minute that is a burst of 8, and
+ * the sustained rate is 8 per hour. The ~1 req/s courtesy figure the PRD cites
+ * is about the bulk history pull in issue #32, which is a different order of
+ * traffic entirely.
+ */
+
+export type SpotSightings =
+  | {
+      kind: 'ok';
+      observations: InatObservations;
+      /** How far back the query reached, so the UI can say "in the last N days". */
+      windowDays: number;
+    }
+  | {
+      kind: 'unavailable';
+      /** Why there is nothing to show. Rendered, never swallowed. */
+      reason: string;
+      /** True when the payload shape drifted, which is a bug rather than a quiet feed. */
+      drift: boolean;
+      url: string;
+    };
+
+/**
+ * Fetch one spot's recent research-grade sightings.
+ *
+ * Never throws. Every failure becomes an `unavailable` result carrying its
+ * reason, because iNaturalist being down must not take out a spot page whose
+ * actual subject is the tide -- the same policy fetchSwell follows, and for the
+ * same reason.
+ *
+ * An empty result is NOT a failure and is not reported as one. It comes back as
+ * `ok` with a zero count, so the UI can say "nothing recorded here in the last
+ * 14 days" -- a fact about the reef -- rather than "could not load", which is a
+ * fact about the connection. Conflating the two is the failure this repo exists
+ * to prevent, in its smallest form.
+ */
+export async function fetchSpotSightings(
+  spot: { slug: string; lat: number; lon: number },
+  today: LocalDate,
+): Promise<SpotSightings> {
+  const contract: InatRequestContract = {
+    spotSlug: spot.slug,
+    lat: spot.lat,
+    lon: spot.lon,
+    radiusKm: INAT_RADIUS_KM,
+    windowStart: addLocalDays(today, -INAT_WINDOW_DAYS),
+    qualityGrade: 'research',
+  };
+  const url = inatObservationsUrl(contract);
+
+  const unavailable = (reason: string, drift = false): SpotSightings => ({
+    kind: 'unavailable',
+    reason,
+    drift,
+    url,
+  });
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT },
+      next: { revalidate: SIGHTINGS_REVALIDATE_SECONDS },
+    });
+  } catch (cause) {
+    return unavailable(
+      `Request to iNaturalist for ${spot.slug} failed: ` +
+        `${cause instanceof Error ? cause.message : String(cause)}`,
+    );
+  }
+
+  if (!response.ok) {
+    // 422 is what a malformed query earns here -- measured, by sending a
+    // duplicated per_page. It means this app built a bad URL, not that the reef
+    // is quiet, so it is named rather than folded into an empty result.
+    return unavailable(
+      `iNaturalist returned HTTP ${response.status} for ${spot.slug}.` +
+        (response.status === 422 ? ' That is a rejected query, not an empty one.' : ''),
+    );
+  }
+
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch (cause) {
+    return unavailable(
+      `iNaturalist body for ${spot.slug} was not JSON: ` +
+        `${cause instanceof Error ? cause.message : String(cause)}`,
+    );
+  }
+
+  try {
+    return { kind: 'ok', observations: parseInatObservations(payload, contract), windowDays: INAT_WINDOW_DAYS };
+  } catch (cause) {
+    if (cause instanceof InatDriftError) {
+      // Loud, but not fatal to the page. The section degrades to unavailable and
+      // the message is surfaced as a notice, so the format change is visible and
+      // no species or time is ever guessed at.
+      return unavailable(cause.message, true);
+    }
+    return unavailable(cause instanceof Error ? cause.message : String(cause));
+  }
 }

@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { SightingsSummary } from '@/components/sightings';
+import type { SpotSightingsSummary } from '@/lib/grid';
 import { thresholdDisclosure } from '@/lib/labels';
 import type { SwellCeiling } from '@/lib/thresholds';
 import type { SpotSwell } from '@/lib/upstream';
@@ -168,15 +170,29 @@ export function SpotDisclosure({
   spot,
   swell,
   ceiling,
+  sightings,
+  nowMs,
 }: {
   spot: TidepoolSpot;
   swell: SpotSwell;
   ceiling: SwellCeiling;
+  sightings: SpotSightingsSummary;
+  nowMs: number;
 }) {
   return (
     <div className="rounded-md border border-[var(--border)] bg-[var(--surface-sunken)] p-3">
       <SpotHeader spot={spot} ceiling={ceiling} showSpotLink />
       <SwellProvenance swell={swell} ceiling={ceiling} />
+      {/*
+        One line, and the ceiling on it is the point.
+
+        This whole panel is rendered on the server and handed to SpotRow, a
+        client component, so it is serialised into the flight payload for all
+        eight rows on every request whether or not anybody expands one. The
+        gallery it summarises is on /spot/[slug], which is also the only place
+        phone readers can reach it -- the disclosure does not exist below 600px.
+      */}
+      <SightingsSummary sightings={sightings} nowMs={nowMs} />
     </div>
   );
 }
