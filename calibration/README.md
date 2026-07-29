@@ -17,6 +17,12 @@ does not.
 Full evidence and rationale: [#30](https://github.com/cweber12/socal-coastal-data/issues/30).
 This directory is the build described in [#32](https://github.com/cweber12/socal-coastal-data/issues/32).
 
+`floor-calibration.md`, beside this file, is the adjacent and separate question of
+how `tidepool_floor_ft` itself gets set. This directory **grades a day**; that
+document is about **gating a spot**. Read its status block before its prose — two
+of its sections are known wrong and are tracked in
+[#40](https://github.com/cweber12/socal-coastal-data/issues/40).
+
 ## Running it
 
 ```bash
