@@ -11,6 +11,7 @@
 
 import { formatClock, formatDateLong, formatDuration, formatWeekdayLong, type LocalDate } from './time';
 import { lowLighting, STATE_PRESENTATION, type WindowResult } from './windows';
+import type { SightingTide } from './sightings';
 
 /** U+2212 MINUS SIGN, not a hyphen: it aligns with digits and reads as a sign. */
 const MINUS = '−';
@@ -212,5 +213,163 @@ export function thresholdDisclosure(
     `Floor ${formatHeight(floorFt)} ft (${floorConfidence}), ` +
     `swell ceiling ${ceilingFt.toFixed(1)} ft (${ceilingConfidence}). ` +
     'Neither has been field-checked.'
+  );
+}
+
+/* ===========================================================================
+ * iNaturalist sightings
+ * ========================================================================= */
+
+/**
+ * How coarsely the distance from the low is reported.
+ *
+ * findExtrema places a turn to within about 60 s of NOAA's own answer, and up
+ * to 30 s of that is NOAA's whole-minute rounding. Printing "37 min after the
+ * low" would spend three characters claiming a precision the extremum time does
+ * not have, so it is rounded to the nearest five minutes and anything inside
+ * one step reads as "at the low".
+ */
+const LOW_OFFSET_ROUNDING_MIN = 5;
+
+/** `0.4 ft, 40 min after the low`. The tide a sighting was recorded at. */
+export function formatSightingTide(tide: SightingTide): string {
+  const height = `${formatHeight(tide.heightFt)} ft`;
+  const step = LOW_OFFSET_ROUNDING_MIN;
+  const rounded = Math.round(tide.minutesFromLow / step) * step;
+  if (rounded === 0) return `${height}, at the low`;
+  const when = rounded > 0 ? 'after' : 'before';
+  return `${height}, ${formatDuration(Math.abs(rounded))} ${when} the low`;
+}
+
+/**
+ * What was seen: common name first, scientific name always.
+ *
+ * The scientific name is never dropped, even when a common name exists. It is
+ * the only part of the pair that identifies anything unambiguously, and the
+ * page is telling a reader what an animal is.
+ */
+export function sightingName(sighting: {
+  commonName: string | null;
+  scientificName: string;
+}): string {
+  return sighting.commonName
+    ? `${sighting.commonName} (${sighting.scientificName})`
+    : sighting.scientificName;
+}
+
+/**
+ * The whole sentence for one sighting, for a screen reader and for a photo's
+ * alt text.
+ *
+ * A photograph of an animal conveys the identification, the observer and the
+ * date visually and by caption; this is the non-visual equivalent of all of it,
+ * including the tide, which is the one part a reader could not get from the
+ * photo either way.
+ */
+export function describeSighting(
+  sighting: {
+    commonName: string | null;
+    scientificName: string;
+    observerLogin: string;
+    observerName: string | null;
+    observedAtMs: number | null;
+    observedOn: LocalDate;
+    tide: SightingTide | null;
+    tideUnavailableReason: string | null;
+    photo: { licenceCode: string } | null;
+    photoWithheldReason: string | null;
+  },
+  timeZone: string,
+): string {
+  const parts: string[] = [`${sightingName(sighting)}.`];
+
+  parts.push(
+    sighting.observedAtMs !== null
+      ? `Recorded ${formatDateLong(sighting.observedAtMs, timeZone)} at ${formatClock(sighting.observedAtMs, timeZone)}`
+      : `Recorded ${sighting.observedOn.year}-${String(sighting.observedOn.month).padStart(2, '0')}-${String(sighting.observedOn.day).padStart(2, '0')}, time not stated`,
+  );
+
+  // Observer names are free text and a good many end in an initial -- "Heidi H."
+  // -- so a blindly appended full stop reads back as "Heidi H dot dot".
+  const observer = sighting.observerName ?? sighting.observerLogin;
+  parts.push(observer.endsWith('.') ? `by ${observer}` : `by ${observer}.`);
+
+  if (sighting.tide) {
+    const { heightFt, minutesFromLow } = sighting.tide;
+    const step = LOW_OFFSET_ROUNDING_MIN;
+    const rounded = Math.round(minutesFromLow / step) * step;
+    parts.push(
+      rounded === 0
+        ? `Predicted tide ${describeHeight(heightFt)}, at the low.`
+        : `Predicted tide ${describeHeight(heightFt)}, ${formatDuration(Math.abs(rounded))} ` +
+          `${rounded > 0 ? 'after' : 'before'} the low.`,
+    );
+  } else if (sighting.tideUnavailableReason) {
+    parts.push(`No tide height: ${sighting.tideUnavailableReason}.`);
+  }
+
+  if (sighting.photo === null && sighting.photoWithheldReason) {
+    parts.push(`No photo shown: ${sighting.photoWithheldReason}.`);
+  }
+
+  return parts.join(' ');
+}
+
+/**
+ * The one line a grid row discloses about sightings.
+ *
+ * A few hundred bytes, and that ceiling is the whole design. `detail` is a prop
+ * on a client component, so it is serialised into the flight payload for all
+ * eight rows on every request whether or not anybody expands one -- the lesson
+ * PR #18 left in components/spot-row.tsx. The gallery lives on /spot/[slug],
+ * which is also where phone readers land, because the disclosure does not exist
+ * below 600px at all.
+ *
+ * Empty and unreachable are different sentences. A 200 carrying an empty array
+ * is a fact about the reef; a failed request is a fact about the connection,
+ * and rendering the second as the first is the exact failure this repo is built
+ * around.
+ */
+export function sightingsSummaryLine(
+  sightings: {
+    kind: 'ok' | 'unavailable';
+    totalResults?: number;
+    newest?: { commonName: string | null; scientificName: string; observedAtMs: number | null; observedOn: LocalDate } | null;
+    windowDays?: number;
+  },
+  nowMs: number,
+): string {
+  if (sightings.kind === 'unavailable') {
+    return 'Recent sightings could not be loaded — that is a failed request, not an empty reef.';
+  }
+
+  const days = sightings.windowDays ?? 14;
+  const total = sightings.totalResults ?? 0;
+  if (total === 0) {
+    return `No research-grade sightings recorded here in the last ${days} days.`;
+  }
+  if (!sightings.newest) {
+    /*
+     * iNaturalist counted records but none of them survived this app's own
+     * exclusions -- obscured, captive, or placed outside the radius. Saying
+     * "none recorded" here would be a claim about the reef made out of a fact
+     * about the filters.
+     */
+    return (
+      `${total} research-grade ${total === 1 ? 'sighting' : 'sightings'} in the last ${days} ` +
+      'days, none of which this page could place at the spot.'
+    );
+  }
+
+  const newest = sightings.newest;
+  const ms =
+    newest.observedAtMs ??
+    Date.UTC(newest.observedOn.year, newest.observedOn.month - 1, newest.observedOn.day);
+  const ageDays = Math.max(0, Math.floor((nowMs - ms) / 86_400_000));
+  const when = ageDays === 0 ? 'today' : ageDays === 1 ? 'yesterday' : `${ageDays} days ago`;
+
+  return (
+    `${total} research-grade ${total === 1 ? 'sighting' : 'sightings'} in the last ${days} days; ` +
+    `most recent ${sightingName(newest)}, ${when}.`
   );
 }

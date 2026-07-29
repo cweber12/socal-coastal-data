@@ -205,7 +205,13 @@ export default async function GridPage({
                 buoy the swell came from. That is what it discloses now.
               */
               detail={
-                <SpotDisclosure spot={row.spot} swell={row.swell} ceiling={row.ceiling} />
+                <SpotDisclosure
+                  spot={row.spot}
+                  swell={row.swell}
+                  ceiling={row.ceiling}
+                  sightings={row.sightings}
+                  nowMs={grid.evaluatedAtMs}
+                />
               }
             />
           ))}

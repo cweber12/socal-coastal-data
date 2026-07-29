@@ -9,9 +9,22 @@
 import 'server-only';
 
 import { evaluateWindow, countUsable, type WindowResult } from './windows';
-import { fetchTideSeries, resolveSpotSwell, UpstreamError, type SpotSwell } from './upstream';
+import {
+  fetchSpotSightings,
+  fetchTideSeries,
+  resolveSpotSwell,
+  UpstreamError,
+  type SpotSwell,
+} from './upstream';
 import { swellCeilingFor, type SwellCeiling } from './thresholds';
 import { findExtrema, sliceSeries, type TideExtremum, type TideSeries } from './tide';
+import { INAT_WINDOW_DAYS, type InatExclusions, type Sighting } from './inat';
+import {
+  annotateWithTide,
+  newestSightings,
+  SIGHTINGS_GALLERY_MAX,
+  type AnnotatedSighting,
+} from './sightings';
 import {
   addLocalDays,
   localDateInZone,
@@ -43,6 +56,31 @@ export const HORIZON_DAYS = 7;
 const MARGIN_DAYS_BEFORE = 1;
 const MARGIN_DAYS_AFTER = 2;
 
+/**
+ * What a grid row says about sightings: one line's worth, and no more.
+ *
+ * Deliberately not the gallery. This travels to a client component through
+ * SpotRow's `detail` prop, and PR #18's lesson is written into
+ * components/spot-row.tsx -- anything rendered there is paid for by every
+ * reader, including the ones who never open a row. The gallery lives on
+ * /spot/[slug], which is also the only place phone readers can reach, because
+ * the disclosure does not exist below 600px.
+ *
+ * `ok` with `totalResults: 0` is an empty reef. `unavailable` is a failed
+ * request. They are separate variants so no renderer can print one as the
+ * other.
+ */
+export type SpotSightingsSummary =
+  | {
+      kind: 'ok';
+      windowDays: number;
+      /** iNaturalist's own count for the window, not the size of the page fetched. */
+      totalResults: number;
+      /** The most recent surviving record, or null when none survived. */
+      newest: Sighting | null;
+    }
+  | { kind: 'unavailable'; reason: string; drift: boolean };
+
 export interface SpotRow {
   spot: TidepoolSpot;
   swell: SpotSwell;
@@ -50,6 +88,7 @@ export interface SpotRow {
   /** One entry per day in the horizon. null where evaluation failed. */
   days: (WindowResult | null)[];
   usableCount: number;
+  sightings: SpotSightingsSummary;
 }
 
 export interface Notice {
@@ -117,6 +156,46 @@ function swellNotices(spot: TidepoolSpot, swell: SpotSwell): Notice[] {
   }
 
   return notices;
+}
+
+/**
+ * The one-line sightings summary for a row.
+ *
+ * Shares a cache entry with the spot page's gallery, because both build the
+ * identical URL and `next: { revalidate }` keys on it. So the grid's eight
+ * requests and a spot page's one are the same eight requests, not nine.
+ */
+async function loadSightingsSummary(
+  spot: TidepoolSpot,
+  today: LocalDate,
+): Promise<SpotSightingsSummary> {
+  const result = await fetchSpotSightings(spot, today);
+  if (result.kind === 'unavailable') {
+    return { kind: 'unavailable', reason: result.reason, drift: result.drift };
+  }
+  return {
+    kind: 'ok',
+    windowDays: result.windowDays,
+    totalResults: result.observations.totalResults,
+    newest: newestSightings(result.observations.sightings, 1)[0] ?? null,
+  };
+}
+
+/**
+ * Notices a spot's sightings earn.
+ *
+ * Drift is surfaced; an ordinary failed request is an info note. An EMPTY
+ * result earns no notice at all, because it is not a problem -- the section
+ * says so itself, in words, where a reader is looking for it.
+ */
+function sightingsNotices(spot: TidepoolSpot, sightings: SpotSightingsSummary): Notice[] {
+  if (sightings.kind === 'ok') return [];
+  return [
+    {
+      severity: sightings.drift ? 'drift' : 'info',
+      message: `${spot.name}: ${sightings.reason}`,
+    },
+  ];
 }
 
 /** Evaluate one spot across a set of days, collecting failures rather than throwing. */
@@ -192,7 +271,12 @@ export async function loadGrid(nowMs: number): Promise<GridData> {
 
   const rows = await Promise.all(
     TIDEPOOL_SPOTS.map(async (spot): Promise<SpotRow> => {
-      const swell = await resolveSpotSwell(spot, nowMs);
+      // Swell and sightings are independent upstreams, so they go out together
+      // rather than one behind the other. Neither can fail the row.
+      const [swell, sightings] = await Promise.all([
+        resolveSpotSwell(spot, nowMs),
+        loadSightingsSummary(spot, today),
+      ]);
       const ceiling = swellCeilingFor(spot.slug);
       const series = seriesByStation.get(spot.tide_station)!;
 
@@ -204,11 +288,15 @@ export async function loadGrid(nowMs: number): Promise<GridData> {
         ceiling,
         days: evaluated,
         usableCount: countUsable(evaluated.filter((d): d is WindowResult => d !== null)),
+        sightings,
       };
     }),
   );
 
-  for (const row of rows) notices.push(...swellNotices(row.spot, row.swell));
+  for (const row of rows) {
+    notices.push(...swellNotices(row.spot, row.swell));
+    notices.push(...sightingsNotices(row.spot, row.sightings));
+  }
 
   return { ...base, rows, notices, failure: null };
 }
@@ -216,6 +304,28 @@ export async function loadGrid(nowMs: number): Promise<GridData> {
 /* ===========================================================================
  * Single spot
  * ========================================================================= */
+
+/**
+ * The gallery, which only /spot/[slug] renders.
+ *
+ * Separate from SpotSightingsSummary rather than an extension of it, because
+ * the grid must not be able to reach this by accident: it is eight photos'
+ * worth of markup and the grid pays for its `detail` on every request.
+ */
+export type SpotSightingsGallery =
+  | {
+      kind: 'ok';
+      windowDays: number;
+      totalResults: number;
+      /** Records on the page fetched, before this app's own exclusions. */
+      fetchedCount: number;
+      /** Surviving records the gallery could have drawn from. */
+      usableCount: number;
+      excluded: InatExclusions;
+      /** The newest few, with their tide. Never filtered by whether a photo renders. */
+      shown: AnnotatedSighting[];
+    }
+  | { kind: 'unavailable'; reason: string; drift: boolean };
 
 export interface SpotWeek extends SpotRow {
   evaluatedAtMs: number;
@@ -225,6 +335,7 @@ export interface SpotWeek extends SpotRow {
   dates: LocalDate[];
   notices: Notice[];
   failure: { message: string; url: string } | null;
+  gallery: SpotSightingsGallery;
 }
 
 /** Resolve a slug to a spot the grid can actually evaluate, or null. */
@@ -297,7 +408,12 @@ export async function loadSpotWeek(spot: TidepoolSpot, nowMs: number): Promise<S
   const notices: Notice[] = [];
   const ceiling = swellCeilingFor(spot.slug);
 
-  const swell = await resolveSpotSwell(spot, nowMs);
+  const [swell, sightings, gallery] = await Promise.all([
+    resolveSpotSwell(spot, nowMs),
+    loadSightingsSummary(spot, today),
+    loadSpotGallery(spot, today),
+  ]);
+  notices.push(...sightingsNotices(spot, sightings));
 
   const shell = {
     evaluatedAtMs: nowMs,
@@ -307,6 +423,8 @@ export async function loadSpotWeek(spot: TidepoolSpot, nowMs: number): Promise<S
     spot,
     swell,
     ceiling,
+    sightings,
+    gallery,
   };
 
   let series: TideSeries;
@@ -334,6 +452,60 @@ export async function loadSpotWeek(spot: TidepoolSpot, nowMs: number): Promise<S
     usableCount: countUsable(days.filter((d): d is WindowResult => d !== null)),
     notices,
     failure: null,
+  };
+}
+
+/**
+ * The gallery, with each sighting's tide attached.
+ *
+ * This needs a SECOND prediction series. The grid's fetch starts one day before
+ * today; the sightings window reaches fourteen days back, and `heightAt` throws
+ * outside its series rather than clamping to the end -- which is the behaviour
+ * to want, and the reason a separate fetch is the honest fix rather than
+ * catching the throw. The two requests are distinct URLs and cache
+ * independently, and CO-OPS serves a year of 6-minute predictions per request,
+ * so sixteen days is not a cost worth optimising away.
+ *
+ * A failed prediction fetch does NOT take out the gallery. The sightings still
+ * render; they render without tide heights, each carrying the reason.
+ */
+async function loadSpotGallery(
+  spot: TidepoolSpot,
+  today: LocalDate,
+): Promise<SpotSightingsGallery> {
+  const result = await fetchSpotSightings(spot, today);
+  if (result.kind === 'unavailable') {
+    return { kind: 'unavailable', reason: result.reason, drift: result.drift };
+  }
+
+  const { observations } = result;
+
+  let series: TideSeries | null = null;
+  if (observations.sightings.length > 0) {
+    try {
+      series = await fetchTideSeries(
+        spot.tide_station,
+        addLocalDays(today, -(INAT_WINDOW_DAYS + 1)),
+        (INAT_WINDOW_DAYS + 2) * 24,
+      );
+    } catch {
+      // Reported per sighting by annotateWithTide, in the place a reader is
+      // looking for the missing number rather than in a notice at the bottom.
+      series = null;
+    }
+  }
+
+  return {
+    kind: 'ok',
+    windowDays: result.windowDays,
+    totalResults: observations.totalResults,
+    fetchedCount: observations.fetchedCount,
+    usableCount: observations.sightings.length,
+    excluded: observations.excluded,
+    shown: annotateWithTide(
+      newestSightings(observations.sightings, SIGHTINGS_GALLERY_MAX),
+      series,
+    ),
   };
 }
 

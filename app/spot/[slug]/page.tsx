@@ -7,6 +7,7 @@ import { FlagBadge } from '@/components/flag-badge';
 import { MidnightNotice } from '@/components/midnight-notice';
 import { WeekRibbon } from '@/components/week-ribbon';
 import { SpotProtection } from '@/components/spot-protection';
+import { SightingsSection } from '@/components/sightings';
 import { UnresolvedDisclosure } from '@/components/unresolved';
 import { CellShell, FloorGap, TideLine } from '@/components/window-cell';
 import { loadSpotWeek, tidepoolSpotBySlug } from '@/lib/grid';
@@ -152,6 +153,25 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
           </ol>
         </div>
       )}
+
+      {/*
+        Below the tide content and above the inventory notes.
+
+        Not at the top: this page is a tide page, and the sightings are an
+        addition to it rather than its subject. But above `From the inventory`,
+        because what someone actually saw here last week is more use to a reader
+        than a note about which buoy the swell falls back to.
+
+        Outside the `week.failure` branch deliberately. A CO-OPS failure takes
+        out the tide content, and the sightings section is still true and still
+        worth rendering -- the same way a swell failure degrades to swell-tbd
+        rather than taking down the grid.
+      */}
+      <SightingsSection
+        gallery={week.gallery}
+        spotName={spot.name}
+        timeZone={week.timeZone}
+      />
 
       <SpotProtection spot={spot} />
 

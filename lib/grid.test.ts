@@ -39,7 +39,9 @@ import {
 } from './grid';
 import { addLocalDays } from './time';
 import coops240h from './__fixtures__/coops-9410230-20260727-240h.json';
+import coops384h from './__fixtures__/coops-9410230-20260713-384h.json';
 import coops72h from './__fixtures__/coops-9410230-20260727-6min.json';
+import sunsetCliffsPage from './__fixtures__/inat-sunset-cliffs-20260728.json';
 import { SPOTS_WITHOUT_FLOOR, TIDEPOOL_SPOTS } from '@/shared/spots.generated';
 import { readFileSync } from 'node:fs';
 
@@ -66,20 +68,35 @@ const textReply = (body: string, status = 200) =>
   }) as unknown as Response;
 
 /**
- * Route by upstream. Predictions and swell fail independently, which is the
- * whole point of the policy, so every test says what each one does.
+ * Route by upstream. Predictions, swell and sightings fail independently, which
+ * is the whole point of the policy, so every test says what each one does.
+ *
+ * Predictions are routed by the range they ask for. The grid asks for 240 h
+ * starting a day before today; the gallery asks for 384 h starting fifteen days
+ * before it, because sightings reach fourteen days back and heightAt refuses to
+ * read outside its series. Routing both to the same fixture would let the
+ * gallery's tide join pass on a series that does not actually cover it.
  */
 function route({
   predictions = jsonReply(coops240h),
+  backWindow = jsonReply(coops384h),
   swell = textReply(NDBC_FIXTURE),
+  sightings = jsonReply(sunsetCliffsPage),
 }: {
   predictions?: Response | Error;
+  backWindow?: Response | Error;
   swell?: Response | Error | ((buoyId: string) => Response);
+  sightings?: Response | Error;
 } = {}) {
   fetchMock.mockImplementation(async (url: string) => {
+    if (url.includes('inaturalist')) {
+      if (sightings instanceof Error) throw sightings;
+      return sightings;
+    }
     if (url.includes('tidesandcurrents')) {
-      if (predictions instanceof Error) throw predictions;
-      return predictions;
+      const chosen = url.includes('range=384') ? backWindow : predictions;
+      if (chosen instanceof Error) throw chosen;
+      return chosen;
     }
     if (swell instanceof Error) throw swell;
     if (typeof swell === 'function') {
@@ -91,6 +108,9 @@ function route({
 
 const coopsCalls = () =>
   fetchMock.mock.calls.filter((c) => String(c[0]).includes('tidesandcurrents')).length;
+
+const inatCalls = () =>
+  fetchMock.mock.calls.filter((c) => String(c[0]).includes('inaturalist')).length;
 
 beforeEach(() => {
   fetchMock = vi.fn();
@@ -348,6 +368,174 @@ describe('isServableDate', () => {
 });
 
 /* ===========================================================================
+ * Sightings: a third upstream, with the same asymmetry
+ * ===========================================================================
+ *
+ * iNaturalist failing is NOT fatal, to the grid or to a spot page. The subject
+ * of both is the tide; sightings are an addition, and an addition that can take
+ * out its host is a liability rather than a feature.
+ *
+ * Empty and unavailable are DIFFERENT results, and that is the whole point.
+ * "Nothing recorded here in 14 days" is a fact about the reef. "Could not
+ * reach iNaturalist" is a fact about the connection. A 200 carrying an empty
+ * array is the first, never the second.
+ */
+
+describe('sightings', () => {
+  const sunsetCliffs = TIDEPOOL_SPOTS.find((s) => s.slug === 'sunset-cliffs')!;
+
+  it('issues exactly one request per spot', async () => {
+    route();
+    await loadGrid(NOW_MS);
+    expect(inatCalls()).toBe(TIDEPOOL_SPOTS.length);
+  });
+
+  it('carries iNaturalist own count into the row summary', async () => {
+    route();
+    const grid = await loadGrid(NOW_MS);
+
+    const row = grid.rows.find((r) => r.spot.slug === 'sunset-cliffs')!;
+    expect(row.sightings.kind).toBe('ok');
+    if (row.sightings.kind !== 'ok') throw new Error('unreachable');
+    // 95 in the window; 30 on the page fetched. The summary reports the first.
+    expect(row.sightings.totalResults).toBe(95);
+    expect(row.sightings.windowDays).toBe(14);
+    expect(row.sightings.newest!.scientificName).toBe('Corvus brachyrhynchos');
+  });
+
+  it('does not place a record at a spot it was not recorded at', async () => {
+    /*
+     * Every spot's query is routed to the SAME captured page, which is Sunset
+     * Cliffs'. The distance guard is what stops those records appearing under
+     * Cabrillo, six kilometres away -- so a run where they did would show up
+     * here as a newest sighting on the wrong row.
+     */
+    route();
+    const grid = await loadGrid(NOW_MS);
+
+    const cabrillo = grid.rows.find((r) => r.spot.slug === 'cabrillo-tidepools')!;
+    expect(cabrillo.sightings.kind).toBe('ok');
+    if (cabrillo.sightings.kind !== 'ok') throw new Error('unreachable');
+    expect(cabrillo.sightings.newest).toBeNull();
+  });
+
+  it('does not take down the grid when iNaturalist is unreachable', async () => {
+    route({ sightings: new Error('getaddrinfo ENOTFOUND api.inaturalist.org') });
+    const grid = await loadGrid(NOW_MS);
+
+    expect(grid.failure).toBeNull();
+    expect(grid.rows).toHaveLength(TIDEPOOL_SPOTS.length);
+    // Every day still evaluated: the tide is what this page is about.
+    expect(grid.rows.every((r) => r.days.every((d) => d !== null))).toBe(true);
+
+    const row = grid.rows[0]!;
+    expect(row.sightings.kind).toBe('unavailable');
+    if (row.sightings.kind !== 'unavailable') throw new Error('unreachable');
+    expect(row.sightings.reason).toContain('ENOTFOUND');
+    expect(row.sightings.drift).toBe(false);
+
+    // Reported, not swallowed.
+    expect(grid.notices.some((n) => n.message.includes('ENOTFOUND'))).toBe(true);
+  });
+
+  it('reports an empty page as empty, not as a failure, and raises no notice for it', async () => {
+    route({ sightings: jsonReply({ total_results: 0, page: 1, per_page: 30, results: [] }) });
+    const grid = await loadGrid(NOW_MS);
+
+    const row = grid.rows[0]!;
+    expect(row.sightings.kind).toBe('ok');
+    if (row.sightings.kind !== 'ok') throw new Error('unreachable');
+    expect(row.sightings.totalResults).toBe(0);
+    expect(row.sightings.newest).toBeNull();
+
+    // An empty reef is not a problem to disclose. The section says so itself.
+    expect(grid.notices.some((n) => n.message.toLowerCase().includes('inaturalist'))).toBe(false);
+  });
+
+  it('marks a drifted payload as drift rather than as a quiet feed', async () => {
+    /*
+     * quality_grade has to be present for this to reach the structural checks
+     * at all: the parser applies the policy gate first, so a record that should
+     * not have been served is dropped and counted before its shape matters. A
+     * record that passes the gate and is then malformed is the drift case.
+     */
+    route({
+      sightings: jsonReply({
+        total_results: 1,
+        results: [{ quality_grade: 'research', id: 'not-a-number' }],
+      }),
+    });
+    const grid = await loadGrid(NOW_MS);
+
+    const row = grid.rows[0]!;
+    expect(row.sightings.kind).toBe('unavailable');
+    if (row.sightings.kind !== 'unavailable') throw new Error('unreachable');
+    expect(row.sightings.drift).toBe(true);
+    expect(grid.notices.some((n) => n.severity === 'drift')).toBe(true);
+  });
+
+  it('builds the gallery on a spot page, with each sighting tide attached', async () => {
+    route();
+    const week = await loadSpotWeek(sunsetCliffs, NOW_MS);
+
+    expect(week.gallery.kind).toBe('ok');
+    if (week.gallery.kind !== 'ok') throw new Error('unreachable');
+
+    expect(week.gallery.totalResults).toBe(95);
+    expect(week.gallery.fetchedCount).toBe(30);
+    expect(week.gallery.usableCount).toBe(30);
+    expect(week.gallery.shown).toHaveLength(6);
+    for (const s of week.gallery.shown) {
+      expect(s.tide).not.toBeNull();
+      expect(s.tideUnavailableReason).toBeNull();
+    }
+  });
+
+  it('fetches the back-window predictions the gallery needs, not the grid range', async () => {
+    route();
+    await loadSpotWeek(sunsetCliffs, NOW_MS);
+
+    const ranges = fetchMock.mock.calls
+      .map((c) => String(c[0]))
+      .filter((u) => u.includes('tidesandcurrents'))
+      .map((u) => new URL(u).searchParams.get('begin_date') + '/' + new URL(u).searchParams.get('range'));
+
+    // The week: one day of margin before today, 240 h. The gallery: fifteen days
+    // before today, 384 h, because heightAt refuses to read outside its series
+    // and the sightings feed reaches fourteen days back.
+    expect(ranges).toContain('20260727/240');
+    expect(ranges).toContain('20260713/384');
+  });
+
+  it('still renders the gallery when the back-window predictions fail', async () => {
+    route({ backWindow: new Error('CO-OPS timed out') });
+    const week = await loadSpotWeek(sunsetCliffs, NOW_MS);
+
+    // The week itself is unaffected: that is a different request.
+    expect(week.failure).toBeNull();
+    expect(week.gallery.kind).toBe('ok');
+    if (week.gallery.kind !== 'ok') throw new Error('unreachable');
+
+    expect(week.gallery.shown).toHaveLength(6);
+    for (const s of week.gallery.shown) {
+      expect(s.tide).toBeNull();
+      expect(s.tideUnavailableReason).toBe('tide predictions for this window could not be loaded');
+    }
+  });
+
+  it('does not spend a predictions request when no sighting survived', async () => {
+    route({ sightings: jsonReply({ total_results: 0, page: 1, per_page: 30, results: [] }) });
+    const week = await loadSpotWeek(sunsetCliffs, NOW_MS);
+
+    const backWindowCalls = fetchMock.mock.calls.filter((c) =>
+      String(c[0]).includes('range=384'),
+    ).length;
+    expect(backWindowCalls).toBe(0);
+    expect(week.gallery.kind).toBe('ok');
+  });
+});
+
+/* ===========================================================================
  * loadSpotWeek
  * ========================================================================= */
 
@@ -452,6 +640,10 @@ function row(name: string, floorFt: number, lows: number[], usableCount = 0): Sp
       (lowFt) => ({ lowFt, floorFt, minutesRemaining: null, usableMinutes: 0 }) as SpotRow['days'][number],
     ),
     usableCount,
+    // The sort never reads this. It is here so the object typechecks as a
+    // SpotRow, and it is the `ok`-with-nothing shape rather than `unavailable`,
+    // so a future sort key that did read it would not be handed a failure.
+    sightings: { kind: 'ok', windowDays: 14, totalResults: 0, newest: null },
   };
 }
 
