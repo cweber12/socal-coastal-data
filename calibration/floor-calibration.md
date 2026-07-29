@@ -310,14 +310,28 @@ number. That still needs local knowledge.
 ## 6. The NPS 0.7 ft check, spent once, at Cabrillo
 
 NPS publishes an operational tide threshold for the Cabrillo tidepools and
-enforces it. Read from nps.gov on 2026-07-29,
-`/thingstodo/visit-the-cabrillo-tidepools.htm`:
+enforces it. It is the same number everywhere it appears and it does not appear
+with the same meaning. Every statement of it on nps.gov, all read 2026-07-29:
 
-> At Cabrillo, a 0.7 tide or lower will give you the best ability to explore the
-> actual tidepools.
+| page | what it says about 0.7 | page last updated |
+|---|---|---|
+| `/thingstodo/visit-the-cabrillo-tidepools.htm` | "At Cabrillo, a 0.7 tide or lower will give you the **best ability to explore** the actual tidepools." | 2025-12-17 |
+| `/cabr/learn/nature/full-year-tide-table.htm` and the twelve monthly `<month>-tide-table.htm` pages | that same sentence verbatim as the standing header above each table — 13 pages, one occurrence each | — |
+| `/cabr/learn/nature/tidepools.htm` | "At Cabrillo, a tide of 0.7 or lower provides the **best opportunity** to explore the tidepools." … "ensuring your visit coincides with the **optimal conditions** for tidepool exploration." | 2026-06-30 |
+| `/articles/000/cabr-tidepools-top-10-tips.htm` | "A tide of 0.7 or below **should expose the tidepools**." | 2024-02-03 |
+| `/cabr/learn/management/compendium.htm` — Superintendent's Compendium, 36 CFR §1.5(d) public use limit, approved by the Superintendent 2025-12-17 | "The use of the tidepools by groups is not to exceed 120 persons per day on weekdays, and 40 persons per day on weekends and holidays, **any time the low tide is 0.7 or lower** during park hours." | 2026-05-27 |
+| `/thingstodo/visit-the-cabrillo-tidepools.htm`, Details → Reservations | "Large groups must request a reservation for a visit to the tidepools when tides are **lower than 0.7 feet above sea level**." | 2025-12-17 |
+| `/cabr/planyourvisit/tidepool-permits.htm` | still a placeholder: "This page is currently being worked on. Please check back later." | — |
 
-> Large groups must request a reservation for a visit to the tidepools when
-> tides are lower than 0.7 feet above sea level.
+Two properties of that record before any of it is used. The same rule is stated
+with two different boundaries — the compendium binds at "0.7 or lower" and the
+Details block at "lower than 0.7", so they disagree about 0.7 itself. And the
+published viewing window is not consistent across pages either: "approximately
+two hours before low tide time … and two hours after", "An hour before and an
+hour after the peak of the low tide", "an hour or more before and after the low
+tide time". These are separately authored pages, not one calibrated standard,
+which is why the differences in wording below cannot be adjudicated by reading
+them more closely.
 
 That is a defended, externally-authored number for one of the 8 spots in scope,
 and it is the only one in the corridor. No other spot here has an external
@@ -348,6 +362,13 @@ threshold to check against, so this figure is not a repeatable test — it is a
    two is wrong, and computing seven more from the wrong one wastes the work. What
    disagreement does *not* license is returning to §2 to re-fit it: the check has
    been spent, and a second pass against the same number measures nothing.
+6. **Which of §2's two outputs 0.7 is compared against is declared in writing
+   before the comparison runs.** §2 reads two numbers off the same curve: the
+   floor, where exposed area crosses the walkable minimum, and the knee, where
+   marginal area per 0.1 ft peaks. Compared against the wrong one, the difference
+   has a magnitude but no interpretation — and rule 5 would then halt the other
+   seven spots over a field mismatch dressed as a measurement disagreement.
+   **This is not currently settled**, and the first bullet below is why.
 
 The earlier version of this section said the pipeline is wrong if lidar and the
 iNaturalist distribution do not both land near 0.7 ft. That is the failure mode
@@ -361,19 +382,70 @@ arithmetic is published and cannot be unseen, but noticing it is not the same as
 checking anything: one side is a citizen-science count and the other a published
 operator threshold, with no instrument between them. It must not be used to
 choose X in #42 — choosing X because it reproduces 0.7 ft is choosing X from the
-output, and it would spend the check on the wrong method into the bargain.
+output, and it would spend the check on the wrong method into the bargain. Note
+also what that arithmetic assumes: "a 0.7 ft floor admits a marginal band" reads
+0.7 as a floor, which is the very thing the first bullet below finds unsettled.
+It is not a check, and it is not even a well-posed resemblance until the field is
+known.
 
 ### Three things to be careful about
 
-- **0.7 ft is a *workable* threshold** — the access and permit line, not the
-  "excellent" knee. It calibrates `tidepool_floor_ft`, not `tidepool_prime_ft`.
-- **Read it from nps.gov, not from a republisher.** A travel site quoting nps.gov
-  is not the publisher. Note that the obvious page for it,
-  `/cabr/planyourvisit/tidepool-permits.htm`, read the same day, says only "This
-  page is currently being worked on" — the figure lives on the two pages quoted
-  above and on `/cabr/learn/nature/tidepools.htm`. Note also that the published
-  rule says "large groups" with **no number**; an earlier version of this section
-  said "groups of ten or more", which nps.gov does not support.
+- **Which field 0.7 calibrates is unresolved, and the published record cannot
+  resolve it.** An earlier version of this bullet asserted that 0.7 ft is a
+  *workable* threshold — "the access and permit line, not the 'excellent' knee" —
+  calibrating `tidepool_floor_ft` rather than the `tidepool_prime_ft` of §1. The
+  record above does not support that. It does not support the opposite either:
+
+  - **Three of the statements are superlatives** — "best ability to explore",
+    "best opportunity", "optimal conditions" — and the first of them stands as
+    the header on all 13 of the park's own tide tables. That is §1's
+    *excellent*, not the level at which the bench first becomes worth the trip.
+  - **One is an exposure threshold.** "A tide of 0.7 or below should expose the
+    tidepools" is §1's *workable*, stated about as plainly as NPS states it
+    anywhere.
+  - **The permit clause is evidence for neither.** It fires on tides *lower* than
+    0.7 — the good ones — and the compendium supplies its own reason: "Group
+    sizes are limited to preserve the natural resources … on high visitation
+    days, which include weekends and holidays", and the limit "also assists in
+    maintaining a positive visitor experience for the general public." (The
+    elision is a parenthetical reading "rocky intertidal habitat", set off by a
+    dash character this fetch could not decode; it is elided rather than
+    reproduced for that reason.) That is a §1.5(d) public use
+    limit pegged to the days people turn up. An accessibility floor would gate
+    the other direction.
+
+  So the workable/prime distinction is **§1's, not NPS's**. One number does three
+  jobs — the best conditions, the level that uncovers the bench, and the crowd
+  trigger — which is what an operator with a single rule of thumb would publish,
+  and it means the publisher never drew the line we need it to have drawn.
+  Assigning 0.7 to one of our two fields would be our choice, not theirs, and by
+  rule 1 the entire worth of this figure is that it is externally authored.
+  Choosing its meaning to fit our schema destroys the thing being spent.
+
+  Neither reading reconciles with this file's own history, which is informative in
+  itself: read as prime, 0.7 ft sits 0.9 ft from the −0.2 ft that `spots.json`'s
+  `unresolved` array says encoded excellent tidepooling; read as workable, it sits
+  0.6 ft from the current +1.3 ft. Both exceed the 0.3 ft of §7's promotion rule,
+  so no reading makes the existing author estimates agree with NPS. That is
+  arithmetic on values already published in #38, not a comparison against §2, and
+  it does not spend anything.
+
+  Recording this does not require `tidepool_prime_ft` to exist — the §1 schema
+  split stays out of scope. It requires only that the field be named, or named as
+  unknown, before the comparison runs. That is rule 6.
+- **Read it from nps.gov, not from a republisher — and read past the visitor
+  pages.** A travel site quoting nps.gov is not the publisher. The obvious page,
+  `/cabr/planyourvisit/tidepool-permits.htm`, was still a placeholder on
+  2026-07-29; re-verified, unchanged. The correction this bullet needs is the
+  reverse of the one it used to carry. It said the published rule gives "large
+  groups" with **no number**, and that an earlier "groups of ten or more" was
+  unsupported. The ten was indeed unsupported — but the numbers are published:
+  the Superintendent's Compendium sets **120 persons per day on weekdays and 40
+  on weekends and holidays**, and requires groups to car pool on weekends and
+  holidays. It was missed because it sits in the regulatory instrument rather
+  than on any visitor page, which is the general lesson. The compendium is where
+  this park's thresholds are actually defended, and it is the document to read
+  first next time.
 - **The datum is not published, and the whole comparison turns on it.** The
   permit sentence says "0.7 feet above sea level". This stack works in feet above
   **MLLW** at 9410230, and `shared/calibration.json` bins in the same units. NPS
@@ -391,6 +463,70 @@ output, and it would spend the check on the wrong method into the bargain.
   declaration. **That is an inference, recorded as one, and an inference is not
   good enough for a check that can only be spent once.** Confirm the datum with
   NPS before spending it.
+
+  Two observations from the 2026-07-29 read point the same way and neither closes
+  it. First, the regulatory text does not say "feet" or "above sea level" at all —
+  the compendium binds on "the low tide is 0.7 or lower", units and datum
+  unstated — so the one phrasing that generates the MSL problem is a paraphrase in
+  a Details block on a non-regulatory page. Second, the tables beside the
+  `/cabr/learn/nature/tidepools.htm` quotation are NOAA's, credited to
+  `tidesandcurrents.noaa.gov` and linked as `noaatideannual.html?id=9410230` —
+  station 9410230, "La Jolla" in the CO-OPS metadata, the Scripps wharf, which is
+  the station `spots.json` already binds `cabrillo-tidepools` to and the one
+  `shared/calibration.json` predicts from. The page says so: the chart gives
+  "predictions for the Scripps Pier in La Jolla" and "there is only a slight
+  difference for the times at Cabrillo". That removes a confound this section
+  never listed — the comparison is not against a different tide series. It still
+  does not name a datum: across all 13 tide-table pages, "MLLW", "mean lower low"
+  and "datum" occur zero times, and the compendium's only low-water reference is
+  the garbled "300 yards below mean low tide lower water level" in the south
+  tidepools closure. The inference stands as an inference and the question still
+  has to be asked.
+
+### What would settle the field question
+
+1. **NPS says which it is.** The answerable form is not the abstract question but
+   the zone question, because NPS already publishes the vocabulary:
+   `/cabr/learn/nature/tidepools.htm` divides the bench into High, Middle and Low
+   and says the Low zone "is accessible only during the lowest tides". Which zone
+   0.7 uncovers maps the figure directly — low zone is §1's *excellent*, middle
+   zone its *workable*. No nps.gov page ties the number to a zone; checked
+   `/cabr/learn/nature/tidepools.htm`,
+   `/cabr/learn/education/tidepool-zonation.htm` (renders empty),
+   `/places/tidepools-rocky-intertidal.htm` and
+   `/articles/tidepooling-in-cabrillo-national-monument.htm`. So it has to be
+   asked, and a ranger can answer it in a sentence.
+2. **Or spend the check on identification instead of verification.** §2's curve
+   yields both numbers at Cabrillo. If exactly one lands within 0.3 ft of 0.7 ft
+   and the other does not, that is evidence about which field NPS's number is on
+   — but it is the same single comparison, so the figure would then be spent
+   identifying the field with nothing left to verify the floor. That trade may be
+   worth making. It is a human's decision, taken in writing before §2 runs, and
+   never a discovery made afterwards.
+3. **Nothing else in the published record.** Every nps.gov statement of the
+   figure is inventoried above. A further phrasing would not help; the ones
+   already there disagree.
+
+### One email, two questions, and it is not sent here
+
+The two questions this section leaves open are one ask to one office and must not
+go as two:
+
+1. Does 0.7 mark the level at which the tidepools become *workable* — bench
+   walkable, pools readable — or the level at which they are *best*? Concretely:
+   which zone is uncovered at 0.7, and is the 0.7 in the §1.5(d) public use limit
+   the same quantity as the 0.7 in "best ability to explore"?
+2. What vertical datum is "0.7 feet above sea level" — MLLW, MSL, or something
+   else? Concretely: is 0.7 a height read off the NOAA annual table for 9410230
+   that the park publishes beside the sentence?
+
+The MARINe transect-topography request in §8 is a third ask, to a different
+organisation, and is tracked separately rather than folded into this one.
+
+**Sending it is a human action and is not done here.** Neither question closes
+from the published record. Until both are answered — or until a human explicitly
+takes route 2 above and accepts that the figure is spent identifying its own field
+— the check in this section is not ready to be spent.
 
 **Related, and cheap:** the tidepool area's gate hours would resolve the
 `access_hours` open item in DECISIONS §9, and nps.gov publishes them itself —
