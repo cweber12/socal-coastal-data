@@ -12,8 +12,7 @@
       "Bash(cp \"C:\\\\Users\\\\coled\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects--current-projects-socal-coastal-data\\\\f55cf6a0-d9ef-40bb-9724-fceb1209849b\\\\scratchpad\\\\shots.mjs\" \"C:/Users/coled/AppData/Local/npm-cache/_npx/f0a362733743bae2/shots.mjs\")",
       "Bash(node \"C:/Users/coled/AppData/Local/npm-cache/_npx/f0a362733743bae2/shots.mjs\" \"C:\\\\Projects\\\\_current-projects\\\\socal-coastal-data\\\\.design\\\\ui-polish\\\\screenshots\")",
       "Bash(cp \"C:\\\\Users\\\\coled\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects--current-projects-socal-coastal-data\\\\f55cf6a0-d9ef-40bb-9724-fceb1209849b\\\\scratchpad\\\\shots.mjs\" \"C:/Users/coled/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/shots.mjs\")",
-      "Bash(node \"C:/Users/coled/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/shots.mjs\" \"C:\\\\Projects\\\\_current-projects\\\\socal-coastal-data\\\\.design\\\\ui-polish\\\\screenshots\")",
-      "Bash(python -c ' *)"
+      "Bash(node \"C:/Users/coled/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/shots.mjs\" \"C:\\\\Projects\\\\_current-projects\\\\socal-coastal-data\\\\.design\\\\ui-polish\\\\screenshots\")"
     ]
   }
 }
