@@ -88,7 +88,22 @@ export function SwellProvenance({
   ceiling: SwellCeiling;
 }) {
   return (
-    <p className="mt-2 text-meta text-[var(--text-dimmer)]">
+    /*
+      text-ui, not text-meta.
+      -----------------------------------------------------------------------
+      The type migration swept this to 11px along with the evaluation stamps
+      and the file-provenance footnotes, which was a misreading of the brief's
+      own principle. That principle demotes CAVEATS -- statements about how
+      much to trust a number. This is not one. Which buoy the reading came
+      from, how old it is, whether a fallback is standing in for a dead primary
+      and "may be geographically distant and read differently for the same
+      conditions", and whether the swell is unknown rather than calm -- those
+      are facts about the data being shown, and one of them can invalidate
+      every verdict on the page.
+
+      Apparatus is set small. This is not apparatus.
+    */
+    <p className="mt-2 text-ui text-[var(--text-dim)]">
       {swell.swellFt === null ? (
         <>
           <strong>Swell unknown.</strong> No buoy in this spot&apos;s binding is delivering a

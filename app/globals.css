@@ -53,6 +53,38 @@
   /* Page title, once per page. */
   --text-title: 1.375rem;
   --text-title--line-height: 1.2;
+
+  /*
+   * One reading width for the whole page.
+   *
+   * The spot page ran three: Tailwind's `max-w-prose` (65ch) on the inventory
+   * notes, a hand-written 68ch on the tinted panels, and full container width
+   * on the ribbon. Three left-aligned blocks with three different right edges
+   * down a single column reads as drift rather than as rhythm.
+   *
+   * 65ch, matching `max-w-prose`, so the two agree wherever both are used.
+   * Panels add their own padding on top -- see --panel-measure.
+   */
+  --measure: 65ch;
+}
+
+/*
+ * The panel equivalent, which has to be wider than the text inside it.
+ *
+ * A .tint-panel carries p-3, so a panel capped at --measure would set its TEXT
+ * to 65ch minus 1.5rem and its right edge would land short of every bare
+ * paragraph on the page. Adding the padding back is what makes the text edges
+ * line up rather than the box edges.
+ *
+ * `ch` resolves against the font-size of the element it is DECLARED on, not the
+ * text inside it. The panel div inherits 16px from body while its paragraphs
+ * are 12px, so `65ch` on the panel measured 65 sixteen-pixel characters and put
+ * its text edge at 592px against 440px for a bare paragraph -- 150px past
+ * everything it was supposed to line up with. Pinning the panel's own font-size
+ * to the size its text actually uses makes the unit resolve on the same basis.
+ */
+:root {
+  --panel-measure: calc(var(--measure) + 1.5rem);
 }
 
 :root {
@@ -212,8 +244,15 @@ body {
    * box, so the copy occupied the left third and the remaining two thirds were
    * an empty field of colour. At the width of a 1280px page that reads as a
    * layout fault rather than as emphasis.
+   *
+   * Derived from --measure rather than hand-set, so panel text and bare prose
+   * share a right edge. It was 68ch against prose at 65ch, which put a panel's
+   * text three characters past every paragraph near it.
    */
-  max-width: 68ch;
+  /* So the ch in --panel-measure resolves against the size the panel's own
+     text is set at. See the note on --panel-measure. */
+  font-size: var(--text-ui);
+  max-width: var(--panel-measure);
 }
 
 /* The provenance line inside a tint panel. See --tint-text-meta. */
@@ -419,11 +458,24 @@ body {
   .flag-popover {
     position: absolute;
     position-anchor: var(--flag-anchor);
-    position-area: block-end span-inline-start;
+    /*
+     * Above the badge, not below it.
+     *
+     * The badge sits in the top-right corner of its cell, so `block-end` --
+     * which is what this was -- opened the panel a few pixels under the badge
+     * and therefore ON TOP of the rest of its own cell, hiding the low, the
+     * high and the floor gap the panel is explaining. `block-start` opens
+     * upward from the badge, which clears the whole cell, because there is
+     * nothing of the cell above its own top-right corner.
+     *
+     * `block-end` stays as the first fallback for the top row, where there is
+     * no room above and covering the cell is better than being clipped.
+     */
+    position-area: block-start span-inline-start;
     position-try-fallbacks:
-      block-start span-inline-start,
-      block-end span-inline-end,
-      block-start span-inline-end;
+      block-end span-inline-start,
+      block-start span-inline-end,
+      block-end span-inline-end;
     top: auto;
     left: auto;
     translate: none;

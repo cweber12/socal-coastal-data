@@ -55,8 +55,9 @@ much as a design one: the evidence was in the folder the whole time.
 Second: the fix that removed the spot page's duplicate heading left an `<h3>`
 containing nothing but a coordinate pair.
 
-**Both must-fixes have since been resolved** — `26e76f1` and `483d92f`. The
-three should-fix items below are open.
+**Every must-fix and should-fix has since been resolved** — `26e76f1`,
+`483d92f` and `ce4f2a9`. Two `could improve` items are left open deliberately,
+with reasons.
 
 ## Must Fix
 
@@ -139,7 +140,7 @@ second heading to write on a page that already carries the spot as its `h1`.
 
 ## Should Fix
 
-### 3. The popover covers the cell it describes
+### 3. ~~The popover covers the cell it describes~~ — FIXED
 
 `screenshots/after/review-popover-last-column.png`. `position-area: block-end
 span-inline-start` puts the panel below and to the left of its badge, which
@@ -148,20 +149,36 @@ inversion (see What Works Well) answers *which* cell, so this is no longer a
 correctness problem — but the reader still cannot see the tide numbers the panel
 is talking about while reading it.
 
-_Fix: add `span-inline-end` variants earlier in `position-try-fallbacks`, or
-offset the panel by the cell's height so it clears its own row._
+**Resolved in `ce4f2a9`.** The primary `position-area` flips to `block-start`, so
+the panel opens UPWARD from a badge that sits in the cell's top-right corner --
+which clears the whole cell, because there is nothing of the cell above its own
+top corner. `block-end` stays as the first fallback for the top row, where there
+is no room above and covering the cell beats being clipped.
 
-### 4. Three different text measures on one page
+Measured on a mid-grid badge: the panel now overlaps its own cell by 165px²,
+about 1% of a 186×72 cell, against the whole lower half plus two rows below
+before.
+
+### 4. ~~Three different text measures on one page~~ — FIXED
 
 The spot page now runs `max-w-prose` (~65ch) on the "From the inventory" body,
 68ch on the two tinted panels, and full container width on the ribbon. The
 result is three left-aligned text blocks with three different right edges down a
 single column. See `screenshots/after/review-spot-desktop-1280.png`.
 
-_Fix: fold `--panel-measure` and the prose measure into one token and use it for
-both, so the page has one reading width._
+**Resolved in `ce4f2a9`.** One `--measure` token at 65ch, with
+`--panel-measure` derived as `calc(var(--measure) + 1.5rem)` to add back the
+panel's own padding so TEXT edges align rather than box edges.
 
-### 5. `SwellProvenance` inherits `text-meta` but carries load-bearing content
+The first attempt did not work and the measurement caught it: `ch` resolves
+against the font-size of the element it is declared on, and the panel div
+inherits 16px from body while its paragraphs are 12px. `65ch` on the panel
+therefore measured 65 sixteen-pixel characters and put its text edge at 592px
+against 440px for a bare paragraph. Pinning `font-size: var(--text-ui)` on the
+panel makes the unit resolve on the same basis: 451px against 440px, an 11px
+residual from the panel border, down from 152px.
+
+### 5. ~~`SwellProvenance` inherits `text-meta` but carries load-bearing content~~ — FIXED
 
 The swell line — which buoy, how old, whether it is a substitute, whether the
 reading is unknown — is now 11px, the same size as the evaluation stamp and the
@@ -169,8 +186,10 @@ file-provenance footnotes. The brief's principle 2 demotes *caveats*, but a
 substituted buoy that "may be geographically distant and read differently for
 the same conditions" is a fact about the data being shown, not apparatus.
 
-_Fix: `text-ui` (12px) for `SwellProvenance`, keeping `text-meta` for stamps and
-file provenance._
+**Resolved in `ce4f2a9`.** `text-ui` at 12px and `--text-dim` rather than
+`--text-dimmer`. Measured on the spot page: 14.20:1 light, 16.21:1 dark. Stamps
+and file provenance stay at `text-meta`, which is what the principle was
+actually about.
 
 ## Could Improve
 
@@ -181,13 +200,15 @@ deliberately: they are aria-hidden decoration sized in `em` against their tide
 line, and changing them changes `TideLine`'s proportions. Worth revisiting if
 the cell is ever reworked.
 
-### 7. `+0.0` is ambiguous at the crossover
+### 7. ~~`+0.0` is ambiguous at the crossover~~ — FIXED
 
 Swami's and Torrey Pines on Mon Aug 3 both read `+0.0` — the low is at the floor
 to within a tenth. The rounding guard in `formatFloorGap` correctly prevents
 `−0.0`, but `+0.0` still reads as "above the floor" when it is really "at it".
 
-_Suggestion: render exact-zero as `0.0` with no sign, or as `at floor`._
+**Resolved in `ce4f2a9`.** An exact zero renders unsigned. Both signs are false
+at the floor -- `+0.0` claims the low is over it and `−0.0` claims under -- and
+unsigned says what is actually known: the two agree to the precision shown.
 
 ### 8. The safety callout appears in full on all three pages
 

@@ -50,6 +50,14 @@ export function formatFloorGap(lowFt: number, floorFt: number): string {
   const gap = lowFt - floorFt;
   // -0.04 would render "−0.0", which reads as under-floor when it is not.
   const rounded = Number(gap.toFixed(1));
+  /*
+   * At the floor, to within the tenth of a foot this prints, neither sign is
+   * true. "+0.0" claims the low is over the floor and "−0.0" claims it is
+   * under, and on a real week both appear -- Swami's and Torrey Pines both read
+   * +0.0 on 3 August against 0.9 ft floors. An unsigned zero says what is
+   * actually known: the low and the floor agree to the precision shown.
+   */
+  if (rounded === 0) return '0.0';
   if (rounded < 0) return MINUS + Math.abs(rounded).toFixed(1);
   return '+' + rounded.toFixed(1);
 }

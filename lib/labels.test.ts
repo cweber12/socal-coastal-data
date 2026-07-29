@@ -206,12 +206,15 @@ describe('formatFloorGap', () => {
 
   it('does not render a negative zero as under the floor', () => {
     // -0.04 rounds to "-0.0" through toFixed, which reads as under-floor when
-    // the tide is actually at or fractionally above it.
-    expect(formatFloorGap(1.26, 1.3)).toBe('+0.0');
+    // the tide is actually at or fractionally above it. Unsigned instead.
+    expect(formatFloorGap(1.26, 1.3)).toBe('0.0');
   });
 
-  it('is exactly zero at the floor', () => {
-    expect(formatFloorGap(1.3, 1.3)).toBe('+0.0');
+  it('signs neither direction when the low is at the floor', () => {
+    // Both signs are false here. +0.0 claims the low is over the floor and −0.0
+    // claims it is under; unsigned says the two agree to the precision shown.
+    expect(formatFloorGap(1.3, 1.3)).toBe('0.0');
+    expect(formatFloorGap(0.9, 0.9)).toBe('0.0');
   });
 });
 
