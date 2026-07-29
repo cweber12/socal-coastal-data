@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3317/)",
+      "Bash(curl -s http://localhost:3317/)",
+      "Bash(sed -i \"s|localhost:3000|localhost:3317|; s|/spot/dike-rock|/spot/cabrillo-tidepools|g\" shots.mjs)",
+      "Bash(node shots.mjs \"C:\\\\Projects\\\\_current-projects\\\\socal-coastal-data\\\\.design\\\\ui-polish\\\\screenshots\")",
+      "Read(//c/Users/coled/AppData/Local/npm-cache/_npx/**)",
+      "Bash(npm ls *)",
+      "Read(//c/Users/coled/AppData/Local/ms-playwright/**)",
+      "Bash(NODE_PATH=\"C:/Users/coled/AppData/Local/npm-cache/_npx/f0a362733743bae2/node_modules\" node --preserve-symlinks shots.mjs \"C:\\\\Projects\\\\_current-projects\\\\socal-coastal-data\\\\.design\\\\ui-polish\\\\screenshots\")",
+      "Bash(cp \"C:\\\\Users\\\\coled\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects--current-projects-socal-coastal-data\\\\f55cf6a0-d9ef-40bb-9724-fceb1209849b\\\\scratchpad\\\\shots.mjs\" \"C:/Users/coled/AppData/Local/npm-cache/_npx/f0a362733743bae2/shots.mjs\")",
+      "Bash(node \"C:/Users/coled/AppData/Local/npm-cache/_npx/f0a362733743bae2/shots.mjs\" \"C:\\\\Projects\\\\_current-projects\\\\socal-coastal-data\\\\.design\\\\ui-polish\\\\screenshots\")",
+      "Bash(cp \"C:\\\\Users\\\\coled\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects--current-projects-socal-coastal-data\\\\f55cf6a0-d9ef-40bb-9724-fceb1209849b\\\\scratchpad\\\\shots.mjs\" \"C:/Users/coled/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/shots.mjs\")",
+      "Bash(node \"C:/Users/coled/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/shots.mjs\" \"C:\\\\Projects\\\\_current-projects\\\\socal-coastal-data\\\\.design\\\\ui-polish\\\\screenshots\")",
+      "Bash(python -c ' *)"
+    ]
+  }
+}
