@@ -56,7 +56,7 @@ Second: the fix that removed the spot page's duplicate heading left an `<h3>`
 containing nothing but a coordinate pair.
 
 **Every must-fix and should-fix has since been resolved** — `26e76f1`,
-`483d92f` and `ce4f2a9`. Two `could improve` items are left open deliberately,
+`483d92f` and `d5a51dc`. Two `could improve` items are left open deliberately,
 with reasons.
 
 ## Must Fix
@@ -149,7 +149,7 @@ inversion (see What Works Well) answers *which* cell, so this is no longer a
 correctness problem — but the reader still cannot see the tide numbers the panel
 is talking about while reading it.
 
-**Resolved in `ce4f2a9`.** The primary `position-area` flips to `block-start`, so
+**Resolved in `d5a51dc`.** The primary `position-area` flips to `block-start`, so
 the panel opens UPWARD from a badge that sits in the cell's top-right corner --
 which clears the whole cell, because there is nothing of the cell above its own
 top corner. `block-end` stays as the first fallback for the top row, where there
@@ -166,7 +166,7 @@ The spot page now runs `max-w-prose` (~65ch) on the "From the inventory" body,
 result is three left-aligned text blocks with three different right edges down a
 single column. See `screenshots/after/review-spot-desktop-1280.png`.
 
-**Resolved in `ce4f2a9`.** One `--measure` token at 65ch, with
+**Resolved in `d5a51dc`.** One `--measure` token at 65ch, with
 `--panel-measure` derived as `calc(var(--measure) + 1.5rem)` to add back the
 panel's own padding so TEXT edges align rather than box edges.
 
@@ -186,7 +186,7 @@ file-provenance footnotes. The brief's principle 2 demotes *caveats*, but a
 substituted buoy that "may be geographically distant and read differently for
 the same conditions" is a fact about the data being shown, not apparatus.
 
-**Resolved in `ce4f2a9`.** `text-ui` at 12px and `--text-dim` rather than
+**Resolved in `d5a51dc`.** `text-ui` at 12px and `--text-dim` rather than
 `--text-dimmer`. Measured on the spot page: 14.20:1 light, 16.21:1 dark. Stamps
 and file provenance stay at `text-meta`, which is what the principle was
 actually about.
@@ -206,7 +206,7 @@ Swami's and Torrey Pines on Mon Aug 3 both read `+0.0` — the low is at the flo
 to within a tenth. The rounding guard in `formatFloorGap` correctly prevents
 `−0.0`, but `+0.0` still reads as "above the floor" when it is really "at it".
 
-**Resolved in `ce4f2a9`.** An exact zero renders unsigned. Both signs are false
+**Resolved in `d5a51dc`.** An exact zero renders unsigned. Both signs are false
 at the floor -- `+0.0` claims the low is over it and `−0.0` claims under -- and
 unsigned says what is actually known: the two agree to the precision shown.
 
