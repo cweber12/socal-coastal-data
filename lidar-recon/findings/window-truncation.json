@@ -1,0 +1,631 @@
+{
+ "read_date": "2026-07-29",
+ "issue": 80,
+ "defect": "probe_dem.probe() clamps its window to the tile it is given and reports the statistics of the surviving part with no record that anything was cut.",
+ "truncated_windows": [
+  {
+   "spot": "la-jolla-cove",
+   "product": "8658",
+   "window": "w100",
+   "px_window": [
+    20948,
+    21074,
+    9864,
+    10065
+   ],
+   "raster_px": [
+    21075,
+    22522
+   ],
+   "actual_px": [
+    127,
+    202
+   ],
+   "edges_touched": [
+    "east"
+   ],
+   "reported_coverage_pct": 100.0,
+   "reported_min_m": -4.841,
+   "reported_median_m": 12.555
+  },
+  {
+   "spot": "la-jolla-cove",
+   "product": "8658",
+   "window": "w25",
+   "px_window": [
+    21023,
+    21074,
+    9939,
+    9990
+   ],
+   "raster_px": [
+    21075,
+    22522
+   ],
+   "actual_px": [
+    52,
+    52
+   ],
+   "edges_touched": [
+    "east"
+   ],
+   "reported_coverage_pct": 100.0,
+   "reported_min_m": -0.018,
+   "reported_median_m": 13.187
+  },
+  {
+   "spot": "cabrillo-tidepools",
+   "product": "2616",
+   "window": "w100",
+   "px_window": [
+    0,
+    129,
+    280,
+    481
+   ],
+   "raster_px": [
+    1500,
+    1500
+   ],
+   "actual_px": [
+    130,
+    202
+   ],
+   "edges_touched": [
+    "west"
+   ],
+   "reported_coverage_pct": 98.35,
+   "reported_min_m": -0.962,
+   "reported_median_m": 14.708
+  },
+  {
+   "spot": "cabrillo-tidepools",
+   "product": "6260",
+   "window": "w100",
+   "px_window": [
+    0,
+    257,
+    560,
+    961
+   ],
+   "raster_px": [
+    3000,
+    3000
+   ],
+   "actual_px": [
+    258,
+    402
+   ],
+   "edges_touched": [
+    "west"
+   ],
+   "reported_coverage_pct": 100.0,
+   "reported_min_m": -0.077,
+   "reported_median_m": 14.229
+  }
+ ],
+ "truncated_widening_windows": [
+  {
+   "spot": "cabrillo-tidepools",
+   "product": "2616",
+   "half_m": 100,
+   "pixels_reported": 26260,
+   "pixels_window_asks_for": 40804,
+   "fraction_of_window": 0.644,
+   "carried_from": "coverage-measured.json",
+   "reported_coverage_pct": 98.35,
+   "reported_min_m": -0.962,
+   "reported_median_m": 14.708,
+   "reported_frac_below_0m": 0.025
+  },
+  {
+   "spot": "cabrillo-tidepools",
+   "product": "2616",
+   "half_m": 200,
+   "pixels_reported": 92460,
+   "pixels_window_asks_for": 161604,
+   "fraction_of_window": 0.572,
+   "carried_from": null,
+   "reported_coverage_pct": 99.53,
+   "reported_min_m": -0.962,
+   "reported_median_m": 19.296,
+   "reported_frac_below_0m": 0.011
+  },
+  {
+   "spot": "cabrillo-tidepools",
+   "product": "2616",
+   "half_m": 300,
+   "pixels_reported": 198660,
+   "pixels_window_asks_for": 362404,
+   "fraction_of_window": 0.548,
+   "carried_from": null,
+   "reported_coverage_pct": 99.78,
+   "reported_min_m": -0.962,
+   "reported_median_m": 24.841,
+   "reported_frac_below_0m": 0.006
+  },
+  {
+   "spot": "cabrillo-tidepools",
+   "product": "2616",
+   "half_m": 500,
+   "pixels_reported": 467460,
+   "pixels_window_asks_for": 1004004,
+   "fraction_of_window": 0.466,
+   "carried_from": null,
+   "reported_coverage_pct": 99.09,
+   "reported_min_m": -3.897,
+   "reported_median_m": 32.556,
+   "reported_frac_below_0m": 0.044
+  },
+  {
+   "spot": "la-jolla-shores",
+   "product": "2616",
+   "half_m": 500,
+   "pixels_reported": 956910,
+   "pixels_window_asks_for": 1004004,
+   "fraction_of_window": 0.953,
+   "carried_from": null,
+   "reported_coverage_pct": 99.04,
+   "reported_min_m": -20.086,
+   "reported_median_m": 3.273,
+   "reported_frac_below_0m": 0.302
+  },
+  {
+   "spot": "sunset-cliffs",
+   "product": "2616",
+   "half_m": 500,
+   "pixels_reported": 894786,
+   "pixels_window_asks_for": 1004004,
+   "fraction_of_window": 0.891,
+   "carried_from": null,
+   "reported_coverage_pct": 86.68,
+   "reported_min_m": -5.973,
+   "reported_median_m": 28.517,
+   "reported_frac_below_0m": 0.255
+  },
+  {
+   "spot": "torrey-pines-beach",
+   "product": "2616",
+   "half_m": 500,
+   "pixels_reported": 890778,
+   "pixels_window_asks_for": 1004004,
+   "fraction_of_window": 0.887,
+   "carried_from": null,
+   "reported_coverage_pct": 92.89,
+   "reported_min_m": -0.785,
+   "reported_median_m": 2.746,
+   "reported_frac_below_0m": 0.012
+  },
+  {
+   "spot": "windansea",
+   "product": "2616",
+   "half_m": 300,
+   "pixels_reported": 304612,
+   "pixels_window_asks_for": 362404,
+   "fraction_of_window": 0.841,
+   "carried_from": null,
+   "reported_coverage_pct": 100.0,
+   "reported_min_m": -5.062,
+   "reported_median_m": 13.081,
+   "reported_frac_below_0m": 0.24
+  },
+  {
+   "spot": "windansea",
+   "product": "2616",
+   "half_m": 500,
+   "pixels_reported": 567624,
+   "pixels_window_asks_for": 1004004,
+   "fraction_of_window": 0.565,
+   "carried_from": null,
+   "reported_coverage_pct": 100.0,
+   "reported_min_m": -7.71,
+   "reported_median_m": 0.085,
+   "reported_frac_below_0m": 0.497
+  }
+ ],
+ "what_still_stands": "The three 'first reaches any sub-zero pixel at +/-200 m' results -- windansea, sunset-cliffs, la-jolla-shores -- are on FULL windows and are unaffected. So is torrey-pines-beach's 'still entirely above 0 m at +/-300 m'. Its +/-500 m row is truncated, so the direction of that finding stands and the '1.2% of the disc' figure does not.",
+ "re_measured": {
+  "2616": {
+   "spot": "cabrillo-tidepools",
+   "lat": 32.669,
+   "lon": -117.245,
+   "tiles": [
+    {
+     "tile": "11SMS770135.tif",
+     "used": true,
+     "src_px_box": [
+      0,
+      553,
+      0,
+      905
+     ]
+    },
+    {
+     "tile": "11SMS755135.tif",
+     "used": true,
+     "src_px_box": [
+      1003,
+      1499,
+      0,
+      905
+     ]
+    },
+    {
+     "tile": "11SMS770150.tif",
+     "used": true,
+     "src_px_box": [
+      0,
+      553,
+      1355,
+      1499
+     ]
+    },
+    {
+     "tile": "11SMS755150.tif",
+     "used": true,
+     "src_px_box": [
+      1003,
+      1499,
+      1355,
+      1499
+     ]
+    }
+   ],
+   "pixel_m": 1.0000000000000389,
+   "vdatum_offset_usft": 0.22,
+   "by_half_m": {
+    "25": {
+     "px_window": [
+      500,
+      551,
+      500,
+      551
+     ],
+     "actual_px": [
+      52,
+      52
+     ],
+     "pixels": 2704,
+     "nodata": 88,
+     "outside_mosaic": 0,
+     "coverage_pct": 96.75,
+     "min_m": -0.052,
+     "max_m": 15.19,
+     "median_m": 0.373,
+     "p05_m": 0.006,
+     "p95_m": 13.741,
+     "frac_below_0m": 0.03,
+     "previously_reported": {
+      "coverage_pct": 96.75,
+      "min_m": -0.052,
+      "median_m": 0.373,
+      "frac_below_0m": 0.03,
+      "pixels": 2704
+     },
+     "min_ft_mllw": 0.049,
+     "median_ft_mllw": 1.444
+    },
+    "100": {
+     "px_window": [
+      425,
+      626,
+      425,
+      626
+     ],
+     "actual_px": [
+      202,
+      202
+     ],
+     "pixels": 40804,
+     "nodata": 2376,
+     "outside_mosaic": 0,
+     "coverage_pct": 94.18,
+     "min_m": -2.744,
+     "max_m": 23.127,
+     "median_m": 6.928,
+     "p05_m": -1.688,
+     "p95_m": 21.043,
+     "frac_below_0m": 0.21,
+     "previously_reported": {
+      "coverage_pct": 98.35,
+      "min_m": -0.962,
+      "median_m": 14.708,
+      "frac_below_0m": 0.025,
+      "pixels": 26260
+     },
+     "min_ft_mllw": -8.783,
+     "median_ft_mllw": 22.95
+    },
+    "200": {
+     "px_window": [
+      325,
+      726,
+      325,
+      726
+     ],
+     "actual_px": [
+      402,
+      402
+     ],
+     "pixels": 161604,
+     "nodata": 27395,
+     "outside_mosaic": 0,
+     "coverage_pct": 83.05,
+     "min_m": -4.88,
+     "max_m": 63.394,
+     "median_m": 11.153,
+     "p05_m": -3.019,
+     "p95_m": 41.126,
+     "frac_below_0m": 0.254,
+     "previously_reported": {
+      "coverage_pct": 99.53,
+      "min_m": -0.962,
+      "median_m": 19.296,
+      "frac_below_0m": 0.011,
+      "pixels": 92460
+     },
+     "min_ft_mllw": -15.79,
+     "median_ft_mllw": 36.811
+    },
+    "300": {
+     "px_window": [
+      225,
+      826,
+      225,
+      826
+     ],
+     "actual_px": [
+      602,
+      602
+     ],
+     "pixels": 362404,
+     "nodata": 69849,
+     "outside_mosaic": 0,
+     "coverage_pct": 80.73,
+     "min_m": -6.656,
+     "max_m": 116.016,
+     "median_m": 14.971,
+     "p05_m": -4.472,
+     "p95_m": 78.188,
+     "frac_below_0m": 0.272,
+     "previously_reported": {
+      "coverage_pct": 99.78,
+      "min_m": -0.962,
+      "median_m": 24.841,
+      "frac_below_0m": 0.006,
+      "pixels": 198660
+     },
+     "min_ft_mllw": -21.617,
+     "median_ft_mllw": 49.337
+    },
+    "500": {
+     "px_window": [
+      25,
+      1026,
+      25,
+      1026
+     ],
+     "actual_px": [
+      1002,
+      1002
+     ],
+     "pixels": 1004004,
+     "nodata": 235496,
+     "outside_mosaic": 0,
+     "coverage_pct": 76.54,
+     "min_m": -10.604,
+     "max_m": 128.817,
+     "median_m": 15.937,
+     "p05_m": -6.611,
+     "p95_m": 118.928,
+     "frac_below_0m": 0.31,
+     "previously_reported": {
+      "coverage_pct": 99.09,
+      "min_m": -3.897,
+      "median_m": 32.556,
+      "frac_below_0m": 0.044,
+      "pixels": 467460
+     },
+     "min_ft_mllw": -34.57,
+     "median_ft_mllw": 52.507
+    }
+   }
+  },
+  "6260": {
+   "spot": "cabrillo-tidepools",
+   "lat": 32.669,
+   "lon": -117.245,
+   "tiles": [
+    {
+     "tile": "11SMS47703613.tif",
+     "used": true,
+     "src_px_box": [
+      0,
+      1106,
+      0,
+      1810
+     ]
+    },
+    {
+     "tile": "11SMS47553613.tif",
+     "used": true,
+     "src_px_box": [
+      2006,
+      2999,
+      0,
+      1810
+     ]
+    },
+    {
+     "tile": "11SMS47703615.tif",
+     "used": true,
+     "src_px_box": [
+      0,
+      1106,
+      2710,
+      2999
+     ]
+    },
+    {
+     "tile": "11SMS47553615.tif",
+     "used": true,
+     "src_px_box": [
+      2006,
+      2999,
+      2710,
+      2999
+     ]
+    }
+   ],
+   "pixel_m": 0.5,
+   "vdatum_offset_usft": 0.22,
+   "by_half_m": {
+    "25": {
+     "px_window": [
+      1000,
+      1101,
+      1000,
+      1101
+     ],
+     "actual_px": [
+      102,
+      102
+     ],
+     "pixels": 10404,
+     "nodata": 0,
+     "outside_mosaic": 0,
+     "coverage_pct": 100.0,
+     "min_m": -0.002,
+     "max_m": 15.081,
+     "median_m": 0.231,
+     "p05_m": 0.104,
+     "p95_m": 12.823,
+     "frac_below_0m": 0.0,
+     "previously_reported": {
+      "coverage_pct": 100.0,
+      "min_m": -0.002,
+      "median_m": 0.231,
+      "frac_below_0m": 0.0,
+      "pixels": 10404
+     },
+     "min_ft_mllw": 0.213,
+     "median_ft_mllw": 0.978
+    },
+    "100": {
+     "px_window": [
+      850,
+      1251,
+      850,
+      1251
+     ],
+     "actual_px": [
+      402,
+      402
+     ],
+     "pixels": 161604,
+     "nodata": 1501,
+     "outside_mosaic": 0,
+     "coverage_pct": 99.07,
+     "min_m": -0.542,
+     "max_m": 23.093,
+     "median_m": 2.2,
+     "p05_m": -0.125,
+     "p95_m": 20.71,
+     "frac_below_0m": 0.124,
+     "previously_reported": {
+      "coverage_pct": 100.0,
+      "min_m": -0.077,
+      "median_m": 14.229,
+      "frac_below_0m": 0.001,
+      "pixels": 103716
+     },
+     "min_ft_mllw": -1.558,
+     "median_ft_mllw": 7.438
+    },
+    "200": {
+     "px_window": [
+      650,
+      1451,
+      650,
+      1451
+     ],
+     "actual_px": [
+      802,
+      802
+     ],
+     "pixels": 643204,
+     "nodata": 144328,
+     "outside_mosaic": 0,
+     "coverage_pct": 77.56,
+     "min_m": -0.613,
+     "max_m": 63.07,
+     "median_m": 13.953,
+     "p05_m": -0.161,
+     "p95_m": 41.505,
+     "frac_below_0m": 0.127,
+     "previously_reported": null,
+     "min_ft_mllw": -1.791,
+     "median_ft_mllw": 45.997
+    },
+    "300": {
+     "px_window": [
+      450,
+      1651,
+      450,
+      1651
+     ],
+     "actual_px": [
+      1202,
+      1202
+     ],
+     "pixels": 1444804,
+     "nodata": 458214,
+     "outside_mosaic": 0,
+     "coverage_pct": 68.29,
+     "min_m": -0.613,
+     "max_m": 115.347,
+     "median_m": 19.357,
+     "p05_m": -0.126,
+     "p95_m": 80.635,
+     "frac_below_0m": 0.095,
+     "previously_reported": null,
+     "min_ft_mllw": -1.791,
+     "median_ft_mllw": 63.727
+    },
+    "500": {
+     "px_window": [
+      50,
+      2051,
+      50,
+      2051
+     ],
+     "actual_px": [
+      2002,
+      2002
+     ],
+     "pixels": 4008004,
+     "nodata": 1651769,
+     "outside_mosaic": 0,
+     "coverage_pct": 58.79,
+     "min_m": -0.613,
+     "max_m": 128.78,
+     "median_m": 30.486,
+     "p05_m": -0.078,
+     "p95_m": 121.587,
+     "frac_below_0m": 0.074,
+     "previously_reported": null,
+     "min_ft_mllw": -1.791,
+     "median_ft_mllw": 100.239
+    }
+   }
+  }
+ },
+ "not_re_measured": [
+  {
+   "spot": "la-jolla-cove",
+   "product": "8658",
+   "window": "w100",
+   "why": "CoNED is uncompressed with RowsPerStrip=1, one range request per raster row, and the mosaic reader here decodes tiled DEFLATE only. The truncation is on the EAST -- landward at a west-facing cove -- so it clips the bluff rather than the reef, and README section 8 recommends dropping CoNED anyway. Recorded rather than worked around."
+  }
+ ]
+}
