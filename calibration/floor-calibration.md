@@ -123,10 +123,18 @@ blocker bites hardest. Treat this as deferred rather than answerable today.
 
 ---
 
-## 2. The primary method: hypsometric curve per spot
+## 2. The hypsometric curve, and why lidar cannot supply it here
 
 If you know the bench's elevation relative to MLLW, the floor is not a judgment
 call — it is a point on a curve.
+
+**That much still holds. What has changed is where the elevations come from.**
+This section was titled "the primary method" until 2026-07-30, when the
+adjudication at the bottom of it measured both recommended lidar products
+against 126 surveyed heights and found neither reproduces the bench. The
+computation is unchanged and still wanted — §8's MARINe grid would feed the same
+curve — but lidar is not a usable input to it at the one spot where it was
+tested, and that spot is the corridor's best covered.
 
 **Inputs.** USGS CoNED 1 m topobathymetric DEM for the Southern California
 coast, or NOAA Digital Coast topobathy lidar via the Data Access Viewer. Both
@@ -272,6 +280,53 @@ One thing #63 got backwards, now measured: alongshore translation is benign
 failure #63 expected to survive — is the **worst** of the three perturbations, ahead
 of cross-shore mislocation. On a narrow shore-parallel strip, moving the edges changes
 which elevation band is inside the polygon, and that is the curve.
+
+### Measured 2026-07-30 under #89: neither product reaches the bench
+
+The pre-registered adjudication in §6 ran both products against the 126 published
+heights in `lidar-recon/findings/cabrillo-surveyed-elevations.json` — NPS's own 2004
+laser-level survey of the Cabrillo monitoring plots, in inches above MLLW at published
+coordinates. It returned **indeterminate**: the three metrics split and the bootstrap
+interval spans zero, so no product was selected.
+
+**The larger result is not the tie.** Over all 119 points valid in both products, with
+no selection involved:
+
+| | d(DEM)/d(survey) | corr(survey, DEM) | mean bias |
+|---|---:|---:|---:|
+| ideal | 1.00 | 1.00 | 0.00 |
+| 2616 | **0.45** | **0.543** | −1.302 ft |
+| 6260 | **0.30** | **0.443** | −1.324 ft |
+
+Both sit about **1.3 ft below** the surveyed heights while differing from each other by
+**0.06 ft** — a factor of twenty. Any datum term is additive and identical for both, so
+VDatum's ±0.305 ft cannot explain it and cancels in the paired difference. Reproducing
+a third to a half of a bench's relief is not a curve about that bench.
+
+**A comparison can rank two products by how well they reproduce ground truth only if at
+least one of them reproduces it.** Neither does, so the indeterminate verdict is not a
+near miss between close candidates — it is what a comparison returns when neither
+candidate is measuring the thing. No product could have been selected whichever way the
+metrics fell.
+
+**What this means for this section.** Cabrillo is the corridor's best-covered site — the
+one spot where both products clear the coverage bar §8 of the recon set — and it is the
+only spot with surveyed ground truth to test against. A method that fails there is not a
+method that succeeds at the other seven and happens to have been unlucky at this one. So
+the elevations this section needs do not come from these products, and the paragraphs
+above about clips, polygons and perturbation are now downstream of a bigger problem than
+any of them.
+
+**What it does not settle.** Three explanations survive and none is tested: coordinates
+that do not locate the plots on a 1 m grid, a scale problem in the surveyed heights, or
+DEMs too smooth to resolve this bench. They are recorded in `lidar-recon/README.md` §12
+with what rules out sand and any datum term. **Separating them is new work, not a
+repair** — and §8's MARINe grid would be an independent third measurement of the same
+bench, so it would discriminate between the first two.
+
+**Whether #46 closes on this is a decision and is not taken here.** Nothing in this
+section has ever set a floor, so no published value is retroactively affected. Full
+result in `lidar-recon/findings/cabrillo-dem-adjudication.json`.
 
 **Reading the curve.**
 
@@ -877,6 +932,16 @@ transform. Revising this is #65; until it is revised, the only instrumented
 method that can meet the rule as written is a pressure logger, which measures
 against the 9410230 prediction directly and performs no datum transform at all.
 
+**And clause 2's first method has since failed for a second, larger reason.**
+The tolerance argument above assumes a lidar curve that is otherwise sound and
+merely spends its error budget on the datum. §2 records that at Cabrillo neither
+recommended product reproduces the surveyed bench at all — `d(DEM)/d(survey)` of
+0.45 and 0.30 against an ideal 1.0 — so there is no curve for the tolerance to be
+applied to. **Listing lidar hypsometry here does not mean a floor may be promoted
+on one today**, and revising #65's tolerance would not change that. The two live
+instrumented routes are the pressure logger (#64) and MARINe transect topography
+(§8), and the second of those is unavailable until its datum is resolved.
+
 ### Permissiveness rule
 
 Declared 2026-07-30, before any re-binned rate was computed, per #42.
@@ -1139,4 +1204,11 @@ machinery §2 is blocked on, and one question stands between it and being usable
   nobody has stood at these places with a survey-grade receiver. **Not an unrelated
   problem, which this line used to claim** — §2's clip cannot be located for exactly
   that reason, so the coordinate imprecision that leaves those 7 MPA bindings
-  unresolved is also what blocks the primary method.
+  unresolved also blocked the lidar route for as long as the clip was the binding
+  constraint. **It no longer is**: #89 measured that neither product reproduces the
+  bench even with a real polygon and surveyed heights to check against, so a
+  survey-grade coordinate would now buy an MPA binding rather than a curve. The two
+  are still one root cause; they are no longer one blocker.
+- **Which of three explanations accounts for the DEM–survey disagreement at
+  Cabrillo** — coordinates, a scale problem in the surveyed heights, or DEMs too
+  smooth to resolve the bench. §2 records it; nothing here separates them.
