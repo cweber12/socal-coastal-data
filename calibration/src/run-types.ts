@@ -5,6 +5,7 @@
  * without the runner's I/O coming along with it.
  */
 
+import type { BackgroundBand } from './join.ts';
 import type { CriterionResult } from './refusals.ts';
 import type {
   AccuracyProfile,
@@ -41,6 +42,13 @@ export interface SpotResult {
   visits: number;
   observers: number;
   bins: ReportBin[];
+  /**
+   * The amplitude gate's denominator, pooled since #72.
+   *
+   * Carried explicitly because it is no longer a row of the bin table a reader
+   * can point at. Null when no bin is usable.
+   */
+  background: BackgroundBand | null;
   amplitudeRatio: number | null;
   publishes: boolean;
   criteria: CriterionResult[];

@@ -103,8 +103,43 @@ export const DISPLAY_TIME_ZONE = 'America/Los_Angeles';
  * published number IS the per-bin count. NOAA publishes no datum below MLLW for
  * 9410230 -- MLLW 0.00, MLW +0.90, MSL +2.73 -- so these edges cannot be sourced
  * from an authority, which is exactly why nothing is allowed to rest on them.
+ *
+ * ---------------------------------------------------------------------------
+ * 0.25 ft over 0.0-1.5 ft, coarse elsewhere. Declared 2026-07-30, for #43.
+ * ---------------------------------------------------------------------------
+ *
+ * The previous edges were [-2.5, -1.0, -0.5, 0.0, 0.5, 1.0, 3.0], and they made
+ * the question the permissiveness rule asks unanswerable. That rule --
+ * `calibration/floor-calibration.md` §7, declared under #42 BEFORE any
+ * re-binned rate was computed -- admits no floor whose marginal band sits below
+ * 2x that spot's own tide-independent background. At Cabrillo the background is
+ * the 1.0-3.0 band's 5.7%, so the crossing is 11.4%; the 0.5-1.0 band reads
+ * 15.0%. Both numbers fall inside one 0.5 ft bin, so the crossing had a value
+ * and no LOCATION. Narrowing the decision region is the whole change.
+ *
+ * The region is narrow and the rest is not, on purpose. Below 0.0 ft every spot
+ * that publishes runs at three to seven times its own background, the crossing
+ * is nowhere near, and splitting those bins would spend visits to resolve
+ * something already resolved. Above 1.5 ft is background by construction and
+ * one wide bin measures it better than six thin ones.
+ *
+ * Nothing is relaxed to pay for the width. USABLE_BIN_MIN_VISITS stays 15 and
+ * MIN_AMPLITUDE_RATIO stays 2.0, so a 0.25 ft bin holding 14 visits drops out
+ * of every gate that reads it. That is a measurement of what this corpus can
+ * resolve at a quarter of a foot, not a reason to widen the bins until it can.
+ *
+ * Uniform corridor-wide. `calibration/README.md` forbids a per-spot bin scheme
+ * in the same breath as a per-spot radius, and the temptation here is real:
+ * Cabrillo has 1,223 visits and Torrey Pines has 31.
  */
-export const BIN_EDGES = [-2.5, -1.0, -0.5, 0.0, 0.5, 1.0, 3.0];
+export const BIN_EDGES = [
+  // Coarse below the datum: high rates, no decision.
+  -2.5, -1.0, -0.5,
+  // The decision region, at 0.25 ft.
+  0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5,
+  // Background, in one bin.
+  3.0,
+];
 
 /**
  * Visits a bin needs before its rate is used for anything.
@@ -140,10 +175,17 @@ export const MIN_CONCORDANT_PAIRS = 0.7;
 /**
  * The contamination detector, and the one number here stated a priori.
  *
- * The highest usable bin measures that spot's TIDE-INDEPENDENT BACKGROUND --
+ * The BACKGROUND BAND measures that spot's TIDE-INDEPENDENT BACKGROUND --
  * surge-channel photos, wrong camera clocks, washed-up specimens -- which runs
  * around 0.20 at every spot. A spot must show a low-tide rate at least double
  * its own background to claim a distinct low zone.
+ *
+ * That band is the highest usable bin POOLED with every bin above it, and the
+ * pooling is #72's fix rather than the original design: it was the highest
+ * usable bin alone until #43's 0.25 ft edges made the bins above it individually
+ * thin, at which point they were discarded and the denominator could land in the
+ * middle of the range. `backgroundBand` in src/join.ts carries the measurement
+ * and the reasoning. The BAR did not move for it.
  *
  * The bar comes from that reasoning and NOT from the observed gap between
  * spots. Reading it off the data would make it a description of this pull
@@ -183,4 +225,12 @@ export const TIMESTAMP_QUALITY_BAND_HOURS = 2;
  */
 export const NPS_CABRILLO_BEST_FT = 0.7;
 
-export const CALIBRATION_VERSION = '1.0.0';
+/**
+ * 1.1.0 for #43: the bin scheme went from 6 bins to 10.
+ *
+ * A minor bump rather than a patch because `bin_edges` and every `bins` array in
+ * `shared/calibration.json` changed shape, and a reader holding two copies of
+ * that file needs to be able to tell which scheme each was computed under. No
+ * count, filter, gate or taxon moved, so it is not a major.
+ */
+export const CALIBRATION_VERSION = '1.1.0';

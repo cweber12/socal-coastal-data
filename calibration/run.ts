@@ -43,6 +43,7 @@ import {
 } from './src/acquire.ts';
 import {
   BINS,
+  backgroundBand,
   binVisits,
   collapseToVisits,
   placeVisits,
@@ -260,6 +261,7 @@ for (const spot of SPOTS) {
   const bins = binVisits(visits);
   const verdict = evaluateRefusals(bins, visits);
   const ratio = amplitudeRatio(bins);
+  const background = backgroundBand(bins);
 
   const filterStages: FilterStage[] = [
     {
@@ -349,6 +351,7 @@ for (const spot of SPOTS) {
       usable: b.usable,
       interval: wilsonInterval(b.hits, b.visits),
     })),
+    background,
     amplitudeRatio: ratio,
     publishes: verdict.publishes,
     criteria: verdict.criteria,

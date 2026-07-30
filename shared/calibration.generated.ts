@@ -1,6 +1,6 @@
 // GENERATED FILE -- do not edit by hand.
 //
-// Source:    shared/calibration.json (version 1.0.0, pulled 2026-07-29)
+// Source:    shared/calibration.json (version 1.1.0, pulled 2026-07-30)
 // Generator: scripts/gen-calibration-types.mjs
 // Regen:     npm run gen:calibration      Verify: npm run gen:calibration:check
 //
@@ -13,12 +13,12 @@ import calibrationJson from './calibration.json';
 export type CalibratedSlug = 'swamis' | 'cardiff-reef' | 'torrey-pines-beach' | 'la-jolla-shores' | 'la-jolla-cove' | 'windansea' | 'sunset-cliffs' | 'cabrillo-tidepools';
 
 /** Bin edges, feet above MLLW at station 9410230. */
-export const BIN_EDGES_FT: readonly number[] = [-2.5,-1,-0.5,0,0.5,1,3];
+export const BIN_EDGES_FT: readonly number[] = [-2.5,-1,-0.5,0,0.25,0.5,0.75,1,1.25,1.5,3];
 
-export const CALIBRATION_VERSION = '1.0.0';
+export const CALIBRATION_VERSION = '1.1.0';
 export const TAXA_VERSION = '1.0.0';
-export const CALIBRATION_PULLED_AT = '2026-07-29';
-export const CALIBRATION_CONTENT_HASH = 'b541c2498b7819dce9ff88ce900db46a232021447b0f63abf287cdb62ac16d91';
+export const CALIBRATION_PULLED_AT = '2026-07-30';
+export const CALIBRATION_CONTENT_HASH = '6ece7b1951503b5444046925a02d0de6370d08ab9eeb6a66ba02d2066ed6c536';
 export const CALIBRATION_DATUM = 'MLLW';
 export const CALIBRATION_TIDE_STATION = '9410230';
 export const CALIBRATION_RADIUS_M = 500;

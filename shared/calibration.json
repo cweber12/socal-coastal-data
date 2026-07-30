@@ -2,23 +2,27 @@
   "_generated": "GENERATED FILE — written by calibration/run.ts --fetch. Do not edit by hand.",
   "_what_this_is": "The observed rate at which a recorded visit logged one of the frozen target taxa, binned by that day's lowest predicted tide. A count, not a model output. No ecological claim is made and no zonation is asserted.",
   "_units": "Bin edges are feet above MLLW at station 9410230, the same coordinate system lib/windows.ts consumes. Adding subordinate-station offsets would silently invalidate every rate here.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "taxa_version": "1.0.0",
-  "spots_version": "1.2.0",
-  "pulled_at": "2026-07-29",
+  "spots_version": "1.3.1",
+  "pulled_at": "2026-07-30",
   "corpus_from": "2016-01-01",
   "radius_m": 500,
   "tide_station": "9410230",
   "datum": "MLLW",
   "tide_years": "2016-2026",
-  "content_hash": "b541c2498b7819dce9ff88ce900db46a232021447b0f63abf287cdb62ac16d91",
+  "content_hash": "6ece7b1951503b5444046925a02d0de6370d08ab9eeb6a66ba02d2066ed6c536",
   "bin_edges": [
     -2.5,
     -1,
     -0.5,
     0,
+    0.25,
     0.5,
+    0.75,
     1,
+    1.25,
+    1.5,
     3
   ],
   "constants": {
@@ -55,7 +59,7 @@
       "visits": 237,
       "records": 558,
       "observers": 185,
-      "amplitude_ratio": 5.0366300366300365,
+      "amplitude_ratio": 9.67032967032967,
       "published": true,
       "null_reason": null,
       "bins": [
@@ -85,26 +89,58 @@
         },
         {
           "lo_ft": 0,
+          "hi_ft": 0.25,
+          "visits": 8,
+          "hits": 2,
+          "rate": 0.25,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.25,
           "hi_ft": 0.5,
-          "visits": 25,
-          "hits": 3,
-          "rate": 0.12,
+          "visits": 17,
+          "hits": 1,
+          "rate": 0.058823529411764705,
           "usable": true
         },
         {
           "lo_ft": 0.5,
+          "hi_ft": 0.75,
+          "visits": 8,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.75,
           "hi_ft": 1,
-          "visits": 11,
+          "visits": 3,
           "hits": 1,
-          "rate": 0.09090909090909091,
+          "rate": 0.3333333333333333,
           "usable": false
         },
         {
           "lo_ft": 1,
-          "hi_ft": 3,
-          "visits": 4,
+          "hi_ft": 1.25,
+          "visits": 3,
           "hits": 0,
           "rate": 0,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.25,
+          "hi_ft": 1.5,
+          "visits": 1,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.5,
+          "hi_ft": 3,
+          "visits": 0,
+          "hits": 0,
+          "rate": null,
           "usable": false
         }
       ],
@@ -115,9 +151,9 @@
       "visits": 74,
       "records": 98,
       "observers": 50,
-      "amplitude_ratio": 1.0048076923076923,
+      "amplitude_ratio": 0.90625,
       "published": false,
-      "null_reason": "Refused on 2 of 4 criteria. too-few-usable-bins: 2 of 6 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. amplitude-below-gate: the lowest usable bin's rate is 1.00x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "null_reason": "Refused on 2 of 4 criteria. too-few-usable-bins: 2 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. amplitude-below-gate: the lowest usable bin's rate is 0.91x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [-1.00, 3.00), 44 of 58 visits, pooled from 9 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -145,26 +181,58 @@
         },
         {
           "lo_ft": 0,
+          "hi_ft": 0.25,
+          "visits": 7,
+          "hits": 5,
+          "rate": 0.7142857142857143,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.25,
           "hi_ft": 0.5,
-          "visits": 12,
-          "hits": 9,
-          "rate": 0.75,
+          "visits": 5,
+          "hits": 4,
+          "rate": 0.8,
           "usable": false
         },
         {
           "lo_ft": 0.5,
+          "hi_ft": 0.75,
+          "visits": 5,
+          "hits": 5,
+          "rate": 1,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.75,
           "hi_ft": 1,
-          "visits": 9,
-          "hits": 8,
-          "rate": 0.8888888888888888,
+          "visits": 4,
+          "hits": 3,
+          "rate": 0.75,
           "usable": false
         },
         {
           "lo_ft": 1,
-          "hi_ft": 3,
-          "visits": 4,
-          "hits": 4,
+          "hi_ft": 1.25,
+          "visits": 3,
+          "hits": 3,
           "rate": 1,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.25,
+          "hi_ft": 1.5,
+          "visits": 1,
+          "hits": 1,
+          "rate": 1,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.5,
+          "hi_ft": 3,
+          "visits": 0,
+          "hits": 0,
+          "rate": null,
           "usable": false
         }
       ],
@@ -177,7 +245,7 @@
       "observers": 28,
       "amplitude_ratio": null,
       "published": false,
-      "null_reason": "Refused on 3 of 4 criteria. too-few-usable-bins: 0 of 6 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. not-declining: no usable pair of bins differs in rate, so the table is flat rather than declining. amplitude-below-gate: the amplitude ratio could not be computed: fewer than two usable bins, or the highest usable bin has no hits at all.",
+      "null_reason": "Refused on 3 of 4 criteria. too-few-usable-bins: 0 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. not-declining: no usable pair of bins differs in rate, so the table is flat rather than declining. amplitude-below-gate: the amplitude ratio could not be computed: fewer than two usable bins, or the background band has no hits at all.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -205,26 +273,58 @@
         },
         {
           "lo_ft": 0,
+          "hi_ft": 0.25,
+          "visits": 5,
+          "hits": 3,
+          "rate": 0.6,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.25,
           "hi_ft": 0.5,
-          "visits": 8,
-          "hits": 4,
-          "rate": 0.5,
+          "visits": 3,
+          "hits": 1,
+          "rate": 0.3333333333333333,
           "usable": false
         },
         {
           "lo_ft": 0.5,
+          "hi_ft": 0.75,
+          "visits": 4,
+          "hits": 2,
+          "rate": 0.5,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.75,
           "hi_ft": 1,
-          "visits": 7,
-          "hits": 3,
-          "rate": 0.42857142857142855,
+          "visits": 3,
+          "hits": 1,
+          "rate": 0.3333333333333333,
           "usable": false
         },
         {
           "lo_ft": 1,
-          "hi_ft": 3,
+          "hi_ft": 1.25,
           "visits": 2,
           "hits": 1,
           "rate": 0.5,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.25,
+          "hi_ft": 1.5,
+          "visits": 0,
+          "hits": 0,
+          "rate": null,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.5,
+          "hi_ft": 3,
+          "visits": 0,
+          "hits": 0,
+          "rate": null,
           "usable": false
         }
       ],
@@ -237,7 +337,7 @@
       "observers": 115,
       "amplitude_ratio": 0.6666666666666666,
       "published": false,
-      "null_reason": "Refused on 2 of 4 criteria. not-declining: 2 of 15 comparable bin pairs decline with height (13%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.67x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "null_reason": "Refused on 2 of 4 criteria. not-declining: 4 of 21 comparable bin pairs decline with height (19%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.67x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [1.00, 3.00), 17 of 22 visits, pooled from 3 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -265,27 +365,59 @@
         },
         {
           "lo_ft": 0,
+          "hi_ft": 0.25,
+          "visits": 33,
+          "hits": 24,
+          "rate": 0.7272727272727273,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.25,
           "hi_ft": 0.5,
-          "visits": 50,
-          "hits": 36,
-          "rate": 0.72,
+          "visits": 17,
+          "hits": 12,
+          "rate": 0.7058823529411765,
           "usable": true
         },
         {
           "lo_ft": 0.5,
-          "hi_ft": 1,
-          "visits": 35,
-          "hits": 31,
-          "rate": 0.8857142857142857,
+          "hi_ft": 0.75,
+          "visits": 21,
+          "hits": 19,
+          "rate": 0.9047619047619048,
           "usable": true
         },
         {
+          "lo_ft": 0.75,
+          "hi_ft": 1,
+          "visits": 14,
+          "hits": 12,
+          "rate": 0.8571428571428571,
+          "usable": false
+        },
+        {
           "lo_ft": 1,
-          "hi_ft": 3,
-          "visits": 22,
-          "hits": 17,
-          "rate": 0.7727272727272727,
+          "hi_ft": 1.25,
+          "visits": 15,
+          "hits": 13,
+          "rate": 0.8666666666666667,
           "usable": true
+        },
+        {
+          "lo_ft": 1.25,
+          "hi_ft": 1.5,
+          "visits": 4,
+          "hits": 2,
+          "rate": 0.5,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.5,
+          "hi_ft": 3,
+          "visits": 3,
+          "hits": 2,
+          "rate": 0.6666666666666666,
+          "usable": false
         }
       ],
       "query": "https://api.inaturalist.org/v2/observations?lat=32.857&lng=-117.257&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
@@ -295,9 +427,9 @@
       "visits": 354,
       "records": 545,
       "observers": 307,
-      "amplitude_ratio": 0.85,
+      "amplitude_ratio": 1.4583333333333333,
       "published": false,
-      "null_reason": "Refused on 2 of 4 criteria. not-declining: 6 of 15 comparable bin pairs decline with height (40%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.85x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "null_reason": "Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.46x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [0.75, 3.00), 6 of 35 visits, pooled from 4 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -325,27 +457,59 @@
         },
         {
           "lo_ft": 0,
+          "hi_ft": 0.25,
+          "visits": 33,
+          "hits": 9,
+          "rate": 0.2727272727272727,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.25,
           "hi_ft": 0.5,
-          "visits": 71,
-          "hits": 18,
-          "rate": 0.2535211267605634,
+          "visits": 38,
+          "hits": 9,
+          "rate": 0.23684210526315788,
           "usable": true
         },
         {
           "lo_ft": 0.5,
+          "hi_ft": 0.75,
+          "visits": 24,
+          "hits": 5,
+          "rate": 0.20833333333333334,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.75,
           "hi_ft": 1,
-          "visits": 42,
-          "hits": 6,
-          "rate": 0.14285714285714285,
+          "visits": 18,
+          "hits": 1,
+          "rate": 0.05555555555555555,
           "usable": true
         },
         {
           "lo_ft": 1,
+          "hi_ft": 1.25,
+          "visits": 6,
+          "hits": 2,
+          "rate": 0.3333333333333333,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.25,
+          "hi_ft": 1.5,
+          "visits": 7,
+          "hits": 2,
+          "rate": 0.2857142857142857,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.5,
           "hi_ft": 3,
-          "visits": 17,
-          "hits": 5,
-          "rate": 0.29411764705882354,
-          "usable": true
+          "visits": 4,
+          "hits": 1,
+          "rate": 0.25,
+          "usable": false
         }
       ],
       "query": "https://api.inaturalist.org/v2/observations?lat=32.85&lng=-117.272&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"
@@ -355,9 +519,9 @@
       "visits": 99,
       "records": 158,
       "observers": 89,
-      "amplitude_ratio": 1.375,
+      "amplitude_ratio": 1.125,
       "published": false,
-      "null_reason": "Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.38x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "null_reason": "Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.13x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [-0.50, 3.00), 10 of 45 visits, pooled from 8 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -385,26 +549,58 @@
         },
         {
           "lo_ft": 0,
+          "hi_ft": 0.25,
+          "visits": 5,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.25,
           "hi_ft": 0.5,
-          "visits": 11,
+          "visits": 6,
           "hits": 1,
-          "rate": 0.09090909090909091,
+          "rate": 0.16666666666666666,
           "usable": false
         },
         {
           "lo_ft": 0.5,
+          "hi_ft": 0.75,
+          "visits": 4,
+          "hits": 1,
+          "rate": 0.25,
+          "usable": false
+        },
+        {
+          "lo_ft": 0.75,
           "hi_ft": 1,
-          "visits": 7,
-          "hits": 3,
-          "rate": 0.42857142857142855,
+          "visits": 3,
+          "hits": 2,
+          "rate": 0.6666666666666666,
           "usable": false
         },
         {
           "lo_ft": 1,
+          "hi_ft": 1.25,
+          "visits": 3,
+          "hits": 1,
+          "rate": 0.3333333333333333,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.25,
+          "hi_ft": 1.5,
+          "visits": 1,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.5,
           "hi_ft": 3,
-          "visits": 5,
-          "hits": 2,
-          "rate": 0.4,
+          "visits": 1,
+          "hits": 1,
+          "rate": 1,
           "usable": false
         }
       ],
@@ -415,7 +611,7 @@
       "visits": 404,
       "records": 794,
       "observers": 264,
-      "amplitude_ratio": 9.629629629629628,
+      "amplitude_ratio": 5.925925925925926,
       "published": true,
       "null_reason": null,
       "bins": [
@@ -445,26 +641,58 @@
         },
         {
           "lo_ft": 0,
-          "hi_ft": 0.5,
-          "visits": 45,
-          "hits": 20,
-          "rate": 0.4444444444444444,
+          "hi_ft": 0.25,
+          "visits": 31,
+          "hits": 14,
+          "rate": 0.45161290322580644,
           "usable": true
+        },
+        {
+          "lo_ft": 0.25,
+          "hi_ft": 0.5,
+          "visits": 14,
+          "hits": 6,
+          "rate": 0.42857142857142855,
+          "usable": false
         },
         {
           "lo_ft": 0.5,
-          "hi_ft": 1,
-          "visits": 26,
-          "hits": 2,
-          "rate": 0.07692307692307693,
+          "hi_ft": 0.75,
+          "visits": 18,
+          "hits": 1,
+          "rate": 0.05555555555555555,
           "usable": true
         },
         {
+          "lo_ft": 0.75,
+          "hi_ft": 1,
+          "visits": 8,
+          "hits": 1,
+          "rate": 0.125,
+          "usable": false
+        },
+        {
           "lo_ft": 1,
-          "hi_ft": 3,
-          "visits": 6,
+          "hi_ft": 1.25,
+          "visits": 3,
           "hits": 2,
-          "rate": 0.3333333333333333,
+          "rate": 0.6666666666666666,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.25,
+          "hi_ft": 1.5,
+          "visits": 2,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.5,
+          "hi_ft": 3,
+          "visits": 1,
+          "hits": 0,
+          "rate": 0,
           "usable": false
         }
       ],
@@ -472,9 +700,9 @@
     },
     {
       "slug": "cabrillo-tidepools",
-      "visits": 1223,
-      "records": 3132,
-      "observers": 806,
+      "visits": 1224,
+      "records": 3133,
+      "observers": 807,
       "amplitude_ratio": 11.834203655352482,
       "published": true,
       "null_reason": null,
@@ -498,34 +726,66 @@
         {
           "lo_ft": -0.5,
           "hi_ft": 0,
-          "visits": 330,
+          "visits": 331,
           "hits": 139,
-          "rate": 0.4212121212121212,
+          "rate": 0.4199395770392749,
           "usable": true
         },
         {
           "lo_ft": 0,
+          "hi_ft": 0.25,
+          "visits": 59,
+          "hits": 18,
+          "rate": 0.3050847457627119,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.25,
           "hi_ft": 0.5,
-          "visits": 148,
-          "hits": 38,
-          "rate": 0.25675675675675674,
+          "visits": 89,
+          "hits": 20,
+          "rate": 0.2247191011235955,
           "usable": true
         },
         {
           "lo_ft": 0.5,
+          "hi_ft": 0.75,
+          "visits": 50,
+          "hits": 8,
+          "rate": 0.16,
+          "usable": true
+        },
+        {
+          "lo_ft": 0.75,
           "hi_ft": 1,
-          "visits": 80,
-          "hits": 12,
-          "rate": 0.15,
+          "visits": 30,
+          "hits": 4,
+          "rate": 0.13333333333333333,
           "usable": true
         },
         {
           "lo_ft": 1,
-          "hi_ft": 3,
-          "visits": 35,
-          "hits": 2,
-          "rate": 0.05714285714285714,
+          "hi_ft": 1.25,
+          "visits": 18,
+          "hits": 1,
+          "rate": 0.05555555555555555,
           "usable": true
+        },
+        {
+          "lo_ft": 1.25,
+          "hi_ft": 1.5,
+          "visits": 11,
+          "hits": 1,
+          "rate": 0.09090909090909091,
+          "usable": false
+        },
+        {
+          "lo_ft": 1.5,
+          "hi_ft": 3,
+          "visits": 6,
+          "hits": 0,
+          "rate": 0,
+          "usable": false
         }
       ],
       "query": "https://api.inaturalist.org/v2/observations?lat=32.669&lng=-117.245&radius=1&quality_grade=research&taxon_id=48645%2C48035%2C54509%2C125663%2C48655%2C72297%2C49699%2C49051%2C52564%2C460365%2C53750%2C47188%2C59635&d1=2016-01-01&per_page=200&order_by=id&order=asc&id_above=0&fields=id%2Cobserved_on%2Ctime_observed_at%2Clocation%2Cgeoprivacy%2Ctaxon_geoprivacy%2Cobscured%2Ccaptive%2Cquality_grade%2Cpositional_accuracy%2Cuser.login%2Ctaxon.id%2Ctaxon.ancestor_ids"

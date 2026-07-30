@@ -122,11 +122,31 @@ the published number *is* the per-bin count.
 | single-observer share | > 30% |
 
 The **amplitude gate is the contamination detector**, and its bar is stated a
-priori. The highest usable bin measures that spot's tide-independent background
+priori. The **background band** measures that spot's tide-independent background
 — surge-channel photos, wrong camera clocks, washed-up specimens — and a spot
 must show a low-tide rate at least double its own background to claim a distinct
 low zone. The bar comes from that reasoning, **not** from the observed gap
 between spots.
+
+The background band is the highest usable bin **pooled with every bin above it**.
+It was the highest usable bin alone until [#72](https://github.com/cweber12/socal-coastal-data/issues/72):
+once [#43](https://github.com/cweber12/socal-coastal-data/issues/43) cut the
+decision region to 0.25 ft, the bins above the highest usable one were
+individually thin and so were discarded outright, which let the denominator land
+in the middle of the range while real high-tide visits sat above it unread. At La
+Jolla Cove that read 4.50× on a table flat across 3.25 ft of tide, against 0.85×
+on the previous edges.
+
+Pooling fixes the discarding; it does **not** make the gate fully invariant to
+bin width, because which bin is "highest usable" still depends on the widths.
+Where the lowest slice of the old top band is itself usable the pooled band is
+exactly the old band — Cabrillo and La Jolla Shores return to 11.83× and 0.67×,
+their pre-re-bin figures to the digit. Where no slice of it is usable the pool
+falls a band lower and measures background over *more* visits at a *higher* rate,
+so the ratio falls. Stricter, never looser. The bar did not move, and pooling is
+**upward only** — the numerator is the low-tide rate, and pooling downward could
+only raise the ratio. `backgroundBand` in `src/join.ts` carries the full
+reasoning, including why full width-invariance was not attempted.
 
 ## Not to be done
 
