@@ -108,6 +108,7 @@ describe('cellAriaLabel', () => {
       go: 'go',
       brief: 'brief',
       veto: 'vetoed on swell',
+      closed: 'outside gate hours',
       dark: 'outside daylight',
       'above-floor': 'above the floor',
       'swell-tbd': 'swell unknown',

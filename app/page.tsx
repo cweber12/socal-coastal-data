@@ -383,6 +383,8 @@ function legendGloss(state: (typeof WINDOW_STATES)[number]): string {
       return `under ${MIN_WINDOW_MINUTES} min`;
     case 'veto':
       return 'swell over the ceiling';
+    case 'closed':
+      return 'window falls outside the operator’s gate hours';
     case 'dark':
       return 'window falls outside the daylight left';
     case 'above-floor':

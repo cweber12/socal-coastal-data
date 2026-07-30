@@ -1,0 +1,48 @@
+{
+  "version": "0.1.0",
+  "generated": "2026-07-30",
+  "time_zone": "America/Los_Angeles",
+
+  "_provenance": "Read from nps.gov directly on 2026-07-30, never from an aggregator and never from a cached figure in this repo's own documents. Google Places reports the same area as a flat 9:00 AM - 4:30 PM daily, which is wrong for the summer months, and that is exactly why the operator is the source. Pages read: /cabr/planyourvisit/hours.htm (page updated 2025-11-26) and /thingstodo/visit-the-cabrillo-tidepools.htm (page updated 2025-12-17).",
+
+  "_why_not_spots_json": "spots.json holds values resolved by join against an upstream authority, and its schema warns against hand-populating resolved fields. A gate rule is neither a join nor a value: it is a conditional with a date-dependent branch and an input that its own publisher does not publish. spots.json's conventions would require a null with a stated reason rather than an encoded guess, so the rule lives here and spots.json is untouched.",
+
+  "_not_a_global_gate": "Keyed by slug, and one slug is present. A spot with no entry here is ungated and its window predicate is unchanged. 25 of the 26 spots in the inventory are open beaches with no operator and no gate; this must not become a fifth gate evaluated for all of them.",
+
+  "_schema": {
+    "opens": "Local wall-clock time the gate opens, HH:MM in time_zone.",
+    "closes": "Local wall-clock time the relevant area closes. Where an operator publishes both an area closing time and a wider park closing time, this is the EARLIER of the two, because the earlier one binds.",
+    "park_closes": "Recorded for provenance only. Not used by the predicate -- `closes` already carries whichever is earlier.",
+    "annual_closures": "Days the gate does not open at all. `rule` is resolved in lib/gate-hours.ts; no date is hard-coded for a moving holiday.",
+    "seasonal_rule": "A published rule whose activating dates the operator does not publish. Recorded verbatim and NOT applied. See unresolved."
+  },
+
+  "gates": {
+    "cabrillo-tidepools": {
+      "operator": "Cabrillo National Monument, National Park Service",
+      "opens": "09:00",
+      "closes": "16:30",
+      "closes_basis": "The tidepool area closes at 16:30 and the main park at 17:00, so 16:30 binds. Verbatim: 'Most of the year the tidepools close at 4:30 P.M.' and 'Cabrillo National Monument (Main Park) is open daily from 9:00 AM to 5:00 PM'.",
+      "park_closes": "17:00",
+      "opens_verbatim": "The park opens at 9 am every day.",
+
+      "annual_closures": [
+        { "rule": "december-25", "name": "Christmas Day" },
+        { "rule": "fourth-thursday-november", "name": "Thanksgiving Day" }
+      ],
+      "annual_closures_verbatim": "Cabrillo National Monument (Main Park) is open daily from 9:00 AM to 5:00 PM, with the exception of Thanksgiving Day and Christmas Day",
+
+      "seasonal_rule": {
+        "verbatim": "If the park is operating during during extended summer hours, the tidepools close 30 minutes before sunset or at 7:30 P.M., whichever is earlier.",
+        "verbatim_note": "The doubled 'during during' is nps.gov's own and is reproduced as published.",
+        "applied": false,
+        "why_not_applied": "The rule is published; the dates on which it is in force are not. Both pages were checked on 2026-07-30 and neither gives a date range, nor does any other page found. Applying it would mean inventing a switchover date, which is the failure this repository exists to prevent. Leaving it unapplied holds the year-round 16:30 close, which under-reports summer windows rather than over-reporting them -- a window called shut that was open costs a missed trip, and the reverse sends someone to a locked gate. The asymmetry runs one way, as it does for floors.",
+        "bounded_by": "nps.gov states 'Low tides that occur during park hours are primarily during the fall, winter and spring months', so the unapplied branch bites least in the season it covers."
+      }
+    }
+  },
+
+  "unresolved": [
+    "cabrillo-tidepools: the dates on which extended summer hours are in force. NPS publishes the rule and not the range. Until it does, `closes` stays 16:30 year-round and the seasonal rule is recorded unapplied. Tracked on issue 59."
+  ]
+}
