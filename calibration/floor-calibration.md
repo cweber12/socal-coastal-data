@@ -1,29 +1,22 @@
 # Calibrating `tidepool_floor_ft`
 
 How a floor moves from `confidence: low` to `confidence: verified`, and what
-evidence is required to do it. Companion to `DECISIONS.md` §9 open items.
+evidence is required to do it. The open items it belongs beside are #38 and its
+child issues.
 
 Nothing in this document sets a floor value. Floors are set by a human against
 the evidence ledger below (CLAUDE.md, "Things that need a human, not a query").
 
 ---
 
-> **Status, 2026-07-29.** Moved here from the repo root in #47 so it stops being
-> an untracked working file. **§3 and §6 have since been rewritten** under #40;
-> everything outside those two sections is as originally written.
+> **Status, 2026-07-30.** Moved here from the repo root in #47 so it stops being
+> an untracked working file. **§3 and §6 have since been rewritten, and every
+> `DECISIONS.md` reference removed**, under #40. Everything else is as originally
+> written.
 >
-> One known defect remains and is *not* fixed here:
+> No known defect remains outstanding in this document.
 >
-> - **`DECISIONS.md` is cited in six places and does not exist in this
->   repository.** `find . -iname 'DECISIONS*'` returns nothing. Whether it exists
->   off-repo is open question 2 of #38, so every §-reference to it below is
->   unverified — including §3's account of the observation timestamped 4.6 hours
->   in the future, which is load-bearing for filters that shipped in
->   `calibration/`. The six citations are left standing exactly as written. A
->   guessed §-number pointing into a file nobody can open would be worse than an
->   unresolved one, because it would read as checked.
->
-> What the rewrite changed:
+> What the rewrites changed:
 >
 > - **§3 reports rather than proposes.** `calibration/` shipped this cross-check
 >   through #30/#32/#33, with a denominator, cursor paging, visit collapsing and
@@ -36,6 +29,14 @@ the evidence ledger below (CLAUDE.md, "Things that need a human, not a query").
 >   *Not to be done*: "The NPS figure is the only independent check available,
 >   and tuning against it consumes it." §6 now spends it once, against the
 >   instrumented method in §2, with the outcome recorded whichever way it falls.
+> - **Every `DECISIONS.md` citation is gone**, replaced by the in-repo source that
+>   records the same fact. That file exists, but off-repo and as a v1.1.1-era
+>   snapshot whose §9 still gives Sunset Cliffs as −0.8 ft and Cabrillo as −0.2 ft
+>   — the pre-raise floors. It was therefore not committed: a companion document
+>   disagreeing with `shared/spots.json` about floor values, by exactly the +1.5 ft
+>   §1 is about, is the failure this repo exists to prevent. Each replacement
+>   points at code, a committed artifact or an issue, so it can be checked and it
+>   moves when the thing it describes moves.
 >
 > Not in dispute, and the reason this was kept rather than deleted: §1's
 > diagnosis of the +1.5 ft blanket raise, §2 and §4 as the instrumented methods,
@@ -54,8 +55,9 @@ tides looks like. The fix is not.
 
 A single constant applied to 8 spots asserts that every reef in the corridor has
 the same shape. Cabrillo's broad shelf and a Sunset Cliffs ledge do not respond
-to a foot of water the same way; that is already acknowledged in the flood-trim
-note in DECISIONS §6. A blanket offset preserves the ranking between spots
+to a foot of water the same way; that is already acknowledged by the flood trim in
+`lib/windows.ts`, where `FLOOD_SIDE_TRIM = 0.6` is documented as "a safety margin,
+not a measurement". A blanket offset preserves the ranking between spots
 exactly as the author's original estimates had it, which means the ranking has
 never actually been tested. It just moved.
 
@@ -144,9 +146,10 @@ function of water level in 0.1 ft steps from +2.0 to −2.0 ft MLLW.
   peaks. Site-intrinsic. This is the number that explains why Cabrillo's
   published 0.7 ft works there and would be useless at a steeper reef.
 
-The curve also answers the flood-trim question in DECISIONS §6 directly. The
-0.6 factor is currently global and admitted to be crude; curve *slope* at the
-floor is the per-spot version of the same idea. A flat shelf drains and refills
+The curve also answers the flood-trim question directly. `FLOOD_SIDE_TRIM = 0.6`
+in `lib/windows.ts` is global and its own comment calls it a safety margin rather
+than a measurement; curve *slope* at the floor is the per-spot version of the same
+idea. A flat shelf drains and refills
 slowly and forgivingly; a steep one cuts you off. Don't tune 0.6 by feel once
 you have slope.
 
@@ -246,11 +249,14 @@ rather than unusable, because the predictor no longer needs the instant.
 
 ### This method inherits a known-bad input — read this before trusting it
 
-DECISIONS §3 already records iNaturalist returning an observation timestamped
-4.6 hours in the future, from a hand-entered date, and files it as a permanent
-property of citizen-science data rather than a one-off. (That citation is one of
-the six the status block flags as unverified — the finding it describes is what
-the shipped filters were built against, which is why it is load-bearing.)
+iNaturalist has been observed returning an observation timestamped 4.6 hours in the
+future, from a hand-entered date — a permanent property of citizen-science data
+rather than a one-off. #30 measured the attrition and found zero future-dated
+records across every filtered spot-zone in the historical corpus, against a
+14-day recent window where they do appear. The filter that resulted is in the
+repo: `calibration/src/acquire.ts:264` counts them, `:340` documents why, the
+`future-dated dropped` diagnostic is emitted at `calibration/run.ts:285`, and
+`calibration/src/acquire.test.ts:286` holds the regression test.
 
 Future-dated records are dropped and counted in `acquire.ts`. #30 measured
 **zero** of them across every filtered spot-zone, and the check stays anyway,
@@ -298,11 +304,15 @@ contains only trips that happened. Every visit someone aborted from the parking
 lot, and every visit that ended badly enough that nobody uploaded a photo, is
 absent. The method therefore reports the ceiling of *observed survivors*, which
 is at or above the true safe ceiling — it fails **away** from the restriction,
-against rule 3, on the one gate where DECISIONS §6 says exceeding it
-disqualifies outright rather than downgrading.
+against rule 3, on the one gate where exceeding it disqualifies outright rather
+than downgrading — `lib/windows.ts` ranks `veto` below `brief` precisely because
+"a swell over the ceiling is a settled no".
 
 Use it to rank spots by relative tolerance (Cabrillo's shelf vs a Sunset Cliffs
-ledge), which is what §9 says is missing. Do not use it to set the absolute
+ledge), which is what `shared/thresholds.json` records as missing: "Every one of
+the 8 spots the grid does render uses `default_swell_ceiling_ft`. No per-spot
+swell calibration exists for any of them." `lib/thresholds.ts` says the same in
+its header — "Nothing here is calibrated." Do not use it to set the absolute
 number. That still needs local knowledge.
 
 ---
@@ -528,8 +538,8 @@ from the published record. Until both are answered — or until a human explicit
 takes route 2 above and accepts that the figure is spent identifying its own field
 — the check in this section is not ready to be spent.
 
-**Related, and cheap:** the tidepool area's gate hours would resolve the
-`access_hours` open item in DECISIONS §9, and nps.gov publishes them itself —
+**Related, and cheap:** the tidepool area's gate hours are #59, and nps.gov
+publishes them itself —
 "The park opens at 9 am every day", and "Most of the year the tidepools close at
 4:30 P.M. If the park is operating during extended summer hours, the tidepools
 close 30 minutes before sunset or at 7:30 P.M., whichever is earlier" (read
