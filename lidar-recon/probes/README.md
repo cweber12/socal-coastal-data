@@ -16,6 +16,7 @@ Standard library only — `struct`, `zlib`, `math`, `json`, `urllib`, `http.clie
 | `s3ls.py` | Paginated public S3 bucket listing, for exact tile counts and byte sizes. |
 | `vdatum.py` | Drives the VDatum REST API for all 8 spots, including the GEOID18-vs-GEOID12B sensitivity check. Produced `findings/vdatum-transforms.json`. |
 | `tides.py` | Lowest predicted tide at 9410230 inside each acquisition window, via the CO-OPS predictions API. Bounds what each campaign could have caught exposed. |
+| `widen_window.py` | Re-runs `probe_dem.probe()` at ±200/300/500 m for the spots whose ±100 m disc holds no sub-zero ground, to measure how far out the bench is. Produced `findings/coordinate-offset-widening.json`. Added later than the rest — the ±200/300/500 m figures in `../README.md` §7 were prose-only with no findings file behind them, which is the thing this directory exists to prevent. |
 
 ## Notes on the two that took real work
 
@@ -35,3 +36,8 @@ handshake per row is the difference between ~45 s and several minutes, hence the
 They read coordinates from a hardcoded list of the 8 spots and their `spots.json`
 lat/lon, duplicated inline. That is deliberate for a throwaway probe — nothing
 here imports from or writes to `shared/`, `lib/`, `app/` or `calibration/`.
+
+`widen_window.py` is the one exception and reads its coordinates out of
+`findings/vdatum-transforms.json` instead, so that it probes exactly the coordinate
+the transform was computed for rather than a second inline copy of it. It still
+touches nothing outside `lidar-recon/`.
