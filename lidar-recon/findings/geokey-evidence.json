@@ -1,0 +1,141 @@
+{
+ "read_date": "2026-07-29",
+ "method": "GeoTIFF GeoKeyDirectory (TIFF tag 34735) read over HTTP range requests, probes/geokeys.py. Tiles are the ones covering cabrillo-tidepools.",
+ "geokeys": {
+  "8658_Southern_California_Topobathy_DEM_1m_J_15": {
+   "bigtiff": false,
+   "endian": "<",
+   "width": 21070,
+   "height": 22519,
+   "geokeys": {
+    "GTModelType": 1,
+    "GTRasterType": 2,
+    "GTCitation": "GCS_North_American_1983",
+    "GeographicType": 4269,
+    "GeogAngularUnits": "9102 (?)",
+    "key2056": 7019,
+    "key2057": [
+     6378137.0
+    ],
+    "key2058": [
+     6356752.314140356
+    ],
+    "key2059": [
+     298.2572221010002
+    ],
+    "ProjectedCSType": 26911,
+    "PCSCitation": "NAD_1983_UTM_Zone_11N",
+    "ProjLinearUnits": "9001 (metre)",
+    "VerticalUnits": "9001 (metre)"
+   },
+   "ascii": "GCS_North_American_1983|NAD_1983_UTM_Zone_11N|\u0000",
+   "pixel_scale": [
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  "5189_2014_NCMP_CA_05_BareEarth_1mGrid": {
+   "bigtiff": false,
+   "endian": "<",
+   "width": 8647,
+   "height": 4492,
+   "geokeys": {
+    "GTModelType": 2,
+    "GTRasterType": 1,
+    "GTCitation": "NAD83(2011) + NAVD88 height",
+    "GeographicType": 6318,
+    "VerticalCSType": 5703
+   },
+   "ascii": "NAD83(2011) + NAVD88 height|\u0000",
+   "pixel_scale": [
+    8.999279999999845e-06,
+    8.999280000000218e-06,
+    1.0
+   ]
+  },
+  "9488_2009_NCMP_CA_05_BareEarth_1mGrid": {
+   "bigtiff": false,
+   "endian": "<",
+   "width": 8493,
+   "height": 5633,
+   "geokeys": {
+    "GTModelType": 2,
+    "GTRasterType": 1,
+    "GTCitation": "NAD83 + NAVD88 height",
+    "GeographicType": 4269,
+    "VerticalCSType": 5703
+   },
+   "ascii": "NAD83 + NAVD88 height|\u0000",
+   "pixel_scale": [
+    8.999279999999655e-06,
+    8.999279999999655e-06,
+    1.0
+   ]
+  },
+  "2616_11SMS770135": {
+   "bigtiff": false,
+   "endian": "<",
+   "width": 1500,
+   "height": 1500,
+   "geokeys": {
+    "GTModelType": 1,
+    "GTRasterType": 1,
+    "GTCitation": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "ProjectedCSType": 26911,
+    "VerticalCSType": 5703
+   },
+   "ascii": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height|\u0000",
+   "pixel_scale": [
+    1.0000000000000389,
+    1.0000000000003104,
+    1.0
+   ]
+  },
+  "8684_11SMS770135": {
+   "bigtiff": false,
+   "endian": "<",
+   "width": 1500,
+   "height": 1500,
+   "geokeys": {
+    "GTModelType": 1,
+    "GTRasterType": 1,
+    "GTCitation": "NAD83(NSRS2007) / UTM zone 11N",
+    "GeogCitation": "NAD83(NSRS2007)",
+    "GeogAngularUnits": "9102 (?)",
+    "key2062": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "ProjectedCSType": 3718,
+    "ProjLinearUnits": "9001 (metre)"
+   },
+   "ascii": "NAD83(NSRS2007) / UTM zone 11N|NAD83(NSRS2007)|\u0000",
+   "pixel_scale": [
+    1.0,
+    1.0,
+    0.0
+   ]
+  },
+  "6260_11SMS47703613": {
+   "bigtiff": false,
+   "endian": "<",
+   "width": 3000,
+   "height": 3000,
+   "geokeys": {
+    "GTModelType": 1,
+    "GTRasterType": 1,
+    "GTCitation": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "ProjectedCSType": 6340,
+    "VerticalCSType": 5703
+   },
+   "ascii": "NAD83(2011) / UTM zone 11N + NAVD88 height|\u0000",
+   "pixel_scale": [
+    0.5,
+    0.5,
+    1.0
+   ]
+  }
+ }
+}
