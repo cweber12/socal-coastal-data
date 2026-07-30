@@ -300,11 +300,31 @@ export interface Bin {
   label: string;
 }
 
+/**
+ * Decimal places a bin label renders at, DERIVED from the edges themselves.
+ *
+ * This was a literal 1 until #43 put 0.25 ft edges over the decision region --
+ * and `(0.25).toFixed(1)` is `"0.3"`, so `[0.0, 0.25)` would have been labelled
+ * `[0.0, 0.3)`: a band 0.05 ft wider than the one whose visits it counts. The
+ * label is display only and `loFt`/`hiFt` carry the truth, but a label that
+ * contradicts them is exactly the plausible-looking wrong number this pipeline
+ * exists not to emit, and it is the string a reviewer reads in `out/report.md`.
+ *
+ * Derived rather than raised to a literal 2, so the labels go back to one place
+ * on their own if the edges ever go back to halves.
+ */
+export const BIN_LABEL_DECIMALS: number = Math.max(
+  1,
+  ...BIN_EDGES.map((edge) => (String(edge).split('.')[1] ?? '').length),
+);
+
 export const BINS: Bin[] = BIN_EDGES.slice(0, -1).map((lo, i) => ({
   index: i,
   loFt: lo,
   hiFt: BIN_EDGES[i + 1]!,
-  label: `[${lo.toFixed(1)}, ${BIN_EDGES[i + 1]!.toFixed(1)})`,
+  label:
+    `[${lo.toFixed(BIN_LABEL_DECIMALS)}, ` +
+    `${BIN_EDGES[i + 1]!.toFixed(BIN_LABEL_DECIMALS)})`,
 }));
 
 /**

@@ -12,7 +12,7 @@
  */
 
 import type { SpotResult, CalibrationRun } from './run-types.ts';
-import { BINS } from './join.ts';
+import { BINS, BIN_LABEL_DECIMALS } from './join.ts';
 import {
   MAX_SINGLE_OBSERVER_SHARE,
   MIN_AMPLITUDE_RATIO,
@@ -61,7 +61,11 @@ export function renderReport(run: CalibrationRun): string {
   out.push('');
   out.push('| constant | value | what it decides |');
   out.push('|---|---|---|');
-  out.push(`| bin edges | ${BINS.map((b) => b.loFt.toFixed(1)).join(', ')}, ${BINS.at(-1)!.hiFt.toFixed(1)} | display only — the published number is the per-bin count |`);
+  out.push(
+    `| bin edges | ${BINS.map((b) => b.loFt.toFixed(BIN_LABEL_DECIMALS)).join(', ')}, ` +
+      `${BINS.at(-1)!.hiFt.toFixed(BIN_LABEL_DECIMALS)} | display only — the published number is ` +
+      'the per-bin count |',
+  );
   out.push(`| usable bin | ≥ ${USABLE_BIN_MIN_VISITS} visits | which bins the gates may read |`);
   out.push(`| minimum usable bins | ${MIN_USABLE_BINS} | refusal |`);
   out.push(`| concordant pairs | ≥ ${pct(MIN_CONCORDANT_PAIRS)} | refusal |`);

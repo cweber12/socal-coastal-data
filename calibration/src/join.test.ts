@@ -312,6 +312,27 @@ describe('binIndexFor', () => {
     expect(binIndexFor(-2.5)).toBe(0);
   });
 
+  it('separates the quarter-foot edges of the decision region', () => {
+    /*
+     * The property #43 exists to create. Before it, 0.3 and 0.9 were the same
+     * bin, so a crossing anywhere between them had a value and no location. Each
+     * assertion below straddles one new edge by 0.01 ft.
+     */
+    expect(binIndexFor(0.24)).toBe(3); // [0.00, 0.25)
+    expect(binIndexFor(0.25)).toBe(4); // [0.25, 0.50)
+    expect(binIndexFor(0.5)).toBe(5); // [0.50, 0.75)
+    expect(binIndexFor(0.74)).toBe(5);
+    expect(binIndexFor(0.75)).toBe(6); // [0.75, 1.00)
+    expect(binIndexFor(1.0)).toBe(7); // [1.00, 1.25)
+    expect(binIndexFor(1.25)).toBe(8); // [1.25, 1.50)
+    expect(binIndexFor(1.49)).toBe(8);
+    expect(binIndexFor(1.5)).toBe(9); // [1.50, 3.00)
+
+    // And the NPS figure and the current Cabrillo floor, which used to share a
+    // bin with each other and with the whole 0.5-1.0 stretch, no longer do.
+    expect(binIndexFor(0.7)).not.toBe(binIndexFor(1.3));
+  });
+
   it('returns null outside every bin rather than clamping', () => {
     // A day whose low is +4 ft is outside anything this table describes, and
     // clamping would let it vote in the top bin.
@@ -321,8 +342,42 @@ describe('binIndexFor', () => {
   });
 
   it('covers the edges the pipeline publishes', () => {
-    expect(BINS.map((b) => b.loFt)).toEqual([-2.5, -1, -0.5, 0, 0.5, 1]);
+    // Coarse below the datum where the rates are high, 0.25 ft across the
+    // decision region, one wide bin for the background above 1.5 ft. Declared in
+    // config.ts for #43, before any re-binned rate was computed.
+    expect(BINS.map((b) => b.loFt)).toEqual([
+      -2.5, -1, -0.5, 0, 0.25, 0.5, 0.75, 1, 1.25, 1.5,
+    ]);
     expect(BINS.at(-1)!.hiFt).toBe(3);
+  });
+
+  it('spans the decision region in quarter-foot steps with no gap', () => {
+    // Stated as a property of the region rather than as a list, so an edge
+    // dropped from the middle fails here and not only in the list above.
+    const region = BINS.filter((b) => b.loFt >= 0 && b.hiFt <= 1.5);
+    expect(region).toHaveLength(6);
+    for (const bin of region) expect(bin.hiFt - bin.loFt).toBeCloseTo(0.25, 10);
+    expect(region[0]!.loFt).toBe(0);
+    expect(region.at(-1)!.hiFt).toBe(1.5);
+  });
+
+  it('labels every bin at the precision its own edges need', () => {
+    /*
+     * `(0.25).toFixed(1)` is "0.3", so the label this file used to build would
+     * have named [0.00, 0.25) as [0.0, 0.3) -- a band 0.05 ft wider than the one
+     * whose visits it counts. The label is display only, and out/report.md is
+     * where a reviewer reads it.
+     */
+    expect(BINS[3]!.label).toBe('[0.00, 0.25)');
+    expect(BINS[6]!.label).toBe('[0.75, 1.00)');
+    expect(BINS.at(-1)!.label).toBe('[1.50, 3.00)');
+
+    // Every label must round-trip to the edges it names, at every bin.
+    for (const bin of BINS) {
+      const [lo, hi] = bin.label.slice(1, -1).split(', ').map(Number);
+      expect(lo).toBe(bin.loFt);
+      expect(hi).toBe(bin.hiFt);
+    }
   });
 });
 
@@ -380,6 +435,37 @@ describe('amplitudeRatio', () => {
   it('is null with fewer than two usable bins', () => {
     expect(amplitudeRatio(table([{ visits: 100, rate: 0.6 }]))).toBeNull();
     expect(amplitudeRatio(table([]))).toBeNull();
+  });
+
+  it('falls when the top bin thins out and the background moves down a band', () => {
+    /*
+     * The mechanism by which #43's narrower bins move amplitude ratios, and the
+     * reason a verdict can change without any gate being touched.
+     *
+     * "Background" is not a fixed height. It is whatever the HIGHEST USABLE bin
+     * happens to be, so splitting a wide top band into thin ones that fall under
+     * USABLE_BIN_MIN_VISITS does not merely drop them from the table -- it
+     * promotes a LOWER, and therefore higher-rate, band to background. The
+     * denominator rises and the ratio falls, on identical visits.
+     *
+     * Same 40 visits at the top of both tables. Wide: one usable bin at 0.10, so
+     * the ratio is 6.0. Split: both halves are thin, background falls back to the
+     * 0.30 band, and the ratio is 2.0 -- at the gate rather than triple it.
+     */
+    const wide = table([
+      { visits: 100, rate: 0.6 },
+      { visits: 100, rate: 0.3 },
+      { visits: 40, rate: 0.1 },
+    ]);
+    const split = table([
+      { visits: 100, rate: 0.6 },
+      { visits: 100, rate: 0.3 },
+      { visits: 14, rate: 0.1 },
+      { visits: 14, rate: 0.1 },
+    ]);
+
+    expect(amplitudeRatio(wide)).toBeCloseTo(6, 6);
+    expect(amplitudeRatio(split)).toBeCloseTo(2, 6);
   });
 });
 
