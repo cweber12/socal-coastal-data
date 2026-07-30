@@ -1032,7 +1032,7 @@ confound between them and not only between each and 2004. It makes the
 indeterminate verdict easier to believe and it is not a reason to adjust
 anything.
 
-### Post-hoc, and it cannot select: the slope gets *worse* on smooth ground
+### Post-hoc, and it cannot select: both DEMs reproduce a fraction of the surveyed relief
 
 **Everything from here to the end of this subsection was computed after the
 comparison above had run and returned indeterminate.** It is not in the
@@ -1056,18 +1056,49 @@ product to the ground *that* product resolves smoothly; it gives two different
 point sets, so it can never be a paired comparison, which is why it appears only
 here.
 
-Read as a transfer function the numbers are stark. Residual is DEM minus survey,
-so a slope of −0.985 means `d(DEM)/d(survey)` = **0.015** — a faithful DEM would
-give 1.0. On the shared restricted set the surveyed heights span 5.30 ft while
-2616 spans 1.52 ft and 6260 spans 1.42 ft, and over all 119 paired points
-`corr(survey, DEM)` is only **0.54** and **0.44**. On smooth ground 6260's
-correlation with the surveyed heights falls to 0.07.
+**Correction, under #93: that strengthening does not mean what this section
+first said it meant.** Roughness is computed *from* the DEM, so restricting on it
+is not an independent slice — it selects on a quantity correlated with the very
+elevation under test. Measured over all 119 paired points:
 
-**Three explanations are ruled out by this, and none of them is the one left
-standing:**
+| product | corr(roughness, DEM elevation) | DEM sd, all → restricted | survey sd, all → restricted |
+|---|---:|---|---|
+| 2616 | **+0.697** | 1.446 → 0.362 (**−75.0%**) | 1.732 → 1.316 (−24.0%) |
+| 6260 | **+0.674** | 1.160 → 0.275 (**−76.3%**) | 1.732 → 1.316 (−24.0%) |
 
-- **Roughness / point against cell.** Ruled out as *the cause*. The slope gets
-  steeper on smooth ground, not shallower. Confound 2 is real and it is not this.
+Rough ground is high ground here. Restricting to smooth ground therefore strips
+about three quarters of the DEM's spread against about a quarter of the survey's,
+and a regression of `DEM − survey` on `survey` under that asymmetry is pushed
+toward slope −1 and r² → 1 **mechanically**, whether or not anything is wrong. It
+is also why r² *rises* on a truncated range, where it would normally fall. **The
+headline therefore rests on the unselected `all 119` row, which involves no
+selection at all**, and the restricted rows are read as illustration rather than
+as evidence.
+
+Read as a transfer function the unselected numbers are still stark. Residual is
+DEM minus survey, so the all-points slopes of −0.547 and −0.704 mean
+`d(DEM)/d(survey)` of **0.45** and **0.30** — a faithful DEM would give 1.0 — and
+`corr(survey, DEM)` over those same 119 points is only **0.54** and **0.44**. A
+DEM reproducing a third to a half of the surveyed relief is the finding, and it
+needs no restricted set to make it.
+
+**One thing the restriction does show cleanly**, because both products are scored
+on the identical shared set and so face the same selection: on those 61 points
+2616 holds `corr(survey, DEM)` at **0.513** while 6260 falls to **0.070**. The
+selection cannot explain a *difference* it applies equally to both. None of the
+three pre-registered metrics captured this — RMSE, MAE and median absolute error
+all measure the size of the error, and this measures whether a product tracks the
+bench's shape at all on ground it resolves smoothly.
+
+**Two explanations are ruled out by this, one is not, and none of them is the one
+left standing:**
+
+- **Roughness / point against cell.** **Not ruled out.** This subsection
+  previously recorded it as ruled out, on the grounds that the slope steepens on
+  smooth ground. That inference does not hold, for the reason given above: the
+  restriction selects on a DEM-derived quantity and induces the same direction of
+  effect. The test cannot separate *roughness is not the cause* from *restricting
+  on a DEM-derived quantity produced the steepening*.
 - **Sand.** Ruled out as the cause. Sand buries low ground and cannot lower high
   rock, and this slope is driven by the DEM reading feet below surveyed cliff
   faces and boulder tops.
@@ -1095,9 +1126,9 @@ gap**. Separating them is new work, not a repair.
 **What it means for the adjudication, plainly: no product could have been
 selected whichever way the metrics fell.** A comparison can rank two products by
 how well they reproduce ground truth only if at least one of them reproduces it.
-Neither tracks the surveyed relief — correlation 0.44–0.54 over all points, and
-`d(DEM)/d(survey)` of 0.01–0.14 on smooth ground against an ideal 1.0. A metric
-win would have been a win on noise. **The indeterminate verdict is not a near
+Neither tracks the surveyed relief — over all 119 points, with no selection
+involved, `corr(survey, DEM)` is 0.44–0.54 and `d(DEM)/d(survey)` is 0.30–0.45
+against an ideal 1.0. A metric win would have been a win on noise. **The indeterminate verdict is not a near
 miss between two close candidates; it is what a comparison returns when neither
 candidate is measuring the thing.** That does not change the verdict — the
 pre-registered rules returned it on their own terms and stand as run — but it
