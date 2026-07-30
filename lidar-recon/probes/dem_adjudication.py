@@ -35,6 +35,13 @@ Four mechanical choices the pre-registration does not fix are listed in
 this module chose is not a parameter that was pre-registered and the difference
 has to survive into the finding.
 
+**One post-hoc diagnostic was added after the comparison had run**, in
+`post_hoc_restricted_slope`. It regresses elevation inside the
+roughness-restricted set, which the run scored but never regressed. It is
+labelled post-hoc everywhere it appears, the verdict block reads nothing from
+it, and it cannot select a product. It is here because of what it rules out,
+not because of what it chooses.
+
 **The vintage gap is measured, not corrected.** The survey is February-March
 2004; 2616's source lidar is a nominal 2009-2011 and 6260's is April-May 2016.
 No sand offset, no epoch adjustment, and nothing that would make the two agree
@@ -509,6 +516,122 @@ def residual_structure(paired):
                                 "without refitting anything."}
 
 
+def post_hoc_restricted_slope(paired, low_idx, split):
+    """POST-HOC. Added after the pre-registered comparison had run and returned
+    indeterminate, and it CANNOT change that verdict.
+
+    The run reported metrics for the roughness-restricted set but never
+    regressed elevation inside it. Doing so asks whether the confound-1 slope is
+    the point-against-cell confound in disguise: if rough ground were producing
+    it, restricting to smooth ground should WEAKEN it.
+
+    It strengthens, in both products and under both ways of drawing the
+    restriction, which is why this is recorded rather than left in a comment.
+
+    Two conventions are reported because they answer slightly different
+    questions and neither is more correct:
+
+    - `shared_set` is the restriction the finding already defines -- one point
+      set from the median of the two products' mean roughness, so both products
+      are scored on identical points and the restriction cannot favour either.
+      This is the set the pre-registered restricted comparison used.
+    - `per_product` splits each product on its OWN roughness median, so each is
+      restricted to the ground that product resolves smoothly. Two different
+      60-point sets, which is why it cannot be used for a paired comparison, and
+      exactly why it is reported only here.
+    """
+    def fit(sub, pid):
+        sur = [r["surveyed_ft_above_mllw"] for r in sub]
+        res = [r[pid]["residual_ft"] for r in sub]
+        dem = [r[pid]["cell_ft_mllw"] for r in sub]
+        m = ols([([1.0, x], y) for x, y in zip(sur, res)], 2)
+        b = m["_raw"][1]
+        return {
+            "n": len(sub),
+            "slope_ft_per_ft": round(b, 4),
+            "r2": m["r2"],
+            "intercept_ft": m["coef"][0],
+            # residual = DEM - survey, so d(resid)/d(survey) = d(DEM)/d(survey) - 1
+            "d_dem_d_survey": round(1.0 + b, 4),
+            "surveyed_span_ft": round(max(sur) - min(sur), 3),
+            "dem_span_ft": round(max(dem) - min(dem), 3),
+            "corr_survey_dem": round(pearson(sur, dem), 4),
+        }
+
+    rows = [r for _, r in paired]
+    out = {
+        "status": "POST-HOC AND CANNOT SELECT. Computed after the "
+                  "pre-registered comparison returned indeterminate. It is not "
+                  "in the pre-registration, it did not contribute to the "
+                  "verdict, and it could not have: no product is selected "
+                  "either way.",
+        "question": "is the confound-1 elevation slope the point-against-cell "
+                    "confound in disguise? If rough ground produced it, "
+                    "restricting to smooth ground would weaken it.",
+        "answer": "No. It STRENGTHENS on smooth ground, in both products and "
+                  "under both restriction conventions.",
+        "all_points": {pid: fit(rows, pid) for pid in PRODUCTS},
+        "shared_set": {
+            "definition": "the finding's own restriction -- points at or below "
+                          f"the median ({round(split, 4)} ft) of the two "
+                          "products' mean 5 m roughness. One point set, "
+                          "identical for both products.",
+            **{pid: fit([rows[i] for i in low_idx], pid) for pid in PRODUCTS}},
+    }
+    per = {"definition": "each product split on its OWN 5 m roughness median. "
+                         "Two different point sets, so this is NOT a paired "
+                         "comparison and is reported for this diagnostic only."}
+    for pid in PRODUCTS:
+        rg = [r[pid]["roughness_ft"] for r in rows
+              if r[pid]["roughness_ft"] is not None]
+        med = statistics.median(rg)
+        sub = [r for r in rows if r[pid]["roughness_ft"] is not None
+               and r[pid]["roughness_ft"] <= med]
+        per[pid] = {"roughness_median_ft": round(med, 4), **fit(sub, pid)}
+    out["per_product"] = per
+    out["what_it_rules_out"] = {
+        "roughness / point-against-cell": "ruled out as the cause. The slope "
+                                          "gets steeper on smooth ground, not "
+                                          "shallower.",
+        "sand": "ruled out as the cause. Sand buries low ground; it cannot "
+                "lower high rock, and the slope is driven by the DEM reading "
+                "several feet BELOW surveyed cliff faces and boulder tops.",
+        "any datum term": "ruled out as the cause. A datum error is additive: "
+                          "it moves the intercept of this regression and "
+                          "cannot produce a slope in it. It is also identical "
+                          "for both products and so cancels exactly in the "
+                          "paired difference.",
+    }
+    out["what_survives_untested"] = [
+        "coordinates that do not locate the plots on a 1 m grid -- the survey's "
+        "horizontal is a 2004 Trimble fix whose published accuracy claim and "
+        "'Std. Dev.' column cannot be reconciled (that column's unit is "
+        "UNRESOLVED and is not read here). A metre-class horizontal error on a "
+        "bench with metre-class relief lands the sample on the wrong feature.",
+        "a scale problem in the surveyed heights -- the report ties its stadia "
+        "readings to MLLW through a conversion formula it attributes to UCSC "
+        "and a still-water line read by eye, and a scale error there would "
+        "stretch the surveyed range against a DEM that is correct.",
+        "DEMs that do not resolve this bench -- both products may simply be "
+        "too smooth here, which the void coverage in README section 10 already "
+        "makes plausible.",
+    ]
+    out["not_tested_here"] = ("None of the three is tested, none is preferred, "
+                              "and nothing is adjusted to close the gap. "
+                              "Separating them is new work, not a repair.")
+    out["consequence_for_the_adjudication"] = (
+        "The adjudication could not have selected a product whichever way the "
+        "metrics fell. A comparison can only rank two products by how well they "
+        "reproduce ground truth if at least one of them reproduces it; over the "
+        "119 paired points corr(survey, DEM) is 0.44-0.54, and on smooth ground "
+        "d(DEM)/d(survey) falls to 0.01-0.14 against the 1.0 a faithful DEM "
+        "would give. Neither product tracks the surveyed relief, so a metric "
+        "win would have been a win on noise. The indeterminate verdict is not a "
+        "near miss between two close candidates; it is what a comparison "
+        "returns when neither candidate is measuring the thing.")
+    return out
+
+
 def confound_roughness(rough, absres, seed):
     """Confound 2: residual MAGNITUDE against local DEM roughness."""
     def r_of(sub):
@@ -653,6 +776,11 @@ def main():
             "bootstrap": bootstrap_paired(rd, BOOTSTRAP_SEED, B=2000),
         }
 
+    # Post-hoc, and deliberately computed AFTER the verdict block below reads
+    # nothing from it. It is in the output and in no decision.
+    post_hoc = (post_hoc_restricted_slope(paired, low, split)
+                if split is not None and len(low) >= 10 else None)
+
     # ---- the verdict ----------------------------------------------------
     reasons = []
     verdict, selected = "indeterminate", None
@@ -728,6 +856,11 @@ def main():
             "shared/spots.json is not read from or written to.",
             "This does not re-run the slope gate, and it does not decide "
             "whether issue 46 closes.",
+            "post_hoc_elevation_slope_in_the_restricted_set was computed AFTER "
+            "the verdict and contributed nothing to it. It selects no product, "
+            "tests none of the three candidates it leaves standing, and no "
+            "value anywhere in this finding was adjusted to close the gap it "
+            "measures.",
         ],
         "pre_registration": {
             "document": "calibration/floor-calibration.md",
@@ -805,6 +938,7 @@ def main():
         "confound_1_structure_descriptive": residual_structure(paired),
         "confound_2_roughness": rough,
         "roughness_restricted_comparison": restricted,
+        "post_hoc_elevation_slope_in_the_restricted_set": post_hoc,
         "per_point": per_point,
     }
     with open(DEST, "w") as f:

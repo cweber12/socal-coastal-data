@@ -1032,6 +1032,77 @@ confound between them and not only between each and 2004. It makes the
 indeterminate verdict easier to believe and it is not a reason to adjust
 anything.
 
+### Post-hoc, and it cannot select: the slope gets *worse* on smooth ground
+
+**Everything from here to the end of this subsection was computed after the
+comparison above had run and returned indeterminate.** It is not in the
+pre-registration, it contributed nothing to the verdict, and it selects no
+product. It is recorded for what it rules out.
+
+The run scored the roughness-restricted set but never regressed elevation inside
+it. Doing so asks one question: is the confound-1 slope really the
+point-against-cell confound wearing a disguise? If rough ground were producing
+it, restricting to smooth ground should **weaken** it.
+
+| set | 2616 slope | r² | 6260 slope | r² |
+|---|---:|---:|---:|---:|
+| all 119 points | −0.547 | 0.378 | −0.704 | 0.579 |
+| shared restricted set, n = 61 | **−0.859** | 0.930 | **−0.985** | 0.957 |
+| each product on its own roughness median, n = 60 | −0.858 | 0.948 | −0.966 | 0.971 |
+
+**It strengthens, in both products and under both ways of drawing the
+restriction.** The second convention is reported because it restricts each
+product to the ground *that* product resolves smoothly; it gives two different
+point sets, so it can never be a paired comparison, which is why it appears only
+here.
+
+Read as a transfer function the numbers are stark. Residual is DEM minus survey,
+so a slope of −0.985 means `d(DEM)/d(survey)` = **0.015** — a faithful DEM would
+give 1.0. On the shared restricted set the surveyed heights span 5.30 ft while
+2616 spans 1.52 ft and 6260 spans 1.42 ft, and over all 119 paired points
+`corr(survey, DEM)` is only **0.54** and **0.44**. On smooth ground 6260's
+correlation with the surveyed heights falls to 0.07.
+
+**Three explanations are ruled out by this, and none of them is the one left
+standing:**
+
+- **Roughness / point against cell.** Ruled out as *the cause*. The slope gets
+  steeper on smooth ground, not shallower. Confound 2 is real and it is not this.
+- **Sand.** Ruled out as the cause. Sand buries low ground and cannot lower high
+  rock, and this slope is driven by the DEM reading feet below surveyed cliff
+  faces and boulder tops.
+- **Any datum term.** Ruled out as the cause. A datum error is additive: it moves
+  this regression's *intercept* and cannot produce a *slope* in it. It is also
+  identical for both products, so it cancels exactly in the paired difference.
+
+**Three candidates survive, and this section chooses between none of them.**
+
+1. **Coordinates that do not locate the plots on a 1 m grid.** The survey's
+   horizontal is a 2004 Trimble fix whose accuracy claim and `Std. Dev.` column
+   cannot be reconciled — that column's unit is **unresolved** and is not read
+   here. Metre-class horizontal error on a bench with metre-class relief samples
+   the wrong feature.
+2. **A scale problem in the surveyed heights.** The report ties stadia readings
+   to MLLW through a conversion formula it attributes to UCSC and a still-water
+   line read by eye. A scale error there stretches the surveyed range against a
+   DEM that is correct.
+3. **DEMs that do not resolve this bench.** Both products may simply be too
+   smooth here, which §10's void coverage already makes plausible.
+
+None is tested here, none is preferred, and **nothing was adjusted to close the
+gap**. Separating them is new work, not a repair.
+
+**What it means for the adjudication, plainly: no product could have been
+selected whichever way the metrics fell.** A comparison can rank two products by
+how well they reproduce ground truth only if at least one of them reproduces it.
+Neither tracks the surveyed relief — correlation 0.44–0.54 over all points, and
+`d(DEM)/d(survey)` of 0.01–0.14 on smooth ground against an ideal 1.0. A metric
+win would have been a win on noise. **The indeterminate verdict is not a near
+miss between two close candidates; it is what a comparison returns when neither
+candidate is measuring the thing.** That does not change the verdict — the
+pre-registered rules returned it on their own terms and stand as run — but it
+changes what the verdict was ever capable of being.
+
 ### What this leaves
 
 - **Indeterminate, no product selected**, on a metric split and a bootstrap
@@ -1039,25 +1110,37 @@ anything.
 - **No floor is set or changed**, `shared/spots.json` is untouched, and the §6
   check stays unspent with nothing recorded against it — which is the branch §6
   committed to for this outcome before it knew which branch it would be taking.
-- **The blocker moved.** It is no longer "which of these two products is right":
-  they are indistinguishable against 126 surveyed heights, and both are ~1.3 ft
-  off with a −0.55 to −0.70 ft/ft slope on elevation that nothing here explains.
-  Choosing between them was the wrong question.
+- **The blocker moved, and the post-hoc diagnostic says how far.** It is no
+  longer "which of these two products is right": they are indistinguishable
+  against 126 surveyed heights, both are ~1.3 ft off, and on smooth ground
+  neither DEM tracks the surveyed relief at all — `d(DEM)/d(survey)` of
+  0.01–0.14 against an ideal 1.0. Choosing between them was never a question the
+  data could answer.
 - Re-running the slope gate on a bench-scale polygon, §10's obvious next step,
   still has no product to prefer, and now has a measured reason why not.
 
 ### Open questions, third round
 
-8. **What is the 1.3 ft?** Both products sit that far below the survey, more than
-   VDatum's ±0.305 ft, and neither the tide-station realisation gap nor a decade
-   of sand is established as the cause. The candidates are separable —
-   9410170-vs-9410230 is a constant, the survey's own calibration formula is a
-   scale, and sand is elevation-dependent — but separating them needs the station
-   comparison the 2006 report never made.
-9. **Why does the residual slope with elevation at −0.55 to −0.70 ft/ft?** A
-   scale disagreement, not an offset, and it is present in both products at
-   different magnitudes. It is the largest unexplained structure in this
-   directory.
+8. **What is the 1.3 ft, given that it is not a constant?** Both products sit
+   that far below the survey on average, more than VDatum's ±0.305 ft — but the
+   post-hoc diagnostic shows the gap is not an offset at all. It is ~0 near
+   datum and 3.5–4.2 ft at the top of the range, so any candidate that is a
+   *constant* is thereby excluded as the whole story: the 9410170-vs-9410230
+   realisation gap and the VDatum transform are both constants and both move the
+   intercept only. What remains has to be something that scales with height, and
+   the 2006 report never made the station comparison that would retire the
+   constant part.
+9. **Why does `d(DEM)/d(survey)` collapse to 0.01–0.14 on smooth ground?** This
+   is the sharpest unexplained result in the directory, and the post-hoc
+   diagnostic narrowed it rather than answering it. The elevation slope
+   *strengthens* under roughness restriction — −0.547/−0.704 over all points
+   against −0.859/−0.985 on the smooth half — which rules out the
+   point-against-cell confound, sand, and any additive datum term as the cause.
+   Three candidates survive and are listed above: horizontal coordinates that do
+   not locate the plots on a 1 m grid, a scale error in the surveyed heights, or
+   DEMs that do not resolve this bench. Separating them is the work; **the
+   consequence for §8's recommendation is already in hand, because a product
+   chosen between these two was never going to be chosen on this evidence.**
 10. **Does anything select a product?** Not these 126 points. If a product must
     be chosen, it is chosen on grounds this comparison did not supply, and that
     should be said out loud rather than inherited from §8's recommendation.

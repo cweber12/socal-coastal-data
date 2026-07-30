@@ -18,7 +18,8 @@
   "No sand correction, epoch adjustment or any other offset that would make the two products agree better is applied. The vintage gap is measured as a confound and left in the residuals.",
   "The GPS 'Std. Dev.' column is not read and its unit is not assumed. No horizontal tolerance derived from it is used.",
   "shared/spots.json is not read from or written to.",
-  "This does not re-run the slope gate, and it does not decide whether issue 46 closes."
+  "This does not re-run the slope gate, and it does not decide whether issue 46 closes.",
+  "post_hoc_elevation_slope_in_the_restricted_set was computed AFTER the verdict and contributed nothing to it. It selects no product, tests none of the three candidates it leaves standing, and no value anywhere in this finding was adjusted to close the gap it measures."
  ],
  "pre_registration": {
   "document": "calibration/floor-calibration.md",
@@ -679,6 +680,93 @@
    "seed": 89,
    "spans_zero": true
   }
+ },
+ "post_hoc_elevation_slope_in_the_restricted_set": {
+  "status": "POST-HOC AND CANNOT SELECT. Computed after the pre-registered comparison returned indeterminate. It is not in the pre-registration, it did not contribute to the verdict, and it could not have: no product is selected either way.",
+  "question": "is the confound-1 elevation slope the point-against-cell confound in disguise? If rough ground produced it, restricting to smooth ground would weaken it.",
+  "answer": "No. It STRENGTHENS on smooth ground, in both products and under both restriction conventions.",
+  "all_points": {
+   "2616": {
+    "n": 119,
+    "slope_ft_per_ft": -0.5465,
+    "r2": 0.378,
+    "intercept_ft": 0.13019,
+    "d_dem_d_survey": 0.4535,
+    "surveyed_span_ft": 8.052,
+    "dem_span_ft": 6.442,
+    "corr_survey_dem": 0.5432
+   },
+   "6260": {
+    "n": 119,
+    "slope_ft_per_ft": -0.7036,
+    "r2": 0.5785,
+    "intercept_ft": 0.52111,
+    "d_dem_d_survey": 0.2964,
+    "surveyed_span_ft": 8.052,
+    "dem_span_ft": 5.613,
+    "corr_survey_dem": 0.4425
+   }
+  },
+  "shared_set": {
+   "definition": "the finding's own restriction -- points at or below the median (0.2092 ft) of the two products' mean 5 m roughness. One point set, identical for both products.",
+   "2616": {
+    "n": 61,
+    "slope_ft_per_ft": -0.8588,
+    "r2": 0.9298,
+    "intercept_ft": 0.35589,
+    "d_dem_d_survey": 0.1412,
+    "surveyed_span_ft": 5.303,
+    "dem_span_ft": 1.517,
+    "corr_survey_dem": 0.5134
+   },
+   "6260": {
+    "n": 61,
+    "slope_ft_per_ft": -0.9853,
+    "r2": 0.9571,
+    "intercept_ft": 0.78064,
+    "d_dem_d_survey": 0.0147,
+    "surveyed_span_ft": 5.303,
+    "dem_span_ft": 1.419,
+    "corr_survey_dem": 0.0704
+   }
+  },
+  "per_product": {
+   "definition": "each product split on its OWN 5 m roughness median. Two different point sets, so this is NOT a paired comparison and is reported for this diagnostic only.",
+   "2616": {
+    "roughness_median_ft": 0.243,
+    "n": 60,
+    "slope_ft_per_ft": -0.8584,
+    "r2": 0.9476,
+    "intercept_ft": 0.30055,
+    "d_dem_d_survey": 0.1416,
+    "surveyed_span_ft": 5.303,
+    "dem_span_ft": 1.479,
+    "corr_survey_dem": 0.5742
+   },
+   "6260": {
+    "roughness_median_ft": 0.1877,
+    "n": 60,
+    "slope_ft_per_ft": -0.966,
+    "r2": 0.9713,
+    "intercept_ft": 0.71212,
+    "d_dem_d_survey": 0.034,
+    "surveyed_span_ft": 4.758,
+    "dem_span_ft": 0.956,
+    "corr_survey_dem": 0.2006
+   }
+  },
+  "what_it_rules_out": {
+   "roughness / point-against-cell": "ruled out as the cause. The slope gets steeper on smooth ground, not shallower.",
+   "sand": "ruled out as the cause. Sand buries low ground; it cannot lower high rock, and the slope is driven by the DEM reading several feet BELOW surveyed cliff faces and boulder tops.",
+   "any datum term": "ruled out as the cause. A datum error is additive: it moves the intercept of this regression and cannot produce a slope in it. It is also identical for both products and so cancels exactly in the paired difference."
+  },
+  "what_survives_untested": [
+   "coordinates that do not locate the plots on a 1 m grid -- the survey's horizontal is a 2004 Trimble fix whose published accuracy claim and 'Std. Dev.' column cannot be reconciled (that column's unit is UNRESOLVED and is not read here). A metre-class horizontal error on a bench with metre-class relief lands the sample on the wrong feature.",
+   "a scale problem in the surveyed heights -- the report ties its stadia readings to MLLW through a conversion formula it attributes to UCSC and a still-water line read by eye, and a scale error there would stretch the surveyed range against a DEM that is correct.",
+   "DEMs that do not resolve this bench -- both products may simply be too smooth here, which the void coverage in README section 10 already makes plausible."
+  ],
+  "not_tested_here": "None of the three is tested, none is preferred, and nothing is adjusted to close the gap. Separating them is new work, not a repair.",
+  "consequence_for_the_adjudication": "The adjudication could not have selected a product whichever way the metrics fell. A comparison can only rank two products by how well they reproduce ground truth if at least one of them reproduces it; over the 119 paired points corr(survey, DEM) is 0.44-0.54, and on smooth ground d(DEM)/d(survey) falls to 0.01-0.14 against the 1.0 a faithful DEM would give. Neither product tracks the surveyed relief, so a metric win would have been a win on noise. The indeterminate verdict is not a near miss between two close candidates; it is what a comparison returns when neither candidate is measuring the thing."
  },
  "per_point": [
   {
