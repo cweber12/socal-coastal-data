@@ -1,0 +1,5162 @@
+{
+ "read_date": "2026-07-30",
+ "issue": 89,
+ "question": "Do the 2004 NPS-surveyed Cabrillo elevations select DEM product 2616 or 6260 for the hypsometric curve, under the rules frozen before the comparison ran?",
+ "verdict": {
+  "result": "indeterminate",
+  "product_selected": null,
+  "reasons": [
+   "the three metrics do not agree on a product. The pre-registration: 'A product is selected only if all three choose the same one. A split selects nothing and is itself the finding.'",
+   "the 95% bootstrap CI on the paired per-point difference in absolute residual spans zero. The pre-registration: 'If the interval spans zero the result is indeterminate and no product is selected.'"
+  ],
+  "under_strict_reading_of_disagree": "indeterminate",
+  "strict_reading_note": "'Disagree' is read as 'the restricted comparison names a different product'. The stricter reading, in which a restricted comparison that names NO product also fails to agree, is reported beside it. Where the two coincide the ambiguity is moot."
+ },
+ "not_claimed": [
+  "No floor is set, changed or proposed, and this is not a floor_evidence entry.",
+  "The NPS check reserved in calibration/floor-calibration.md section 6 is NOT spent. Its figure is not read, cited or compared against anywhere in this finding, and it does not appear in it. That section's conditional governs what a later comparison is worth, and the branch it commits to for an indeterminate result is that nothing is recorded against the figure and the check stays unspent.",
+  "No sand correction, epoch adjustment or any other offset that would make the two products agree better is applied. The vintage gap is measured as a confound and left in the residuals.",
+  "The GPS 'Std. Dev.' column is not read and its unit is not assumed. No horizontal tolerance derived from it is used.",
+  "shared/spots.json is not read from or written to.",
+  "This does not re-run the slope gate, and it does not decide whether issue 46 closes."
+ ],
+ "pre_registration": {
+  "document": "calibration/floor-calibration.md",
+  "section": "6, subsection 'Pre-registration: which DEM the surveyed elevations select, written before it runs'",
+  "committed_before_the_comparison_ran": true,
+  "rules_implemented": [
+   "three metrics -- RMSE, MAE, median absolute error -- all reported, agreement required, a split selects nothing",
+   "exclusions are the report's own two and no others",
+   "95% bootstrap CI over points on the paired per-point difference in absolute residual; spanning zero is indeterminate",
+   "residual regressed on plot elevation and plot type",
+   "residual magnitude against local DEM roughness, restricted comparison diagnostic only and never able to select"
+  ]
+ },
+ "implementation_choices_the_pre_registration_does_not_fix": {
+  "dem_sampling_rule": {
+   "choice": "the single DEM cell whose footprint contains the surveyed coordinate; no search, no interpolation, no neighbourhood.",
+   "why": "It is the only sampling rule with no free parameter. Any radius would be a number chosen by this module rather than by the pre-registration, and 'widen until the answer changes' is the failure section 6 rule 2 exists to prevent.",
+   "horizontal_tolerance_implied": "half a cell diagonal -- 0.71 m for 2616 at 1 m, 0.35 m for 6260 at 0.5 m"
+  },
+  "horizontal_tolerance": {
+   "choice": "none applied beyond the containing cell.",
+   "why": "The comparison does not need one: a point is either inside a cell or inside its neighbour, and both are sampled the same way for both products. This is stated independently of the report's 'Std. Dev.' column, whose unit is UNRESOLVED (findings/cabrillo-surveyed-elevations.json, gps_std_dev_unresolved) and is neither read nor assumed to be metres anywhere in this module.",
+   "sensitivity_reported": "a 3 m radius MEAN of valid cells is reported as a diagnostic that cannot select. 3 m is the order of a monitoring plot, not a number derived from the unresolved GPS column, and it is a neutral smoothing rather than a best-match search."
+  },
+  "roughness_definition": {
+   "choice": "population standard deviation, in feet, of the valid DEM cells whose centres lie within 5.0 m of the surveyed coordinate.",
+   "why": "A fixed ground radius rather than a fixed cell count, because a 3x3 window means 3 m on 2616 and 1.5 m on 6260 and the two roughnesses would then not be the same measurement. 5 m is the scale of the boulder-and-cliff-face relief confound 2 names."
+  },
+  "roughness_restriction_split": {
+   "choice": "the low half by the median of the two products' mean roughness at each point.",
+   "why": "A median split has no threshold to choose. Both products are then restricted to the SAME point set, so the restriction cannot favour either. Diagnostic only, per the pre-registration -- it can force indeterminate and can never select."
+  }
+ },
+ "ground_truth": {
+  "source_finding": "lidar-recon/findings/cabrillo-surveyed-elevations.json",
+  "survey": "Appendix E: Tidal Height Study by L.A. Victoria, SDSU Special Study, Spring 2004",
+  "citation": "Becker, Bonnie J. 2006. Status and Trends of Ecological Health and Human Use of the Cabrillo National Monument Rocky Intertidal Zone (1990-2005). Natural Resource Technical Report NPS/PWR/CABR/NRTR--2006/03. National Park Service, Seattle, Washington.",
+  "vertical_datum": "MLLW, stated by the report in three places: the legends of Tables 8-10, the caption of Table E-1, and Appendix E's calibration formula.",
+  "reported_height_uncertainty": "'Standard deviation of the tidal height measurement is approximately 4 inches' -- legend of Tables 8, 9 and 10. Per-session values in Table E-1 are finer grained; see sessions[].",
+  "unit_conversion": "published inches above MLLW / 12 = feet above MLLW. The report's foot is not declared as US survey or international; the two differ by 2 ppm, which is 1.6e-5 ft on an 8 ft stadia pole and is below every other term here.",
+  "tide_station_the_survey_used": "9410170",
+  "tide_station_this_repo_binds": "9410230",
+  "why_that_does_not_select": "A difference between the two MLLW realisations is a constant applied to every surveyed height, so it shifts both products' residuals identically and cancels exactly in the paired difference. It biases the ABSOLUTE residuals and cannot bias the choice between products."
+ },
+ "point_accounting": {
+  "surveyed_points_total": 137,
+  "points_with_published_height": 126,
+  "analysis_candidates": 124,
+  "report_exclusion_1_zone_ii_m2": {
+   "points": [
+    "Zone 2 M2"
+   ],
+   "effect_on_the_126": "none -- its height is published as ND, so it is already outside the 126."
+  },
+  "report_exclusion_2_feb_8_1620_reading": {
+   "n_points_affected": 35,
+   "effect_on_the_126": "none -- this is a reading-level exclusion the report already applied to its own published averages. All 35 points are retained."
+  },
+  "dropped_no_published_coordinates": {
+   "points": [
+    "Zone 2 L7",
+    "Zone 2 L8"
+   ],
+   "n": 2,
+   "why": "a height with no coordinate cannot be sampled against a DEM. This is an impossibility, not a further exclusion; the pre-registration admits no further exclusions and none is made."
+  },
+  "further_exclusions_applied": 0
+ },
+ "vintage_gap": {
+  "survey": "2004-02-07 .. 2004-03-19 (Appendix E field dates); the pre-registration calls it spring 2004",
+  "2616_acquisition": "2009-01-01 .. 2011-01-01 (nominal range only; no finer date published)",
+  "2616_publication": "2014-03",
+  "6260_acquisition": "2016-04-28 .. 2016-05-28",
+  "6260_publication": "2017-04-12",
+  "gap_2616": "roughly 5 to 7 years after the survey",
+  "gap_6260": "roughly 12 years after the survey",
+  "read_carefully": "The pre-registration describes the DEMs as 'roughly 2014'. Measured against the recon's own metadata that is loose: 2616's source lidar is a nominal 2009-2011 and 6260's is April-May 2016. The two products are NOT the same age relative to the survey, which is itself a confound -- they are five years apart from each other on a bench that buries and scours seasonally. Recorded, not corrected.",
+  "correction_applied": "NONE. No sand offset, no epoch adjustment, no term of any kind that would make the two products agree better with the survey or with each other."
+ },
+ "datum_conversion": {
+  "navd88_m_to_ft_mllw": "ft = z_m * 3.280833 + 0.22",
+  "source": "VDatum, findings/vdatum-transforms.json; the same constants hypsometry.py used for the slope gate",
+  "offset_uncertainty_ft": 0.305,
+  "why_the_uncertainty_does_not_select": "the offset is additive and identical for both products, so it cancels in the paired difference. It is a floor under the absolute residuals, not a term in the choice."
+ },
+ "grids": {
+  "2616": {
+   "grid_px": [
+    360,
+    645
+   ],
+   "px_m": 1.0000000000000389,
+   "nodata_value": -3.4028234663852886e+38,
+   "tiles": [
+    {
+     "tile": "11SMS770135.tif",
+     "used": true,
+     "src_px_box": [
+      0,
+      288,
+      275,
+      919
+     ]
+    },
+    {
+     "tile": "11SMS755135.tif",
+     "used": true,
+     "src_px_box": [
+      1429,
+      1499,
+      275,
+      919
+     ]
+    },
+    {
+     "tile": "11SMS770150.tif",
+     "used": false,
+     "why": "no overlap with the window"
+    },
+    {
+     "tile": "11SMS755150.tif",
+     "used": false,
+     "why": "no overlap with the window"
+    }
+   ],
+   "points_on_a_valid_cell": 119
+  },
+  "6260": {
+   "grid_px": [
+    718,
+    1289
+   ],
+   "px_m": 0.5,
+   "nodata_value": -3.4028230607370965e+38,
+   "tiles": [
+    {
+     "tile": "11SMS47703613.tif",
+     "used": true,
+     "src_px_box": [
+      0,
+      576,
+      551,
+      1839
+     ]
+    },
+    {
+     "tile": "11SMS47553613.tif",
+     "used": true,
+     "src_px_box": [
+      2859,
+      2999,
+      551,
+      1839
+     ]
+    },
+    {
+     "tile": "11SMS47703615.tif",
+     "used": false,
+     "why": "no overlap with the window"
+    },
+    {
+     "tile": "11SMS47553615.tif",
+     "used": false,
+     "why": "no overlap with the window"
+    }
+   ],
+   "points_on_a_valid_cell": 124
+  }
+ },
+ "primary_comparison": {
+  "point_set": "points valid in BOTH products, so every drop is applied to both and no drop can favour either",
+  "n_points": 119,
+  "metrics": {
+   "2616": {
+    "n": 119,
+    "rmse_ft": 2.0167,
+    "mae_ft": 1.6017,
+    "median_abs_err_ft": 1.5175,
+    "mean_signed_bias_ft": -1.3024,
+    "median_signed_bias_ft": -1.4331
+   },
+   "6260": {
+    "n": 119,
+    "rmse_ft": 2.0785,
+    "mae_ft": 1.6631,
+    "median_abs_err_ft": 1.4386,
+    "mean_signed_bias_ft": -1.3235,
+    "median_signed_bias_ft": -1.4285
+   }
+  },
+  "winner": {
+   "per_metric": {
+    "rmse_ft": "2616",
+    "mae_ft": "2616",
+    "median_abs_err_ft": "6260"
+   },
+   "agreement": false,
+   "selected": null
+  },
+  "bootstrap_ci": {
+   "statistic": "mean of the paired per-point difference in absolute residual, |resid 2616| - |resid 6260|. Negative means 2616 is closer to the surveyed heights.",
+   "n_points": 119,
+   "point_estimate_ft": -0.0615,
+   "ci_lo_ft": -0.1599,
+   "ci_hi_ft": 0.0339,
+   "conf": 0.95,
+   "resamples": 10000,
+   "seed": 89,
+   "spans_zero": true,
+   "seed_stability": [
+    {
+     "seed": 89,
+     "ci_lo_ft": -0.1562,
+     "ci_hi_ft": 0.033,
+     "spans_zero": true
+    },
+    {
+     "seed": 8901,
+     "ci_lo_ft": -0.1612,
+     "ci_hi_ft": 0.0286,
+     "spans_zero": true
+    },
+    {
+     "seed": 8902,
+     "ci_lo_ft": -0.1604,
+     "ci_hi_ft": 0.0286,
+     "spans_zero": true
+    },
+    {
+     "seed": 8903,
+     "ci_lo_ft": -0.161,
+     "ci_hi_ft": 0.0334,
+     "spans_zero": true
+    },
+    {
+     "seed": 8904,
+     "ci_lo_ft": -0.1564,
+     "ci_hi_ft": 0.0382,
+     "spans_zero": true
+    }
+   ]
+  },
+  "metric_difference_ci_descriptive_only": {
+   "rmse_ft": {
+    "ci_lo": -0.1741,
+    "ci_hi": 0.0472,
+    "conf": 0.95,
+    "resamples": 2000,
+    "seed": 89,
+    "spans_zero": true
+   },
+   "mae_ft": {
+    "ci_lo": -0.1563,
+    "ci_hi": 0.033,
+    "conf": 0.95,
+    "resamples": 2000,
+    "seed": 89,
+    "spans_zero": true
+   },
+   "median_abs_err_ft": {
+    "ci_lo": -0.206,
+    "ci_hi": 0.251,
+    "conf": 0.95,
+    "resamples": 2000,
+    "seed": 89,
+    "spans_zero": true
+   }
+  }
+ },
+ "per_product_over_own_valid_points_descriptive_only": {
+  "2616": {
+   "n": 119,
+   "rmse_ft": 2.0167,
+   "mae_ft": 1.6017,
+   "median_abs_err_ft": 1.5175,
+   "mean_signed_bias_ft": -1.3024,
+   "median_signed_bias_ft": -1.4331
+  },
+  "6260": {
+   "n": 124,
+   "rmse_ft": 2.0425,
+   "mae_ft": 1.6221,
+   "median_abs_err_ft": 1.4078,
+   "mean_signed_bias_ft": -1.2798,
+   "median_signed_bias_ft": -1.3735
+  }
+ },
+ "sensitivity_3m_mean_cannot_select": {
+  "status": "DIAGNOSTIC ONLY -- cannot select, and is not part of the pre-registered rule set.",
+  "radius_m": 3.0,
+  "n_points": 119,
+  "metrics": {
+   "2616": {
+    "n": 119,
+    "rmse_ft": 2.0019,
+    "mae_ft": 1.6052,
+    "median_abs_err_ft": 1.581,
+    "mean_signed_bias_ft": -1.3692,
+    "median_signed_bias_ft": -1.5758
+   },
+   "6260": {
+    "n": 119,
+    "rmse_ft": 2.0837,
+    "mae_ft": 1.7022,
+    "median_abs_err_ft": 1.5677,
+    "mean_signed_bias_ft": -1.3452,
+    "median_signed_bias_ft": -1.4672
+   }
+  },
+  "winner": {
+   "per_metric": {
+    "rmse_ft": "2616",
+    "mae_ft": "2616",
+    "median_abs_err_ft": "6260"
+   },
+   "agreement": false,
+   "selected": null
+  }
+ },
+ "confound_1_sand": {
+  "2616": {
+   "model": "signed residual (DEM ft MLLW - surveyed ft MLLW) on plot elevation (surveyed ft MLLW) and plot type. OLS. Reference level for the type dummies is 'Circular Plot'.",
+   "on_elevation_alone": {
+    "intercept_ft": 0.13019,
+    "slope_ft_per_ft": -0.54645,
+    "r2": 0.378,
+    "slope_ci95": {
+     "ci_lo": -0.69548,
+     "ci_hi": -0.39388,
+     "conf": 0.95,
+     "resamples": 2000,
+     "seed": 89,
+     "spans_zero": false
+    }
+   },
+   "on_plot_type_alone": {
+    "levels_in_order": [
+     "Circular Plot",
+     "Line Transect",
+     "Photoplot"
+    ],
+    "coef": [
+     -2.34821,
+     1.84459,
+     0.83063
+    ],
+    "r2": 0.1702,
+    "group_summary": {
+     "Circular Plot": {
+      "n": 18,
+      "mean_residual_ft": -2.3482,
+      "median_residual_ft": -2.7983,
+      "mean_abs_residual_ft": 2.6711
+     },
+     "Line Transect": {
+      "n": 40,
+      "mean_residual_ft": -0.5036,
+      "median_residual_ft": -0.2777,
+      "mean_abs_residual_ft": 0.8034
+     },
+     "Photoplot": {
+      "n": 61,
+      "mean_residual_ft": -1.5176,
+      "median_residual_ft": -1.6,
+      "mean_abs_residual_ft": 1.8095
+     }
+    }
+   },
+   "joint": {
+    "terms": [
+     "intercept",
+     "plot_elevation_ft",
+     "type=Line Transect",
+     "type=Photoplot"
+    ],
+    "coef": [
+     -0.15543,
+     -0.52925,
+     0.26294,
+     0.29679
+    ],
+    "r2": 0.382
+   }
+  },
+  "6260": {
+   "model": "signed residual (DEM ft MLLW - surveyed ft MLLW) on plot elevation (surveyed ft MLLW) and plot type. OLS. Reference level for the type dummies is 'Circular Plot'.",
+   "on_elevation_alone": {
+    "intercept_ft": 0.52111,
+    "slope_ft_per_ft": -0.70364,
+    "r2": 0.5785,
+    "slope_ci95": {
+     "ci_lo": -0.82193,
+     "ci_hi": -0.56695,
+     "conf": 0.95,
+     "resamples": 2000,
+     "seed": 89,
+     "spans_zero": false
+    }
+   },
+   "on_plot_type_alone": {
+    "levels_in_order": [
+     "Circular Plot",
+     "Line Transect",
+     "Photoplot"
+    ],
+    "coef": [
+     -2.59034,
+     2.1883,
+     1.03635
+    ],
+    "r2": 0.2162,
+    "group_summary": {
+     "Circular Plot": {
+      "n": 18,
+      "mean_residual_ft": -2.5903,
+      "median_residual_ft": -2.6918,
+      "mean_abs_residual_ft": 2.6472
+     },
+     "Line Transect": {
+      "n": 40,
+      "mean_residual_ft": -0.402,
+      "median_residual_ft": -0.0672,
+      "mean_abs_residual_ft": 0.9953
+     },
+     "Photoplot": {
+      "n": 61,
+      "mean_residual_ft": -1.554,
+      "median_residual_ft": -1.4504,
+      "mean_abs_residual_ft": 1.8107
+     }
+    }
+   },
+   "joint": {
+    "terms": [
+     "intercept",
+     "plot_elevation_ft",
+     "type=Line Transect",
+     "type=Photoplot"
+    ],
+    "coef": [
+     0.426,
+     -0.72803,
+     0.01261,
+     0.30201
+    ],
+    "r2": 0.5861
+   }
+  }
+ },
+ "confound_1_structure_descriptive": {
+  "residual_by_surveyed_elevation_band": [
+   {
+    "band_ft_mllw": [
+     -1,
+     0
+    ],
+    "n": 7,
+    "2616": {
+     "mean_residual_ft": 0.5471
+    },
+    "6260": {
+     "mean_residual_ft": 0.9947
+    }
+   },
+   {
+    "band_ft_mllw": [
+     0,
+     1
+    ],
+    "n": 15,
+    "2616": {
+     "mean_residual_ft": -0.0312
+    },
+    "6260": {
+     "mean_residual_ft": 0.3201
+    }
+   },
+   {
+    "band_ft_mllw": [
+     1,
+     2
+    ],
+    "n": 19,
+    "2616": {
+     "mean_residual_ft": -0.4727
+    },
+    "6260": {
+     "mean_residual_ft": -0.3383
+    }
+   },
+   {
+    "band_ft_mllw": [
+     2,
+     3
+    ],
+    "n": 33,
+    "2616": {
+     "mean_residual_ft": -1.5697
+    },
+    "6260": {
+     "mean_residual_ft": -1.5804
+    }
+   },
+   {
+    "band_ft_mllw": [
+     3,
+     4
+    ],
+    "n": 18,
+    "2616": {
+     "mean_residual_ft": -2.0156
+    },
+    "6260": {
+     "mean_residual_ft": -2.314
+    }
+   },
+   {
+    "band_ft_mllw": [
+     4,
+     5
+    ],
+    "n": 16,
+    "2616": {
+     "mean_residual_ft": -1.4438
+    },
+    "6260": {
+     "mean_residual_ft": -1.4317
+    }
+   },
+   {
+    "band_ft_mllw": [
+     5,
+     8
+    ],
+    "n": 11,
+    "2616": {
+     "mean_residual_ft": -3.471
+    },
+    "6260": {
+     "mean_residual_ft": -4.1931
+    }
+   }
+  ],
+  "surveyed_elevation_by_plot_type": {
+   "Circular Plot": {
+    "n": 18,
+    "mean_surveyed_ft": 4.143,
+    "median_surveyed_ft": 4.03,
+    "range_ft": [
+     2.47,
+     6.979
+    ]
+   },
+   "Line Transect": {
+    "n": 40,
+    "mean_surveyed_ft": 1.155,
+    "median_surveyed_ft": 0.807,
+    "range_ft": [
+     -0.406,
+     3.333
+    ]
+   },
+   "Photoplot": {
+    "n": 61,
+    "mean_surveyed_ft": 3.134,
+    "median_surveyed_ft": 2.643,
+    "range_ft": [
+     0.553,
+     7.646
+    ]
+   }
+  },
+  "why_this_is_here": "the two regressions are not independent: plot type is largely elevation in disguise, and these two tables are how a reader sees that without refitting anything."
+ },
+ "confound_2_roughness": {
+  "2616": {
+   "model": "absolute residual (ft) against local DEM roughness (ft), roughness = population sd of valid cells within 5 m.",
+   "n": 119,
+   "pearson_r": 0.2651,
+   "pearson_r_ci95": {
+    "ci_lo": -0.0158,
+    "ci_hi": 0.50018,
+    "conf": 0.95,
+    "resamples": 2000,
+    "seed": 89,
+    "spans_zero": true
+   },
+   "ols_intercept_ft": 1.41299,
+   "ols_slope_ft_per_ft_roughness": 0.25808,
+   "ols_r2": 0.0703,
+   "roughness_median_ft": 0.243,
+   "roughness_range_ft": [
+    0.0549,
+    5.6666
+   ]
+  },
+  "6260": {
+   "model": "absolute residual (ft) against local DEM roughness (ft), roughness = population sd of valid cells within 5 m.",
+   "n": 119,
+   "pearson_r": 0.3703,
+   "pearson_r_ci95": {
+    "ci_lo": 0.11213,
+    "ci_hi": 0.58313,
+    "conf": 0.95,
+    "resamples": 2000,
+    "seed": 89,
+    "spans_zero": false
+   },
+   "ols_intercept_ft": 1.42205,
+   "ols_slope_ft_per_ft_roughness": 0.33465,
+   "ols_r2": 0.1371,
+   "roughness_median_ft": 0.1877,
+   "roughness_range_ft": [
+    0.0523,
+    6.7464
+   ]
+  }
+ },
+ "roughness_restricted_comparison": {
+  "status": "DIAGNOSTIC ONLY. The pre-registration makes the primary comparison all points; this one is reported beside it, can never override it, and can only force indeterminate.",
+  "restriction": "points at or below the median of the two products' mean 5 m roughness (0.2092 ft)",
+  "n_points": 61,
+  "metrics": {
+   "2616": {
+    "n": 61,
+    "rmse_ft": 1.763,
+    "mae_ft": 1.4213,
+    "median_abs_err_ft": 1.5175,
+    "mean_signed_bias_ft": -1.3171,
+    "median_signed_bias_ft": -1.5175
+   },
+   "6260": {
+    "n": 61,
+    "rmse_ft": 1.7471,
+    "mae_ft": 1.4641,
+    "median_abs_err_ft": 1.2931,
+    "mean_signed_bias_ft": -1.1386,
+    "median_signed_bias_ft": -1.2564
+   }
+  },
+  "winner": {
+   "per_metric": {
+    "rmse_ft": "6260",
+    "mae_ft": "2616",
+    "median_abs_err_ft": "6260"
+   },
+   "agreement": false,
+   "selected": null
+  },
+  "bootstrap": {
+   "statistic": "mean of the paired per-point difference in absolute residual, |resid 2616| - |resid 6260|. Negative means 2616 is closer to the surveyed heights.",
+   "n_points": 61,
+   "point_estimate_ft": -0.0429,
+   "ci_lo_ft": -0.1432,
+   "ci_hi_ft": 0.0574,
+   "conf": 0.95,
+   "resamples": 2000,
+   "seed": 89,
+   "spans_zero": true
+  }
+ },
+ "per_point": [
+  {
+   "point_label": "Zone 1 L1",
+   "zone": 1,
+   "plot_id": "L1",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 61.47,
+   "surveyed_ft_above_mllw": 5.1225,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669477,
+   "longitude_deg": -117.245499,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476981.35,
+    "utm_n": 3614672.72,
+    "cell_ft_mllw": 2.7631,
+    "z_navd88_m": 0.7751,
+    "roughness_ft": 0.9175,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 2.3503,
+    "residual_ft": -2.3594
+   },
+   "6260": {
+    "utm_e": 476981.35,
+    "utm_n": 3614672.72,
+    "cell_ft_mllw": 1.8849,
+    "z_navd88_m": 0.5075,
+    "roughness_ft": 0.7129,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 1.8052,
+    "residual_ft": -3.2376
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 L2",
+   "zone": 1,
+   "plot_id": "L2",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 52.22,
+   "surveyed_ft_above_mllw": 4.3517,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669396,
+   "longitude_deg": -117.245625,
+   "flags": [],
+   "2616": {
+    "utm_e": 476969.52,
+    "utm_n": 3614663.77,
+    "cell_ft_mllw": 0.5925,
+    "z_navd88_m": 0.1135,
+    "roughness_ft": 0.2285,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.6062,
+    "residual_ft": -3.7592
+   },
+   "6260": {
+    "utm_e": 476969.52,
+    "utm_n": 3614663.77,
+    "cell_ft_mllw": 0.876,
+    "z_navd88_m": 0.2,
+    "roughness_ft": 0.1248,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.898,
+    "residual_ft": -3.4757
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 L3",
+   "zone": 1,
+   "plot_id": "L3",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 51.22,
+   "surveyed_ft_above_mllw": 4.2683,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669262,
+   "longitude_deg": -117.245514,
+   "flags": [],
+   "2616": {
+    "utm_e": 476979.89,
+    "utm_n": 3614648.89,
+    "cell_ft_mllw": 1.1106,
+    "z_navd88_m": 0.2715,
+    "roughness_ft": 0.3514,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 0.9418,
+    "residual_ft": -3.1577
+   },
+   "6260": {
+    "utm_e": 476979.89,
+    "utm_n": 3614648.89,
+    "cell_ft_mllw": 0.9823,
+    "z_navd88_m": 0.2323,
+    "roughness_ft": 0.1309,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.9138,
+    "residual_ft": -3.286
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 L4",
+   "zone": 1,
+   "plot_id": "L4",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 65.22,
+   "surveyed_ft_above_mllw": 5.435,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.66911,
+   "longitude_deg": -117.245449,
+   "flags": [],
+   "2616": {
+    "utm_e": 476985.94,
+    "utm_n": 3614632.03,
+    "cell_ft_mllw": 0.6371,
+    "z_navd88_m": 0.1271,
+    "roughness_ft": 0.2894,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.6173,
+    "residual_ft": -4.7979
+   },
+   "6260": {
+    "utm_e": 476985.94,
+    "utm_n": 3614632.03,
+    "cell_ft_mllw": 1.1943,
+    "z_navd88_m": 0.297,
+    "roughness_ft": 0.2015,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 1.0378,
+    "residual_ft": -4.2407
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 L5",
+   "zone": 1,
+   "plot_id": "L5",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 56.72,
+   "surveyed_ft_above_mllw": 4.7267,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669154,
+   "longitude_deg": -117.24528,
+   "flags": [],
+   "2616": {
+    "utm_e": 477001.8,
+    "utm_n": 3614636.87,
+    "cell_ft_mllw": 3.6982,
+    "z_navd88_m": 1.0601,
+    "roughness_ft": 2.7066,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 4.3675,
+    "residual_ft": -1.0285
+   },
+   "6260": {
+    "utm_e": 477001.8,
+    "utm_n": 3614636.87,
+    "cell_ft_mllw": 3.2881,
+    "z_navd88_m": 0.9352,
+    "roughness_ft": 2.4813,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 3.5279,
+    "residual_ft": -1.4386
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 L6",
+   "zone": 1,
+   "plot_id": "L6",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 48.22,
+   "surveyed_ft_above_mllw": 4.0183,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669113,
+   "longitude_deg": -117.245213,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477008.07,
+    "utm_n": 3614632.31,
+    "cell_ft_mllw": 5.8495,
+    "z_navd88_m": 1.7159,
+    "roughness_ft": 1.7104,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 4.2026,
+    "residual_ft": 1.8312
+   },
+   "6260": {
+    "utm_e": 477008.07,
+    "utm_n": 3614632.31,
+    "cell_ft_mllw": 4.5298,
+    "z_navd88_m": 1.3136,
+    "roughness_ft": 1.7259,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 3.5988,
+    "residual_ft": 0.5115
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 B1",
+   "zone": 1,
+   "plot_id": "B1",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 30.47,
+   "surveyed_ft_above_mllw": 2.5392,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669721,
+   "longitude_deg": -117.245609,
+   "flags": [],
+   "2616": {
+    "utm_e": 476971.1,
+    "utm_n": 3614699.79,
+    "cell_ft_mllw": 1.3557,
+    "z_navd88_m": 0.3461,
+    "roughness_ft": 0.2944,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 1.3505,
+    "residual_ft": -1.1835
+   },
+   "6260": {
+    "utm_e": 476971.1,
+    "utm_n": 3614699.79,
+    "cell_ft_mllw": 1.0086,
+    "z_navd88_m": 0.2404,
+    "roughness_ft": 0.1322,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 1.0159,
+    "residual_ft": -1.5306
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 B2",
+   "zone": 1,
+   "plot_id": "B2",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 38.22,
+   "surveyed_ft_above_mllw": 3.185,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669621,
+   "longitude_deg": -117.245614,
+   "flags": [],
+   "2616": {
+    "utm_e": 476970.6,
+    "utm_n": 3614688.71,
+    "cell_ft_mllw": 1.6183,
+    "z_navd88_m": 0.4262,
+    "roughness_ft": 0.2243,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 1.0474,
+    "residual_ft": -1.5667
+   },
+   "6260": {
+    "utm_e": 476970.6,
+    "utm_n": 3614688.71,
+    "cell_ft_mllw": 0.9575,
+    "z_navd88_m": 0.2248,
+    "roughness_ft": 0.1388,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 1.022,
+    "residual_ft": -2.2275
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 B3",
+   "zone": 1,
+   "plot_id": "B3",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 28.97,
+   "surveyed_ft_above_mllw": 2.4142,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669486,
+   "longitude_deg": -117.245829,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476950.41,
+    "utm_n": 3614673.79,
+    "cell_ft_mllw": 0.4947,
+    "z_navd88_m": 0.0837,
+    "roughness_ft": 0.2322,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.5353,
+    "residual_ft": -1.9195
+   },
+   "6260": {
+    "utm_e": 476950.41,
+    "utm_n": 3614673.79,
+    "cell_ft_mllw": 1.1578,
+    "z_navd88_m": 0.2858,
+    "roughness_ft": 0.1561,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 1.1176,
+    "residual_ft": -1.2564
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 B4",
+   "zone": 1,
+   "plot_id": "B4",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 27.72,
+   "surveyed_ft_above_mllw": 2.31,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669211,
+   "longitude_deg": -117.245595,
+   "flags": [],
+   "2616": {
+    "utm_e": 476972.28,
+    "utm_n": 3614643.26,
+    "cell_ft_mllw": 0.449,
+    "z_navd88_m": 0.0698,
+    "roughness_ft": 0.2829,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.4829,
+    "residual_ft": -1.861
+   },
+   "6260": {
+    "utm_e": 476972.28,
+    "utm_n": 3614643.26,
+    "cell_ft_mllw": 0.5807,
+    "z_navd88_m": 0.1099,
+    "roughness_ft": 0.2319,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.5541,
+    "residual_ft": -1.7293
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 B5",
+   "zone": 1,
+   "plot_id": "B5",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 29.47,
+   "surveyed_ft_above_mllw": 2.4558,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669166,
+   "longitude_deg": -117.245532,
+   "flags": [],
+   "2616": {
+    "utm_e": 476978.18,
+    "utm_n": 3614638.25,
+    "cell_ft_mllw": 0.794,
+    "z_navd88_m": 0.175,
+    "roughness_ft": 0.3449,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.6729,
+    "residual_ft": -1.6618
+   },
+   "6260": {
+    "utm_e": 476978.18,
+    "utm_n": 3614638.25,
+    "cell_ft_mllw": 0.7779,
+    "z_navd88_m": 0.17,
+    "roughness_ft": 0.1885,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.8152,
+    "residual_ft": -1.6779
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 M1",
+   "zone": 1,
+   "plot_id": "M1",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 38.47,
+   "surveyed_ft_above_mllw": 3.2058,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669525,
+   "longitude_deg": -117.245838,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476949.58,
+    "utm_n": 3614678.12,
+    "cell_ft_mllw": 0.3081,
+    "z_navd88_m": 0.0269,
+    "roughness_ft": 0.272,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.3792,
+    "residual_ft": -2.8977
+   },
+   "6260": {
+    "utm_e": 476949.58,
+    "utm_n": 3614678.12,
+    "cell_ft_mllw": 1.2825,
+    "z_navd88_m": 0.3239,
+    "roughness_ft": 0.1591,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 1.0209,
+    "residual_ft": -1.9233
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 M2",
+   "zone": 1,
+   "plot_id": "M2",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 27.47,
+   "surveyed_ft_above_mllw": 2.2892,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669516,
+   "longitude_deg": -117.245832,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476950.14,
+    "utm_n": 3614677.12,
+    "cell_ft_mllw": 0.4908,
+    "z_navd88_m": 0.0825,
+    "roughness_ft": 0.2366,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 0.4141,
+    "residual_ft": -1.7984
+   },
+   "6260": {
+    "utm_e": 476950.14,
+    "utm_n": 3614677.12,
+    "cell_ft_mllw": 1.0629,
+    "z_navd88_m": 0.2569,
+    "roughness_ft": 0.1612,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 1.0714,
+    "residual_ft": -1.2263
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 M3",
+   "zone": 1,
+   "plot_id": "M3",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 25.97,
+   "surveyed_ft_above_mllw": 2.1642,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669365,
+   "longitude_deg": -117.245836,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476949.72,
+    "utm_n": 3614660.38,
+    "cell_ft_mllw": 1.3647,
+    "z_navd88_m": 0.3489,
+    "roughness_ft": 0.2644,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.5373,
+    "residual_ft": -0.7995
+   },
+   "6260": {
+    "utm_e": 476949.72,
+    "utm_n": 3614660.38,
+    "cell_ft_mllw": 0.7381,
+    "z_navd88_m": 0.1579,
+    "roughness_ft": 0.1673,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 0.697,
+    "residual_ft": -1.4261
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 M4",
+   "zone": 1,
+   "plot_id": "M4",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 18.47,
+   "surveyed_ft_above_mllw": 1.5392,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669308,
+   "longitude_deg": -117.245801,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476952.99,
+    "utm_n": 3614654.05,
+    "cell_ft_mllw": 0.3287,
+    "z_navd88_m": 0.0331,
+    "roughness_ft": 0.1106,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.3184,
+    "residual_ft": -1.2105
+   },
+   "6260": {
+    "utm_e": 476952.99,
+    "utm_n": 3614654.05,
+    "cell_ft_mllw": 1.3792,
+    "z_navd88_m": 0.3533,
+    "roughness_ft": 0.3399,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 1.0092,
+    "residual_ft": -0.16
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 M5",
+   "zone": 1,
+   "plot_id": "M5",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 31.22,
+   "surveyed_ft_above_mllw": 2.6017,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669291,
+   "longitude_deg": -117.245657,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476966.49,
+    "utm_n": 3614652.14,
+    "cell_ft_mllw": 1.0337,
+    "z_navd88_m": 0.248,
+    "roughness_ft": 0.4015,
+    "roughness_n_cells": 76,
+    "mean_3m_ft_mllw": 0.7006,
+    "residual_ft": -1.568
+   },
+   "6260": {
+    "utm_e": 476966.49,
+    "utm_n": 3614652.14,
+    "cell_ft_mllw": 0.6858,
+    "z_navd88_m": 0.142,
+    "roughness_ft": 0.1637,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.6865,
+    "residual_ft": -1.9159
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Pe1",
+   "zone": 1,
+   "plot_id": "Pe1",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 20.72,
+   "surveyed_ft_above_mllw": 1.7267,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669444,
+   "longitude_deg": -117.245619,
+   "flags": [],
+   "2616": {
+    "utm_e": 476970.09,
+    "utm_n": 3614669.09,
+    "cell_ft_mllw": 0.8931,
+    "z_navd88_m": 0.2052,
+    "roughness_ft": 0.3044,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.8255,
+    "residual_ft": -0.8336
+   },
+   "6260": {
+    "utm_e": 476970.09,
+    "utm_n": 3614669.09,
+    "cell_ft_mllw": 0.8691,
+    "z_navd88_m": 0.1978,
+    "roughness_ft": 0.1107,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.9283,
+    "residual_ft": -0.8576
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Pe2",
+   "zone": 1,
+   "plot_id": "Pe2",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 31.72,
+   "surveyed_ft_above_mllw": 2.6433,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669396,
+   "longitude_deg": -117.245541,
+   "flags": [],
+   "2616": {
+    "utm_e": 476977.39,
+    "utm_n": 3614663.75,
+    "cell_ft_mllw": 0.79,
+    "z_navd88_m": 0.1737,
+    "roughness_ft": 0.3797,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7304,
+    "residual_ft": -1.8533
+   },
+   "6260": {
+    "utm_e": 476977.39,
+    "utm_n": 3614663.75,
+    "cell_ft_mllw": 0.9657,
+    "z_navd88_m": 0.2273,
+    "roughness_ft": 0.1364,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 0.9237,
+    "residual_ft": -1.6776
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Pe3",
+   "zone": 1,
+   "plot_id": "Pe3",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 18.97,
+   "surveyed_ft_above_mllw": 1.5808,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669334,
+   "longitude_deg": -117.245551,
+   "flags": [],
+   "2616": {
+    "utm_e": 476976.44,
+    "utm_n": 3614656.88,
+    "cell_ft_mllw": 1.2137,
+    "z_navd88_m": 0.3029,
+    "roughness_ft": 0.337,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7838,
+    "residual_ft": -0.3671
+   },
+   "6260": {
+    "utm_e": 476976.44,
+    "utm_n": 3614656.88,
+    "cell_ft_mllw": 1.1589,
+    "z_navd88_m": 0.2862,
+    "roughness_ft": 0.1235,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.9978,
+    "residual_ft": -0.4219
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Pe4",
+   "zone": 1,
+   "plot_id": "Pe4",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 24.47,
+   "surveyed_ft_above_mllw": 2.0392,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669228,
+   "longitude_deg": -117.245549,
+   "flags": [],
+   "2616": {
+    "utm_e": 476976.6,
+    "utm_n": 3614645.13,
+    "cell_ft_mllw": 0.7868,
+    "z_navd88_m": 0.1728,
+    "roughness_ft": 0.3041,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7984,
+    "residual_ft": -1.2524
+   },
+   "6260": {
+    "utm_e": 476976.6,
+    "utm_n": 3614645.13,
+    "cell_ft_mllw": 0.9066,
+    "z_navd88_m": 0.2093,
+    "roughness_ft": 0.1965,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.845,
+    "residual_ft": -1.1326
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Pe5",
+   "zone": 1,
+   "plot_id": "Pe5",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 38.47,
+   "surveyed_ft_above_mllw": 3.2058,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669194,
+   "longitude_deg": -117.245424,
+   "flags": [],
+   "2616": {
+    "utm_e": 476988.31,
+    "utm_n": 3614641.33,
+    "cell_ft_mllw": 0.7293,
+    "z_navd88_m": 0.1552,
+    "roughness_ft": 0.3811,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 1.1206,
+    "residual_ft": -2.4765
+   },
+   "6260": {
+    "utm_e": 476988.31,
+    "utm_n": 3614641.33,
+    "cell_ft_mllw": 0.8178,
+    "z_navd88_m": 0.1822,
+    "roughness_ft": 0.2218,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 1.0486,
+    "residual_ft": -2.388
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Po1",
+   "zone": 1,
+   "plot_id": "Po1",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 53.22,
+   "surveyed_ft_above_mllw": 4.435,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669617,
+   "longitude_deg": -117.245517,
+   "flags": [],
+   "2616": {
+    "utm_e": 476979.7,
+    "utm_n": 3614688.25,
+    "cell_ft_mllw": 5.3388,
+    "z_navd88_m": 1.5602,
+    "roughness_ft": 5.6666,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 5.6558,
+    "residual_ft": 0.9038
+   },
+   "6260": {
+    "utm_e": 476979.7,
+    "utm_n": 3614688.25,
+    "cell_ft_mllw": 5.6115,
+    "z_navd88_m": 1.6433,
+    "roughness_ft": 6.1195,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 5.371,
+    "residual_ft": 1.1765
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Po2",
+   "zone": 1,
+   "plot_id": "Po2",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 55.72,
+   "surveyed_ft_above_mllw": 4.6433,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669573,
+   "longitude_deg": -117.245522,
+   "flags": [],
+   "2616": {
+    "utm_e": 476979.22,
+    "utm_n": 3614683.37,
+    "cell_ft_mllw": 3.814,
+    "z_navd88_m": 1.0955,
+    "roughness_ft": 5.2842,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 4.0066,
+    "residual_ft": -0.8293
+   },
+   "6260": {
+    "utm_e": 476979.22,
+    "utm_n": 3614683.37,
+    "cell_ft_mllw": 5.7473,
+    "z_navd88_m": 1.6847,
+    "roughness_ft": 6.7464,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 7.4193,
+    "residual_ft": 1.104
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Po3",
+   "zone": 1,
+   "plot_id": "Po3",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 64.22,
+   "surveyed_ft_above_mllw": 5.3517,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669293,
+   "longitude_deg": -117.245373,
+   "flags": [],
+   "2616": {
+    "utm_e": 476993.12,
+    "utm_n": 3614652.3,
+    "cell_ft_mllw": 2.0419,
+    "z_navd88_m": 0.5553,
+    "roughness_ft": 5.3064,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 3.3809,
+    "residual_ft": -3.3098
+   },
+   "6260": {
+    "utm_e": 476993.12,
+    "utm_n": 3614652.3,
+    "cell_ft_mllw": 1.3452,
+    "z_navd88_m": 0.343,
+    "roughness_ft": 6.3514,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 3.5576,
+    "residual_ft": -4.0065
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Po4",
+   "zone": 1,
+   "plot_id": "Po4",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 16.22,
+   "surveyed_ft_above_mllw": 1.3517,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669219,
+   "longitude_deg": -117.245355,
+   "flags": [],
+   "2616": {
+    "utm_e": 476994.79,
+    "utm_n": 3614644.09,
+    "cell_ft_mllw": 5.7945,
+    "z_navd88_m": 1.6991,
+    "roughness_ft": 4.6445,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 6.0545,
+    "residual_ft": 4.4428
+   },
+   "6260": {
+    "utm_e": 476994.79,
+    "utm_n": 3614644.09,
+    "cell_ft_mllw": 4.8671,
+    "z_navd88_m": 1.4164,
+    "roughness_ft": 4.8903,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 5.9711,
+    "residual_ft": 3.5154
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Po5",
+   "zone": 1,
+   "plot_id": "Po5",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 54.22,
+   "surveyed_ft_above_mllw": 4.5183,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669139,
+   "longitude_deg": -117.245216,
+   "flags": [],
+   "2616": {
+    "utm_e": 477007.8,
+    "utm_n": 3614635.19,
+    "cell_ft_mllw": 5.3071,
+    "z_navd88_m": 1.5505,
+    "roughness_ft": 1.2811,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 4.5059,
+    "residual_ft": 0.7888
+   },
+   "6260": {
+    "utm_e": 477007.8,
+    "utm_n": 3614635.19,
+    "cell_ft_mllw": 4.7287,
+    "z_navd88_m": 1.3743,
+    "roughness_ft": 1.3442,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 3.7992,
+    "residual_ft": 0.2104
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 Po6",
+   "zone": 1,
+   "plot_id": "Po6",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 56.97,
+   "surveyed_ft_above_mllw": 4.7475,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669116,
+   "longitude_deg": -117.245204,
+   "flags": [],
+   "2616": {
+    "utm_e": 477008.92,
+    "utm_n": 3614632.64,
+    "cell_ft_mllw": 5.8495,
+    "z_navd88_m": 1.7159,
+    "roughness_ft": 1.5505,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 4.9716,
+    "residual_ft": 1.102
+   },
+   "6260": {
+    "utm_e": 477008.92,
+    "utm_n": 3614632.64,
+    "cell_ft_mllw": 5.2138,
+    "z_navd88_m": 1.5221,
+    "roughness_ft": 1.601,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 4.2175,
+    "residual_ft": 0.4663
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 T1 N",
+   "zone": 1,
+   "plot_id": "T1",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 23.22,
+   "surveyed_ft_above_mllw": 1.935,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669761,
+   "longitude_deg": -117.245583,
+   "flags": [],
+   "2616": {
+    "utm_e": 476973.55,
+    "utm_n": 3614704.22,
+    "cell_ft_mllw": 1.3095,
+    "z_navd88_m": 0.3321,
+    "roughness_ft": 0.2551,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 1.3131,
+    "residual_ft": -0.6255
+   },
+   "6260": {
+    "utm_e": 476973.55,
+    "utm_n": 3614704.22,
+    "cell_ft_mllw": 0.9513,
+    "z_navd88_m": 0.2229,
+    "roughness_ft": 0.1043,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.9776,
+    "residual_ft": -0.9837
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 T1 S",
+   "zone": 1,
+   "plot_id": "T1",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 19.22,
+   "surveyed_ft_above_mllw": 1.6017,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.66967,
+   "longitude_deg": -117.24559,
+   "flags": [],
+   "2616": {
+    "utm_e": 476972.87,
+    "utm_n": 3614694.14,
+    "cell_ft_mllw": 1.4035,
+    "z_navd88_m": 0.3607,
+    "roughness_ft": 0.2314,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 1.0981,
+    "residual_ft": -0.1982
+   },
+   "6260": {
+    "utm_e": 476972.87,
+    "utm_n": 3614694.14,
+    "cell_ft_mllw": 0.8379,
+    "z_navd88_m": 0.1883,
+    "roughness_ft": 0.1071,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.945,
+    "residual_ft": -0.7638
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 T2 N",
+   "zone": 1,
+   "plot_id": "T2",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 14.47,
+   "surveyed_ft_above_mllw": 1.2058,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669095,
+   "longitude_deg": -117.245395,
+   "flags": [],
+   "2616": {
+    "utm_e": 476991.0,
+    "utm_n": 3614630.35,
+    "cell_ft_mllw": 0.7163,
+    "z_navd88_m": 0.1513,
+    "roughness_ft": 0.3046,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.8258,
+    "residual_ft": -0.4895
+   },
+   "6260": {
+    "utm_e": 476991.0,
+    "utm_n": 3614630.35,
+    "cell_ft_mllw": 0.8944,
+    "z_navd88_m": 0.2056,
+    "roughness_ft": 0.2115,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.9618,
+    "residual_ft": -0.3114
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 T2 S",
+   "zone": 1,
+   "plot_id": "T2",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 8.22,
+   "surveyed_ft_above_mllw": 0.685,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669022,
+   "longitude_deg": -117.245342,
+   "flags": [
+    "shared_bolt"
+   ],
+   "2616": {
+    "utm_e": 476995.95,
+    "utm_n": 3614622.25,
+    "cell_ft_mllw": 0.3572,
+    "z_navd88_m": 0.0418,
+    "roughness_ft": 0.2302,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 0.3501,
+    "residual_ft": -0.3278
+   },
+   "6260": {
+    "utm_e": 476995.95,
+    "utm_n": 3614622.25,
+    "cell_ft_mllw": 1.3689,
+    "z_navd88_m": 0.3502,
+    "roughness_ft": 0.1881,
+    "roughness_n_cells": 310,
+    "mean_3m_ft_mllw": 1.2709,
+    "residual_ft": 0.6839
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 G3 N",
+   "zone": 1,
+   "plot_id": "G3",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 14.97,
+   "surveyed_ft_above_mllw": 1.2475,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669669,
+   "longitude_deg": -117.245651,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476967.15,
+    "utm_n": 3614694.04,
+    "cell_ft_mllw": 0.9161,
+    "z_navd88_m": 0.2122,
+    "roughness_ft": 0.2616,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7851,
+    "residual_ft": -0.3314
+   },
+   "6260": {
+    "utm_e": 476967.15,
+    "utm_n": 3614694.04,
+    "cell_ft_mllw": 0.8545,
+    "z_navd88_m": 0.1934,
+    "roughness_ft": 0.1184,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.843,
+    "residual_ft": -0.393
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 G3 S",
+   "zone": 1,
+   "plot_id": "G3",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 14.97,
+   "surveyed_ft_above_mllw": 1.2475,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669584,
+   "longitude_deg": -117.245619,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476970.13,
+    "utm_n": 3614684.61,
+    "cell_ft_mllw": 1.2455,
+    "z_navd88_m": 0.3126,
+    "roughness_ft": 0.2748,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.903,
+    "residual_ft": -0.002
+   },
+   "6260": {
+    "utm_e": 476970.13,
+    "utm_n": 3614684.61,
+    "cell_ft_mllw": 1.1664,
+    "z_navd88_m": 0.2885,
+    "roughness_ft": 0.1193,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 1.0666,
+    "residual_ft": -0.0811
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 G4 N",
+   "zone": 1,
+   "plot_id": "G4",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-03-19",
+   "surveyed_in_above_mllw": -2.21,
+   "surveyed_ft_above_mllw": -0.1842,
+   "surveyed_height_std_dev_in": 2.45,
+   "latitude_deg": 32.669037,
+   "longitude_deg": -117.245238,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477005.71,
+    "utm_n": 3614623.89,
+    "cell_ft_mllw": 0.4676,
+    "z_navd88_m": 0.0755,
+    "roughness_ft": 0.3555,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.3792,
+    "residual_ft": 0.6518
+   },
+   "6260": {
+    "utm_e": 477005.71,
+    "utm_n": 3614623.89,
+    "cell_ft_mllw": 0.7177,
+    "z_navd88_m": 0.1517,
+    "roughness_ft": 0.129,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 0.7172,
+    "residual_ft": 0.9019
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 G4 S",
+   "zone": 1,
+   "plot_id": "G4",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 10.22,
+   "surveyed_ft_above_mllw": 0.8517,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.668959,
+   "longitude_deg": -117.245217,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477007.66,
+    "utm_n": 3614615.24,
+    "cell_ft_mllw": 0.4961,
+    "z_navd88_m": 0.0842,
+    "roughness_ft": 0.112,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.4863,
+    "residual_ft": -0.3556
+   },
+   "6260": {
+    "utm_e": 477007.66,
+    "utm_n": 3614615.24,
+    "cell_ft_mllw": 0.7985,
+    "z_navd88_m": 0.1763,
+    "roughness_ft": 0.3231,
+    "roughness_n_cells": 309,
+    "mean_3m_ft_mllw": 0.9058,
+    "residual_ft": -0.0532
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 K5 N",
+   "zone": 1,
+   "plot_id": "K5",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 3.22,
+   "surveyed_ft_above_mllw": 0.2683,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669636,
+   "longitude_deg": -117.245798,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476953.36,
+    "utm_n": 3614690.41,
+    "cell_ft_mllw": 0.2808,
+    "z_navd88_m": 0.0185,
+    "roughness_ft": 0.3379,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.4827,
+    "residual_ft": 0.0125
+   },
+   "6260": {
+    "utm_e": 476953.36,
+    "utm_n": 3614690.41,
+    "cell_ft_mllw": 0.5486,
+    "z_navd88_m": 0.1001,
+    "roughness_ft": 0.2425,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.7548,
+    "residual_ft": 0.2803
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 K5 S",
+   "zone": 1,
+   "plot_id": "K5",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 0.47,
+   "surveyed_ft_above_mllw": 0.0392,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669547,
+   "longitude_deg": -117.245819,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 476951.36,
+    "utm_n": 3614680.55,
+    "cell_ft_mllw": 0.701,
+    "z_navd88_m": 0.1466,
+    "roughness_ft": 0.5665,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.7436,
+    "residual_ft": 0.6618
+   },
+   "6260": {
+    "utm_e": 476951.36,
+    "utm_n": 3614680.55,
+    "cell_ft_mllw": 0.7935,
+    "z_navd88_m": 0.1748,
+    "roughness_ft": 0.2369,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 1.0469,
+    "residual_ft": 0.7543
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 K6 N",
+   "zone": 1,
+   "plot_id": "K6",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 8.22,
+   "surveyed_ft_above_mllw": 0.685,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.669022,
+   "longitude_deg": -117.245342,
+   "flags": [
+    "shared_bolt"
+   ],
+   "2616": {
+    "utm_e": 476995.95,
+    "utm_n": 3614622.25,
+    "cell_ft_mllw": 0.3572,
+    "z_navd88_m": 0.0418,
+    "roughness_ft": 0.2302,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 0.3501,
+    "residual_ft": -0.3278
+   },
+   "6260": {
+    "utm_e": 476995.95,
+    "utm_n": 3614622.25,
+    "cell_ft_mllw": 1.3689,
+    "z_navd88_m": 0.3502,
+    "roughness_ft": 0.1881,
+    "roughness_n_cells": 310,
+    "mean_3m_ft_mllw": 1.2709,
+    "residual_ft": 0.6839
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 1 K6 S",
+   "zone": 1,
+   "plot_id": "K6",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-03-04",
+   "surveyed_in_above_mllw": 6.47,
+   "surveyed_ft_above_mllw": 0.5392,
+   "surveyed_height_std_dev_in": 3.94,
+   "latitude_deg": 32.66895,
+   "longitude_deg": -117.245279,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477001.84,
+    "utm_n": 3614614.25,
+    "cell_ft_mllw": 0.1397,
+    "z_navd88_m": -0.0245,
+    "roughness_ft": 0.1266,
+    "roughness_n_cells": 73,
+    "mean_3m_ft_mllw": 0.2025,
+    "residual_ft": -0.3995
+   },
+   "6260": {
+    "utm_e": 477001.84,
+    "utm_n": 3614614.25,
+    "cell_ft_mllw": 1.3171,
+    "z_navd88_m": 0.3344,
+    "roughness_ft": 0.1772,
+    "roughness_n_cells": 309,
+    "mean_3m_ft_mllw": 1.1835,
+    "residual_ft": 0.7779
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 L1",
+   "zone": 2,
+   "plot_id": "L1",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 46.14,
+   "surveyed_ft_above_mllw": 3.845,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.66819,
+   "longitude_deg": -117.245128,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477015.81,
+    "utm_n": 3614529.97,
+    "cell_ft_mllw": 0.7348,
+    "z_navd88_m": 0.1569,
+    "roughness_ft": 0.3794,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.7227,
+    "residual_ft": -3.1102
+   },
+   "6260": {
+    "utm_e": 477015.81,
+    "utm_n": 3614529.97,
+    "cell_ft_mllw": 1.051,
+    "z_navd88_m": 0.2533,
+    "roughness_ft": 0.1755,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.8195,
+    "residual_ft": -2.794
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 L2",
+   "zone": 2,
+   "plot_id": "L2",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 43.64,
+   "surveyed_ft_above_mllw": 3.6367,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667736,
+   "longitude_deg": -117.245068,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477021.32,
+    "utm_n": 3614479.63,
+    "cell_ft_mllw": 3.8953,
+    "z_navd88_m": 1.1202,
+    "roughness_ft": 2.4963,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 3.4472,
+    "residual_ft": 0.2586
+   },
+   "6260": {
+    "utm_e": 477021.32,
+    "utm_n": 3614479.63,
+    "cell_ft_mllw": 2.4503,
+    "z_navd88_m": 0.6798,
+    "roughness_ft": 1.9655,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 2.7857,
+    "residual_ft": -1.1864
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 L3",
+   "zone": 2,
+   "plot_id": "L3",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 38.39,
+   "surveyed_ft_above_mllw": 3.1992,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667439,
+   "longitude_deg": -117.245159,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477012.71,
+    "utm_n": 3614446.73,
+    "cell_ft_mllw": 0.3882,
+    "z_navd88_m": 0.0513,
+    "roughness_ft": 0.0881,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.3097,
+    "residual_ft": -2.811
+   },
+   "6260": {
+    "utm_e": 477012.71,
+    "utm_n": 3614446.73,
+    "cell_ft_mllw": 0.7595,
+    "z_navd88_m": 0.1644,
+    "roughness_ft": 0.1084,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.7196,
+    "residual_ft": -2.4397
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 L4",
+   "zone": 2,
+   "plot_id": "L4",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-03-19",
+   "surveyed_in_above_mllw": 29.98,
+   "surveyed_ft_above_mllw": 2.4983,
+   "surveyed_height_std_dev_in": 0.03,
+   "latitude_deg": 32.667297,
+   "longitude_deg": -117.244944,
+   "flags": [
+    "supersedes_earlier_measurement"
+   ],
+   "2616": {
+    "utm_e": 477032.83,
+    "utm_n": 3614430.94,
+    "cell_ft_mllw": 2.3788,
+    "z_navd88_m": 0.658,
+    "roughness_ft": 1.1768,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 2.4427,
+    "residual_ft": -0.1195
+   },
+   "6260": {
+    "utm_e": 477032.83,
+    "utm_n": 3614430.94,
+    "cell_ft_mllw": 1.937,
+    "z_navd88_m": 0.5233,
+    "roughness_ft": 1.2616,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 1.8487,
+    "residual_ft": -0.5613
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 L5",
+   "zone": 2,
+   "plot_id": "L5",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 42.26,
+   "surveyed_ft_above_mllw": 3.5217,
+   "surveyed_height_std_dev_in": null,
+   "latitude_deg": 32.667191,
+   "longitude_deg": -117.24492,
+   "flags": [],
+   "2616": {
+    "utm_e": 477035.05,
+    "utm_n": 3614419.18,
+    "cell_ft_mllw": 4.3383,
+    "z_navd88_m": 1.2553,
+    "roughness_ft": 1.1217,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 3.2422,
+    "residual_ft": 0.8166
+   },
+   "6260": {
+    "utm_e": 477035.05,
+    "utm_n": 3614419.18,
+    "cell_ft_mllw": 1.5782,
+    "z_navd88_m": 0.414,
+    "roughness_ft": 0.8037,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 1.5861,
+    "residual_ft": -1.9435
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 L6",
+   "zone": 2,
+   "plot_id": "L6",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 29.64,
+   "surveyed_ft_above_mllw": 2.47,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667117,
+   "longitude_deg": -117.24536,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476993.78,
+    "utm_n": 3614411.08,
+    "cell_ft_mllw": 0.3003,
+    "z_navd88_m": 0.0245,
+    "roughness_ft": 0.0815,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 0.2127,
+    "residual_ft": -2.1697
+   },
+   "6260": {
+    "utm_e": 476993.78,
+    "utm_n": 3614411.08,
+    "cell_ft_mllw": 0.6735,
+    "z_navd88_m": 0.1382,
+    "roughness_ft": 0.0523,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.6707,
+    "residual_ft": -1.7965
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 B1",
+   "zone": 2,
+   "plot_id": "B1",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 21.39,
+   "surveyed_ft_above_mllw": 1.7825,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.66793,
+   "longitude_deg": -117.245276,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477001.86,
+    "utm_n": 3614501.18,
+    "cell_ft_mllw": 0.3494,
+    "z_navd88_m": 0.0394,
+    "roughness_ft": 0.142,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 0.3292,
+    "residual_ft": -1.4331
+   },
+   "6260": {
+    "utm_e": 477001.86,
+    "utm_n": 3614501.18,
+    "cell_ft_mllw": 0.9234,
+    "z_navd88_m": 0.2144,
+    "roughness_ft": 0.1935,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.7304,
+    "residual_ft": -0.8591
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 B2",
+   "zone": 2,
+   "plot_id": "B2",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 33.14,
+   "surveyed_ft_above_mllw": 2.7617,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667938,
+   "longitude_deg": -117.24522,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477007.12,
+    "utm_n": 3614502.06,
+    "cell_ft_mllw": 0.4121,
+    "z_navd88_m": 0.0586,
+    "roughness_ft": 0.1472,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.4024,
+    "residual_ft": -2.3496
+   },
+   "6260": {
+    "utm_e": 477007.12,
+    "utm_n": 3614502.06,
+    "cell_ft_mllw": 0.8875,
+    "z_navd88_m": 0.2034,
+    "roughness_ft": 0.1395,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.736,
+    "residual_ft": -1.8742
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 B3",
+   "zone": 2,
+   "plot_id": "B3",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 16.76,
+   "surveyed_ft_above_mllw": 1.3967,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667326,
+   "longitude_deg": -117.245159,
+   "flags": [
+    "feb_8_1620_second_reading_excluded",
+    "average_not_reproducible_from_listed_readings"
+   ],
+   "2616": {
+    "utm_e": 477012.68,
+    "utm_n": 3614434.2,
+    "cell_ft_mllw": 0.359,
+    "z_navd88_m": 0.0424,
+    "roughness_ft": 0.1013,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.3739,
+    "residual_ft": -1.0377
+   },
+   "6260": {
+    "utm_e": 477012.68,
+    "utm_n": 3614434.2,
+    "cell_ft_mllw": 0.5461,
+    "z_navd88_m": 0.0994,
+    "roughness_ft": 0.1258,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.6756,
+    "residual_ft": -0.8506
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 B4",
+   "zone": 2,
+   "plot_id": "B4",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 16.92,
+   "surveyed_ft_above_mllw": 1.41,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667239,
+   "longitude_deg": -117.245046,
+   "flags": [
+    "feb_8_1620_second_reading_excluded",
+    "average_not_reproducible_from_listed_readings"
+   ],
+   "2616": {
+    "utm_e": 477023.25,
+    "utm_n": 3614424.53,
+    "cell_ft_mllw": 0.5328,
+    "z_navd88_m": 0.0954,
+    "roughness_ft": 0.1743,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.6023,
+    "residual_ft": -0.8772
+   },
+   "6260": {
+    "utm_e": 477023.25,
+    "utm_n": 3614424.53,
+    "cell_ft_mllw": 1.6859,
+    "z_navd88_m": 0.4468,
+    "roughness_ft": 0.2037,
+    "roughness_n_cells": 310,
+    "mean_3m_ft_mllw": 0.7114,
+    "residual_ft": 0.2759
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 B5",
+   "zone": 2,
+   "plot_id": "B5",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 39.76,
+   "surveyed_ft_above_mllw": 3.3133,
+   "surveyed_height_std_dev_in": null,
+   "latitude_deg": 32.667113,
+   "longitude_deg": -117.245055,
+   "flags": [],
+   "2616": {
+    "utm_e": 477022.38,
+    "utm_n": 3614410.57,
+    "cell_ft_mllw": 0.6203,
+    "z_navd88_m": 0.122,
+    "roughness_ft": 0.1794,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.7098,
+    "residual_ft": -2.693
+   },
+   "6260": {
+    "utm_e": 477022.38,
+    "utm_n": 3614410.57,
+    "cell_ft_mllw": 0.5711,
+    "z_navd88_m": 0.107,
+    "roughness_ft": 0.0929,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.6027,
+    "residual_ft": -2.7422
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 M1",
+   "zone": 2,
+   "plot_id": "M1",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 17.64,
+   "surveyed_ft_above_mllw": 1.47,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668002,
+   "longitude_deg": -117.245313,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476998.41,
+    "utm_n": 3614509.17,
+    "cell_ft_mllw": 0.3393,
+    "z_navd88_m": 0.0364,
+    "roughness_ft": 0.1634,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.3237,
+    "residual_ft": -1.1307
+   },
+   "6260": {
+    "utm_e": 476998.41,
+    "utm_n": 3614509.17,
+    "cell_ft_mllw": 0.8624,
+    "z_navd88_m": 0.1958,
+    "roughness_ft": 0.2753,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.5944,
+    "residual_ft": -0.6076
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 M3",
+   "zone": 2,
+   "plot_id": "M3",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 22.64,
+   "surveyed_ft_above_mllw": 1.8867,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.66771,
+   "longitude_deg": -117.245264,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477002.93,
+    "utm_n": 3614476.79,
+    "cell_ft_mllw": 0.1891,
+    "z_navd88_m": -0.0094,
+    "roughness_ft": 0.1512,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.2509,
+    "residual_ft": -1.6976
+   },
+   "6260": {
+    "utm_e": 477002.93,
+    "utm_n": 3614476.79,
+    "cell_ft_mllw": 0.762,
+    "z_navd88_m": 0.1652,
+    "roughness_ft": 0.1368,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.5575,
+    "residual_ft": -1.1247
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 M4",
+   "zone": 2,
+   "plot_id": "M4",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 23.39,
+   "surveyed_ft_above_mllw": 1.9492,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667659,
+   "longitude_deg": -117.245264,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477002.92,
+    "utm_n": 3614471.14,
+    "cell_ft_mllw": 0.2633,
+    "z_navd88_m": 0.0132,
+    "roughness_ft": 0.143,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.2386,
+    "residual_ft": -1.6859
+   },
+   "6260": {
+    "utm_e": 477002.92,
+    "utm_n": 3614471.14,
+    "cell_ft_mllw": 0.7328,
+    "z_navd88_m": 0.1563,
+    "roughness_ft": 0.157,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.4999,
+    "residual_ft": -1.2164
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 M5",
+   "zone": 2,
+   "plot_id": "M5",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 19.89,
+   "surveyed_ft_above_mllw": 1.6575,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667533,
+   "longitude_deg": -117.245419,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476988.35,
+    "utm_n": 3614457.2,
+    "cell_ft_mllw": null,
+    "z_navd88_m": null,
+    "roughness_ft": 0.1515,
+    "roughness_n_cells": 19,
+    "mean_3m_ft_mllw": 0.5594,
+    "void": true
+   },
+   "6260": {
+    "utm_e": 476988.35,
+    "utm_n": 3614457.2,
+    "cell_ft_mllw": 0.7086,
+    "z_navd88_m": 0.1489,
+    "roughness_ft": 0.1821,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.6695,
+    "residual_ft": -0.9489
+   },
+   "in_paired_set": false
+  },
+  {
+   "point_label": "Zone 2 Pe1",
+   "zone": 2,
+   "plot_id": "Pe1",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 6.64,
+   "surveyed_ft_above_mllw": 0.5533,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667887,
+   "longitude_deg": -117.245181,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477010.76,
+    "utm_n": 3614496.39,
+    "cell_ft_mllw": 0.3723,
+    "z_navd88_m": 0.0464,
+    "roughness_ft": 0.2094,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.3393,
+    "residual_ft": -0.181
+   },
+   "6260": {
+    "utm_e": 477010.76,
+    "utm_n": 3614496.39,
+    "cell_ft_mllw": 0.638,
+    "z_navd88_m": 0.1274,
+    "roughness_ft": 0.1797,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 0.7761,
+    "residual_ft": 0.0847
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Pe2",
+   "zone": 2,
+   "plot_id": "Pe2",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 26.14,
+   "surveyed_ft_above_mllw": 2.1783,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667863,
+   "longitude_deg": -117.245207,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477008.32,
+    "utm_n": 3614493.74,
+    "cell_ft_mllw": 0.2337,
+    "z_navd88_m": 0.0042,
+    "roughness_ft": 0.2398,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.3858,
+    "residual_ft": -1.9446
+   },
+   "6260": {
+    "utm_e": 477008.32,
+    "utm_n": 3614493.74,
+    "cell_ft_mllw": 0.6411,
+    "z_navd88_m": 0.1283,
+    "roughness_ft": 0.2238,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.7285,
+    "residual_ft": -1.5372
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Pe3",
+   "zone": 2,
+   "plot_id": "Pe3",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 14.39,
+   "surveyed_ft_above_mllw": 1.1992,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.6678,
+   "longitude_deg": -117.245139,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477014.68,
+    "utm_n": 3614486.74,
+    "cell_ft_mllw": 0.2709,
+    "z_navd88_m": 0.0155,
+    "roughness_ft": 0.357,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.2597,
+    "residual_ft": -0.9283
+   },
+   "6260": {
+    "utm_e": 477014.68,
+    "utm_n": 3614486.74,
+    "cell_ft_mllw": 0.7106,
+    "z_navd88_m": 0.1495,
+    "roughness_ft": 0.2416,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.7255,
+    "residual_ft": -0.4886
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Pe4",
+   "zone": 2,
+   "plot_id": "Pe4",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 13.76,
+   "surveyed_ft_above_mllw": 1.1467,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667253,
+   "longitude_deg": -117.2451,
+   "flags": [
+    "feb_8_1620_second_reading_excluded",
+    "average_not_reproducible_from_listed_readings"
+   ],
+   "2616": {
+    "utm_e": 477018.19,
+    "utm_n": 3614426.1,
+    "cell_ft_mllw": 0.6545,
+    "z_navd88_m": 0.1324,
+    "roughness_ft": 0.1138,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.6038,
+    "residual_ft": -0.4922
+   },
+   "6260": {
+    "utm_e": 477018.19,
+    "utm_n": 3614426.1,
+    "cell_ft_mllw": 0.8766,
+    "z_navd88_m": 0.2001,
+    "roughness_ft": 0.1877,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.6432,
+    "residual_ft": -0.2701
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Pe5",
+   "zone": 2,
+   "plot_id": "Pe5",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 15.59,
+   "surveyed_ft_above_mllw": 1.2992,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667203,
+   "longitude_deg": -117.24502,
+   "flags": [
+    "feb_8_1620_second_reading_excluded",
+    "average_not_reproducible_from_listed_readings"
+   ],
+   "2616": {
+    "utm_e": 477025.68,
+    "utm_n": 3614420.53,
+    "cell_ft_mllw": 0.8926,
+    "z_navd88_m": 0.205,
+    "roughness_ft": 0.2462,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.8683,
+    "residual_ft": -0.4066
+   },
+   "6260": {
+    "utm_e": 477025.68,
+    "utm_n": 3614420.53,
+    "cell_ft_mllw": 0.7229,
+    "z_navd88_m": 0.1533,
+    "roughness_ft": 0.1459,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.6365,
+    "residual_ft": -0.5763
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Po1",
+   "zone": 2,
+   "plot_id": "Po1",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 58.39,
+   "surveyed_ft_above_mllw": 4.8658,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667895,
+   "longitude_deg": -117.245014,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477026.42,
+    "utm_n": 3614497.25,
+    "cell_ft_mllw": 1.8357,
+    "z_navd88_m": 0.4925,
+    "roughness_ft": 1.1601,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 2.0649,
+    "residual_ft": -3.0301
+   },
+   "6260": {
+    "utm_e": 477026.42,
+    "utm_n": 3614497.25,
+    "cell_ft_mllw": 2.1088,
+    "z_navd88_m": 0.5757,
+    "roughness_ft": 1.1324,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 1.8056,
+    "residual_ft": -2.757
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Po2",
+   "zone": 2,
+   "plot_id": "Po2",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 54.64,
+   "surveyed_ft_above_mllw": 4.5533,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667881,
+   "longitude_deg": -117.245016,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477026.23,
+    "utm_n": 3614495.69,
+    "cell_ft_mllw": 2.8172,
+    "z_navd88_m": 0.7916,
+    "roughness_ft": 1.5014,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 2.5311,
+    "residual_ft": -1.7361
+   },
+   "6260": {
+    "utm_e": 477026.23,
+    "utm_n": 3614495.69,
+    "cell_ft_mllw": 2.977,
+    "z_navd88_m": 0.8403,
+    "roughness_ft": 1.4797,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 2.2976,
+    "residual_ft": -1.5763
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Po3",
+   "zone": 2,
+   "plot_id": "Po3",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 41.26,
+   "surveyed_ft_above_mllw": 3.4383,
+   "surveyed_height_std_dev_in": null,
+   "latitude_deg": 32.667235,
+   "longitude_deg": -117.244918,
+   "flags": [],
+   "2616": {
+    "utm_e": 477035.25,
+    "utm_n": 3614424.06,
+    "cell_ft_mllw": 3.5405,
+    "z_navd88_m": 1.0121,
+    "roughness_ft": 1.0006,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 3.0057,
+    "residual_ft": 0.1022
+   },
+   "6260": {
+    "utm_e": 477035.25,
+    "utm_n": 3614424.06,
+    "cell_ft_mllw": 2.9047,
+    "z_navd88_m": 0.8183,
+    "roughness_ft": 0.8439,
+    "roughness_n_cells": 310,
+    "mean_3m_ft_mllw": 2.0903,
+    "residual_ft": -0.5336
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Po4",
+   "zone": 2,
+   "plot_id": "Po4",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 69.76,
+   "surveyed_ft_above_mllw": 5.8133,
+   "surveyed_height_std_dev_in": null,
+   "latitude_deg": 32.667157,
+   "longitude_deg": -117.244922,
+   "flags": [],
+   "2616": {
+    "utm_e": 477034.86,
+    "utm_n": 3614415.41,
+    "cell_ft_mllw": 1.4087,
+    "z_navd88_m": 0.3623,
+    "roughness_ft": 1.1196,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 1.8002,
+    "residual_ft": -4.4046
+   },
+   "6260": {
+    "utm_e": 477034.86,
+    "utm_n": 3614415.41,
+    "cell_ft_mllw": 1.0822,
+    "z_navd88_m": 0.2628,
+    "roughness_ft": 0.5801,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 1.0077,
+    "residual_ft": -4.7311
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Po5",
+   "zone": 2,
+   "plot_id": "Po5",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 62.51,
+   "surveyed_ft_above_mllw": 5.2092,
+   "surveyed_height_std_dev_in": null,
+   "latitude_deg": 32.667049,
+   "longitude_deg": -117.244838,
+   "flags": [],
+   "2616": {
+    "utm_e": 477042.71,
+    "utm_n": 3614403.42,
+    "cell_ft_mllw": 1.9664,
+    "z_navd88_m": 0.5323,
+    "roughness_ft": 0.6942,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 2.0593,
+    "residual_ft": -3.2428
+   },
+   "6260": {
+    "utm_e": 477042.71,
+    "utm_n": 3614403.42,
+    "cell_ft_mllw": 2.0031,
+    "z_navd88_m": 0.5435,
+    "roughness_ft": 1.0502,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 2.2052,
+    "residual_ft": -3.2061
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 Po6",
+   "zone": 2,
+   "plot_id": "Po6",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 64.26,
+   "surveyed_ft_above_mllw": 5.355,
+   "surveyed_height_std_dev_in": null,
+   "latitude_deg": 32.667007,
+   "longitude_deg": -117.244824,
+   "flags": [],
+   "2616": {
+    "utm_e": 477044.01,
+    "utm_n": 3614398.77,
+    "cell_ft_mllw": 1.8469,
+    "z_navd88_m": 0.4959,
+    "roughness_ft": 0.6389,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 1.8642,
+    "residual_ft": -3.5081
+   },
+   "6260": {
+    "utm_e": 477044.01,
+    "utm_n": 3614398.77,
+    "cell_ft_mllw": 1.9882,
+    "z_navd88_m": 0.539,
+    "roughness_ft": 1.1055,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 2.2517,
+    "residual_ft": -3.3668
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 T1 N",
+   "zone": 2,
+   "plot_id": "T1",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 2.14,
+   "surveyed_ft_above_mllw": 0.1783,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668294,
+   "longitude_deg": -117.245069,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477021.37,
+    "utm_n": 3614541.49,
+    "cell_ft_mllw": 0.841,
+    "z_navd88_m": 0.1893,
+    "roughness_ft": 0.2698,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.8385,
+    "residual_ft": 0.6627
+   },
+   "6260": {
+    "utm_e": 477021.37,
+    "utm_n": 3614541.49,
+    "cell_ft_mllw": 0.5392,
+    "z_navd88_m": 0.0973,
+    "roughness_ft": 0.1581,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.6466,
+    "residual_ft": 0.3609
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 T1 C",
+   "zone": 2,
+   "plot_id": "T1",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 9.14,
+   "surveyed_ft_above_mllw": 0.7617,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668251,
+   "longitude_deg": -117.245063,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477021.92,
+    "utm_n": 3614536.72,
+    "cell_ft_mllw": 1.2679,
+    "z_navd88_m": 0.3194,
+    "roughness_ft": 0.3002,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 1.1113,
+    "residual_ft": 0.5062
+   },
+   "6260": {
+    "utm_e": 477021.92,
+    "utm_n": 3614536.72,
+    "cell_ft_mllw": 0.6281,
+    "z_navd88_m": 0.1244,
+    "roughness_ft": 0.1667,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.6711,
+    "residual_ft": -0.1336
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 T1 S",
+   "zone": 2,
+   "plot_id": "T1",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 15.14,
+   "surveyed_ft_above_mllw": 1.2617,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668207,
+   "longitude_deg": -117.245056,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477022.56,
+    "utm_n": 3614531.84,
+    "cell_ft_mllw": 1.5847,
+    "z_navd88_m": 0.416,
+    "roughness_ft": 0.3695,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 1.404,
+    "residual_ft": 0.323
+   },
+   "6260": {
+    "utm_e": 477022.56,
+    "utm_n": 3614531.84,
+    "cell_ft_mllw": 1.0083,
+    "z_navd88_m": 0.2403,
+    "roughness_ft": 0.3688,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.8701,
+    "residual_ft": -0.2534
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 T2 N",
+   "zone": 2,
+   "plot_id": "T2",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 5.39,
+   "surveyed_ft_above_mllw": 0.4492,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667307,
+   "longitude_deg": -117.245346,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476995.14,
+    "utm_n": 3614432.13,
+    "cell_ft_mllw": 0.2215,
+    "z_navd88_m": 0.0005,
+    "roughness_ft": 0.0801,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 0.1758,
+    "residual_ft": -0.2277
+   },
+   "6260": {
+    "utm_e": 476995.14,
+    "utm_n": 3614432.13,
+    "cell_ft_mllw": 0.475,
+    "z_navd88_m": 0.0777,
+    "roughness_ft": 0.0715,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.5168,
+    "residual_ft": 0.0258
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 T2 C",
+   "zone": 2,
+   "plot_id": "T2",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 3.64,
+   "surveyed_ft_above_mllw": 0.3033,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667261,
+   "longitude_deg": -117.245331,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476996.53,
+    "utm_n": 3614427.03,
+    "cell_ft_mllw": 0.2214,
+    "z_navd88_m": 0.0004,
+    "roughness_ft": 0.0687,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.1795,
+    "residual_ft": -0.0819
+   },
+   "6260": {
+    "utm_e": 476996.53,
+    "utm_n": 3614427.03,
+    "cell_ft_mllw": 0.6015,
+    "z_navd88_m": 0.1163,
+    "roughness_ft": 0.0655,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.5729,
+    "residual_ft": 0.2982
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 T2 S",
+   "zone": 2,
+   "plot_id": "T2",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 4.89,
+   "surveyed_ft_above_mllw": 0.4075,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667223,
+   "longitude_deg": -117.245314,
+   "flags": [
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476998.12,
+    "utm_n": 3614422.82,
+    "cell_ft_mllw": 0.2411,
+    "z_navd88_m": 0.0064,
+    "roughness_ft": 0.1055,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.2195,
+    "residual_ft": -0.1664
+   },
+   "6260": {
+    "utm_e": 476998.12,
+    "utm_n": 3614422.82,
+    "cell_ft_mllw": 0.6914,
+    "z_navd88_m": 0.1437,
+    "roughness_ft": 0.0534,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.6281,
+    "residual_ft": 0.2839
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 G3 N",
+   "zone": 2,
+   "plot_id": "G3",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": -4.87,
+   "surveyed_ft_above_mllw": -0.4058,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668326,
+   "longitude_deg": -117.245192,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477009.84,
+    "utm_n": 3614545.06,
+    "cell_ft_mllw": 0.1827,
+    "z_navd88_m": -0.0114,
+    "roughness_ft": 0.2317,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.3942,
+    "residual_ft": 0.5885
+   },
+   "6260": {
+    "utm_e": 477009.84,
+    "utm_n": 3614545.06,
+    "cell_ft_mllw": 0.8873,
+    "z_navd88_m": 0.2034,
+    "roughness_ft": 0.1509,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.7361,
+    "residual_ft": 1.2931
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 G3 S",
+   "zone": 2,
+   "plot_id": "G3",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": -3.37,
+   "surveyed_ft_above_mllw": -0.2808,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668234,
+   "longitude_deg": -117.245181,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477010.85,
+    "utm_n": 3614534.86,
+    "cell_ft_mllw": 0.1913,
+    "z_navd88_m": -0.0088,
+    "roughness_ft": 0.2011,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 0.3248,
+    "residual_ft": 0.4721
+   },
+   "6260": {
+    "utm_e": 477010.85,
+    "utm_n": 3614534.86,
+    "cell_ft_mllw": 0.7762,
+    "z_navd88_m": 0.1695,
+    "roughness_ft": 0.1672,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.925,
+    "residual_ft": 1.057
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 G4 N",
+   "zone": 2,
+   "plot_id": "G4",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 3.39,
+   "surveyed_ft_above_mllw": 0.2825,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667277,
+   "longitude_deg": -117.245433,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476986.97,
+    "utm_n": 3614428.83,
+    "cell_ft_mllw": 0.2333,
+    "z_navd88_m": 0.004,
+    "roughness_ft": 0.0562,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.1834,
+    "residual_ft": -0.0492
+   },
+   "6260": {
+    "utm_e": 476986.97,
+    "utm_n": 3614428.83,
+    "cell_ft_mllw": 0.472,
+    "z_navd88_m": 0.0768,
+    "roughness_ft": 0.1181,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.4993,
+    "residual_ft": 0.1895
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 G4 S",
+   "zone": 2,
+   "plot_id": "G4",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 3.14,
+   "surveyed_ft_above_mllw": 0.2617,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667187,
+   "longitude_deg": -117.245418,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476988.36,
+    "utm_n": 3614418.85,
+    "cell_ft_mllw": 0.2587,
+    "z_navd88_m": 0.0118,
+    "roughness_ft": 0.3005,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.3711,
+    "residual_ft": -0.003
+   },
+   "6260": {
+    "utm_e": 476988.36,
+    "utm_n": 3614418.85,
+    "cell_ft_mllw": 0.5741,
+    "z_navd88_m": 0.1079,
+    "roughness_ft": 0.116,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.557,
+    "residual_ft": 0.3124
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 K5 N",
+   "zone": 2,
+   "plot_id": "K5",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": -4.12,
+   "surveyed_ft_above_mllw": -0.3433,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668323,
+   "longitude_deg": -117.245207,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477008.43,
+    "utm_n": 3614544.73,
+    "cell_ft_mllw": 0.5445,
+    "z_navd88_m": 0.0989,
+    "roughness_ft": 0.243,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.541,
+    "residual_ft": 0.8878
+   },
+   "6260": {
+    "utm_e": 477008.43,
+    "utm_n": 3614544.73,
+    "cell_ft_mllw": 0.6034,
+    "z_navd88_m": 0.1169,
+    "roughness_ft": 0.1476,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.7256,
+    "residual_ft": 0.9467
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 K5 C",
+   "zone": 2,
+   "plot_id": "K5",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": -4.37,
+   "surveyed_ft_above_mllw": -0.3642,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668277,
+   "longitude_deg": -117.245208,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477008.33,
+    "utm_n": 3614539.63,
+    "cell_ft_mllw": 0.2079,
+    "z_navd88_m": -0.0037,
+    "roughness_ft": 0.2351,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.3118,
+    "residual_ft": 0.5721
+   },
+   "6260": {
+    "utm_e": 477008.33,
+    "utm_n": 3614539.63,
+    "cell_ft_mllw": 0.5575,
+    "z_navd88_m": 0.1029,
+    "roughness_ft": 0.1542,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.7906,
+    "residual_ft": 0.9217
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 K5 S",
+   "zone": 2,
+   "plot_id": "K5",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": -1.62,
+   "surveyed_ft_above_mllw": -0.135,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.668232,
+   "longitude_deg": -117.245208,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 477008.32,
+    "utm_n": 3614534.65,
+    "cell_ft_mllw": 0.2214,
+    "z_navd88_m": 0.0004,
+    "roughness_ft": 0.1258,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.2264,
+    "residual_ft": 0.3564
+   },
+   "6260": {
+    "utm_e": 477008.32,
+    "utm_n": 3614534.65,
+    "cell_ft_mllw": 0.6584,
+    "z_navd88_m": 0.1336,
+    "roughness_ft": 0.1858,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.7787,
+    "residual_ft": 0.7934
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 K6 N",
+   "zone": 2,
+   "plot_id": "K6",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": -0.87,
+   "surveyed_ft_above_mllw": -0.0725,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667314,
+   "longitude_deg": -117.245521,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476978.73,
+    "utm_n": 3614432.95,
+    "cell_ft_mllw": 0.2287,
+    "z_navd88_m": 0.0027,
+    "roughness_ft": 0.256,
+    "roughness_n_cells": 72,
+    "mean_3m_ft_mllw": 0.3789,
+    "residual_ft": 0.3012
+   },
+   "6260": {
+    "utm_e": 476978.73,
+    "utm_n": 3614432.95,
+    "cell_ft_mllw": 0.9764,
+    "z_navd88_m": 0.2305,
+    "roughness_ft": 0.1062,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.8237,
+    "residual_ft": 1.0489
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 2 K6 S",
+   "zone": 2,
+   "plot_id": "K6",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-02-08",
+   "surveyed_in_above_mllw": 4.64,
+   "surveyed_ft_above_mllw": 0.3867,
+   "surveyed_height_std_dev_in": 2.79,
+   "latitude_deg": 32.667236,
+   "longitude_deg": -117.245469,
+   "flags": [
+    "gps_std_dev_not_applicable",
+    "feb_8_1620_second_reading_excluded"
+   ],
+   "2616": {
+    "utm_e": 476983.59,
+    "utm_n": 3614424.29,
+    "cell_ft_mllw": 0.1953,
+    "z_navd88_m": -0.0075,
+    "roughness_ft": 0.1163,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.2381,
+    "residual_ft": -0.1914
+   },
+   "6260": {
+    "utm_e": 476983.59,
+    "utm_n": 3614424.29,
+    "cell_ft_mllw": 0.6386,
+    "z_navd88_m": 0.1276,
+    "roughness_ft": 0.171,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.6135,
+    "residual_ft": 0.2519
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 L1",
+   "zone": 3,
+   "plot_id": "L1",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 83.75,
+   "surveyed_ft_above_mllw": 6.9792,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665286,
+   "longitude_deg": -117.243425,
+   "flags": [],
+   "2616": {
+    "utm_e": 477174.75,
+    "utm_n": 3614207.68,
+    "cell_ft_mllw": 2.0042,
+    "z_navd88_m": 0.5438,
+    "roughness_ft": 4.5312,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 3.0257,
+    "residual_ft": -4.975
+   },
+   "6260": {
+    "utm_e": 477174.75,
+    "utm_n": 3614207.68,
+    "cell_ft_mllw": 1.4104,
+    "z_navd88_m": 0.3628,
+    "roughness_ft": 3.9124,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 1.819,
+    "residual_ft": -5.5688
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 L2",
+   "zone": 3,
+   "plot_id": "L2",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 48.51,
+   "surveyed_ft_above_mllw": 4.0425,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664493,
+   "longitude_deg": -117.24267,
+   "flags": [],
+   "2616": {
+    "utm_e": 477245.34,
+    "utm_n": 3614119.61,
+    "cell_ft_mllw": 0.5685,
+    "z_navd88_m": 0.1062,
+    "roughness_ft": 0.0716,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.5653,
+    "residual_ft": -3.474
+   },
+   "6260": {
+    "utm_e": 477245.34,
+    "utm_n": 3614119.61,
+    "cell_ft_mllw": 0.9547,
+    "z_navd88_m": 0.2239,
+    "roughness_ft": 0.2849,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.8524,
+    "residual_ft": -3.0878
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 L3",
+   "zone": 3,
+   "plot_id": "L3",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 42.26,
+   "surveyed_ft_above_mllw": 3.5217,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664446,
+   "longitude_deg": -117.24261,
+   "flags": [],
+   "2616": {
+    "utm_e": 477250.96,
+    "utm_n": 3614114.39,
+    "cell_ft_mllw": 0.7361,
+    "z_navd88_m": 0.1573,
+    "roughness_ft": 0.1793,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.7377,
+    "residual_ft": -2.7856
+   },
+   "6260": {
+    "utm_e": 477250.96,
+    "utm_n": 3614114.39,
+    "cell_ft_mllw": 1.0266,
+    "z_navd88_m": 0.2459,
+    "roughness_ft": 0.2463,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.8023,
+    "residual_ft": -2.4951
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 L4",
+   "zone": 3,
+   "plot_id": "L4",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 40.51,
+   "surveyed_ft_above_mllw": 3.3758,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664412,
+   "longitude_deg": -117.242608,
+   "flags": [],
+   "2616": {
+    "utm_e": 477251.14,
+    "utm_n": 3614110.62,
+    "cell_ft_mllw": 0.9385,
+    "z_navd88_m": 0.219,
+    "roughness_ft": 0.1579,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.8813,
+    "residual_ft": -2.4373
+   },
+   "6260": {
+    "utm_e": 477251.14,
+    "utm_n": 3614110.62,
+    "cell_ft_mllw": 0.7862,
+    "z_navd88_m": 0.1726,
+    "roughness_ft": 0.2173,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.6749,
+    "residual_ft": -2.5896
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 L5",
+   "zone": 3,
+   "plot_id": "L5",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 58.76,
+   "surveyed_ft_above_mllw": 4.8967,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664365,
+   "longitude_deg": -117.242586,
+   "flags": [],
+   "2616": {
+    "utm_e": 477253.19,
+    "utm_n": 3614105.41,
+    "cell_ft_mllw": 0.7936,
+    "z_navd88_m": 0.1748,
+    "roughness_ft": 0.124,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7439,
+    "residual_ft": -4.1031
+   },
+   "6260": {
+    "utm_e": 477253.19,
+    "utm_n": 3614105.41,
+    "cell_ft_mllw": 0.787,
+    "z_navd88_m": 0.1728,
+    "roughness_ft": 0.2205,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.6735,
+    "residual_ft": -4.1097
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 L6",
+   "zone": 3,
+   "plot_id": "L6",
+   "plot_type": "Circular Plot",
+   "target_species": "Owl Limpets",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 56.01,
+   "surveyed_ft_above_mllw": 4.6675,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664326,
+   "longitude_deg": -117.242424,
+   "flags": [],
+   "2616": {
+    "utm_e": 477268.37,
+    "utm_n": 3614101.05,
+    "cell_ft_mllw": 0.5815,
+    "z_navd88_m": 0.1102,
+    "roughness_ft": 0.0582,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.5807,
+    "residual_ft": -4.086
+   },
+   "6260": {
+    "utm_e": 477268.37,
+    "utm_n": 3614101.05,
+    "cell_ft_mllw": 1.7809,
+    "z_navd88_m": 0.4758,
+    "roughness_ft": 0.1878,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.7168,
+    "residual_ft": -2.8866
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 B1",
+   "zone": 3,
+   "plot_id": "B1",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 32.0,
+   "surveyed_ft_above_mllw": 2.6667,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.66503,
+   "longitude_deg": -117.243188,
+   "flags": [],
+   "2616": {
+    "utm_e": 477196.91,
+    "utm_n": 3614179.25,
+    "cell_ft_mllw": 2.0421,
+    "z_navd88_m": 0.5554,
+    "roughness_ft": 0.3273,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 1.468,
+    "residual_ft": -0.6246
+   },
+   "6260": {
+    "utm_e": 477196.91,
+    "utm_n": 3614179.25,
+    "cell_ft_mllw": 1.7964,
+    "z_navd88_m": 0.4805,
+    "roughness_ft": 0.3448,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 1.0265,
+    "residual_ft": -0.8703
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 B2",
+   "zone": 3,
+   "plot_id": "B2",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 30.0,
+   "surveyed_ft_above_mllw": 2.5,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665011,
+   "longitude_deg": -117.243177,
+   "flags": [],
+   "2616": {
+    "utm_e": 477197.93,
+    "utm_n": 3614177.14,
+    "cell_ft_mllw": 1.7127,
+    "z_navd88_m": 0.455,
+    "roughness_ft": 0.3474,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 1.3389,
+    "residual_ft": -0.7873
+   },
+   "6260": {
+    "utm_e": 477197.93,
+    "utm_n": 3614177.14,
+    "cell_ft_mllw": 1.5971,
+    "z_navd88_m": 0.4197,
+    "roughness_ft": 0.3593,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.9323,
+    "residual_ft": -0.9029
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 B3",
+   "zone": 3,
+   "plot_id": "B3",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 49.01,
+   "surveyed_ft_above_mllw": 4.0842,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.66468,
+   "longitude_deg": -117.242701,
+   "flags": [],
+   "2616": {
+    "utm_e": 477242.48,
+    "utm_n": 3614140.35,
+    "cell_ft_mllw": 0.7418,
+    "z_navd88_m": 0.1591,
+    "roughness_ft": 0.1651,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.7627,
+    "residual_ft": -3.3424
+   },
+   "6260": {
+    "utm_e": 477242.48,
+    "utm_n": 3614140.35,
+    "cell_ft_mllw": 0.7197,
+    "z_navd88_m": 0.1523,
+    "roughness_ft": 0.436,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.9661,
+    "residual_ft": -3.3645
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 B4",
+   "zone": 3,
+   "plot_id": "B4",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 40.51,
+   "surveyed_ft_above_mllw": 3.3758,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664664,
+   "longitude_deg": -117.242703,
+   "flags": [],
+   "2616": {
+    "utm_e": 477242.29,
+    "utm_n": 3614138.58,
+    "cell_ft_mllw": 0.8958,
+    "z_navd88_m": 0.206,
+    "roughness_ft": 0.1616,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7714,
+    "residual_ft": -2.48
+   },
+   "6260": {
+    "utm_e": 477242.29,
+    "utm_n": 3614138.58,
+    "cell_ft_mllw": 1.3114,
+    "z_navd88_m": 0.3326,
+    "roughness_ft": 0.4383,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.9533,
+    "residual_ft": -2.0644
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 B5",
+   "zone": 3,
+   "plot_id": "B5",
+   "plot_type": "Photoplot",
+   "target_species": "Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 44.26,
+   "surveyed_ft_above_mllw": 3.6883,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.66443,
+   "longitude_deg": -117.242613,
+   "flags": [],
+   "2616": {
+    "utm_e": 477250.67,
+    "utm_n": 3614112.62,
+    "cell_ft_mllw": 1.0464,
+    "z_navd88_m": 0.2519,
+    "roughness_ft": 0.1674,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.8347,
+    "residual_ft": -2.6419
+   },
+   "6260": {
+    "utm_e": 477250.67,
+    "utm_n": 3614112.62,
+    "cell_ft_mllw": 0.7672,
+    "z_navd88_m": 0.1668,
+    "roughness_ft": 0.2473,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.733,
+    "residual_ft": -2.9211
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 M1",
+   "zone": 3,
+   "plot_id": "M1",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 35.51,
+   "surveyed_ft_above_mllw": 2.9592,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664445,
+   "longitude_deg": -117.242618,
+   "flags": [],
+   "2616": {
+    "utm_e": 477250.21,
+    "utm_n": 3614114.28,
+    "cell_ft_mllw": 0.7361,
+    "z_navd88_m": 0.1573,
+    "roughness_ft": 0.1806,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7514,
+    "residual_ft": -2.2231
+   },
+   "6260": {
+    "utm_e": 477250.21,
+    "utm_n": 3614114.28,
+    "cell_ft_mllw": 0.7676,
+    "z_navd88_m": 0.1669,
+    "roughness_ft": 0.254,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.8147,
+    "residual_ft": -2.1916
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 M2",
+   "zone": 3,
+   "plot_id": "M2",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-03-19",
+   "surveyed_in_above_mllw": 28.98,
+   "surveyed_ft_above_mllw": 2.415,
+   "surveyed_height_std_dev_in": 4.37,
+   "latitude_deg": 32.664407,
+   "longitude_deg": -117.242596,
+   "flags": [
+    "supersedes_earlier_measurement"
+   ],
+   "2616": {
+    "utm_e": 477252.26,
+    "utm_n": 3614110.06,
+    "cell_ft_mllw": 0.815,
+    "z_navd88_m": 0.1814,
+    "roughness_ft": 0.1665,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.8198,
+    "residual_ft": -1.6
+   },
+   "6260": {
+    "utm_e": 477252.26,
+    "utm_n": 3614110.06,
+    "cell_ft_mllw": 0.9646,
+    "z_navd88_m": 0.2269,
+    "roughness_ft": 0.2335,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.6898,
+    "residual_ft": -1.4504
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 M3",
+   "zone": 3,
+   "plot_id": "M3",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 43.51,
+   "surveyed_ft_above_mllw": 3.6258,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664389,
+   "longitude_deg": -117.242589,
+   "flags": [],
+   "2616": {
+    "utm_e": 477252.91,
+    "utm_n": 3614108.07,
+    "cell_ft_mllw": 0.83,
+    "z_navd88_m": 0.1859,
+    "roughness_ft": 0.1512,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.7895,
+    "residual_ft": -2.7958
+   },
+   "6260": {
+    "utm_e": 477252.91,
+    "utm_n": 3614108.07,
+    "cell_ft_mllw": 0.5133,
+    "z_navd88_m": 0.0894,
+    "roughness_ft": 0.2195,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.772,
+    "residual_ft": -3.1125
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 M4",
+   "zone": 3,
+   "plot_id": "M4",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 36.51,
+   "surveyed_ft_above_mllw": 3.0425,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664328,
+   "longitude_deg": -117.242507,
+   "flags": [],
+   "2616": {
+    "utm_e": 477260.58,
+    "utm_n": 3614101.29,
+    "cell_ft_mllw": 0.9807,
+    "z_navd88_m": 0.2319,
+    "roughness_ft": 0.1495,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.8439,
+    "residual_ft": -2.0618
+   },
+   "6260": {
+    "utm_e": 477260.58,
+    "utm_n": 3614101.29,
+    "cell_ft_mllw": 0.9142,
+    "z_navd88_m": 0.2116,
+    "roughness_ft": 0.1627,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.7485,
+    "residual_ft": -2.1283
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 M5",
+   "zone": 3,
+   "plot_id": "M5",
+   "plot_type": "Photoplot",
+   "target_species": "Mussels",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 42.01,
+   "surveyed_ft_above_mllw": 3.5008,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.66432,
+   "longitude_deg": -117.242489,
+   "flags": [],
+   "2616": {
+    "utm_e": 477262.27,
+    "utm_n": 3614100.4,
+    "cell_ft_mllw": 0.9319,
+    "z_navd88_m": 0.217,
+    "roughness_ft": 0.1521,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7902,
+    "residual_ft": -2.5689
+   },
+   "6260": {
+    "utm_e": 477262.27,
+    "utm_n": 3614100.4,
+    "cell_ft_mllw": 0.5484,
+    "z_navd88_m": 0.1001,
+    "roughness_ft": 0.1517,
+    "roughness_n_cells": 311,
+    "mean_3m_ft_mllw": 0.6921,
+    "residual_ft": -2.9524
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Pe1",
+   "zone": 3,
+   "plot_id": "Pe1",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 29.26,
+   "surveyed_ft_above_mllw": 2.4383,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664664,
+   "longitude_deg": -117.242621,
+   "flags": [],
+   "2616": {
+    "utm_e": 477249.98,
+    "utm_n": 3614138.56,
+    "cell_ft_mllw": 0.5606,
+    "z_navd88_m": 0.1038,
+    "roughness_ft": 0.0549,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.5668,
+    "residual_ft": -1.8777
+   },
+   "6260": {
+    "utm_e": 477249.98,
+    "utm_n": 3614138.56,
+    "cell_ft_mllw": 0.3614,
+    "z_navd88_m": 0.0431,
+    "roughness_ft": 0.12,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.571,
+    "residual_ft": -2.0769
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Pe2",
+   "zone": 3,
+   "plot_id": "Pe2",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 27.26,
+   "surveyed_ft_above_mllw": 2.2717,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664683,
+   "longitude_deg": -117.242576,
+   "flags": [],
+   "2616": {
+    "utm_e": 477254.2,
+    "utm_n": 3614140.66,
+    "cell_ft_mllw": 0.7542,
+    "z_navd88_m": 0.1628,
+    "roughness_ft": 0.0711,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.5953,
+    "residual_ft": -1.5175
+   },
+   "6260": {
+    "utm_e": 477254.2,
+    "utm_n": 3614140.66,
+    "cell_ft_mllw": 0.7144,
+    "z_navd88_m": 0.1507,
+    "roughness_ft": 0.163,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.6211,
+    "residual_ft": -1.5573
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Pe3",
+   "zone": 3,
+   "plot_id": "Pe3",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 24.01,
+   "surveyed_ft_above_mllw": 2.0008,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664625,
+   "longitude_deg": -117.242681,
+   "flags": [],
+   "2616": {
+    "utm_e": 477244.34,
+    "utm_n": 3614134.25,
+    "cell_ft_mllw": 0.7345,
+    "z_navd88_m": 0.1568,
+    "roughness_ft": 0.1493,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7199,
+    "residual_ft": -1.2663
+   },
+   "6260": {
+    "utm_e": 477244.34,
+    "utm_n": 3614134.25,
+    "cell_ft_mllw": 0.7885,
+    "z_navd88_m": 0.1733,
+    "roughness_ft": 0.2173,
+    "roughness_n_cells": 309,
+    "mean_3m_ft_mllw": 0.7048,
+    "residual_ft": -1.2123
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Pe4",
+   "zone": 3,
+   "plot_id": "Pe4",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 30.51,
+   "surveyed_ft_above_mllw": 2.5425,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664624,
+   "longitude_deg": -117.242656,
+   "flags": [],
+   "2616": {
+    "utm_e": 477246.69,
+    "utm_n": 3614134.13,
+    "cell_ft_mllw": 0.9501,
+    "z_navd88_m": 0.2225,
+    "roughness_ft": 0.1421,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.6787,
+    "residual_ft": -1.5924
+   },
+   "6260": {
+    "utm_e": 477246.69,
+    "utm_n": 3614134.13,
+    "cell_ft_mllw": 1.114,
+    "z_navd88_m": 0.2725,
+    "roughness_ft": 0.1806,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.6864,
+    "residual_ft": -1.4285
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Pe5",
+   "zone": 3,
+   "plot_id": "Pe5",
+   "plot_type": "Photoplot",
+   "target_species": "Rockweed",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 25.26,
+   "surveyed_ft_above_mllw": 2.105,
+   "surveyed_height_std_dev_in": 3.08,
+   "latitude_deg": 32.664466,
+   "longitude_deg": -117.242651,
+   "flags": [],
+   "2616": {
+    "utm_e": 477247.12,
+    "utm_n": 3614116.62,
+    "cell_ft_mllw": 0.5042,
+    "z_navd88_m": 0.0866,
+    "roughness_ft": 0.1345,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.5292,
+    "residual_ft": -1.6008
+   },
+   "6260": {
+    "utm_e": 477247.12,
+    "utm_n": 3614116.62,
+    "cell_ft_mllw": 0.7475,
+    "z_navd88_m": 0.1608,
+    "roughness_ft": 0.3108,
+    "roughness_n_cells": 318,
+    "mean_3m_ft_mllw": 0.7278,
+    "residual_ft": -1.3575
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Po1",
+   "zone": 3,
+   "plot_id": "Po1",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 64.0,
+   "surveyed_ft_above_mllw": 5.3333,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665606,
+   "longitude_deg": -117.243656,
+   "flags": [],
+   "2616": {
+    "utm_e": 477153.17,
+    "utm_n": 3614243.21,
+    "cell_ft_mllw": 4.6129,
+    "z_navd88_m": 1.339,
+    "roughness_ft": 2.8225,
+    "roughness_n_cells": 81,
+    "mean_3m_ft_mllw": 4.2529,
+    "residual_ft": -0.7204
+   },
+   "6260": {
+    "utm_e": 477153.17,
+    "utm_n": 3614243.21,
+    "cell_ft_mllw": 2.6918,
+    "z_navd88_m": 0.7534,
+    "roughness_ft": 2.8566,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 3.4573,
+    "residual_ft": -2.6415
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Po2",
+   "zone": 3,
+   "plot_id": "Po2",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 91.75,
+   "surveyed_ft_above_mllw": 7.6458,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.66556,
+   "longitude_deg": -117.243615,
+   "flags": [],
+   "2616": {
+    "utm_e": 477157.0,
+    "utm_n": 3614238.1,
+    "cell_ft_mllw": 5.2866,
+    "z_navd88_m": 1.5443,
+    "roughness_ft": 3.6517,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 4.3867,
+    "residual_ft": -2.3592
+   },
+   "6260": {
+    "utm_e": 477157.0,
+    "utm_n": 3614238.1,
+    "cell_ft_mllw": 3.0712,
+    "z_navd88_m": 0.8691,
+    "roughness_ft": 3.4188,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 3.5275,
+    "residual_ft": -4.5746
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Po3",
+   "zone": 3,
+   "plot_id": "Po3",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 69.75,
+   "surveyed_ft_above_mllw": 5.8125,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665383,
+   "longitude_deg": -117.243462,
+   "flags": [],
+   "2616": {
+    "utm_e": 477171.3,
+    "utm_n": 3614218.44,
+    "cell_ft_mllw": 3.4122,
+    "z_navd88_m": 0.973,
+    "roughness_ft": 4.2994,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 2.7269,
+    "residual_ft": -2.4003
+   },
+   "6260": {
+    "utm_e": 477171.3,
+    "utm_n": 3614218.44,
+    "cell_ft_mllw": 1.7743,
+    "z_navd88_m": 0.4737,
+    "roughness_ft": 5.3053,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 2.2811,
+    "residual_ft": -4.0382
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Po4",
+   "zone": 3,
+   "plot_id": "Po4",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 85.25,
+   "surveyed_ft_above_mllw": 7.1042,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665349,
+   "longitude_deg": -117.243461,
+   "flags": [],
+   "2616": {
+    "utm_e": 477171.39,
+    "utm_n": 3614214.67,
+    "cell_ft_mllw": 1.0008,
+    "z_navd88_m": 0.238,
+    "roughness_ft": 5.3822,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 1.8859,
+    "residual_ft": -6.1034
+   },
+   "6260": {
+    "utm_e": 477171.39,
+    "utm_n": 3614214.67,
+    "cell_ft_mllw": 0.5925,
+    "z_navd88_m": 0.1135,
+    "roughness_ft": 5.3405,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 1.0697,
+    "residual_ft": -6.5117
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Po5",
+   "zone": 3,
+   "plot_id": "Po5",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 59.75,
+   "surveyed_ft_above_mllw": 4.9792,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665038,
+   "longitude_deg": -117.242851,
+   "flags": [],
+   "2616": {
+    "utm_e": 477228.51,
+    "utm_n": 3614180.07,
+    "cell_ft_mllw": 6.5435,
+    "z_navd88_m": 1.9274,
+    "roughness_ft": 3.1047,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 5.9316,
+    "residual_ft": 1.5643
+   },
+   "6260": {
+    "utm_e": 477228.51,
+    "utm_n": 3614180.07,
+    "cell_ft_mllw": 5.9744,
+    "z_navd88_m": 1.754,
+    "roughness_ft": 3.2173,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 5.2519,
+    "residual_ft": 0.9952
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 Po6",
+   "zone": 3,
+   "plot_id": "Po6",
+   "plot_type": "Photoplot",
+   "target_species": "Goose Barnacles",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 55.0,
+   "surveyed_ft_above_mllw": 4.5833,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665024,
+   "longitude_deg": -117.242858,
+   "flags": [],
+   "2616": {
+    "utm_e": 477227.85,
+    "utm_n": 3614178.52,
+    "cell_ft_mllw": 3.839,
+    "z_navd88_m": 1.1031,
+    "roughness_ft": 2.7064,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 4.8179,
+    "residual_ft": -0.7443
+   },
+   "6260": {
+    "utm_e": 477227.85,
+    "utm_n": 3614178.52,
+    "cell_ft_mllw": 3.1938,
+    "z_navd88_m": 0.9064,
+    "roughness_ft": 2.8816,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 3.7999,
+    "residual_ft": -1.3895
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 T1 N",
+   "zone": 3,
+   "plot_id": "T1",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 40.0,
+   "surveyed_ft_above_mllw": 3.3333,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665846,
+   "longitude_deg": -117.244598,
+   "flags": [],
+   "2616": {
+    "utm_e": 477064.9,
+    "utm_n": 3614270.01,
+    "cell_ft_mllw": 1.2753,
+    "z_navd88_m": 0.3217,
+    "roughness_ft": 0.2948,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 1.0543,
+    "residual_ft": -2.058
+   },
+   "6260": {
+    "utm_e": 477064.9,
+    "utm_n": 3614270.01,
+    "cell_ft_mllw": 0.5499,
+    "z_navd88_m": 0.1006,
+    "roughness_ft": 0.1009,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.6582,
+    "residual_ft": -2.7834
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 T1 C",
+   "zone": 3,
+   "plot_id": "T1",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 37.5,
+   "surveyed_ft_above_mllw": 3.125,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665808,
+   "longitude_deg": -117.244576,
+   "flags": [],
+   "2616": {
+    "utm_e": 477066.96,
+    "utm_n": 3614265.8,
+    "cell_ft_mllw": 1.0505,
+    "z_navd88_m": 0.2531,
+    "roughness_ft": 0.252,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.9266,
+    "residual_ft": -2.0745
+   },
+   "6260": {
+    "utm_e": 477066.96,
+    "utm_n": 3614265.8,
+    "cell_ft_mllw": 0.6977,
+    "z_navd88_m": 0.1456,
+    "roughness_ft": 0.0852,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.6993,
+    "residual_ft": -2.4273
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 T1 S",
+   "zone": 3,
+   "plot_id": "T1",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 29.25,
+   "surveyed_ft_above_mllw": 2.4375,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665765,
+   "longitude_deg": -117.24455,
+   "flags": [],
+   "2616": {
+    "utm_e": 477069.38,
+    "utm_n": 3614261.02,
+    "cell_ft_mllw": 0.7366,
+    "z_navd88_m": 0.1574,
+    "roughness_ft": 0.2792,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.598,
+    "residual_ft": -1.7009
+   },
+   "6260": {
+    "utm_e": 477069.38,
+    "utm_n": 3614261.02,
+    "cell_ft_mllw": 0.7686,
+    "z_navd88_m": 0.1672,
+    "roughness_ft": 0.0581,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.7225,
+    "residual_ft": -1.6689
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 T2 N",
+   "zone": 3,
+   "plot_id": "T2",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 31.75,
+   "surveyed_ft_above_mllw": 2.6458,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665691,
+   "longitude_deg": -117.244137,
+   "flags": [
+    "bolt_letter_mis_keyed_in_appendix_e"
+   ],
+   "2616": {
+    "utm_e": 477108.09,
+    "utm_n": 3614252.73,
+    "cell_ft_mllw": 1.0431,
+    "z_navd88_m": 0.2509,
+    "roughness_ft": 0.186,
+    "roughness_n_cells": 80,
+    "mean_3m_ft_mllw": 0.9227,
+    "residual_ft": -1.6027
+   },
+   "6260": {
+    "utm_e": 477108.09,
+    "utm_n": 3614252.73,
+    "cell_ft_mllw": 0.6372,
+    "z_navd88_m": 0.1272,
+    "roughness_ft": 0.1771,
+    "roughness_n_cells": 312,
+    "mean_3m_ft_mllw": 0.5934,
+    "residual_ft": -2.0086
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 T2 C",
+   "zone": 3,
+   "plot_id": "T2",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 31.5,
+   "surveyed_ft_above_mllw": 2.625,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665645,
+   "longitude_deg": -117.244123,
+   "flags": [],
+   "2616": {
+    "utm_e": 477109.39,
+    "utm_n": 3614247.63,
+    "cell_ft_mllw": 1.1142,
+    "z_navd88_m": 0.2726,
+    "roughness_ft": 0.2344,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 1.1086,
+    "residual_ft": -1.5108
+   },
+   "6260": {
+    "utm_e": 477109.39,
+    "utm_n": 3614247.63,
+    "cell_ft_mllw": 0.5065,
+    "z_navd88_m": 0.0873,
+    "roughness_ft": 0.1903,
+    "roughness_n_cells": 316,
+    "mean_3m_ft_mllw": 0.671,
+    "residual_ft": -2.1185
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 T2 S",
+   "zone": 3,
+   "plot_id": "T2",
+   "plot_type": "Line Transect",
+   "target_species": "Red Algal Turf",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 29.5,
+   "surveyed_ft_above_mllw": 2.4583,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665601,
+   "longitude_deg": -117.244109,
+   "flags": [],
+   "2616": {
+    "utm_e": 477110.69,
+    "utm_n": 3614242.75,
+    "cell_ft_mllw": 0.9962,
+    "z_navd88_m": 0.2366,
+    "roughness_ft": 0.2088,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.9005,
+    "residual_ft": -1.4621
+   },
+   "6260": {
+    "utm_e": 477110.69,
+    "utm_n": 3614242.75,
+    "cell_ft_mllw": 0.5046,
+    "z_navd88_m": 0.0868,
+    "roughness_ft": 0.1515,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.5391,
+    "residual_ft": -1.9537
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 G3 N",
+   "zone": 3,
+   "plot_id": "G3",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 30.25,
+   "surveyed_ft_above_mllw": 2.5208,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665896,
+   "longitude_deg": -117.244391,
+   "flags": [],
+   "2616": {
+    "utm_e": 477084.33,
+    "utm_n": 3614275.51,
+    "cell_ft_mllw": 0.6462,
+    "z_navd88_m": 0.1299,
+    "roughness_ft": 0.2019,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.5743,
+    "residual_ft": -1.8746
+   },
+   "6260": {
+    "utm_e": 477084.33,
+    "utm_n": 3614275.51,
+    "cell_ft_mllw": 0.6996,
+    "z_navd88_m": 0.1462,
+    "roughness_ft": 0.1438,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.6497,
+    "residual_ft": -1.8212
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 G3 C",
+   "zone": 3,
+   "plot_id": "G3",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 27.0,
+   "surveyed_ft_above_mllw": 2.25,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665869,
+   "longitude_deg": -117.244432,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477080.47,
+    "utm_n": 3614272.53,
+    "cell_ft_mllw": 0.7031,
+    "z_navd88_m": 0.1473,
+    "roughness_ft": 0.2058,
+    "roughness_n_cells": 75,
+    "mean_3m_ft_mllw": 0.6663,
+    "residual_ft": -1.5469
+   },
+   "6260": {
+    "utm_e": 477080.47,
+    "utm_n": 3614272.53,
+    "cell_ft_mllw": 0.7742,
+    "z_navd88_m": 0.1689,
+    "roughness_ft": 0.1375,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.5885,
+    "residual_ft": -1.4758
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 G3 S",
+   "zone": 3,
+   "plot_id": "G3",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 29.0,
+   "surveyed_ft_above_mllw": 2.4167,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665843,
+   "longitude_deg": -117.244473,
+   "flags": [],
+   "2616": {
+    "utm_e": 477076.62,
+    "utm_n": 3614269.65,
+    "cell_ft_mllw": 1.106,
+    "z_navd88_m": 0.27,
+    "roughness_ft": 0.2369,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.7417,
+    "residual_ft": -1.3107
+   },
+   "6260": {
+    "utm_e": 477076.62,
+    "utm_n": 3614269.65,
+    "cell_ft_mllw": 0.5281,
+    "z_navd88_m": 0.0939,
+    "roughness_ft": 0.1413,
+    "roughness_n_cells": 314,
+    "mean_3m_ft_mllw": 0.5538,
+    "residual_ft": -1.8886
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 G4 N",
+   "zone": 3,
+   "plot_id": "G4",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 32.25,
+   "surveyed_ft_above_mllw": 2.6875,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665821,
+   "longitude_deg": -117.244485,
+   "flags": [],
+   "2616": {
+    "utm_e": 477075.49,
+    "utm_n": 3614267.22,
+    "cell_ft_mllw": 0.6283,
+    "z_navd88_m": 0.1244,
+    "roughness_ft": 0.2269,
+    "roughness_n_cells": 76,
+    "mean_3m_ft_mllw": 0.6313,
+    "residual_ft": -2.0592
+   },
+   "6260": {
+    "utm_e": 477075.49,
+    "utm_n": 3614267.22,
+    "cell_ft_mllw": 0.5481,
+    "z_navd88_m": 0.1,
+    "roughness_ft": 0.1355,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.608,
+    "residual_ft": -2.1394
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 G4 C",
+   "zone": 3,
+   "plot_id": "G4",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 29.0,
+   "surveyed_ft_above_mllw": 2.4167,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665768,
+   "longitude_deg": -117.244475,
+   "flags": [],
+   "2616": {
+    "utm_e": 477076.42,
+    "utm_n": 3614261.34,
+    "cell_ft_mllw": 0.6206,
+    "z_navd88_m": 0.1221,
+    "roughness_ft": 0.1497,
+    "roughness_n_cells": 78,
+    "mean_3m_ft_mllw": 0.5422,
+    "residual_ft": -1.7961
+   },
+   "6260": {
+    "utm_e": 477076.42,
+    "utm_n": 3614261.34,
+    "cell_ft_mllw": 0.7387,
+    "z_navd88_m": 0.1581,
+    "roughness_ft": 0.0968,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.7413,
+    "residual_ft": -1.678
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 G4 S",
+   "zone": 3,
+   "plot_id": "G4",
+   "plot_type": "Line Transect",
+   "target_species": "Surfgrass",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 26.75,
+   "surveyed_ft_above_mllw": 2.2292,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665733,
+   "longitude_deg": -117.244476,
+   "flags": [],
+   "2616": {
+    "utm_e": 477076.31,
+    "utm_n": 3614257.46,
+    "cell_ft_mllw": 0.1012,
+    "z_navd88_m": -0.0362,
+    "roughness_ft": 0.3121,
+    "roughness_n_cells": 77,
+    "mean_3m_ft_mllw": 0.3574,
+    "residual_ft": -2.128
+   },
+   "6260": {
+    "utm_e": 477076.31,
+    "utm_n": 3614257.46,
+    "cell_ft_mllw": 0.7826,
+    "z_navd88_m": 0.1715,
+    "roughness_ft": 0.0542,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.7636,
+    "residual_ft": -1.4466
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 K5 N",
+   "zone": 3,
+   "plot_id": "K5",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 26.75,
+   "surveyed_ft_above_mllw": 2.2292,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665747,
+   "longitude_deg": -117.244657,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477059.35,
+    "utm_n": 3614259.05,
+    "cell_ft_mllw": 0.99,
+    "z_navd88_m": 0.2347,
+    "roughness_ft": 0.2162,
+    "roughness_n_cells": 79,
+    "mean_3m_ft_mllw": 0.6482,
+    "residual_ft": -1.2392
+   },
+   "6260": {
+    "utm_e": 477059.35,
+    "utm_n": 3614259.05,
+    "cell_ft_mllw": 0.6651,
+    "z_navd88_m": 0.1357,
+    "roughness_ft": 0.0604,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.6584,
+    "residual_ft": -1.5641
+   },
+   "in_paired_set": true
+  },
+  {
+   "point_label": "Zone 3 K5 S",
+   "zone": 3,
+   "plot_id": "K5",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-02-07",
+   "surveyed_in_above_mllw": 24.75,
+   "surveyed_ft_above_mllw": 2.0625,
+   "surveyed_height_std_dev_in": 3.53,
+   "latitude_deg": 32.665657,
+   "longitude_deg": -117.244646,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477060.35,
+    "utm_n": 3614249.07,
+    "cell_ft_mllw": null,
+    "z_navd88_m": null,
+    "roughness_ft": 0.022,
+    "roughness_n_cells": 2,
+    "mean_3m_ft_mllw": null,
+    "void": true
+   },
+   "6260": {
+    "utm_e": 477060.35,
+    "utm_n": 3614249.07,
+    "cell_ft_mllw": 0.8002,
+    "z_navd88_m": 0.1768,
+    "roughness_ft": 0.0584,
+    "roughness_n_cells": 315,
+    "mean_3m_ft_mllw": 0.6284,
+    "residual_ft": -1.2623
+   },
+   "in_paired_set": false
+  },
+  {
+   "point_label": "Zone 3 K6 N",
+   "zone": 3,
+   "plot_id": "K6",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-03-19",
+   "surveyed_in_above_mllw": 4.73,
+   "surveyed_ft_above_mllw": 0.3942,
+   "surveyed_height_std_dev_in": 4.37,
+   "latitude_deg": 32.665567,
+   "longitude_deg": -117.244624,
+   "flags": [
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477062.39,
+    "utm_n": 3614239.09,
+    "cell_ft_mllw": null,
+    "z_navd88_m": null,
+    "roughness_ft": null,
+    "roughness_n_cells": 0,
+    "mean_3m_ft_mllw": null,
+    "void": true
+   },
+   "6260": {
+    "utm_e": 477062.39,
+    "utm_n": 3614239.09,
+    "cell_ft_mllw": 0.4536,
+    "z_navd88_m": 0.0712,
+    "roughness_ft": 0.0597,
+    "roughness_n_cells": 317,
+    "mean_3m_ft_mllw": 0.5133,
+    "residual_ft": 0.0594
+   },
+   "in_paired_set": false
+  },
+  {
+   "point_label": "Zone 3 K6 C",
+   "zone": 3,
+   "plot_id": "K6",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-03-19",
+   "surveyed_in_above_mllw": 4.23,
+   "surveyed_ft_above_mllw": 0.3525,
+   "surveyed_height_std_dev_in": 4.37,
+   "latitude_deg": 32.665526,
+   "longitude_deg": -117.244641,
+   "flags": [
+    "supersedes_earlier_measurement",
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477060.79,
+    "utm_n": 3614234.55,
+    "cell_ft_mllw": null,
+    "z_navd88_m": null,
+    "roughness_ft": 0.0469,
+    "roughness_n_cells": 5,
+    "mean_3m_ft_mllw": null,
+    "void": true
+   },
+   "6260": {
+    "utm_e": 477060.79,
+    "utm_n": 3614234.55,
+    "cell_ft_mllw": 0.4996,
+    "z_navd88_m": 0.0852,
+    "roughness_ft": 0.1346,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.5788,
+    "residual_ft": 0.1471
+   },
+   "in_paired_set": false
+  },
+  {
+   "point_label": "Zone 3 K6 S",
+   "zone": 3,
+   "plot_id": "K6",
+   "plot_type": "Line Transect",
+   "target_species": "Boa Kelp",
+   "date_recorded": "2004-03-19",
+   "surveyed_in_above_mllw": 1.23,
+   "surveyed_ft_above_mllw": 0.1025,
+   "surveyed_height_std_dev_in": 4.37,
+   "latitude_deg": 32.665481,
+   "longitude_deg": -117.24466,
+   "flags": [
+    "supersedes_earlier_measurement",
+    "gps_std_dev_not_applicable"
+   ],
+   "2616": {
+    "utm_e": 477059.0,
+    "utm_n": 3614229.57,
+    "cell_ft_mllw": null,
+    "z_navd88_m": null,
+    "roughness_ft": 0.0808,
+    "roughness_n_cells": 35,
+    "mean_3m_ft_mllw": 0.4237,
+    "void": true
+   },
+   "6260": {
+    "utm_e": 477059.0,
+    "utm_n": 3614229.57,
+    "cell_ft_mllw": 0.9186,
+    "z_navd88_m": 0.2129,
+    "roughness_ft": 0.1456,
+    "roughness_n_cells": 313,
+    "mean_3m_ft_mllw": 0.7531,
+    "residual_ft": 0.8161
+   },
+   "in_paired_set": false
+  }
+ ]
+}
