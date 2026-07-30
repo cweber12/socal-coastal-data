@@ -1,5 +1,5 @@
 import { binFor, USABLE_BIN_MIN_VISITS, type SpotCalibration } from '@/lib/calibration';
-import { formatHeight } from '@/lib/labels';
+import { formatThreshold } from '@/lib/format';
 
 /**
  * The observed sighting rate, as a marginal panel on the day chart's height
@@ -346,7 +346,7 @@ export function RateTable({
               ].join(' ')}
             >
               <td className="py-1 pr-3">
-                {formatHeight(bin.lo_ft)} to {formatHeight(bin.hi_ft)} ft
+                {formatThreshold(bin.lo_ft)} to {formatThreshold(bin.hi_ft)} ft
                 {isDayBin ? (
                   <span className="ml-2 font-sans text-meta font-medium text-[var(--color-accent)]">
                     this day

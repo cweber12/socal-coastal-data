@@ -1,3 +1,4 @@
+import { formatThreshold } from '@/lib/format';
 import { formatHeight } from '@/lib/labels';
 import { formatClock } from '@/lib/time';
 import type { TideExtremum, TideSeries } from '@/lib/tide';
@@ -133,7 +134,7 @@ export function DayChart({
     `Tide chart for ${spotName} on ${dateLabel}. ` +
     `${extrema.length} turning points, from ${formatHeight(Math.min(...extrema.map((e) => e.ft)))} to ` +
     `${formatHeight(Math.max(...extrema.map((e) => e.ft)))} feet. ` +
-    `The workable floor is ${formatHeight(floorFt)} feet. ` +
+    `The workable floor is ${formatThreshold(floorFt)} feet. ` +
     (result
       ? `${STATE_PRESENTATION[result.state].spoken}. ${result.reason}`
       : 'This day could not be evaluated.') +
@@ -270,7 +271,7 @@ export function DayChart({
           strokeWidth="3.5"
           strokeLinejoin="round"
         >
-          floor {formatHeight(floorFt)} ft
+          floor {formatThreshold(floorFt)} ft
         </text>
 
         <path d={area} fill="var(--text)" opacity="0.07" />
@@ -484,7 +485,7 @@ function rateSentence(
   }
   return (
     ` This day's lowest low is ${formatHeight(dayLowFt)} feet. Of ${bin.visits} recorded visits ` +
-    `on days whose low fell between ${formatHeight(bin.lo_ft)} and ${formatHeight(bin.hi_ft)} ` +
+    `on days whose low fell between ${formatThreshold(bin.lo_ft)} and ${formatThreshold(bin.hi_ft)} ` +
     `feet, ${Math.round(bin.rate * 100)} percent logged one of ${taxaCount} target species.`
   );
 }
