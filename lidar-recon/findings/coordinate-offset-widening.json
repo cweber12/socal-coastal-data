@@ -1,0 +1,200 @@
+{
+ "read_date": "2026-07-29",
+ "product": "2616",
+ "product_name": "2009-2011 Merged TopoBathy DEM (with voids)",
+ "why_this_product": "Tiled DEFLATE, so a 500 m window is a few tile reads rather than ~1000 sequential range requests. Declares NAVD88 in-raster (GeoKey VerticalCSType=5703) rather than in a sidecar.",
+ "method": "probe_dem.probe() unchanged, at half-widths 200/300/500 m. The 100 m row is carried verbatim from coverage-measured.json for continuity, not re-measured. Values are metres in the tile's own NAVD88, NOT MLLW feet -- convert with vdatum-transforms.json as min_m * 3.280833 + offset.",
+ "reading_it": "first_negative_half_m is the smallest tested half-width whose window contains any pixel below 0 m NAVD88. It is a lower bound on how far the bench is from the published coordinate, resolved only to the tested widths, and it says nothing about direction.",
+ "spots": {
+  "windansea": {
+   "lat": 32.832,
+   "lon": -117.28,
+   "tile": "11SMS725315",
+   "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS725315.tif",
+   "first_negative_half_m": 200,
+   "by_half_m": {
+    "100": {
+     "coverage_pct": 100.0,
+     "min_m": 2.794,
+     "median_m": 19.311,
+     "frac_below_0m": 0.0,
+     "pixels": 40804,
+     "carried_from": "coverage-measured.json"
+    },
+    "200": {
+     "coverage_pct": 100.0,
+     "min_m": -3.372,
+     "median_m": 18.308,
+     "frac_below_0m": 0.071,
+     "pixels": 161604
+    },
+    "300": {
+     "coverage_pct": 100.0,
+     "min_m": -5.062,
+     "median_m": 13.081,
+     "frac_below_0m": 0.24,
+     "pixels": 304612
+    },
+    "500": {
+     "coverage_pct": 100.0,
+     "min_m": -7.71,
+     "median_m": 0.085,
+     "frac_below_0m": 0.497,
+     "pixels": 567624
+    }
+   }
+  },
+  "sunset-cliffs": {
+   "lat": 32.723,
+   "lon": -117.256,
+   "tile": "11SMS755195",
+   "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS755195.tif",
+   "first_negative_half_m": 200,
+   "by_half_m": {
+    "100": {
+     "coverage_pct": 100.0,
+     "min_m": 2.725,
+     "median_m": 22.321,
+     "frac_below_0m": 0.0,
+     "pixels": 40804,
+     "carried_from": "coverage-measured.json"
+    },
+    "200": {
+     "coverage_pct": 95.78,
+     "min_m": -2.345,
+     "median_m": 23.546,
+     "frac_below_0m": 0.117,
+     "pixels": 161604
+    },
+    "300": {
+     "coverage_pct": 97.44,
+     "min_m": -2.873,
+     "median_m": 23.795,
+     "frac_below_0m": 0.228,
+     "pixels": 362404
+    },
+    "500": {
+     "coverage_pct": 86.68,
+     "min_m": -5.973,
+     "median_m": 28.517,
+     "frac_below_0m": 0.255,
+     "pixels": 894786
+    }
+   }
+  },
+  "torrey-pines-beach": {
+   "lat": 32.933,
+   "lon": -117.256,
+   "tile": "11SMS755435",
+   "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS755435.tif",
+   "first_negative_half_m": 500,
+   "by_half_m": {
+    "100": {
+     "coverage_pct": 72.25,
+     "min_m": 0.987,
+     "median_m": 1.748,
+     "frac_below_0m": 0.0,
+     "pixels": 40804,
+     "carried_from": "coverage-measured.json"
+    },
+    "200": {
+     "coverage_pct": 80.95,
+     "min_m": 0.986,
+     "median_m": 1.938,
+     "frac_below_0m": 0.0,
+     "pixels": 161604
+    },
+    "300": {
+     "coverage_pct": 85.86,
+     "min_m": 0.921,
+     "median_m": 2.037,
+     "frac_below_0m": 0.0,
+     "pixels": 362404
+    },
+    "500": {
+     "coverage_pct": 92.89,
+     "min_m": -0.785,
+     "median_m": 2.746,
+     "frac_below_0m": 0.012,
+     "pixels": 890778
+    }
+   }
+  },
+  "la-jolla-shores": {
+   "lat": 32.857,
+   "lon": -117.257,
+   "tile": "11SMS755345",
+   "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS755345.tif",
+   "first_negative_half_m": 200,
+   "by_half_m": {
+    "100": {
+     "coverage_pct": 100.0,
+     "min_m": 0.224,
+     "median_m": 3.148,
+     "frac_below_0m": 0.0,
+     "pixels": 40804,
+     "carried_from": "coverage-measured.json"
+    },
+    "200": {
+     "coverage_pct": 99.5,
+     "min_m": -2.663,
+     "median_m": 3.161,
+     "frac_below_0m": 0.116,
+     "pixels": 161604
+    },
+    "300": {
+     "coverage_pct": 98.85,
+     "min_m": -5.191,
+     "median_m": 3.207,
+     "frac_below_0m": 0.227,
+     "pixels": 362404
+    },
+    "500": {
+     "coverage_pct": 99.04,
+     "min_m": -20.086,
+     "median_m": 3.273,
+     "frac_below_0m": 0.302,
+     "pixels": 956910
+    }
+   }
+  },
+  "cabrillo-tidepools": {
+   "lat": 32.669,
+   "lon": -117.245,
+   "tile": "11SMS770135",
+   "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS770135.tif",
+   "first_negative_half_m": 100,
+   "by_half_m": {
+    "100": {
+     "coverage_pct": 98.35,
+     "min_m": -0.962,
+     "median_m": 14.708,
+     "frac_below_0m": 0.025,
+     "pixels": 26260,
+     "carried_from": "coverage-measured.json"
+    },
+    "200": {
+     "coverage_pct": 99.53,
+     "min_m": -0.962,
+     "median_m": 19.296,
+     "frac_below_0m": 0.011,
+     "pixels": 92460
+    },
+    "300": {
+     "coverage_pct": 99.78,
+     "min_m": -0.962,
+     "median_m": 24.841,
+     "frac_below_0m": 0.006,
+     "pixels": 198660
+    },
+    "500": {
+     "coverage_pct": 99.09,
+     "min_m": -3.897,
+     "median_m": 32.556,
+     "frac_below_0m": 0.044,
+     "pixels": 467460
+    }
+   }
+  }
+ }
+}

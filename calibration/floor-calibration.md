@@ -117,7 +117,9 @@ surfaces earlier. Publishing the minimum costs a marginal trip. The asymmetry
 runs one way.
 
 Revisit only if a bench turns out to be >0.5 ft off its neighbours, which the
-hypsometry in §2 will tell you without any fieldwork.
+hypsometry in §2 would tell you without any fieldwork — **but §2 is blocked on not
+knowing where any of these benches are**, and `la-jolla-cove` is the spot where that
+blocker bites hardest. Treat this as deferred rather than answerable today.
 
 ---
 
@@ -160,6 +162,80 @@ present, from `lidar-recon/README.md`:
 
 **Computation.** Clip each spot's reef polygon, then compute exposed area as a
 function of water level in 0.1 ft steps from +2.0 to −2.0 ft MLLW.
+
+**Blocked, 2026-07-29, and not on tooling: the clip cannot be located.** No reef
+polygon exists anywhere in this repo — `spots.json` carries one lat/lon per spot and
+nothing else — and a buffer around that coordinate cannot stand in for one. At **3 of
+the 8 spots, every one of the five decoded products agrees that the ±100 m disc the
+coordinate's own error bar admits holds no pixel below 0 m NAVD88 at all.** Converted
+through each spot's own VDatum offset, the lowest ground the published coordinate
+reaches — as a range across those five products, because they do *not* agree closely
+on the value:
+
+| spot | VDatum offset ft | lowest ground in ±100 m | against the range above |
+|---|---|---|---|
+| `windansea` | +0.240 | **+8.77 to +11.74 ft MLLW** | entirely above +2.0 |
+| `sunset-cliffs` | +0.240 | **+7.77 to +9.33 ft MLLW** | entirely above +2.0 |
+| `la-jolla-shores` | +0.262 | **+0.96 to +1.76 ft MLLW** | inside, but nothing below +0.96 |
+
+Raw values in `findings/coverage-measured.json` and `findings/vdatum-transforms.json`;
+the column above is `min_m * 3.280833 + offset`. Two corrections to how
+`lidar-recon/README.md` §7 states this, both found while writing this note:
+
+- §7 says of these spots that "that entire range is outside the data the coordinate
+  reaches." True at the two cliff spots, overstated at `la-jolla-shores`, whose lowest
+  pixel does land inside the band — with the bottom 3 ft of a 4 ft band empty. There
+  is no curve either way.
+- §7 counts **`torrey-pines-beach` as a fourth such spot on a three-product table.
+  The five-product picture is a flat contradiction, not an agreement.** Four products
+  put its floor at +3.50 to +3.97 ft MLLW with no sub-zero pixel; the 2014 NCMP tile
+  (5189) reads **−9.11 ft MLLW over 8.8% of the same disc** at 93.8% coverage, against
+  CoNED's 100%-coverage claim of a +3.50 ft minimum for the same ground. One of those
+  is wrong and this document does not resolve which. Note the direction of the
+  awkwardness: 5189 is the tile §7 shows *missing its low ground* elsewhere — 47.2%
+  coverage on the wet reef at Cabrillo, 49.1% at Cardiff — so the one product that
+  finds intertidal ground here is the one least trusted to have it.
+
+Those coordinates sit inland of the bench by roughly **100–400 m**, measured rather
+than estimated (`findings/coordinate-offset-widening.json`, product 2616): `windansea`,
+`la-jolla-shores` and `sunset-cliffs` first reach any sub-zero pixel at **±200 m**, and
+`torrey-pines-beach` is still entirely above 0 m at ±300 m and does not go negative
+until **±500 m** — and then over only 1.2% of the disc.
+`cabrillo-tidepools` fails the other way: its median *rises* going inland, 14.7 m at
+±100 m → 19.3 → **24.8 m at ±300 m** → 32.6 m at ±500 m, because the disc fills with
+bluff while the bench is a narrow shore-parallel strip. Widening the clip is therefore
+not a workaround at any spot; it trades a window with no reef in it for a window that
+is mostly cliff. `la-jolla-cove` reaches **−15.6 ft MLLW**, which is deep water rather
+than intertidal, consistent with the 1142 m conflict between its coordinate and
+MARINe's published position that #45 left unresolved.
+
+**This is upstream of every other hazard in this section.** A correct tile, a correct
+datum and a correct transform still produce a meaningless curve if the clip is a
+circle centred 300 m inland. The published pins are not defects — they mark surf
+spots, plausibly bluff-top or parking — they are simply not on the rock, and bench
+geometry is a separate field if it is anything.
+
+**Drawing the polygons does not obviously fix it, and #63 fails its own acceptance
+test.** #63 scoped the eight polygons and required that perturbing one by its stated
+positional uncertainty move the derived floor by less than 0.1 ft, or the polygon is
+the dominant error term and the floor is not instrumented evidence. The
+±0.299–0.313 ft above fails that before a polygon contributes anything, and eight
+hand-traced benches would inherit their imagery's georeferencing on top of it. #63's
+own open question asked whether the work was worth doing; on the absolute floor the
+answer it was measuring for is no.
+
+**What survives is the part that needs no absolute floor.** VDatum's uncertainty is on
+a **pure additive offset** — verified linear at Cabrillo over z = 0, 1, 2, −1 m, with
+uncertainty constant at 0.305 ft *regardless of z*, because it is the uncertainty of
+the tidal surface and not of the elevation. An additive offset does not change curve
+*slope*, so the figure that kills the absolute floor does not, on its face, touch the
+flood-trim result two paragraphs below or the relative shape across spots. Whether
+slope also survives a wrong polygon *boundary* is an expectation and not a
+measurement: a boundary drawn slightly wrong at its edges changes area magnitude while
+the cross-shore gradient that dominates dA/dz survives, but a boundary in the wrong
+*place* destroys both. #63 conflated edge imprecision with gross mislocation. One
+perturbation test at Cabrillo settles it, and until it is run nothing in this section
+is available.
 
 **Reading the curve.**
 
@@ -740,5 +816,8 @@ Worth an hour to check the site list before modelling anything.
   configuration, not forever.
 - The 0.6 flood trim, until curve slope replaces it.
 - `swell_ceiling_ft` absolute values (§5).
-- Surveyed coordinates for the 7 `mpa_resolved: false` spots. Unrelated problem,
-  same root cause: nobody has stood at these places with a survey-grade receiver.
+- Surveyed coordinates for the 7 `mpa_resolved: false` spots. Same root cause:
+  nobody has stood at these places with a survey-grade receiver. **Not an unrelated
+  problem, which this line used to claim** — §2's clip cannot be located for exactly
+  that reason, so the coordinate imprecision that leaves those 7 MPA bindings
+  unresolved is also what blocks the primary method.

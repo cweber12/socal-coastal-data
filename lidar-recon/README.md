@@ -382,6 +382,33 @@ they are: `windansea` and `la-jolla-shores` first reach negative elevations at
 ±200 m, `sunset-cliffs` at ±200 m, and `torrey-pines-beach` not until **±500 m**.
 Those coordinates sit inland of the bench by roughly 100–400 m.
 
+> **Corrected 2026-07-29, and the widening is now committed.** Two defects in the
+> two paragraphs above, both found while writing this finding into
+> `calibration/floor-calibration.md` §2.
+>
+> 1. **The count is 3, not 4.** The table above carries three of the five decoded
+>    products; it omits 5189 (2014 NCMP) and 6260 (El-Niño). On the full five,
+>    `torrey-pines-beach` is not an agreement but a **contradiction**: four products
+>    put its ±100 m minimum at +0.99 to +1.13 m with no sub-zero pixel, while **5189
+>    reads −2.858 m over 8.8% of the same disc** at 93.8% coverage. Unresolved — and
+>    note that 5189 is the tile shown above to be *missing its low ground* at Cabrillo
+>    (47.2%) and Cardiff (49.1%), so the only product finding intertidal ground here is
+>    the one least trusted to have it. `windansea`, `sunset-cliffs` and
+>    `la-jolla-shores` are unanimous across all five and stand.
+> 2. **"That entire range is outside the data" is overstated** for
+>    `la-jolla-shores`, whose lowest pixel is +0.96 ft MLLW — inside the +2.0 → −2.0 ft
+>    band, with the bottom 3 ft of it empty. Right at the two cliff spots.
+>
+> The ±200/300/500 m figures were prose-only when written, with no findings file behind
+> them. They have now been re-derived and committed —
+> `findings/coordinate-offset-widening.json`, driver `probes/widen_window.py`, product
+> 2616. Every figure above reproduced. It also adds two the prose did not have:
+> `torrey-pines-beach` is still entirely above 0 m at ±300 m and goes negative at
+> ±500 m over only **1.2%** of the disc, and Cabrillo's median climbs
+> 14.7 → 19.3 → 24.8 → **32.6 m** across ±100/200/300/500 m. Widening is not a
+> workaround at any spot: it trades a window with no reef for a window that is mostly
+> cliff.
+
 Cabrillo fails the other way. Its ±100 m median is 14.7 m and *rises* to 24.8 m
 at ±300 m — the disc fills with bluff going inland while the reef is a narrow
 shore-parallel strip. The clip geometry has to be the bench, and nothing in the
