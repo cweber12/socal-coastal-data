@@ -1,0 +1,2291 @@
+{
+ "read_date": "2026-07-29",
+ "method": "Elevations sampled straight out of the published GeoTIFFs over HTTP range requests (probes/probe_dem.py). Window half-widths 100 m, which is the spots.json coordinate error bar, and 25 m. All values are metres in each tile's own vertical datum, which is NAVD88 for every decoded dataset. These are NOT MLLW feet.",
+ "not_decoded": {
+  "8684": "LZW compression; not decoded by this recon"
+ },
+ "measured": {
+  "swamis": {
+   "8658": {
+    "tile": "Southern_California_Topobathy_DEM_1m_H_14",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/CA_Southern_CoNED_DEM_2016_8658/Southern_California_Topobathy_DEM_1m_H_14.tif",
+    "size_bytes": 1898785293,
+    "acq_start": "1930-03-03T00:00:00+00:00",
+    "acq_end": "2014-12-31T00:00:00+00:00",
+    "crs": "NAD83 / UTM zone 11N",
+    "w100": {
+     "W": 21075,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      19040,
+      19241,
+      11872,
+      12073
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": -1.333,
+     "max_m": 32.678,
+     "median_m": 20.925,
+     "p05_m": -0.355,
+     "p95_m": 28.499,
+     "frac_below_0m": 0.111
+    },
+    "w25": {
+     "W": 21075,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      19115,
+      19166,
+      11947,
+      11998
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 1.132,
+     "max_m": 22.695,
+     "median_m": 18.448,
+     "p05_m": 1.498,
+     "p95_m": 21.775,
+     "frac_below_0m": 0.0
+    }
+   },
+   "9488": {
+    "tile": "2009_NCMP_CA_13_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_CA_DEM_2009_9488/2009_NCMP_CA_13_BareEarth_1mGrid.tif",
+    "size_bytes": 29885347,
+    "acq_start": "2009-09-30T00:00:00+00:00",
+    "acq_end": "2009-10-28T00:00:00+00:00",
+    "crs": "NAD83 + NAVD88 height",
+    "w100": {
+     "W": 4264,
+     "H": 5152,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1918,
+      2157,
+      1248,
+      1450
+     ],
+     "pixels": 48720,
+     "nodata": 207,
+     "coverage_pct": 99.58,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -1.414,
+     "max_m": 32.665,
+     "median_m": 20.957,
+     "p05_m": -0.345,
+     "p95_m": 28.467,
+     "frac_below_0m": 0.106
+    },
+    "w25": {
+     "W": 4264,
+     "H": 5152,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2007,
+      2068,
+      1324,
+      1375
+     ],
+     "pixels": 3224,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 1.139,
+     "max_m": 22.709,
+     "median_m": 18.259,
+     "p05_m": 1.504,
+     "p95_m": 21.776,
+     "frac_below_0m": 0.0
+    }
+   },
+   "5189": {
+    "tile": "2014_NCMP_CA_13_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_California_Topobathy_DEM_2014_5189/2014_NCMP_CA_13_BareEarth_1mGrid.tif",
+    "size_bytes": 26373244,
+    "acq_start": "2014-09-08T00:00:00+00:00",
+    "acq_end": "2014-10-05T00:00:00+00:00",
+    "crs": "NAD83(2011) + NAVD88 height",
+    "w100": {
+     "W": 3771,
+     "H": 5012,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1348,
+      1587,
+      1298,
+      1500
+     ],
+     "pixels": 48720,
+     "nodata": 5058,
+     "coverage_pct": 89.62,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -0.966,
+     "max_m": 32.335,
+     "median_m": 21.064,
+     "p05_m": -0.031,
+     "p95_m": 29.187,
+     "frac_below_0m": 0.06
+    },
+    "w25": {
+     "W": 3771,
+     "H": 5012,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1437,
+      1498,
+      1374,
+      1425
+     ],
+     "pixels": 3224,
+     "nodata": 15,
+     "coverage_pct": 99.53,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 1.885,
+     "max_m": 22.536,
+     "median_m": 18.133,
+     "p05_m": 2.757,
+     "p95_m": 21.626,
+     "frac_below_0m": 0.0
+    }
+   },
+   "2616": {
+    "tile": "11SMS725540",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS725540.tif",
+    "size_bytes": 7292673,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "w100": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      39,
+      240,
+      194,
+      395
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -1.333,
+     "max_m": 32.678,
+     "median_m": 20.925,
+     "p05_m": -0.355,
+     "p95_m": 28.499,
+     "frac_below_0m": 0.111
+    },
+    "w25": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      114,
+      165,
+      269,
+      320
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 1.132,
+     "max_m": 22.695,
+     "median_m": 18.448,
+     "p05_m": 1.498,
+     "p95_m": 21.775,
+     "frac_below_0m": 0.0
+    }
+   },
+   "6260": {
+    "tile": "11SMS47253654",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/West_Coast_El_Nino_DEM_2016_6260/UTM11/11SMS47253654.tif",
+    "size_bytes": 11571112,
+    "acq_start": "2016-04-28T00:00:00+00:00",
+    "acq_end": "2016-05-28T00:00:00+00:00",
+    "crs": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "w100": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      79,
+      480,
+      389,
+      790
+     ],
+     "pixels": 161604,
+     "nodata": 1032,
+     "coverage_pct": 99.36,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": -0.31,
+     "max_m": 32.784,
+     "median_m": 20.771,
+     "p05_m": -0.044,
+     "p95_m": 28.393,
+     "frac_below_0m": 0.107
+    },
+    "w25": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      229,
+      330,
+      539,
+      640
+     ],
+     "pixels": 10404,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": 0.852,
+     "max_m": 22.684,
+     "median_m": 18.412,
+     "p05_m": 1.791,
+     "p95_m": 21.743,
+     "frac_below_0m": 0.0
+    }
+   },
+   "8684": {
+    "tile": "11SMS725540",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_Interp_8684/block1a/11SMS725540.tif",
+    "size_bytes": 9708295,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83(NSRS2007) / UTM zone 11N",
+    "w100": {
+     "error": "compression 5 not decoded (tiled=True)"
+    },
+    "w25": {
+     "error": "compression 5 not decoded (tiled=True)"
+    }
+   }
+  },
+  "cardiff-reef": {
+   "8658": {
+    "tile": "Southern_California_Topobathy_DEM_1m_H_14",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/CA_Southern_CoNED_DEM_2016_8658/Southern_California_Topobathy_DEM_1m_H_14.tif",
+    "size_bytes": 1898785293,
+    "acq_start": "1930-03-03T00:00:00+00:00",
+    "acq_end": "2014-12-31T00:00:00+00:00",
+    "crs": "NAD83 / UTM zone 11N",
+    "w100": {
+     "W": 21075,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      19968,
+      20169,
+      13870,
+      14071
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": -1.647,
+     "max_m": 10.053,
+     "median_m": 1.105,
+     "p05_m": -0.749,
+     "p95_m": 6.692,
+     "frac_below_0m": 0.174
+    },
+    "w25": {
+     "W": 21075,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      20043,
+      20094,
+      13945,
+      13996
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 0.544,
+     "max_m": 2.641,
+     "median_m": 1.135,
+     "p05_m": 0.723,
+     "p95_m": 1.994,
+     "frac_below_0m": 0.0
+    }
+   },
+   "9488": {
+    "tile": "2009_NCMP_CA_13_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_CA_DEM_2009_9488/2009_NCMP_CA_13_BareEarth_1mGrid.tif",
+    "size_bytes": 29885347,
+    "acq_start": "2009-09-30T00:00:00+00:00",
+    "acq_end": "2009-10-28T00:00:00+00:00",
+    "crs": "NAD83 + NAVD88 height",
+    "w100": {
+     "W": 4264,
+     "H": 5152,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      3029,
+      3268,
+      3248,
+      3450
+     ],
+     "pixels": 48720,
+     "nodata": 8413,
+     "coverage_pct": 82.73,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -1.628,
+     "max_m": 10.062,
+     "median_m": 1.468,
+     "p05_m": -0.806,
+     "p95_m": 6.838,
+     "frac_below_0m": 0.156
+    },
+    "w25": {
+     "W": 4264,
+     "H": 5152,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      3118,
+      3179,
+      3324,
+      3375
+     ],
+     "pixels": 3224,
+     "nodata": 34,
+     "coverage_pct": 98.95,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.625,
+     "max_m": 2.703,
+     "median_m": 1.166,
+     "p05_m": 0.749,
+     "p95_m": 2.034,
+     "frac_below_0m": 0.0
+    }
+   },
+   "5189": {
+    "tile": "2014_NCMP_CA_13_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_California_Topobathy_DEM_2014_5189/2014_NCMP_CA_13_BareEarth_1mGrid.tif",
+    "size_bytes": 26373244,
+    "acq_start": "2014-09-08T00:00:00+00:00",
+    "acq_end": "2014-10-05T00:00:00+00:00",
+    "crs": "NAD83(2011) + NAVD88 height",
+    "w100": {
+     "W": 3771,
+     "H": 5012,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2459,
+      2698,
+      3298,
+      3500
+     ],
+     "pixels": 48720,
+     "nodata": 13118,
+     "coverage_pct": 73.07,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -1.827,
+     "max_m": 10.064,
+     "median_m": 0.697,
+     "p05_m": -0.627,
+     "p95_m": 6.884,
+     "frac_below_0m": 0.255
+    },
+    "w25": {
+     "W": 3771,
+     "H": 5012,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2548,
+      2609,
+      3374,
+      3425
+     ],
+     "pixels": 3224,
+     "nodata": 1641,
+     "coverage_pct": 49.1,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.168,
+     "max_m": 2.95,
+     "median_m": 0.585,
+     "p05_m": 0.309,
+     "p95_m": 2.458,
+     "frac_below_0m": 0.0
+    }
+   },
+   "2616": {
+    "tile": "11SMS725525",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS725525.tif",
+    "size_bytes": 6956866,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "w100": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      968,
+      1169,
+      692,
+      893
+     ],
+     "pixels": 40804,
+     "nodata": 2859,
+     "coverage_pct": 92.99,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -1.573,
+     "max_m": 10.053,
+     "median_m": 1.249,
+     "p05_m": -0.756,
+     "p95_m": 6.748,
+     "frac_below_0m": 0.175
+    },
+    "w25": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      1043,
+      1094,
+      767,
+      818
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.582,
+     "max_m": 2.718,
+     "median_m": 1.16,
+     "p05_m": 0.739,
+     "p95_m": 2.039,
+     "frac_below_0m": 0.0
+    }
+   },
+   "6260": {
+    "tile": "11SMS47253652",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/West_Coast_El_Nino_DEM_2016_6260/UTM11/11SMS47253652.tif",
+    "size_bytes": 10203198,
+    "acq_start": "2016-04-28T00:00:00+00:00",
+    "acq_end": "2016-05-28T00:00:00+00:00",
+    "crs": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "w100": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      1936,
+      2337,
+      1385,
+      1786
+     ],
+     "pixels": 161604,
+     "nodata": 7192,
+     "coverage_pct": 95.55,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": -0.255,
+     "max_m": 9.994,
+     "median_m": 0.39,
+     "p05_m": -0.034,
+     "p95_m": 6.57,
+     "frac_below_0m": 0.098
+    },
+    "w25": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      2086,
+      2187,
+      1535,
+      1636
+     ],
+     "pixels": 10404,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": -0.048,
+     "max_m": 3.323,
+     "median_m": 0.257,
+     "p05_m": 0.037,
+     "p95_m": 2.171,
+     "frac_below_0m": 0.017
+    }
+   },
+   "8684": {
+    "tile": "11SMS725525",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_Interp_8684/block1a/11SMS725525.tif",
+    "size_bytes": 9808962,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83(NSRS2007) / UTM zone 11N",
+    "w100": {
+     "error": "compression 5 not decoded (tiled=True)"
+    },
+    "w25": {
+     "error": "compression 5 not decoded (tiled=True)"
+    }
+   }
+  },
+  "torrey-pines-beach": {
+   "8658": {
+    "tile": "Southern_California_Topobathy_DEM_1m_I_15",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/CA_Southern_CoNED_DEM_2016_8658/Southern_California_Topobathy_DEM_1m_I_15.tif",
+    "size_bytes": 1898334853,
+    "acq_start": "1930-03-03T00:00:00+00:00",
+    "acq_end": "2014-12-31T00:00:00+00:00",
+    "crs": "NAD83 / UTM zone 11N",
+    "w100": {
+     "W": 21070,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      1392,
+      1593,
+      667,
+      868
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 0.987,
+     "max_m": 5.452,
+     "median_m": 1.679,
+     "p05_m": 1.063,
+     "p95_m": 3.597,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 21070,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      1467,
+      1518,
+      742,
+      793
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 1.453,
+     "max_m": 5.203,
+     "median_m": 1.887,
+     "p05_m": 1.67,
+     "p95_m": 4.864,
+     "frac_below_0m": 0.0
+    }
+   },
+   "9488": {
+    "tile": "2009_NCMP_CA_11_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_CA_DEM_2009_9488/2009_NCMP_CA_11_BareEarth_1mGrid.tif",
+    "size_bytes": 32782780,
+    "acq_start": "2009-09-30T00:00:00+00:00",
+    "acq_end": "2009-10-28T00:00:00+00:00",
+    "crs": "NAD83 + NAVD88 height",
+    "w100": {
+     "W": 2937,
+     "H": 5141,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2495,
+      2734,
+      2922,
+      3124
+     ],
+     "pixels": 48720,
+     "nodata": 14119,
+     "coverage_pct": 71.02,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.988,
+     "max_m": 5.484,
+     "median_m": 1.754,
+     "p05_m": 1.092,
+     "p95_m": 3.999,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 2937,
+     "H": 5141,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2585,
+      2645,
+      2997,
+      3048
+     ],
+     "pixels": 3172,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 1.423,
+     "max_m": 5.224,
+     "median_m": 1.883,
+     "p05_m": 1.666,
+     "p95_m": 4.878,
+     "frac_below_0m": 0.0
+    }
+   },
+   "5189": {
+    "tile": "2014_NCMP_CA_11_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_California_Topobathy_DEM_2014_5189/2014_NCMP_CA_11_BareEarth_1mGrid.tif",
+    "size_bytes": 36073486,
+    "acq_start": "2014-09-08T00:00:00+00:00",
+    "acq_end": "2014-10-05T00:00:00+00:00",
+    "crs": "NAD83(2011) + NAVD88 height",
+    "w100": {
+     "W": 3627,
+     "H": 5152,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2409,
+      2648,
+      2953,
+      3155
+     ],
+     "pixels": 48720,
+     "nodata": 3018,
+     "coverage_pct": 93.81,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -2.858,
+     "max_m": 5.493,
+     "median_m": 1.715,
+     "p05_m": -0.306,
+     "p95_m": 3.712,
+     "frac_below_0m": 0.088
+    },
+    "w25": {
+     "W": 3627,
+     "H": 5152,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2499,
+      2559,
+      3028,
+      3079
+     ],
+     "pixels": 3172,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 1.507,
+     "max_m": 5.189,
+     "median_m": 1.886,
+     "p05_m": 1.621,
+     "p95_m": 4.843,
+     "frac_below_0m": 0.0
+    }
+   },
+   "2616": {
+    "tile": "11SMS755435",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS755435.tif",
+    "size_bytes": 7582186,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "w100": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      467,
+      668,
+      1011,
+      1212
+     ],
+     "pixels": 40804,
+     "nodata": 11325,
+     "coverage_pct": 72.25,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.987,
+     "max_m": 5.452,
+     "median_m": 1.748,
+     "p05_m": 1.083,
+     "p95_m": 4.011,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      542,
+      593,
+      1086,
+      1137
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 1.453,
+     "max_m": 5.203,
+     "median_m": 1.871,
+     "p05_m": 1.666,
+     "p95_m": 4.863,
+     "frac_below_0m": 0.0
+    }
+   },
+   "6260": {
+    "tile": "11SMS47553643",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/West_Coast_El_Nino_DEM_2016_6260/UTM11/11SMS47553643.tif",
+    "size_bytes": 9999316,
+    "acq_start": "2016-04-28T00:00:00+00:00",
+    "acq_end": "2016-05-28T00:00:00+00:00",
+    "crs": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "w100": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      934,
+      1335,
+      2023,
+      2424
+     ],
+     "pixels": 161604,
+     "nodata": 106137,
+     "coverage_pct": 34.32,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": 1.13,
+     "max_m": 5.241,
+     "median_m": 1.344,
+     "p05_m": 1.187,
+     "p95_m": 2.115,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      1084,
+      1185,
+      2173,
+      2274
+     ],
+     "pixels": 10404,
+     "nodata": 10404,
+     "coverage_pct": 0.0,
+     "nodata_value": -3.4028230607370965e+38
+    }
+   },
+   "8684": {
+    "tile": "11SMS755435",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_Interp_8684/block1a/11SMS755435.tif",
+    "size_bytes": 10216288,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83(NSRS2007) / UTM zone 11N",
+    "w100": {
+     "error": "compression 5 not decoded (tiled=True)"
+    },
+    "w25": {
+     "error": "compression 5 not decoded (tiled=True)"
+    }
+   }
+  },
+  "la-jolla-shores": {
+   "8658": {
+    "tile": "Southern_California_Topobathy_DEM_1m_I_15",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/CA_Southern_CoNED_DEM_2016_8658/Southern_California_Topobathy_DEM_1m_I_15.tif",
+    "size_bytes": 1898334853,
+    "acq_start": "1930-03-03T00:00:00+00:00",
+    "acq_end": "2014-12-31T00:00:00+00:00",
+    "crs": "NAD83 / UTM zone 11N",
+    "w100": {
+     "W": 21070,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      1278,
+      1479,
+      9092,
+      9293
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 0.213,
+     "max_m": 4.735,
+     "median_m": 3.141,
+     "p05_m": 0.953,
+     "p95_m": 3.614,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 21070,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      1353,
+      1404,
+      9167,
+      9218
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 2.752,
+     "max_m": 3.553,
+     "median_m": 3.136,
+     "p05_m": 2.853,
+     "p95_m": 3.374,
+     "frac_below_0m": 0.0
+    }
+   },
+   "9488": {
+    "tile": "2009_NCMP_CA_09_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_CA_DEM_2009_9488/2009_NCMP_CA_09_BareEarth_1mGrid.tif",
+    "size_bytes": 36744468,
+    "acq_start": "2009-09-30T00:00:00+00:00",
+    "acq_end": "2009-10-28T00:00:00+00:00",
+    "crs": "NAD83 + NAVD88 height",
+    "w100": {
+     "W": 5310,
+     "H": 4878,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      4117,
+      4356,
+      1467,
+      1669
+     ],
+     "pixels": 48720,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.223,
+     "max_m": 4.765,
+     "median_m": 3.155,
+     "p05_m": 0.974,
+     "p95_m": 3.626,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 5310,
+     "H": 4878,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      4206,
+      4267,
+      1542,
+      1593
+     ],
+     "pixels": 3224,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 2.726,
+     "max_m": 3.587,
+     "median_m": 3.137,
+     "p05_m": 2.852,
+     "p95_m": 3.377,
+     "frac_below_0m": 0.0
+    }
+   },
+   "5189": {
+    "tile": "2014_NCMP_CA_09_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_California_Topobathy_DEM_2014_5189/2014_NCMP_CA_09_BareEarth_1mGrid.tif",
+    "size_bytes": 43653359,
+    "acq_start": "2014-09-08T00:00:00+00:00",
+    "acq_end": "2014-10-05T00:00:00+00:00",
+    "crs": "NAD83(2011) + NAVD88 height",
+    "w100": {
+     "W": 5035,
+     "H": 5118,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      3542,
+      3781,
+      1444,
+      1646
+     ],
+     "pixels": 48720,
+     "nodata": 704,
+     "coverage_pct": 98.56,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.458,
+     "max_m": 5.93,
+     "median_m": 3.018,
+     "p05_m": 1.089,
+     "p95_m": 3.52,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 5035,
+     "H": 5118,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      3631,
+      3692,
+      1519,
+      1570
+     ],
+     "pixels": 3224,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 2.626,
+     "max_m": 3.464,
+     "median_m": 2.959,
+     "p05_m": 2.693,
+     "p95_m": 3.277,
+     "frac_below_0m": 0.0
+    }
+   },
+   "2616": {
+    "tile": "11SMS755345",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS755345.tif",
+    "size_bytes": 7375083,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "w100": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      353,
+      554,
+      436,
+      637
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.224,
+     "max_m": 4.766,
+     "median_m": 3.148,
+     "p05_m": 0.974,
+     "p95_m": 3.618,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      428,
+      479,
+      511,
+      562
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 2.752,
+     "max_m": 3.585,
+     "median_m": 3.136,
+     "p05_m": 2.854,
+     "p95_m": 3.376,
+     "frac_below_0m": 0.0
+    }
+   },
+   "6260": {
+    "tile": "11SMS47553634",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/West_Coast_El_Nino_DEM_2016_6260/UTM11/11SMS47553634.tif",
+    "size_bytes": 11291097,
+    "acq_start": "2016-04-28T00:00:00+00:00",
+    "acq_end": "2016-05-28T00:00:00+00:00",
+    "crs": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "w100": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      706,
+      1107,
+      873,
+      1274
+     ],
+     "pixels": 161604,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": 0.27,
+     "max_m": 4.987,
+     "median_m": 2.99,
+     "p05_m": 0.939,
+     "p95_m": 3.472,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      856,
+      957,
+      1023,
+      1124
+     ],
+     "pixels": 10404,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": 2.568,
+     "max_m": 3.434,
+     "median_m": 2.981,
+     "p05_m": 2.673,
+     "p95_m": 3.25,
+     "frac_below_0m": 0.0
+    }
+   },
+   "8684": {
+    "tile": "11SMS755345",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_Interp_8684/block1a/11SMS755345.tif",
+    "size_bytes": 9781281,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83(NSRS2007) / UTM zone 11N",
+    "w100": {
+     "error": "compression 5 not decoded (tiled=True)"
+    },
+    "w25": {
+     "error": "compression 5 not decoded (tiled=True)"
+    }
+   }
+  },
+  "la-jolla-cove": {
+   "8658": {
+    "tile": "Southern_California_Topobathy_DEM_1m_I_14",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/CA_Southern_CoNED_DEM_2016_8658/Southern_California_Topobathy_DEM_1m_I_14.tif",
+    "size_bytes": 1898785293,
+    "acq_start": "1930-03-03T00:00:00+00:00",
+    "acq_end": "2014-12-31T00:00:00+00:00",
+    "crs": "NAD83 / UTM zone 11N",
+    "w100": {
+     "W": 21075,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      20948,
+      21074,
+      9864,
+      10065
+     ],
+     "pixels": 25654,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": -4.841,
+     "max_m": 34.98,
+     "median_m": 12.555,
+     "p05_m": -2.719,
+     "p95_m": 33.98,
+     "frac_below_0m": 0.227
+    },
+    "w25": {
+     "W": 21075,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      21023,
+      21074,
+      9939,
+      9990
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": -0.018,
+     "max_m": 16.83,
+     "median_m": 13.187,
+     "p05_m": 6.622,
+     "p95_m": 14.773,
+     "frac_below_0m": 0.0
+    }
+   },
+   "9488": {
+    "tile": "2009_NCMP_CA_09_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_CA_DEM_2009_9488/2009_NCMP_CA_09_BareEarth_1mGrid.tif",
+    "size_bytes": 36744468,
+    "acq_start": "2009-09-30T00:00:00+00:00",
+    "acq_end": "2009-10-28T00:00:00+00:00",
+    "crs": "NAD83 + NAVD88 height",
+    "w100": {
+     "W": 5310,
+     "H": 4878,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2451,
+      2689,
+      2244,
+      2447
+     ],
+     "pixels": 48756,
+     "nodata": 57,
+     "coverage_pct": 99.88,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -6.026,
+     "max_m": 35.896,
+     "median_m": 13.431,
+     "p05_m": -3.61,
+     "p95_m": 35.004,
+     "frac_below_0m": 0.231
+    },
+    "w25": {
+     "W": 5310,
+     "H": 4878,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      2540,
+      2600,
+      2320,
+      2371
+     ],
+     "pixels": 3172,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -0.029,
+     "max_m": 16.836,
+     "median_m": 13.212,
+     "p05_m": 6.7,
+     "p95_m": 14.944,
+     "frac_below_0m": 0.001
+    }
+   },
+   "5189": {
+    "tile": "2014_NCMP_CA_09_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_California_Topobathy_DEM_2014_5189/2014_NCMP_CA_09_BareEarth_1mGrid.tif",
+    "size_bytes": 43653359,
+    "acq_start": "2014-09-08T00:00:00+00:00",
+    "acq_end": "2014-10-05T00:00:00+00:00",
+    "crs": "NAD83(2011) + NAVD88 height",
+    "w100": {
+     "W": 5035,
+     "H": 5118,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1876,
+      2114,
+      2221,
+      2424
+     ],
+     "pixels": 48756,
+     "nodata": 11952,
+     "coverage_pct": 75.49,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.357,
+     "max_m": 38.47,
+     "median_m": 17.182,
+     "p05_m": 0.809,
+     "p95_m": 35.116,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 5035,
+     "H": 5118,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1965,
+      2025,
+      2297,
+      2348
+     ],
+     "pixels": 3172,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.679,
+     "max_m": 16.832,
+     "median_m": 13.167,
+     "p05_m": 6.446,
+     "p95_m": 14.924,
+     "frac_below_0m": 0.0
+    }
+   },
+   "2616": {
+    "tile": "11SMS740345",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS740345.tif",
+    "size_bytes": 7537661,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "w100": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      447,
+      648,
+      1209,
+      1410
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -5.986,
+     "max_m": 35.866,
+     "median_m": 13.457,
+     "p05_m": -3.492,
+     "p95_m": 34.993,
+     "frac_below_0m": 0.226
+    },
+    "w25": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      522,
+      573,
+      1284,
+      1335
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 0.007,
+     "max_m": 17.032,
+     "median_m": 13.225,
+     "p05_m": 6.839,
+     "p95_m": 15.045,
+     "frac_below_0m": 0.0
+    }
+   },
+   "6260": {
+    "tile": "11SMS47403634",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/West_Coast_El_Nino_DEM_2016_6260/UTM11/11SMS47403634.tif",
+    "size_bytes": 7410081,
+    "acq_start": "2016-04-28T00:00:00+00:00",
+    "acq_end": "2016-05-28T00:00:00+00:00",
+    "crs": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "w100": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      895,
+      1296,
+      2418,
+      2819
+     ],
+     "pixels": 161604,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": -0.607,
+     "max_m": 35.967,
+     "median_m": 13.29,
+     "p05_m": -0.279,
+     "p95_m": 34.808,
+     "frac_below_0m": 0.183
+    },
+    "w25": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      1045,
+      1146,
+      2568,
+      2669
+     ],
+     "pixels": 10404,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": -0.204,
+     "max_m": 17.05,
+     "median_m": 13.075,
+     "p05_m": 6.639,
+     "p95_m": 15.202,
+     "frac_below_0m": 0.001
+    }
+   },
+   "8684": {
+    "tile": "11SMS740345",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_Interp_8684/block1a/11SMS740345.tif",
+    "size_bytes": 9941519,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83(NSRS2007) / UTM zone 11N",
+    "w100": {
+     "error": "compression 5 not decoded (tiled=True)"
+    },
+    "w25": {
+     "error": "compression 5 not decoded (tiled=True)"
+    }
+   }
+  },
+  "windansea": {
+   "8658": {
+    "tile": "Southern_California_Topobathy_DEM_1m_I_14",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/CA_Southern_CoNED_DEM_2016_8658/Southern_California_Topobathy_DEM_1m_I_14.tif",
+    "size_bytes": 1898785293,
+    "acq_start": "1930-03-03T00:00:00+00:00",
+    "acq_end": "2014-12-31T00:00:00+00:00",
+    "crs": "NAD83 / UTM zone 11N",
+    "w100": {
+     "W": 21075,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      20194,
+      20395,
+      11858,
+      12059
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 2.77,
+     "max_m": 22.444,
+     "median_m": 19.27,
+     "p05_m": 11.263,
+     "p95_m": 21.768,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 21075,
+     "H": 22522,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      20269,
+      20320,
+      11933,
+      11984
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 17.58,
+     "max_m": 20.686,
+     "median_m": 19.171,
+     "p05_m": 17.916,
+     "p95_m": 20.406,
+     "frac_below_0m": 0.0
+    }
+   },
+   "9488": {
+    "tile": "2009_NCMP_CA_09_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_CA_DEM_2009_9488/2009_NCMP_CA_09_BareEarth_1mGrid.tif",
+    "size_bytes": 36744468,
+    "acq_start": "2009-09-30T00:00:00+00:00",
+    "acq_end": "2009-10-28T00:00:00+00:00",
+    "crs": "NAD83 + NAVD88 height",
+    "w100": {
+     "W": 5310,
+     "H": 4878,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1562,
+      1800,
+      4245,
+      4447
+     ],
+     "pixels": 48517,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 2.765,
+     "max_m": 22.374,
+     "median_m": 19.296,
+     "p05_m": 11.303,
+     "p95_m": 21.779,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 5310,
+     "H": 4878,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1651,
+      1711,
+      4320,
+      4371
+     ],
+     "pixels": 3172,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 17.615,
+     "max_m": 20.699,
+     "median_m": 19.2,
+     "p05_m": 17.972,
+     "p95_m": 20.425,
+     "frac_below_0m": 0.0
+    }
+   },
+   "5189": {
+    "tile": "2014_NCMP_CA_09_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_California_Topobathy_DEM_2014_5189/2014_NCMP_CA_09_BareEarth_1mGrid.tif",
+    "size_bytes": 43653359,
+    "acq_start": "2014-09-08T00:00:00+00:00",
+    "acq_end": "2014-10-05T00:00:00+00:00",
+    "crs": "NAD83(2011) + NAVD88 height",
+    "w100": {
+     "W": 5035,
+     "H": 5118,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      987,
+      1225,
+      4222,
+      4424
+     ],
+     "pixels": 48517,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 3.504,
+     "max_m": 22.361,
+     "median_m": 19.263,
+     "p05_m": 11.332,
+     "p95_m": 21.77,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 5035,
+     "H": 5118,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1076,
+      1136,
+      4297,
+      4348
+     ],
+     "pixels": 3172,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 17.566,
+     "max_m": 20.687,
+     "median_m": 19.16,
+     "p05_m": 17.932,
+     "p95_m": 20.404,
+     "frac_below_0m": 0.0
+    }
+   },
+   "2616": {
+    "tile": "11SMS725315",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS725315.tif",
+    "size_bytes": 6433124,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "w100": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      1194,
+      1395,
+      202,
+      403
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 2.794,
+     "max_m": 22.444,
+     "median_m": 19.311,
+     "p05_m": 11.317,
+     "p95_m": 21.782,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      1269,
+      1320,
+      277,
+      328
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 17.619,
+     "max_m": 20.686,
+     "median_m": 19.205,
+     "p05_m": 17.96,
+     "p95_m": 20.426,
+     "frac_below_0m": 0.0
+    }
+   },
+   "6260": {
+    "tile": "11SMS47253631",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/West_Coast_El_Nino_DEM_2016_6260/UTM11/11SMS47253631.tif",
+    "size_bytes": 8259847,
+    "acq_start": "2016-04-28T00:00:00+00:00",
+    "acq_end": "2016-05-28T00:00:00+00:00",
+    "crs": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "w100": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      2388,
+      2789,
+      405,
+      806
+     ],
+     "pixels": 161604,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": 2.6,
+     "max_m": 22.139,
+     "median_m": 18.987,
+     "p05_m": 11.06,
+     "p95_m": 21.518,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      2538,
+      2639,
+      555,
+      656
+     ],
+     "pixels": 10404,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": 17.288,
+     "max_m": 20.526,
+     "median_m": 18.92,
+     "p05_m": 17.697,
+     "p95_m": 20.139,
+     "frac_below_0m": 0.0
+    }
+   },
+   "8684": {
+    "tile": "11SMS725315",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_Interp_8684/block1a/11SMS725315.tif",
+    "size_bytes": 9633570,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83(NSRS2007) / UTM zone 11N",
+    "w100": {
+     "error": "compression 5 not decoded (tiled=True)"
+    },
+    "w25": {
+     "error": "compression 5 not decoded (tiled=True)"
+    }
+   }
+  },
+  "sunset-cliffs": {
+   "8658": {
+    "tile": "Southern_California_Topobathy_DEM_1m_J_15",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/CA_Southern_CoNED_DEM_2016_8658/Southern_California_Topobathy_DEM_1m_J_15.tif",
+    "size_bytes": 1898081989,
+    "acq_start": "1930-03-03T00:00:00+00:00",
+    "acq_end": "2014-12-31T00:00:00+00:00",
+    "crs": "NAD83 / UTM zone 11N",
+    "w100": {
+     "W": 21070,
+     "H": 22519,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      1336,
+      1537,
+      1425,
+      1626
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 2.725,
+     "max_m": 31.714,
+     "median_m": 22.257,
+     "p05_m": 14.959,
+     "p95_m": 29.391,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 21070,
+     "H": 22519,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      1411,
+      1462,
+      1500,
+      1551
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": 19.16,
+     "max_m": 23.476,
+     "median_m": 21.933,
+     "p05_m": 19.459,
+     "p95_m": 23.166,
+     "frac_below_0m": 0.0
+    }
+   },
+   "9488": {
+    "tile": "2009_NCMP_CA_06_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_CA_DEM_2009_9488/2009_NCMP_CA_06_BareEarth_1mGrid.tif",
+    "size_bytes": 21788038,
+    "acq_start": "2009-09-30T00:00:00+00:00",
+    "acq_end": "2009-10-28T00:00:00+00:00",
+    "crs": "NAD83 + NAVD88 height",
+    "w100": {
+     "W": 2818,
+     "H": 6387,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1439,
+      1677,
+      1400,
+      1602
+     ],
+     "pixels": 48517,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 2.77,
+     "max_m": 31.736,
+     "median_m": 22.316,
+     "p05_m": 15.053,
+     "p95_m": 29.454,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 2818,
+     "H": 6387,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1528,
+      1588,
+      1475,
+      1526
+     ],
+     "pixels": 3172,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 19.155,
+     "max_m": 23.496,
+     "median_m": 22.003,
+     "p05_m": 19.464,
+     "p95_m": 23.175,
+     "frac_below_0m": 0.0
+    }
+   },
+   "5189": {
+    "tile": "2014_NCMP_CA_06_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_California_Topobathy_DEM_2014_5189/2014_NCMP_CA_06_BareEarth_1mGrid.tif",
+    "size_bytes": 21515842,
+    "acq_start": "2014-09-08T00:00:00+00:00",
+    "acq_end": "2014-10-05T00:00:00+00:00",
+    "crs": "NAD83(2011) + NAVD88 height",
+    "w100": {
+     "W": 2644,
+     "H": 6377,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      650,
+      888,
+      1421,
+      1623
+     ],
+     "pixels": 48517,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 2.519,
+     "max_m": 31.893,
+     "median_m": 22.206,
+     "p05_m": 14.893,
+     "p95_m": 29.313,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 2644,
+     "H": 6377,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      739,
+      799,
+      1496,
+      1547
+     ],
+     "pixels": 3172,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 19.072,
+     "max_m": 23.594,
+     "median_m": 21.896,
+     "p05_m": 19.343,
+     "p95_m": 23.135,
+     "frac_below_0m": 0.0
+    }
+   },
+   "2616": {
+    "tile": "11SMS755195",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS755195.tif",
+    "size_bytes": 6052859,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "w100": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      411,
+      612,
+      291,
+      492
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 2.725,
+     "max_m": 31.963,
+     "median_m": 22.321,
+     "p05_m": 15.065,
+     "p95_m": 29.505,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      486,
+      537,
+      366,
+      417
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": 19.16,
+     "max_m": 23.476,
+     "median_m": 22.061,
+     "p05_m": 19.466,
+     "p95_m": 23.206,
+     "frac_below_0m": 0.0
+    }
+   },
+   "6260": {
+    "tile": "11SMS47553619",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/West_Coast_El_Nino_DEM_2016_6260/UTM11/11SMS47553619.tif",
+    "size_bytes": 11182510,
+    "acq_start": "2016-04-28T00:00:00+00:00",
+    "acq_end": "2016-05-28T00:00:00+00:00",
+    "crs": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "w100": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      822,
+      1223,
+      583,
+      984
+     ],
+     "pixels": 161604,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": 2.294,
+     "max_m": 31.901,
+     "median_m": 22.128,
+     "p05_m": 14.937,
+     "p95_m": 29.244,
+     "frac_below_0m": 0.0
+    },
+    "w25": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      972,
+      1073,
+      733,
+      834
+     ],
+     "pixels": 10404,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": 19.065,
+     "max_m": 23.531,
+     "median_m": 21.898,
+     "p05_m": 19.336,
+     "p95_m": 23.065,
+     "frac_below_0m": 0.0
+    }
+   },
+   "8684": {
+    "tile": "11SMS755195",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_Interp_8684/block1a/11SMS755195.tif",
+    "size_bytes": 9393181,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83(NSRS2007) / UTM zone 11N",
+    "w100": {
+     "error": "compression 5 not decoded (tiled=True)"
+    },
+    "w25": {
+     "error": "compression 5 not decoded (tiled=True)"
+    }
+   }
+  },
+  "cabrillo-tidepools": {
+   "8658": {
+    "tile": "Southern_California_Topobathy_DEM_1m_J_15",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/CA_Southern_CoNED_DEM_2016_8658/Southern_California_Topobathy_DEM_1m_J_15.tif",
+    "size_bytes": 1898081989,
+    "acq_start": "1930-03-03T00:00:00+00:00",
+    "acq_end": "2014-12-31T00:00:00+00:00",
+    "crs": "NAD83 / UTM zone 11N",
+    "w100": {
+     "W": 21070,
+     "H": 22519,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      2353,
+      2554,
+      7413,
+      7614
+     ],
+     "pixels": 40804,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": -2.764,
+     "max_m": 22.909,
+     "median_m": 2.196,
+     "p05_m": -1.78,
+     "p95_m": 20.861,
+     "frac_below_0m": 0.258
+    },
+    "w25": {
+     "W": 21070,
+     "H": 22519,
+     "compression": 1,
+     "predictor": 1,
+     "geographic": false,
+     "px_window": [
+      2428,
+      2479,
+      7488,
+      7539
+     ],
+     "pixels": 2704,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -32767.0,
+     "min_m": -0.118,
+     "max_m": 15.19,
+     "median_m": 0.359,
+     "p05_m": -0.003,
+     "p95_m": 13.304,
+     "frac_below_0m": 0.058
+    }
+   },
+   "9488": {
+    "tile": "2009_NCMP_CA_05_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_CA_DEM_2009_9488/2009_NCMP_CA_05_BareEarth_1mGrid.tif",
+    "size_bytes": 59245067,
+    "acq_start": "2009-09-30T00:00:00+00:00",
+    "acq_end": "2009-10-28T00:00:00+00:00",
+    "crs": "NAD83 + NAVD88 height",
+    "w100": {
+     "W": 8493,
+     "H": 5633,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1201,
+      1439,
+      3534,
+      3736
+     ],
+     "pixels": 48517,
+     "nodata": 8497,
+     "coverage_pct": 82.49,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -2.781,
+     "max_m": 23.025,
+     "median_m": 9.547,
+     "p05_m": -1.568,
+     "p95_m": 21.147,
+     "frac_below_0m": 0.151
+    },
+    "w25": {
+     "W": 8493,
+     "H": 5633,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1290,
+      1350,
+      3610,
+      3661
+     ],
+     "pixels": 3172,
+     "nodata": 205,
+     "coverage_pct": 93.54,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -0.075,
+     "max_m": 15.201,
+     "median_m": 0.378,
+     "p05_m": -0.002,
+     "p95_m": 13.394,
+     "frac_below_0m": 0.054
+    }
+   },
+   "5189": {
+    "tile": "2014_NCMP_CA_05_BareEarth_1mGrid",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/USACE_California_Topobathy_DEM_2014_5189/2014_NCMP_CA_05_BareEarth_1mGrid.tif",
+    "size_bytes": 62192483,
+    "acq_start": "2014-09-08T00:00:00+00:00",
+    "acq_end": "2014-10-05T00:00:00+00:00",
+    "crs": "NAD83(2011) + NAVD88 height",
+    "w100": {
+     "W": 8647,
+     "H": 4492,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1062,
+      1300,
+      2798,
+      3000
+     ],
+     "pixels": 48517,
+     "nodata": 16337,
+     "coverage_pct": 66.33,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -1.6,
+     "max_m": 22.841,
+     "median_m": 13.928,
+     "p05_m": -0.069,
+     "p95_m": 21.268,
+     "frac_below_0m": 0.062
+    },
+    "w25": {
+     "W": 8647,
+     "H": 4492,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": true,
+     "px_window": [
+      1151,
+      1211,
+      2874,
+      2925
+     ],
+     "pixels": 3172,
+     "nodata": 1675,
+     "coverage_pct": 47.19,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -0.06,
+     "max_m": 14.998,
+     "median_m": 0.952,
+     "p05_m": 0.221,
+     "p95_m": 14.083,
+     "frac_below_0m": 0.005
+    }
+   },
+   "2616": {
+    "tile": "11SMS770135",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_2011_2616/ca_topo_bathy/block_1a/SMOOTHED_VOIDS/11SMS770135.tif",
+    "size_bytes": 7270169,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83_NSRS2007_UTM_zone_11N + NAVD88 height",
+    "w100": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      0,
+      129,
+      280,
+      481
+     ],
+     "pixels": 26260,
+     "nodata": 432,
+     "coverage_pct": 98.35,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -0.962,
+     "max_m": 23.127,
+     "median_m": 14.708,
+     "p05_m": 0.03,
+     "p95_m": 21.513,
+     "frac_below_0m": 0.025
+    },
+    "w25": {
+     "W": 1500,
+     "H": 1500,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      3,
+      54,
+      355,
+      406
+     ],
+     "pixels": 2704,
+     "nodata": 88,
+     "coverage_pct": 96.75,
+     "nodata_value": -3.4028234663852886e+38,
+     "min_m": -0.052,
+     "max_m": 15.19,
+     "median_m": 0.373,
+     "p05_m": 0.006,
+     "p95_m": 13.741,
+     "frac_below_0m": 0.03
+    }
+   },
+   "6260": {
+    "tile": "11SMS47703613",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/West_Coast_El_Nino_DEM_2016_6260/UTM11/11SMS47703613.tif",
+    "size_bytes": 10221456,
+    "acq_start": "2016-04-28T00:00:00+00:00",
+    "acq_end": "2016-05-28T00:00:00+00:00",
+    "crs": "NAD83(2011) / UTM zone 11N + NAVD88 height",
+    "w100": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      0,
+      257,
+      560,
+      961
+     ],
+     "pixels": 103716,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": -0.077,
+     "max_m": 23.093,
+     "median_m": 14.229,
+     "p05_m": 0.129,
+     "p95_m": 21.224,
+     "frac_below_0m": 0.001
+    },
+    "w25": {
+     "W": 3000,
+     "H": 3000,
+     "compression": 8,
+     "predictor": 3,
+     "geographic": false,
+     "px_window": [
+      6,
+      107,
+      710,
+      811
+     ],
+     "pixels": 10404,
+     "nodata": 0,
+     "coverage_pct": 100.0,
+     "nodata_value": -3.4028230607370965e+38,
+     "min_m": -0.002,
+     "max_m": 15.081,
+     "median_m": 0.231,
+     "p05_m": 0.104,
+     "p95_m": 12.823,
+     "frac_below_0m": 0.0
+    }
+   },
+   "8684": {
+    "tile": "11SMS770135",
+    "href": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/California_Topobathy_DEM_Interp_8684/block1a/11SMS770135.tif",
+    "size_bytes": 9910034,
+    "acq_start": "2009-01-01T00:00:00+00:00",
+    "acq_end": "2011-01-01T00:00:00+00:00",
+    "crs": "NAD83(NSRS2007) / UTM zone 11N",
+    "w100": {
+     "error": "compression 5 not decoded (tiled=True)"
+    },
+    "w25": {
+     "error": "compression 5 not decoded (tiled=True)"
+    }
+   }
+  }
+ }
+}
