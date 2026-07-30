@@ -80,7 +80,11 @@ Both fall out of the same artifact (§2), so this is cheap to fix:
 `tidepool_prime_ft` must not become a fifth gate. The predicate stays at four.
 It renders as a badge on cells already passing the floor.
 
-**Schema change — needs your call before implementation.**
+**Schema change — needs your call before implementation.** Gated on a decision,
+not on data: both quantities fall out of the same artifact and neither needs an
+instrumented elevation, an upstream reply or a field campaign. Available whenever
+it is wanted. Noted because §2's route died and it would be easy to assume this
+died with it.
 
 ### Beach-level slugs cover multiple benches
 
@@ -1039,11 +1043,47 @@ to choose anything: §6 records that the published record cannot say which field
 0.7 calibrates, and this rule is immune by construction because it is computed
 from each spot's own background and 0.7 plays no part in it.
 
-**Open question for you:** does `FloorConfidence` need a middle value? Adding
-one touches `spots.generated.ts`, the window predicate, and every UI surface
-that renders confidence, so it is not a drive-by change. The alternative is to
-let `floor_evidence` carry the nuance and leave the enum binary. I'd lean
-binary, but it's your call.
+### No instrumented route is available, and that is a labelling limit
+
+Recorded 2026-07-30. Both remaining instrumented methods are **future
+improvements rather than prerequisites**: the MARINe grid waits on an ask that
+is not being sent yet (§8, #69), and the pressure logger is a field campaign
+(#64). Lidar is out on measurement (§2, #46). So clause 2 of the promotion rule
+has nothing to offer it, and **`verified` is unreachable for the foreseeable
+future.**
+
+**Nothing stops on that account.** It is worth being explicit, because the
+measurement results above read more pessimistically than the state of the stack
+warrants:
+
+- All 8 tidepool floors are set and rendering, each with 3–4 `floor_evidence`
+  entries. Three were set from the permissiveness rule below in 1.4.0.
+- **No code gates on `confidence: 'verified'`** — the only occurrence in the
+  codebase is the type definition. Nothing refuses to render and nothing throws
+  for want of an instrumented elevation.
+- `spots.json`'s `unresolved` array carries the unverified status honestly in
+  four separate entries.
+
+Good estimates, labelled as estimates and carrying their evidence, are the
+working state of this field and are expected to stay so. What is missing is a
+promotion, not a value. Treat an eventual reply or logger deployment as an
+upgrade path, not as a gate anything is holding for.
+
+**Open question for you, and it has changed:** does `FloorConfidence` need a
+middle value? This document previously leaned binary, on the reasoning that
+`floor_evidence` carries the nuance and `verified` is where the real signal
+lands. **That lean was formed when `verified` was reachable.** It is not now, so
+the enum is a field with one attainable value, which is a field that always says
+the same thing.
+
+It also conflates two states that are not alike. Three spots carry a
+citizen-science cross-check that *publishes*; five refuse. `low` says the same
+about both, and the ones it says it about most misleadingly are the three whose
+floors were actually derived from measured rates.
+
+Adding a value still touches `spots.generated.ts`, the window predicate and every
+UI surface that renders confidence, so it is still not a drive-by change — but it
+is answerable today with no external input, and #98 records it as available.
 
 ---
 
@@ -1198,7 +1238,12 @@ machinery §2 is blocked on, and one question stands between it and being usable
 
 - Sand burial state at time of use. A verified floor is verified for a bed
   configuration, not forever.
-- The 0.6 flood trim, until curve slope replaces it.
+- **The 0.6 flood trim.** This line used to end "until curve slope replaces it",
+  and that route no longer exists: slope was coming from §2's hypsometry, which
+  #89 measured out. `FLOOD_SIDE_TRIM = 0.6` therefore stands as what its own
+  comment in `lib/windows.ts` already calls it — a safety margin, not a
+  measurement — for as long as no method produces a per-spot slope. It is not
+  waiting on anything, and nothing is waiting on it.
 - `swell_ceiling_ft` absolute values (§5).
 - Surveyed coordinates for the 7 `mpa_resolved: false` spots. Same root cause:
   nobody has stood at these places with a survey-grade receiver. **Not an unrelated
