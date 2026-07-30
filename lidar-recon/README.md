@@ -414,6 +414,54 @@ at ±300 m — the disc fills with bluff going inland while the reef is a narrow
 shore-parallel strip. The clip geometry has to be the bench, and nothing in the
 repo knows where the bench is.
 
+> **Corrected 2026-07-29 under #80: every Cabrillo figure in this section was
+> measured over a window clipped at a tile edge, and the clipped side is the
+> seaward one.** `probe_dem.probe()` clamps its window to the tile it is handed —
+> `x0,y0=max(0,x0),max(0,y0); x1,y1=min(W-1,x1),min(H-1,y1)` — which is right as
+> code and silent as measurement. The `cabrillo-tidepools` pin sits **28 m east
+> of tile 11SMS770135's western edge**, and the same boundary falls in the same
+> place in 6260, so the ±100 m window recorded `px_window` starting at column 0
+> and covered 130×202 px of the 202×202 it asked for. It widened **inland only**,
+> at every width. A window that can only grow one way will show a rising median
+> whether or not the terrain does.
+>
+> Re-measured on a 2×2 tile mosaic — `probes/window_truncation.py`, full output in
+> `findings/window-truncation.json`. The ±25 m windows were never truncated and
+> reproduce exactly, which is what says the mosaic reader and `probe_dem` agree
+> where there is nothing to disagree about:
+>
+> | product | half-width | coverage % | min m | median m | frac < 0 m |
+> |---|---|---|---|---|---|
+> | 2616 | ±25 | 96.75 → 96.75 | −0.052 → −0.052 | 0.373 → 0.373 | 0.030 → 0.030 |
+> | 2616 | ±100 | 98.35 → **94.18** | −0.962 → **−2.744** | 14.708 → **6.928** | 0.025 → **0.210** |
+> | 2616 | ±200 | 99.53 → **83.05** | −0.962 → **−4.880** | 19.296 → **11.153** | 0.011 → **0.254** |
+> | 2616 | ±300 | 99.78 → **80.73** | −0.962 → **−6.656** | 24.841 → **14.971** | 0.006 → **0.272** |
+> | 2616 | ±500 | 99.09 → **76.54** | −3.897 → **−10.604** | 32.556 → **15.937** | 0.044 → **0.310** |
+> | 6260 | ±100 | 100.0 → **99.07** | −0.077 → **−0.542** | 14.229 → **2.200** | 0.001 → **0.124** |
+>
+> **What changes.** Cabrillo's ±100 m disc holds far more intertidal ground than
+> reported: 21% of valid pixels below 0 m NAVD88 against 0.025, an eight-fold
+> difference, and a minimum of −2.744 m against −0.962 m. The median at ±100 m is
+> **6.9 m, not 14.7 m**. The rise going inland is real but much flatter —
+> 6.9 → 11.2 → 15.0 → 15.9 m rather than 14.7 → 32.6 m — and it flattens at the
+> top rather than climbing. Coverage falls with width instead of rising, which is
+> the honest shape: widening reaches offshore into voids.
+>
+> **What stands.** The three unanimous spots are unaffected — `windansea`,
+> `sunset-cliffs` and `la-jolla-shores` first reach sub-zero ground at ±200 m on
+> **full, untruncated** windows, and `torrey-pines-beach` is still entirely above
+> 0 m at ±300 m on a full window. Truncation reaches their ±300/±500 m rows only
+> (`windansea` 84% and 57% of the window it asked for, the others 89–95%), so
+> `torrey-pines-beach`'s "negative at ±500 m over only 1.2% of the disc" keeps its
+> direction and loses its fraction. `la-jolla-cove`'s ±100 m CoNED window is also
+> truncated, on the **east** — landward at a west-facing cove — and was not
+> re-measured, because CoNED is uncompressed at one range request per raster row
+> and §8 recommends dropping it anyway.
+>
+> The conclusion this section exists to support does not move: a point buffer is
+> still not a bench, and Cabrillo's disc is still mostly bluff. The numbers it was
+> argued with were wrong by up to a factor of eight.
+
 This is the real long pole, and it is upstream of every tooling question below. A
 correct DEM, a correct datum and a correct transform still produce a meaningless
 curve if the polygon is a circle centred 300 m inland. **`la-jolla-cove` deserves
@@ -525,3 +573,269 @@ dependency — which is why it is being put to you rather than taken.
    1930–2014 range as its date?
 4. **Does the 2014 NCMP date discrepancy get reported upstream?** NOAA's DEM
    metadata contradicts its own swath filenames.
+
+Sections 10 and 11 were added later, under #80, and §9 was written before them.
+
+---
+
+## 10. The slope gate: a real polygon, and slope does not survive it
+
+#80 asked the one question §7 left open. The VDatum transform is a **pure
+additive offset** (§4), an additive offset cannot change dA/dz, so is curve
+*slope* robust to a wrong boundary even where the absolute level is not? If yes,
+#46 has a deliverable that never needed 0.3 ft absolute. If slope moves as much
+as level, #46 closes on a measured no.
+
+**It closes on a measured no, and for a reason #80 did not anticipate: the two
+products this directory recommended cannot agree on the curve even with the
+polygon held fixed.**
+
+### The polygon is not hand-traced, and that is the point
+
+§7's open question was "who produces the reef polygons". One already exists.
+OpenStreetMap carries `natural=reef` areas along this corridor, traced from
+satellite imagery — the tens-of-metres class #80 asked for, and unlike a hand
+trace it arrives with a version, a changeset, a mapper and the imagery it
+inherits its georeferencing from. `probes/osm_reef.py`, output in
+`findings/osm-reef-locator.json`.
+
+```
+way 975130801  v5  2023-06-11  changeset 137200202  mapper JRH50
+  natural=reef  reef=rock  biotic_reef:type=fringing  area=yes
+  252 nodes, 27.67 ha, ~1.5 km alongshore x 100-450 m cross-shore
+  changeset imagery_used = "Mapbox Satellite"
+  changeset comment (v2, cs110010382) = "adjusted coastline to highwater mark
+                                         per OSM guidelines and added reefs"
+```
+
+**The `cabrillo-tidepools` pin sits inside it**, 13 m from the nearest vertex, on
+its landward edge. Stated positional uncertainty **±25 m**, and the reasoning
+matters more than the number: Mapbox Satellite is Maxar-derived and usually
+georeferenced within ~10 m, but a rock reef's *seaward* edge in imagery is a
+water-clarity and tide-state boundary rather than a sharp feature, so where a
+mapper puts it moves with the image epoch. Every perturbation below is reported
+at 10, 25 **and** 50 m so the gate does not rest on that judgement.
+
+**This is not an MPA boundary and none was read.** `natural=reef` is a mapper's
+physical trace. The Cabrillo State Marine Reserve relation is in the same
+neighbourhood, #80 puts it out of scope, and the query never touched it.
+
+**OSM has one of these, not eight.** The same sweep at 1.2 km around each of the
+other seven spots returns **zero** `natural=reef` areas. Whatever the locator job
+is, it is not a join.
+
+### The polygon locates the bench; the coordinate disc does not
+
+| clip | median elevation inside |
+|---|---|
+| ±100 m disc around the pin, 2616, corrected | 6.93 m NAVD88 = **+22.9 ft MLLW** |
+| OSM reef ∩ ±250 m alongshore, 2616 | **−1.00 ft MLLW** |
+| OSM reef ∩ ±250 m alongshore, 6260 | **+0.50 ft MLLW** |
+
+That is the coarse-locator result in one table. A mapped outline puts the median
+within a foot of the datum; the published coordinate's own error bar puts it 23 ft
+above it.
+
+### The bench is where the voids are
+
+Coverage inside the polygon, which no ±25 m disc could have shown:
+
+| extent | 2616 valid | 6260 valid |
+|---|---|---|
+| OSM reef ∩ ±250 m alongshore | 82.4% | **66.6%** |
+| full mapped reef, ~1.5 km | 89.5% | **38.7%** |
+
+And the voids are not scattered. Translating the polygon 50 m **seaward** drops
+6260 to **38.0%** valid and 2616 to 66.3%; 50 m **landward** raises them to
+**87.8%** and 91.6%. §7 said the 2014 NCMP voids "sit on the wet reef" from the
+medians; here it is measured directly on the rock, and it is true of the two
+products §8 recommended instead.
+
+**6260 cannot produce the curve #80 specifies.** Its lowest pixel anywhere inside
+the mapped bench is **−1.56 ft MLLW**. The band runs to −2.0 ft, so A(−2.0 ft)
+equals its entire valid area and the bottom 0.44 ft of the band is empty. 2616
+reaches −14.02 ft MLLW inside the same polygon, with 43% of its valid pixels
+below −2.0 ft. **The two products do not sample the same elevation range on the
+same rock**, which is the fact everything below follows from.
+
+### The floor cannot be located in the band at all
+
+§2 defines the floor as the level where exposed area crosses "a fixed minimum of
+walkable bench" and never fixes the minimum. At a *minimum* — 500 or 2000 m² —
+A(w) already exceeds it at +2.0 ft MLLW in both products, so the crossing is
+above the top of the band and +2.0 is a band edge rather than a floor. The
+thresholds that bite are most of the bench, not a minimum of it:
+
+| threshold | 2616 floor | 6260 floor |
+|---|---|---|
+| 500 m² | +2.0 (saturated) | +2.0 (saturated) |
+| 2 000 m² | +2.0 (saturated) | +2.0 (saturated) |
+| 10 000 m² | +1.0 | +0.9 |
+| 20 000 m² | +0.3 | +0.7 |
+| 40 000 m² | never in band | 0.0 |
+
+### The gate, level and slope reported separately
+
+At the stated ±25 m, on the pin reach. Level in feet, slope as a percentage
+change. `shape_dev` is the largest gap between the perturbed and baseline
+*normalised* curves over the 41 levels — one threshold-free number for "did the
+curve change shape".
+
+| product | perturbation | Δ floor @2000 m² | Δ floor @50% | Δ prime | Δ norm slope @knee | shape_dev |
+|---|---|---|---|---|---|---|
+| 2616 | erode 25 m | **1.2 ft** | 0.2 | **0.0** | 25.9% | 0.246 |
+| 2616 | dilate 25 m | 0.0 | 0.5 | **0.0** | 26.9% | 0.245 |
+| 2616 | alongshore ±25 m | 0.0 | 0.0 | **0.0** | 0.6% | **0.035** |
+| 2616 | cross-shore ±25 m | **1.0 ft** | 0.4 | **0.0** | 8.2% | 0.216 |
+| 6260 | erode 25 m | **1.0 ft** | 0.1 | **0.0** | 6.0% | 0.138 |
+| 6260 | dilate 25 m | 0.0 | 0.2 | **0.0** | 24.7% | 0.194 |
+| 6260 | alongshore ±25 m | 0.0 | 0.1 | **0.0** | 2.8% | **0.033** |
+| 6260 | cross-shore ±25 m | 0.9 ft | 0.2 | **0.0** | 15.2% | 0.189 |
+
+Three results, in order of how much they matter.
+
+**Slope magnitude does not hold.** Normalised slope at the knee moves 25–27% at
+the stated uncertainty and up to 62% at ±50 m. The normalised curve moves by up
+to 0.246 — a quarter of the bench's area arriving at a different level. #80's own
+disposition applies: slope moves about as much as level does, so hand-traced
+geometry cannot support the slope claim.
+
+**Slope *location* holds perfectly.** The knee — where marginal area per 0.1 ft
+of drop peaks, which is §2's `tidepool_prime_ft` — moves **0.0 ft** in every
+product, every extent, every perturbation kind, at ±10 m and ±25 m, and for 2616
+at ±50 m too. That is the one quantity that survived, and the next paragraph is
+why it cannot be used.
+
+**Product choice beats every perturbation.** Same polygon, same datum offset,
+different DEM:
+
+| | 2616 | 6260 | gap |
+|---|---|---|---|
+| prime, pin reach | **+0.3 ft** | **+0.7 ft** | 0.4 ft |
+| normalised peak slope, pin reach | — | — | **+91%** |
+| normalised peak slope, full reef | — | — | **+357%** |
+| shape_dev, pin reach | — | — | 0.117 |
+| shape_dev, full reef | — | — | 0.131 |
+| median inside, full reef | −4.0 ft MLLW | +0.5 ft MLLW | 4.5 ft |
+
+The one metric that survived geometry perturbation is **0.4 ft apart between the
+two products**, and the shape deviation between products (0.117–0.131) is the
+same order as the shape deviation from perturbing the polygon by its own
+uncertainty. Choosing the other qualifying tile is not a smaller error than
+drawing the polygon 25 m wrong.
+
+**#63's conflation, measured, and it is backwards.** #63 assumed edge imprecision
+was survivable and gross mislocation fatal. Alongshore translation is indeed
+benign — `shape_dev` 0.033–0.036 at ±25 m, in all four product-and-extent
+combinations, an order of magnitude below everything else. But uniform
+erode/dilate, which *is* edge imprecision, is the **worst** perturbation of the
+three (0.138–0.246), ahead of cross-shore mislocation (0.189–0.216). On a narrow
+shore-parallel strip, moving the edges in or out changes which elevation band is
+inside the polygon, and that is the curve itself.
+
+### One disclosure, and it is not the NPS check
+
+6260's knee lands at **+0.7 ft**, which is numerically NPS's published Cabrillo
+figure. **That is not a comparison and must not be read as one.** §6's rule is
+that the check is spent once, against a settled field; this is a knee and not a
+floor, `nps.gov` was not read for this work, and 2616 puts the same knee at
++0.3 ft on the same polygon. A 0.4 ft spread between two qualifying products
+means the coincidence carries no weight in either direction. It is recorded here
+because finding it later in the JSON and wondering whether anyone noticed would be
+worse.
+
+### What this leaves
+
+- **The blocker was never the polygons.** It is DEM void coverage on the wet
+  reef, and the two products §8 recommended have 82%/67% coverage on the bench
+  and disagree by 0.4 ft on the only stable metric.
+- Reviving hypsometry means resolving that disagreement, not drawing seven more
+  outlines. §6's unread per-point GPS times and §8's dropped CoNED are where that
+  would start.
+- `probes/hypsometry.py`, full output in `findings/cabrillo-slope-gate.json`:
+  both products, both extents, 19 variants each, all 41 levels.
+
+---
+
+## 11. The rate-curve discs are centred on the pin, and at five spots that is not
+where the records are
+
+#80 §1 noted that `calibration/` pulls a 0.5 km disc around each `spots.json`
+coordinate, that §7 measured those coordinates sitting 100–400 m inland of the
+bench, and that "the centring is worth stating rather than assuming, and it has
+never been checked". Checked now: `probes/rate_centring.py`, output in
+`findings/rate-curve-centring.json`.
+
+Method: iNaturalist **count** queries only — no records pulled — with the
+calibration's own 13 taxon ids and corpus start, read out of
+`calibration/target_taxa.json` and `calibration/src/config.ts` so the audit
+cannot drift from the pull it audits. Two measurements per spot: counts at
+0.1–2.0 km of the pin, and the count inside a 0.5 km disc centred on each of a
+5×5 grid of offsets from −500 to +500 m.
+
+**The instrument is validated by construction.** The 0.5 km counts reproduce the
+`records` figures in `shared/calibration.json` **exactly at 7 of 8 spots** — 558,
+98, 310, 545, 158, 794, 3133 — with `torrey-pines-beach` at 36 against a shipped
+35, one record that reached research grade since the 2026-07-30 pull.
+
+| spot | ≤100 m | ≤500 m (shipped) | best 500 m disc | offset | vs pin | publishes? |
+|---|---|---|---|---|---|---|
+| `cabrillo-tidepools` | 1983 | 3133 | 3166 | +250 E | 1.01× | **yes** |
+| `sunset-cliffs` | 1 | 794 | 794 | none | 1.00× | **yes** |
+| `swamis` | 258 | 558 | 560 | +250 N | 1.00× | **yes** |
+| `la-jolla-shores` | 42 | 310 | 469 | 559 m SW | 1.51× | no |
+| `cardiff-reef` | 20 | 98 | 157 | 707 m SE | 1.60× | no |
+| `torrey-pines-beach` | 0 | 36 | 72 | 559 m NW | **2.00×** | no |
+| `la-jolla-cove` | 96 | 545 | 1625 | 707 m SW | **2.98×** | no |
+| `windansea` | 1 | 158 | 866 | 559 m NNW | **5.48×** | no |
+
+**The three spots that publish are the three that are centred, and the five that
+refuse are the five that are not.** Every refusing spot's best 500 m disc holds
+1.5–5.5× the records the shipped disc holds.
+
+Three things to be careful about before that is read as a cause.
+
+- **These are lower bounds.** All five refusing spots put their best disc on the
+  ±500 m grid boundary, so the real optimum is further out than this grid reaches.
+- **More records is not automatically better data for this spot.** §1 of
+  `calibration/floor-calibration.md` already warns that beach-level slugs cover
+  multiple benches; a disc recentred 500 m away may be aggregating two of them,
+  which is a different defect rather than a fix. `la-jolla-cove` and
+  `la-jolla-shores` refuse on the amplitude gate — diver contamination — and a
+  richer disc need not move that at all.
+- **Counts are not visits,** and none of the pipeline's in-memory filters ran.
+  This is a question about where, not how many.
+
+Two findings that do not depend on the correlation.
+
+**Two independent instruments agree the pin is off the rock at the same spots.**
+`torrey-pines-beach` has **0** records within 100 m of its coordinate,
+`windansea` **1**, `sunset-cliffs` **1** — and those are three of the four spots
+§7 found with no sub-zero pixel in their ±100 m disc. Elevation and observation
+density are unrelated measurements reaching the same conclusion.
+
+**`RADIUS_KM = 0.5` is licensed by the one spot where centring cannot bite.**
+`config.ts` says the corridor-wide radius rests on #30 measuring Cabrillo's
+per-bin rates as insensitive to 250/500/1000 m. Cabrillo is the best-centred spot
+in the corridor — 1983 of its 3133 records are within 100 m of the pin, and no
+500 m offset improves on it by more than 1.1%. A radius-insensitivity result from
+the one spot whose disc is already on the rock does not transfer to a spot whose
+disc is 559 m off it. `config.ts` anticipated exactly this — "It was Cabrillo-only,
+which is why the sensitivity grid is re-run per spot rather than assumed from the
+richest one" — and the grid it re-runs varies the radius, not the centre.
+
+### Open questions, second round
+
+5. **Does #46 close?** §10 says slope does not survive the polygon at either
+   product, and that product choice is a bigger error term than the polygon.
+   Nothing here sets or changes a floor, per #42's rule; the disposition is a
+   decision.
+6. **Is the centring result a defect or a diagnostic?** Recentring is out of
+   scope under #80 and would mean editing `spots.json` coordinates, which #80
+   forbids and the repo's own rule reserves for joins against an authority. The
+   cheapest honest move is a per-spot centring diagnostic beside the existing
+   radius grid, so a refusal states whether its disc is on the rock.
+7. **Which of the five refusals survive a centred disc?** Untested. `windansea`
+   refuses on one criterion at 1.13× against a 2.0× bar with 99 visits, and its
+   best disc holds 5.5× the records. That is the cheapest test in the corridor
+   and it is a `calibration/` change, not a lidar one.

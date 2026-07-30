@@ -201,11 +201,22 @@ than estimated (`findings/coordinate-offset-widening.json`, product 2616): `wind
 `la-jolla-shores` and `sunset-cliffs` first reach any sub-zero pixel at **±200 m**, and
 `torrey-pines-beach` is still entirely above 0 m at ±300 m and does not go negative
 until **±500 m** — and then over only 1.2% of the disc.
-`cabrillo-tidepools` fails the other way: its median *rises* going inland, 14.7 m at
-±100 m → 19.3 → **24.8 m at ±300 m** → 32.6 m at ±500 m, because the disc fills with
-bluff while the bench is a narrow shore-parallel strip. Widening the clip is therefore
-not a workaround at any spot; it trades a window with no reef in it for a window that
-is mostly cliff. `la-jolla-cove` reaches **−15.6 ft MLLW**, which is deep water rather
+`cabrillo-tidepools` fails the other way: its median *rises* going inland, and its
+disc fills with bluff while the bench is a narrow shore-parallel strip. Widening the
+clip is therefore not a workaround at any spot; it trades a window with no reef in it
+for a window that is mostly cliff.
+
+**Correction, 2026-07-29, under #80: the Cabrillo figures this paragraph used to
+carry were wrong, and the sentence above has been rewritten to drop them.** It said
+the median rises "14.7 m at ±100 m → 19.3 → 24.8 m at ±300 m → 32.6 m at ±500 m".
+Every one of those windows was clipped at a tile edge and the clipped side was the
+**seaward** side — the pin sits 28 m east of tile 11SMS770135's western boundary in
+both products, so the window could only widen inland, and a window that can only
+widen one way shows a rising median whether or not the terrain does. Re-measured on a
+2×2 tile mosaic the series is **6.9 → 11.2 → 15.0 → 15.9 m**, and the ±100 m
+fraction of pixels below 0 m NAVD88 is **0.21, not 0.025**. The three ±200 m results
+above are on full windows and are unaffected. Detail, and what else was truncated, in
+`lidar-recon/README.md` §7 and `lidar-recon/findings/window-truncation.json`. `la-jolla-cove` reaches **−15.6 ft MLLW**, which is deep water rather
 than intertidal, consistent with the 1142 m conflict between its coordinate and
 MARINe's published position that #45 left unresolved.
 
@@ -236,6 +247,31 @@ the cross-shore gradient that dominates dA/dz survives, but a boundary in the wr
 *place* destroys both. #63 conflated edge imprecision with gross mislocation. One
 perturbation test at Cabrillo settles it, and until it is run nothing in this section
 is available.
+
+**Run 2026-07-29 under #80, and slope did not survive it.** A real polygon — OSM way
+975130801, `natural=reef`, traced from Mapbox Satellite, ±25 m stated — perturbed by
+erosion, dilation and translation, over products 2616 and 6260. Normalised curve slope
+at the knee moves **25–27%** at the stated uncertainty and the normalised curve itself
+by up to **0.246**, which is the same order as the floor level's movement. The one
+quantity that held perfectly was the knee's *location*, `tidepool_prime_ft`: 0.0 ft
+across every product, extent and perturbation kind.
+
+**And that one is defeated by something else.** With the polygon held fixed, the two
+products §8 of the recon recommends put the knee **0.4 ft apart** (+0.3 ft against
++0.7 ft) and their normalised peak slopes differ by **91%**, because they do not
+sample the same elevation range on the same rock: 6260's lowest pixel inside the
+mapped bench is −1.56 ft MLLW, so it cannot produce the +2.0 → −2.0 ft curve at all,
+while 2616 reaches −14.0 ft there. Coverage on the bench is 82% and 67%, and the voids
+are on the wet side. **The blocker was never the polygons.** Full result in
+`lidar-recon/README.md` §10 and `lidar-recon/findings/cabrillo-slope-gate.json`.
+Whether #46 closes on that is a decision and is not taken here; nothing in this
+section moved a floor.
+
+One thing #63 got backwards, now measured: alongshore translation is benign
+(`shape_dev` 0.033–0.036 at ±25 m) but uniform erode/dilate — edge imprecision, the
+failure #63 expected to survive — is the **worst** of the three perturbations, ahead
+of cross-shore mislocation. On a narrow shore-parallel strip, moving the edges changes
+which elevation band is inside the polygon, and that is the curve.
 
 **Reading the curve.**
 
@@ -368,6 +404,35 @@ San Diego's tidal rate; joining on the local day's low, it is wrong only when th
 error crosses midnight. That is the substitute the 48-hour `created_at` guard
 never got, and it is genuinely weaker: a hand-entered date wrong by a whole day
 lands the visit in the wrong day's bin and nothing in the pipeline notices.
+
+### A second inherited input, measured 2026-07-29: the disc is centred on the pin
+
+The pull is a 0.5 km disc around each `spots.json` coordinate, and §2 above
+measures those coordinates sitting 100–400 m inland of the bench. 500 m is wide
+enough to *contain* a bench 300 m away, which is not the same as being centred on
+it, and it had never been checked. It has now — `lidar-recon/probes/rate_centring.py`,
+iNaturalist count queries only, reproducing this file's own `records` figures
+exactly at 7 of 8 spots.
+
+**The three spots that publish are the three whose disc is centred. The five that
+refuse are the five whose disc is not.** Recentring a 0.5 km disc within ±500 m of
+the pin finds 1.5× the records at `la-jolla-shores`, 1.6× at `cardiff-reef`, 2.0× at
+`torrey-pines-beach`, 3.0× at `la-jolla-cove` and **5.5× at `windansea`**, against
+1.00–1.01× at `swamis`, `sunset-cliffs` and `cabrillo-tidepools`. All five best
+offsets sit on the search grid's boundary, so those are lower bounds.
+
+This is not licence to move a coordinate — that is a join against an authority, not
+a fit to observation density — and it does not overturn any refusal. Three cautions
+carry equal weight: counts are observations rather than visits and skip every
+in-memory filter; a disc recentred 500 m away may be aggregating two benches, which
+§1 already flags as its own defect rather than a fix; and `la-jolla-cove` and
+`la-jolla-shores` refuse on the amplitude gate, which more records need not move.
+
+What it does mean is that **"thin data here" and "the disc is in the wrong place"
+are not currently distinguishable at five spots**, and the pipeline reports the
+first. `windansea` is the cheapest test in the corridor: it refuses on one criterion
+at 1.13× against a 2.0× bar with 99 visits, and its best disc holds 5.5× the
+records. `lidar-recon/README.md` §11 has the table and the open questions.
 
 **Status of the output: evidence, never the number.** It is a cross-check
 against the lidar-derived floor of §2. Agreement raises confidence; disagreement
