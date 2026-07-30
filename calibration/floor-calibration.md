@@ -683,13 +683,32 @@ crossings are these, each computed against that spot's own background band:
 | `sunset-cliffs` | 0.50–3.00 ft, 12.5% | 25.0% | bracketed 0.25–0.50 ft | 0.25–0.50 ft, 42.9% | 14, **thin** |
 | `swamis` | 0.25–3.00 ft, 6.25% | 12.5% | bracketed 0.00–0.25 ft | 0.00–0.25 ft, 25.0% | 8, **thin** |
 
-Only Cabrillo's is usable. Its marginal band holds 30 visits, and its background
-is unchanged by the re-binning at 5.71% either way — so the +1.3 ft in force is
-too permissive and the ceiling is 1.00 ft. The other two are bracketed rather
-than located, because the band that decides each holds fewer than the 15 visits
-`USABLE_BIN_MIN_VISITS` requires — Sunset Cliffs' by a single visit. A ceiling
-resting on a band no gate may read is not a ceiling, so #44 has one spot to act
-on and two to record as unresolved.
+Only Cabrillo's crossing is *located*. Its marginal band holds 30 visits and the
+band above it is also usable and fails the bar, so the crossing is measured on
+both sides — the +1.3 ft in force was too permissive and the ceiling is 1.00 ft.
+The other two are bracketed rather than located, because the band that decides
+each holds fewer than the 15 visits `USABLE_BIN_MIN_VISITS` requires — Sunset
+Cliffs' by a single visit.
+
+**Correction, 2026-07-30.** This paragraph used to end: "A ceiling resting on a
+band no gate may read is not a ceiling, so #44 has one spot to act on and two to
+record as unresolved." That was wrong, and #44 acted on all three.
+
+It conflated *where the crossing is* with *what ceiling has a usable marginal
+band*. A bracket has two ends. Its permissive end does rest on a thin band and is
+unusable — but its **conservative end rests on the band below**, which at Sunset
+Cliffs holds 31 visits and at Swami's holds 51. Those are settable, and the rule
+fails toward the restriction, so the conservative end is the one the rule
+selects. All three ceilings were set, all three downward: Cabrillo 1.00 ft,
+Sunset Cliffs 0.25 ft, Swami's 0.00 ft.
+
+What a bracket changes is the strength of the claim, not whether one can be made.
+A located crossing says the reef's behaviour was measured on both sides of the
+value. A bracket's conservative end says only that the rule is satisfied at or
+below it, and that the band which would justify going higher was too thin to
+read. Both are ceilings; only the first is evidence about where this reef
+actually surfaces. `floor_evidence` records which of the two each value is, and
+the two brackets say so in their notes.
 
 An X of roughly 15% would land near the NPS 0.7 ft figure. That is not a reason
 to choose anything: §6 records that the published record cannot say which field
