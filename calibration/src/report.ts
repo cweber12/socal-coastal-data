@@ -166,6 +166,19 @@ export function renderReport(run: CalibrationRun): string {
       );
     }
     out.push('');
+    out.push(
+      spot.background === null
+        ? '**Background band:** none — no bin holds ' +
+            `${USABLE_BIN_MIN_VISITS} visits, so there is nothing to measure a background over.`
+        : `**Background band:** [${spot.background.loFt.toFixed(2)}, ` +
+            `${spot.background.hiFt.toFixed(2)}) — ${spot.background.hits} of ` +
+            `${spot.background.visits} visits, ` +
+            `${n(spot.background.rate)}, pooled from ${spot.background.binsPooled} ` +
+            `bin${spot.background.binsPooled === 1 ? '' : 's'}. The amplitude gate's ` +
+            'denominator: the highest usable bin plus every bin above it, so that no high-tide ' +
+            'visit above it goes uncounted (#72).',
+    );
+    out.push('');
 
     out.push('### Refusal criteria');
     out.push('');

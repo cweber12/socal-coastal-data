@@ -21,6 +21,7 @@ import {
 } from './config.ts';
 import {
   amplitudeRatio,
+  backgroundBand,
   concordance,
   observerConcentration,
   type BinResult,
@@ -63,8 +64,19 @@ export function evaluateRefusals(
 ): RefusalVerdict {
   const usableBins = bins.filter((b) => b.usable && b.rate !== null);
   const ratio = amplitudeRatio(bins);
+  const background = backgroundBand(bins);
   const conc = concordance(bins);
   const observers = observerConcentration(visits);
+
+  // Named in the statement rather than left implicit. Since #72 the denominator
+  // is a POOLED band, not a bin anyone can point at in the table, and a derived
+  // number a reader cannot locate is the kind this repo is built to avoid.
+  const backgroundDescription =
+    background === null
+      ? 'no usable bin, so no background band'
+      : `[${background.loFt.toFixed(2)}, ${background.hiFt.toFixed(2)}), ` +
+        `${background.hits} of ${background.visits} visits` +
+        (background.binsPooled > 1 ? `, pooled from ${background.binsPooled} bins` : '');
 
   const criteria: CriterionResult[] = [
     {
@@ -100,10 +112,12 @@ export function evaluateRefusals(
       statement:
         ratio === null
           ? 'the amplitude ratio could not be computed: fewer than two usable bins, or the ' +
-            'highest usable bin has no hits at all.'
-          : `the lowest usable bin's rate is ${ratio.toFixed(2)}x the highest usable bin's; ` +
-            `${MIN_AMPLITUDE_RATIO.toFixed(1)}x is needed. The highest bin measures this spot's ` +
-            'own tide-independent background, and a distinct low zone has to at least double it.',
+            'background band has no hits at all.'
+          : `the lowest usable bin's rate is ${ratio.toFixed(2)}x the background band's; ` +
+            `${MIN_AMPLITUDE_RATIO.toFixed(1)}x is needed. Background is the highest usable bin ` +
+            `pooled with everything above it — here ${backgroundDescription} — which measures ` +
+            'this spot\'s own tide-independent background, and a distinct low zone has to at ' +
+            'least double it.',
     },
     {
       code: 'observer-concentration',

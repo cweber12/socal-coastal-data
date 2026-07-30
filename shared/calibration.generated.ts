@@ -122,7 +122,7 @@ export const CALIBRATION_BY_SLUG: Readonly<Record<CalibratedSlug, SpotCalibratio
     SpotCalibration
   >;
 
-/** Slugs that published a rate table. 4 of 8 on this corpus. */
-export const PUBLISHED_SLUGS: readonly CalibratedSlug[] = ["swamis","la-jolla-cove","sunset-cliffs","cabrillo-tidepools"];
+/** Slugs that published a rate table. 3 of 8 on this corpus. */
+export const PUBLISHED_SLUGS: readonly CalibratedSlug[] = ["swamis","sunset-cliffs","cabrillo-tidepools"];
 
 export const CALIBRATION_QUERIES: readonly string[] = FILE.queries;

@@ -376,21 +376,105 @@ export function binVisits(visits: readonly PlacedVisit[]): BinResult[] {
  * Summary statistics over the bin table
  * ========================================================================= */
 
+/** The band the amplitude gate measures this spot's background over. */
+export interface BackgroundBand {
+  loFt: number;
+  /** The top edge of the whole table, since the pool always runs to the top. */
+  hiFt: number;
+  visits: number;
+  hits: number;
+  /** hits / visits, or null when the band holds no visits. */
+  rate: number | null;
+  /** How many bins were pooled. 1 means the highest usable bin stood alone. */
+  binsPooled: number;
+}
+
 /**
- * Lowest usable bin's rate over the highest usable bin's.
+ * The spot's tide-independent background: the highest USABLE bin, POOLED with
+ * every bin above it.
  *
- * Null when there are fewer than two usable bins, or when the highest usable
- * bin's rate is zero -- a ratio over zero is not "infinitely good", it is a bin
- * with no hits in it, and reporting Infinity would let a spot with a single
- * empty high bin pass the strongest gate in the pipeline.
+ * ---------------------------------------------------------------------------
+ * Why pooled, since #72
+ * ---------------------------------------------------------------------------
+ *
+ * This used to be the highest usable bin alone, and the justification in
+ * config.ts and README.md was that that bin "measures the spot's
+ * tide-independent background". That held while the top bin was [1.0, 3.0) --
+ * 2 ft wide, definitionally high-tide days, and fat enough to be usable
+ * wherever there was data at all.
+ *
+ * #43's 0.25 ft edges broke it. Bins above the highest usable one are
+ * individually thin, so they were DISCARDED -- not merged up, not merged down,
+ * simply not counted. The denominator could then be a band in the middle of the
+ * range while real high-tide visits sat above it unread. Measured at La Jolla
+ * Cove: the old top band held 17 visits at 29.4% and the ratio was 0.85x, so the
+ * gate caught the contamination. Split into bins of 6, 7 and 4 those same visits
+ * all fell under the usable floor, background dropped to [0.75, 1.00) -- 1 hit
+ * in 18 visits, Wilson [0.01, 0.26], overlapping the whole plateau beneath it --
+ * and the ratio read 4.50x on an unchanged, flat table.
+ *
+ * Cutting [1.0, 3.0) into three does not change who visited on a high-tide day
+ * or who saw a target, so it must not change the background. Pooling fixes the
+ * DISCARDING, which is the mechanism that allowed that: every visit above the
+ * highest usable bin now counts.
+ *
+ * It does NOT make the gate fully invariant to bin width, and the difference
+ * matters. Which bin is "highest usable" still depends on the widths. Where the
+ * lowest slice of the old top band is itself usable the pooled band is exactly
+ * the old band -- Cabrillo back to 11.83x over [1.00, 3.00) n=35, La Jolla
+ * Shores to 0.67x over [1.00, 3.00) n=22, both the pre-#43 figures to the digit.
+ * Where no slice of it is usable, the pool falls one band lower and measures
+ * background over MORE visits at a HIGHER rate, so the ratio falls: La Jolla
+ * Cove's background went from 17 visits to 35 and its ratio from 4.50x to 1.46x.
+ * Stricter, never looser, which is the direction README.md requires. Full
+ * width-invariance would mean choosing the background region by HEIGHT, which
+ * needs an a priori height nobody has stated; #72 did not invent one.
+ *
+ * UPWARD ONLY. Bins below the lowest usable bin stay discarded. The numerator is
+ * the low-tide rate, and pooling downward would fold thin extreme-low bins into
+ * it and could only RAISE the ratio. The gate has to fail toward the
+ * restriction, so only the denominator pools.
+ *
+ * Null when no bin is usable at all, which is a spot with nothing to measure
+ * rather than a background of zero.
+ */
+export function backgroundBand(bins: readonly BinResult[]): BackgroundBand | null {
+  const usable = bins.filter((b) => b.usable && b.rate !== null);
+  const highest = usable[usable.length - 1];
+  if (highest === undefined) return null;
+
+  // From the highest usable bin to the top of the table. Located by `index`
+  // rather than by identity so a caller that mapped over the bins still works.
+  const from = bins.findIndex((b) => b.index === highest.index);
+  const pool = bins.slice(from);
+
+  const visits = pool.reduce((n, b) => n + b.visits, 0);
+  const hits = pool.reduce((n, b) => n + b.hits, 0);
+  return {
+    loFt: highest.loFt,
+    hiFt: pool[pool.length - 1]!.hiFt,
+    visits,
+    hits,
+    rate: visits === 0 ? null : hits / visits,
+    binsPooled: pool.length,
+  };
+}
+
+/**
+ * Lowest usable bin's rate over the pooled background's.
+ *
+ * Null when there are fewer than two usable bins, or when the background band's
+ * rate is zero -- a ratio over zero is not "infinitely good", it is a band with
+ * no hits in it, and reporting Infinity would let a spot with an empty top of
+ * the table pass the strongest gate in the pipeline.
  */
 export function amplitudeRatio(bins: readonly BinResult[]): number | null {
   const usable = bins.filter((b) => b.usable && b.rate !== null);
   if (usable.length < 2) return null;
-  const lowest = usable[0]!;
-  const highest = usable[usable.length - 1]!;
-  if (highest.rate === 0) return null;
-  return lowest.rate! / highest.rate!;
+  const background = backgroundBand(bins);
+  // Covers null, a null rate and a rate of exactly zero in one test.
+  if (background === null || !background.rate) return null;
+  return usable[0]!.rate! / background.rate;
 }
 
 /**

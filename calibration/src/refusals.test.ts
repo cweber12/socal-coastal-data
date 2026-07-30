@@ -191,6 +191,38 @@ describe('amplitude-below-gate', () => {
     ).toBe(true);
   });
 
+  it('still catches a flat spot when its high-tide bins are individually thin', () => {
+    /*
+     * La Jolla Cove, at its real counts, and the regression #72 exists to
+     * prevent. The table is flat -- the diver signature -- and 17 high-tide
+     * visits at 29% sit in bins of 6, 7 and 4, all under the usable floor.
+     *
+     * With background read off the highest usable bin alone, those 17 visits
+     * were discarded, 1 hit in 18 became the background, and the spot published
+     * at 4.50x on an unchanged flat table. Pooled, the background is 6 of 35 and
+     * the gate fires again.
+     */
+    const table = bins([
+      { visits: 100, rate: 0.25 },
+      { visits: 18, rate: 1 / 18 },
+      { visits: 6, rate: 2 / 6 },
+      { visits: 7, rate: 2 / 7 },
+      { visits: 4, rate: 1 / 4 },
+    ]);
+    const verdict = evaluateRefusals(table, visits(135));
+
+    const criterion = verdict.criteria.find((c) => c.code === 'amplitude-below-gate')!;
+    expect(criterion.value).toBeCloseTo(0.25 / (6 / 35), 6);
+    expect(criterion.value).toBeLessThan(MIN_AMPLITUDE_RATIO);
+    expect(criterion.passed).toBe(false);
+    expect(verdict.publishes).toBe(false);
+
+    // And the statement locates the pooled band, because a reader cannot find it
+    // in the bin table.
+    expect(criterion.statement).toContain('pooled from');
+    expect(criterion.statement).toContain('6 of 35 visits');
+  });
+
   it('fires rather than passing on an infinite ratio', () => {
     // A highest bin with no hits gives a ratio over zero. That is a bin with
     // nothing in it, not an infinitely good spot, and it must not clear the

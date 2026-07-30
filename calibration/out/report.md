@@ -32,14 +32,14 @@ Every one of these is corridor-wide and stated a priori. None may be changed to 
 
 | spot | visits | [-2.50, -1.00) | [-1.00, -0.50) | [-0.50, 0.00) | [0.00, 0.25) | [0.25, 0.50) | [0.50, 0.75) | [0.75, 1.00) | [1.00, 1.25) | [1.25, 1.50) | [1.50, 3.00) | ratio | verdict |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| swamis | 237 | 0.60 (91) | 0.53 (55) | 0.31 (51) | 0.25 (8)* | 0.06 (17) | 0.00 (8)* | 0.33 (3)* | 0.00 (3)* | 0.00 (1)* | — | 10.27 | **PUBLISH** |
-| cardiff-reef | 74 | 0.69 (16) | 0.68 (19) | 0.71 (14)* | 0.71 (7)* | 0.80 (5)* | 1.00 (5)* | 0.75 (4)* | 1.00 (3)* | 1.00 (1)* | — | 1.00 | refuse |
+| swamis | 237 | 0.60 (91) | 0.53 (55) | 0.31 (51) | 0.25 (8)* | 0.06 (17) | 0.00 (8)* | 0.33 (3)* | 0.00 (3)* | 0.00 (1)* | — | 9.67 | **PUBLISH** |
+| cardiff-reef | 74 | 0.69 (16) | 0.68 (19) | 0.71 (14)* | 0.71 (7)* | 0.80 (5)* | 1.00 (5)* | 0.75 (4)* | 1.00 (3)* | 1.00 (1)* | — | 0.91 | refuse |
 | torrey-pines-beach | 31 | 0.33 (3)* | 0.00 (4)* | 0.00 (7)* | 0.60 (5)* | 0.33 (3)* | 0.50 (4)* | 0.33 (3)* | 0.50 (2)* | — | — | — | refuse |
-| la-jolla-shores | 239 | 0.52 (33) | 0.70 (50) | 0.73 (49) | 0.73 (33) | 0.71 (17) | 0.90 (21) | 0.86 (14)* | 0.87 (15) | 0.50 (4)* | 0.67 (3)* | 0.59 | refuse |
-| la-jolla-cove | 354 | 0.25 (56) | 0.26 (73) | 0.27 (95) | 0.27 (33) | 0.24 (38) | 0.21 (24) | 0.06 (18) | 0.33 (6)* | 0.29 (7)* | 0.25 (4)* | 4.50 | **PUBLISH** |
-| windansea | 99 | 0.25 (32) | 0.23 (22) | 0.18 (22) | 0.00 (5)* | 0.17 (6)* | 0.25 (4)* | 0.67 (3)* | 0.33 (3)* | 0.00 (1)* | 1.00 (1)* | 1.38 | refuse |
-| sunset-cliffs | 404 | 0.74 (162) | 0.72 (102) | 0.41 (63) | 0.45 (31) | 0.43 (14)* | 0.06 (18) | 0.13 (8)* | 0.67 (3)* | 0.00 (2)* | 0.00 (1)* | 13.33 | **PUBLISH** |
-| cabrillo-tidepools | 1224 | 0.68 (383) | 0.57 (247) | 0.42 (331) | 0.31 (59) | 0.22 (89) | 0.16 (50) | 0.13 (30) | 0.06 (18) | 0.09 (11)* | 0.00 (6)* | 12.17 | **PUBLISH** |
+| la-jolla-shores | 239 | 0.52 (33) | 0.70 (50) | 0.73 (49) | 0.73 (33) | 0.71 (17) | 0.90 (21) | 0.86 (14)* | 0.87 (15) | 0.50 (4)* | 0.67 (3)* | 0.67 | refuse |
+| la-jolla-cove | 354 | 0.25 (56) | 0.26 (73) | 0.27 (95) | 0.27 (33) | 0.24 (38) | 0.21 (24) | 0.06 (18) | 0.33 (6)* | 0.29 (7)* | 0.25 (4)* | 1.46 | refuse |
+| windansea | 99 | 0.25 (32) | 0.23 (22) | 0.18 (22) | 0.00 (5)* | 0.17 (6)* | 0.25 (4)* | 0.67 (3)* | 0.33 (3)* | 0.00 (1)* | 1.00 (1)* | 1.13 | refuse |
+| sunset-cliffs | 404 | 0.74 (162) | 0.72 (102) | 0.41 (63) | 0.45 (31) | 0.43 (14)* | 0.06 (18) | 0.13 (8)* | 0.67 (3)* | 0.00 (2)* | 0.00 (1)* | 5.93 | **PUBLISH** |
+| cabrillo-tidepools | 1224 | 0.68 (383) | 0.57 (247) | 0.42 (331) | 0.31 (59) | 0.22 (89) | 0.16 (50) | 0.13 (30) | 0.06 (18) | 0.09 (11)* | 0.00 (6)* | 11.83 | **PUBLISH** |
 
 `*` marks a bin below 15 visits. Those are reported but no gate reads them.
 
@@ -86,18 +86,20 @@ At 0.7 ft the observed rate at Cabrillo is **0.16** over 50 visits (bin [0.50, 0
 | [1.25, 1.50) | 1 | 0 | 0.00 | [0.00, 0.79] | no |
 | [1.50, 3.00) | 0 | 0 | — | — | no |
 
+**Background band:** [0.25, 3.00) — 2 of 32 visits, 0.06, pooled from 6 bins. The amplitude gate's denominator: the highest usable bin plus every bin above it, so that no high-tide visit above it goes uncounted (#72).
+
 ### Refusal criteria
 
 | criterion | value | threshold | passed |
 |---|---:|---:|---|
 | too-few-usable-bins | 4.00 | 3.00 | yes |
 | not-declining | 1.00 | 0.70 | yes |
-| amplitude-below-gate | 10.27 | 2.00 | yes |
+| amplitude-below-gate | 9.67 | 2.00 | yes |
 | observer-concentration | 0.04 | 0.30 | yes |
 
 - `too-few-usable-bins` — 4 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them.
 - `not-declining` — 6 of 6 comparable bin pairs decline with height (100%, 0 tied and excluded); 70% is needed.
-- `amplitude-below-gate` — the lowest usable bin's rate is 10.27x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+- `amplitude-below-gate` — the lowest usable bin's rate is 9.67x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [0.25, 3.00), 2 of 32 visits, pooled from 6 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 - `observer-concentration` — the largest single observer contributed 10 of 237 visits (4%); the limit is 30%. One enthusiast is not a distribution.
 
 ### Per-taxon height distribution
@@ -126,13 +128,13 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | removed | hits | Δ hits | ratio | Δ ratio | flips verdict |
 |---|---:|---:|---:|---:|---|
-| Megathura crenulata | 96 | -8 | 8.78 | -1.49 | no |
-| Strongylocentrotus purpuratus | 99 | -5 | 9.71 | -0.56 | no |
-| Octopus bimaculoides | 97 | -7 | 9.34 | -0.93 | no |
-| Kelletia kelletii | 102 | -2 | 10.09 | -0.19 | no |
-| Aplysia californica | 49 | -55 | — | — | **yes** |
-| Phyllospadix | 98 | -6 | 9.71 | -0.56 | no |
-| Pisaster ochraceus | 104 | 0 | 10.27 | 0.00 | no |
+| Megathura crenulata | 96 | -8 | 8.26 | -1.41 | no |
+| Strongylocentrotus purpuratus | 99 | -5 | 9.14 | -0.53 | no |
+| Octopus bimaculoides | 97 | -7 | 8.79 | -0.88 | no |
+| Kelletia kelletii | 102 | -2 | 9.49 | -0.18 | no |
+| Aplysia californica | 49 | -55 | 12.31 | 2.64 | no |
+| Phyllospadix | 98 | -6 | 18.29 | 8.62 | no |
+| Pisaster ochraceus | 104 | 0 | 9.67 | 0.00 | no |
 
 ### Radius × accuracy sensitivity
 
@@ -140,21 +142,21 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | radius | acc bar | visits | [-2.50, -1.00) | [-1.00, -0.50) | [-0.50, 0.00) | [0.00, 0.25) | [0.25, 0.50) | [0.50, 0.75) | [0.75, 1.00) | [1.00, 1.25) | [1.25, 1.50) | [1.50, 3.00) | ratio |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 250 | none | 227 | 0.60 (85) | 0.50 (52) | 0.26 (50) | 0.25 (8) | 0.06 (17) | 0.00 (8) | 0.00 (3) | 0.00 (3) | 0.00 (1) | — | 10.20 |
-| 250 | 100 | 177 | 0.65 (66) | 0.51 (45) | 0.26 (35) | 0.25 (8) | 0.09 (11) | 0.00 (7) | 0.00 (2) | 0.00 (3) | — | — | 2.53 |
-| 500 | none | 237 | 0.60 (91) | 0.53 (55) | 0.31 (51) | 0.25 (8) | 0.06 (17) | 0.00 (8) | 0.33 (3) | 0.00 (3) | 0.00 (1) | — | 10.27 |
-| 500 | 100 | 182 | 0.67 (70) | 0.52 (46) | 0.29 (35) | 0.25 (8) | 0.09 (11) | 0.00 (7) | 0.50 (2) | 0.00 (3) | — | — | 2.35 |
-| 1000 | none | 257 | 0.61 (102) | 0.50 (58) | 0.33 (52) | 0.40 (10) | 0.06 (17) | 0.00 (9) | 0.50 (4) | 0.00 (4) | 0.00 (1) | — | 10.33 |
-| 1000 | 100 | 193 | 0.65 (77) | 0.50 (48) | 0.28 (36) | 0.33 (9) | 0.09 (11) | 0.00 (7) | 0.50 (2) | 0.00 (3) | — | — | 2.34 |
+| 250 | none | 227 | 0.60 (85) | 0.50 (52) | 0.26 (50) | 0.25 (8) | 0.06 (17) | 0.00 (8) | 0.00 (3) | 0.00 (3) | 0.00 (1) | — | 19.20 |
+| 250 | 100 | 177 | 0.65 (66) | 0.51 (45) | 0.26 (35) | 0.25 (8) | 0.09 (11) | 0.00 (7) | 0.00 (2) | 0.00 (3) | — | — | 3.58 |
+| 500 | none | 237 | 0.60 (91) | 0.53 (55) | 0.31 (51) | 0.25 (8) | 0.06 (17) | 0.00 (8) | 0.33 (3) | 0.00 (3) | 0.00 (1) | — | 9.67 |
+| 500 | 100 | 182 | 0.67 (70) | 0.52 (46) | 0.29 (35) | 0.25 (8) | 0.09 (11) | 0.00 (7) | 0.50 (2) | 0.00 (3) | — | — | 3.17 |
+| 1000 | none | 257 | 0.61 (102) | 0.50 (58) | 0.33 (52) | 0.40 (10) | 0.06 (17) | 0.00 (9) | 0.50 (4) | 0.00 (4) | 0.00 (1) | — | 7.09 |
+| 1000 | 100 | 193 | 0.65 (77) | 0.50 (48) | 0.28 (36) | 0.33 (9) | 0.09 (11) | 0.00 (7) | 0.50 (2) | 0.00 (3) | — | — | 2.94 |
 
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
 |---|---:|---:|---|
-| all | 237 | 10.27 | no |
-| 2019 | 200 | 9.89 | no |
-| 2021 | 169 | 1.71 | no |
-| 2023 | 128 | 1.54 | no |
+| all | 237 | 9.67 | no |
+| 2019 | 200 | 9.27 | no |
+| 2021 | 169 | 2.57 | no |
+| 2023 | 128 | 2.54 | no |
 
 ### Timestamp quality
 
@@ -217,21 +219,23 @@ No records were withheld by geoprivacy at this spot.
 | [1.25, 1.50) | 1 | 1 | 1.00 | [0.21, 1.00] | no |
 | [1.50, 3.00) | 0 | 0 | — | — | no |
 
+**Background band:** [-1.00, 3.00) — 44 of 58 visits, 0.76, pooled from 9 bins. The amplitude gate's denominator: the highest usable bin plus every bin above it, so that no high-tide visit above it goes uncounted (#72).
+
 ### Refusal criteria
 
 | criterion | value | threshold | passed |
 |---|---:|---:|---|
 | too-few-usable-bins | 2.00 | 3.00 | **no** |
 | not-declining | 1.00 | 0.70 | yes |
-| amplitude-below-gate | 1.00 | 2.00 | **no** |
+| amplitude-below-gate | 0.91 | 2.00 | **no** |
 | observer-concentration | 0.22 | 0.30 | yes |
 
 - `too-few-usable-bins` — 2 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them.
 - `not-declining` — 1 of 1 comparable bin pairs decline with height (100%, 0 tied and excluded); 70% is needed.
-- `amplitude-below-gate` — the lowest usable bin's rate is 1.00x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+- `amplitude-below-gate` — the lowest usable bin's rate is 0.91x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [-1.00, 3.00), 44 of 58 visits, pooled from 9 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 - `observer-concentration` — the largest single observer contributed 16 of 74 visits (22%); the limit is 30%. One enthusiast is not a distribution.
 
-**null_reason:** Refused on 2 of 4 criteria. too-few-usable-bins: 2 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. amplitude-below-gate: the lowest usable bin's rate is 1.00x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+**null_reason:** Refused on 2 of 4 criteria. too-few-usable-bins: 2 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. amplitude-below-gate: the lowest usable bin's rate is 0.91x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [-1.00, 3.00), 44 of 58 visits, pooled from 9 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 
 ### Per-taxon height distribution
 
@@ -259,13 +263,13 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | removed | hits | Δ hits | ratio | Δ ratio | flips verdict |
 |---|---:|---:|---:|---:|---|
-| Megathura crenulata | 51 | -4 | 0.82 | -0.18 | no |
-| Strongylocentrotus purpuratus | 50 | -5 | 1.00 | 0.00 | no |
-| Octopus bimaculoides | 52 | -3 | 1.19 | 0.18 | no |
-| Kelletia kelletii | 43 | -12 | 1.32 | 0.31 | no |
-| Aplysia californica | 37 | -18 | 0.53 | -0.48 | no |
-| Phyllospadix | 47 | -8 | 1.19 | 0.18 | no |
-| Pisaster ochraceus | 55 | 0 | 1.00 | 0.00 | no |
+| Megathura crenulata | 51 | -4 | 0.78 | -0.13 | no |
+| Strongylocentrotus purpuratus | 50 | -5 | 1.02 | 0.12 | no |
+| Octopus bimaculoides | 52 | -3 | 0.97 | 0.07 | no |
+| Kelletia kelletii | 43 | -12 | 1.10 | 0.19 | no |
+| Aplysia californica | 37 | -18 | 0.44 | -0.47 | no |
+| Phyllospadix | 47 | -8 | 1.11 | 0.20 | no |
+| Pisaster ochraceus | 55 | 0 | 0.91 | 0.00 | no |
 
 ### Radius × accuracy sensitivity
 
@@ -275,16 +279,16 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 250 | none | 35 | 0.75 (8) | 0.56 (9) | 0.67 (6) | 0.40 (5) | 1.00 (1) | 1.00 (3) | 1.00 (1) | 1.00 (1) | 1.00 (1) | — | — |
 | 250 | 100 | 31 | 0.71 (7) | 0.56 (9) | 0.75 (4) | 0.20 (5) | — | 1.00 (3) | 1.00 (1) | 1.00 (1) | 1.00 (1) | — | — |
-| 500 | none | 74 | 0.69 (16) | 0.68 (19) | 0.71 (14) | 0.71 (7) | 0.80 (5) | 1.00 (5) | 0.75 (4) | 1.00 (3) | 1.00 (1) | — | 1.00 |
+| 500 | none | 74 | 0.69 (16) | 0.68 (19) | 0.71 (14) | 0.71 (7) | 0.80 (5) | 1.00 (5) | 0.75 (4) | 1.00 (3) | 1.00 (1) | — | 0.91 |
 | 500 | 100 | 61 | 0.71 (14) | 0.67 (18) | 0.88 (8) | 0.33 (6) | 0.67 (3) | 1.00 (4) | 0.75 (4) | 1.00 (3) | 1.00 (1) | — | — |
-| 1000 | none | 138 | 0.59 (29) | 0.64 (25) | 0.58 (31) | 0.53 (17) | 0.75 (8) | 0.67 (9) | 0.45 (11) | 0.83 (6) | 1.00 (1) | 1.00 (1) | 1.11 |
-| 1000 | 100 | 99 | 0.68 (19) | 0.68 (19) | 0.61 (23) | 0.31 (13) | 0.75 (4) | 0.67 (6) | 0.63 (8) | 1.00 (5) | 1.00 (1) | 1.00 (1) | 1.12 |
+| 1000 | none | 138 | 0.59 (29) | 0.64 (25) | 0.58 (31) | 0.53 (17) | 0.75 (8) | 0.67 (9) | 0.45 (11) | 0.83 (6) | 1.00 (1) | 1.00 (1) | 0.94 |
+| 1000 | 100 | 99 | 0.68 (19) | 0.68 (19) | 0.61 (23) | 0.31 (13) | 0.75 (4) | 0.67 (6) | 0.63 (8) | 1.00 (5) | 1.00 (1) | 1.00 (1) | 1.13 |
 
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
 |---|---:|---:|---|
-| all | 74 | 1.00 | no |
+| all | 74 | 0.91 | no |
 | 2019 | 58 | — | no |
 | 2021 | 47 | — | no |
 | 2023 | 37 | — | no |
@@ -352,6 +356,8 @@ p10 -1.8 h · median 0.1 h · p90 3.6 h · **72%** within ±2 h (72 timed visits
 | [1.25, 1.50) | 0 | 0 | — | — | no |
 | [1.50, 3.00) | 0 | 0 | — | — | no |
 
+**Background band:** none — no bin holds 15 visits, so there is nothing to measure a background over.
+
 ### Refusal criteria
 
 | criterion | value | threshold | passed |
@@ -363,10 +369,10 @@ p10 -1.8 h · median 0.1 h · p90 3.6 h · **72%** within ±2 h (72 timed visits
 
 - `too-few-usable-bins` — 0 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them.
 - `not-declining` — no usable pair of bins differs in rate, so the table is flat rather than declining.
-- `amplitude-below-gate` — the amplitude ratio could not be computed: fewer than two usable bins, or the highest usable bin has no hits at all.
+- `amplitude-below-gate` — the amplitude ratio could not be computed: fewer than two usable bins, or the background band has no hits at all.
 - `observer-concentration` — the largest single observer contributed 3 of 31 visits (10%); the limit is 30%. One enthusiast is not a distribution.
 
-**null_reason:** Refused on 3 of 4 criteria. too-few-usable-bins: 0 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. not-declining: no usable pair of bins differs in rate, so the table is flat rather than declining. amplitude-below-gate: the amplitude ratio could not be computed: fewer than two usable bins, or the highest usable bin has no hits at all.
+**null_reason:** Refused on 3 of 4 criteria. too-few-usable-bins: 0 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. not-declining: no usable pair of bins differs in rate, so the table is flat rather than declining. amplitude-below-gate: the amplitude ratio could not be computed: fewer than two usable bins, or the background band has no hits at all.
 
 ### Per-taxon height distribution
 
@@ -412,8 +418,8 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 250 | 100 | 3 | — | 0.00 (1) | — | — | 0.00 (1) | — | — | 1.00 (1) | — | — | — |
 | 500 | none | 31 | 0.33 (3) | 0.00 (4) | 0.00 (7) | 0.60 (5) | 0.33 (3) | 0.50 (4) | 0.33 (3) | 0.50 (2) | — | — | — |
 | 500 | 100 | 21 | 0.33 (3) | 0.00 (3) | 0.00 (5) | 0.67 (3) | 0.50 (2) | 0.67 (3) | — | 0.50 (2) | — | — | — |
-| 1000 | none | 121 | 0.38 (24) | 0.17 (24) | 0.18 (28) | 0.25 (16) | 0.33 (6) | 0.45 (11) | 0.44 (9) | 0.50 (2) | 1.00 (1) | — | 1.50 |
-| 1000 | 100 | 81 | 0.42 (19) | 0.17 (18) | 0.17 (18) | 0.33 (9) | 0.50 (4) | 0.67 (6) | 0.50 (4) | 0.50 (2) | 1.00 (1) | — | 2.53 |
+| 1000 | none | 121 | 0.38 (24) | 0.17 (24) | 0.18 (28) | 0.25 (16) | 0.33 (6) | 0.45 (11) | 0.44 (9) | 0.50 (2) | 1.00 (1) | — | 0.99 |
+| 1000 | 100 | 81 | 0.42 (19) | 0.17 (18) | 0.17 (18) | 0.33 (9) | 0.50 (4) | 0.67 (6) | 0.50 (4) | 0.50 (2) | 1.00 (1) | — | 1.16 |
 
 ### Window stability
 
@@ -487,21 +493,23 @@ p10 -3.9 h · median -0.3 h · p90 5.1 h · **45%** within ±2 h (31 timed visit
 | [1.25, 1.50) | 4 | 2 | 0.50 | [0.15, 0.85] | no |
 | [1.50, 3.00) | 3 | 2 | 0.67 | [0.21, 0.94] | no |
 
+**Background band:** [1.00, 3.00) — 17 of 22 visits, 0.77, pooled from 3 bins. The amplitude gate's denominator: the highest usable bin plus every bin above it, so that no high-tide visit above it goes uncounted (#72).
+
 ### Refusal criteria
 
 | criterion | value | threshold | passed |
 |---|---:|---:|---|
 | too-few-usable-bins | 7.00 | 3.00 | yes |
 | not-declining | 0.19 | 0.70 | **no** |
-| amplitude-below-gate | 0.59 | 2.00 | **no** |
+| amplitude-below-gate | 0.67 | 2.00 | **no** |
 | observer-concentration | 0.15 | 0.30 | yes |
 
 - `too-few-usable-bins` — 7 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them.
 - `not-declining` — 4 of 21 comparable bin pairs decline with height (19%, 0 tied and excluded); 70% is needed.
-- `amplitude-below-gate` — the lowest usable bin's rate is 0.59x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+- `amplitude-below-gate` — the lowest usable bin's rate is 0.67x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [1.00, 3.00), 17 of 22 visits, pooled from 3 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 - `observer-concentration` — the largest single observer contributed 37 of 239 visits (15%); the limit is 30%. One enthusiast is not a distribution.
 
-**null_reason:** Refused on 2 of 4 criteria. not-declining: 4 of 21 comparable bin pairs decline with height (19%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.59x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+**null_reason:** Refused on 2 of 4 criteria. not-declining: 4 of 21 comparable bin pairs decline with height (19%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.67x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [1.00, 3.00), 17 of 22 visits, pooled from 3 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 
 ### Per-taxon height distribution
 
@@ -529,13 +537,13 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | removed | hits | Δ hits | ratio | Δ ratio | flips verdict |
 |---|---:|---:|---:|---:|---|
-| Megathura crenulata | 169 | -3 | 0.64 | 0.05 | no |
-| Strongylocentrotus purpuratus | 170 | -2 | 0.59 | 0.00 | no |
-| Octopus bimaculoides | 154 | -18 | 0.49 | -0.10 | no |
-| Kelletia kelletii | 164 | -8 | 0.59 | 0.00 | no |
-| Aplysia californica | 77 | -95 | 0.45 | -0.14 | no |
-| Phyllospadix | 154 | -18 | 0.66 | 0.07 | no |
-| Pisaster ochraceus | 159 | -13 | 0.56 | -0.03 | no |
+| Megathura crenulata | 169 | -3 | 0.71 | 0.04 | no |
+| Strongylocentrotus purpuratus | 170 | -2 | 0.67 | 0.00 | no |
+| Octopus bimaculoides | 154 | -18 | 0.54 | -0.13 | no |
+| Kelletia kelletii | 164 | -8 | 0.67 | 0.00 | no |
+| Aplysia californica | 77 | -95 | 0.52 | -0.15 | no |
+| Phyllospadix | 154 | -18 | 0.71 | 0.04 | no |
+| Pisaster ochraceus | 159 | -13 | 0.63 | -0.04 | no |
 
 ### Radius × accuracy sensitivity
 
@@ -545,19 +553,19 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 250 | none | 63 | 0.31 (13) | 0.62 (13) | 0.33 (12) | 0.40 (10) | 0.50 (6) | 1.00 (1) | 0.50 (2) | 0.50 (4) | 0.00 (1) | 1.00 (1) | — |
 | 250 | 100 | 10 | 0.50 (2) | 0.75 (4) | 1.00 (2) | — | — | — | 0.00 (1) | — | 0.00 (1) | — | — |
-| 500 | none | 239 | 0.52 (33) | 0.70 (50) | 0.73 (49) | 0.73 (33) | 0.71 (17) | 0.90 (21) | 0.86 (14) | 0.87 (15) | 0.50 (4) | 0.67 (3) | 0.59 |
+| 500 | none | 239 | 0.52 (33) | 0.70 (50) | 0.73 (49) | 0.73 (33) | 0.71 (17) | 0.90 (21) | 0.86 (14) | 0.87 (15) | 0.50 (4) | 0.67 (3) | 0.67 |
 | 500 | 100 | 74 | 0.63 (8) | 0.90 (21) | 0.92 (13) | 0.86 (7) | 1.00 (5) | 0.88 (8) | 0.75 (4) | 1.00 (4) | 0.33 (3) | 0.00 (1) | — |
-| 1000 | none | 484 | 0.69 (85) | 0.70 (107) | 0.70 (97) | 0.67 (55) | 0.66 (38) | 0.70 (37) | 0.74 (27) | 0.86 (22) | 0.45 (11) | 0.60 (5) | 0.80 |
-| 1000 | 100 | 210 | 0.72 (39) | 0.83 (47) | 0.72 (39) | 0.75 (20) | 0.67 (18) | 0.57 (14) | 0.73 (11) | 0.89 (9) | 0.40 (10) | 0.33 (3) | 1.08 |
+| 1000 | none | 484 | 0.69 (85) | 0.70 (107) | 0.70 (97) | 0.67 (55) | 0.66 (38) | 0.70 (37) | 0.74 (27) | 0.86 (22) | 0.45 (11) | 0.60 (5) | 0.98 |
+| 1000 | 100 | 210 | 0.72 (39) | 0.83 (47) | 0.72 (39) | 0.75 (20) | 0.67 (18) | 0.57 (14) | 0.73 (11) | 0.89 (9) | 0.40 (10) | 0.33 (3) | 1.14 |
 
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
 |---|---:|---:|---|
-| all | 239 | 0.59 | no |
-| 2019 | 227 | 0.61 | no |
-| 2021 | 186 | 0.64 | no |
-| 2023 | 124 | 0.65 | no |
+| all | 239 | 0.67 | no |
+| 2019 | 227 | 0.65 | no |
+| 2021 | 186 | 0.65 | no |
+| 2023 | 124 | 0.64 | no |
 
 ### Timestamp quality
 
@@ -591,7 +599,7 @@ p10 -4.7 h · median 0.3 h · p90 4.6 h · **39%** within ±2 h (236 timed visit
 
 ## la-jolla-cove
 
-**Publishes.** 354 visits from 545 records, 307 distinct observers.
+**Refuses.** 354 visits from 545 records, 307 distinct observers.
 
 ### Filter attrition
 
@@ -624,19 +632,23 @@ p10 -4.7 h · median 0.3 h · p90 4.6 h · **39%** within ±2 h (236 timed visit
 | [1.25, 1.50) | 7 | 2 | 0.29 | [0.08, 0.64] | no |
 | [1.50, 3.00) | 4 | 1 | 0.25 | [0.05, 0.70] | no |
 
+**Background band:** [0.75, 3.00) — 6 of 35 visits, 0.17, pooled from 4 bins. The amplitude gate's denominator: the highest usable bin plus every bin above it, so that no high-tide visit above it goes uncounted (#72).
+
 ### Refusal criteria
 
 | criterion | value | threshold | passed |
 |---|---:|---:|---|
 | too-few-usable-bins | 7.00 | 3.00 | yes |
 | not-declining | 0.76 | 0.70 | yes |
-| amplitude-below-gate | 4.50 | 2.00 | yes |
+| amplitude-below-gate | 1.46 | 2.00 | **no** |
 | observer-concentration | 0.06 | 0.30 | yes |
 
 - `too-few-usable-bins` — 7 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them.
 - `not-declining` — 16 of 21 comparable bin pairs decline with height (76%, 0 tied and excluded); 70% is needed.
-- `amplitude-below-gate` — the lowest usable bin's rate is 4.50x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+- `amplitude-below-gate` — the lowest usable bin's rate is 1.46x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [0.75, 3.00), 6 of 35 visits, pooled from 4 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 - `observer-concentration` — the largest single observer contributed 21 of 354 visits (6%); the limit is 30%. One enthusiast is not a distribution.
+
+**null_reason:** Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.46x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [0.75, 3.00), 6 of 35 visits, pooled from 4 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 
 ### Per-taxon height distribution
 
@@ -664,13 +676,13 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | removed | hits | Δ hits | ratio | Δ ratio | flips verdict |
 |---|---:|---:|---:|---:|---|
-| Megathura crenulata | 66 | -22 | 3.21 | -1.29 | no |
-| Strongylocentrotus purpuratus | 83 | -5 | 4.50 | 0.00 | no |
-| Octopus bimaculoides | 83 | -5 | — | — | **yes** |
-| Kelletia kelletii | 73 | -15 | 4.18 | -0.32 | no |
-| Aplysia californica | 71 | -17 | 3.21 | -1.29 | no |
-| Phyllospadix | 81 | -7 | 4.18 | -0.32 | no |
-| Pisaster ochraceus | 79 | -9 | 3.54 | -0.96 | no |
+| Megathura crenulata | 66 | -22 | 1.04 | -0.42 | no |
+| Strongylocentrotus purpuratus | 83 | -5 | 1.46 | 0.00 | no |
+| Octopus bimaculoides | 83 | -5 | 1.75 | 0.29 | no |
+| Kelletia kelletii | 73 | -15 | 2.03 | 0.57 | **yes** |
+| Aplysia californica | 71 | -17 | 1.25 | -0.21 | no |
+| Phyllospadix | 81 | -7 | 1.63 | 0.17 | no |
+| Pisaster ochraceus | 79 | -9 | 1.15 | -0.31 | no |
 
 ### Radius × accuracy sensitivity
 
@@ -678,21 +690,21 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | radius | acc bar | visits | [-2.50, -1.00) | [-1.00, -0.50) | [-0.50, 0.00) | [0.00, 0.25) | [0.25, 0.50) | [0.50, 0.75) | [0.75, 1.00) | [1.00, 1.25) | [1.25, 1.50) | [1.50, 3.00) | ratio |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 250 | none | 223 | 0.20 (30) | 0.19 (42) | 0.16 (64) | 0.20 (20) | 0.26 (27) | 0.25 (16) | 0.09 (11) | 0.40 (5) | 0.33 (6) | 0.00 (2) | 0.80 |
-| 250 | 100 | 133 | 0.13 (15) | 0.19 (26) | 0.18 (38) | 0.33 (9) | 0.26 (19) | 0.33 (12) | 0.17 (6) | 0.50 (4) | 0.33 (3) | 0.00 (1) | 0.51 |
-| 500 | none | 354 | 0.25 (56) | 0.26 (73) | 0.27 (95) | 0.27 (33) | 0.24 (38) | 0.21 (24) | 0.06 (18) | 0.33 (6) | 0.29 (7) | 0.25 (4) | 4.50 |
-| 500 | 100 | 217 | 0.23 (35) | 0.29 (45) | 0.26 (54) | 0.40 (15) | 0.22 (27) | 0.24 (17) | 0.08 (12) | 0.40 (5) | 0.25 (4) | 0.33 (3) | 0.97 |
-| 1000 | none | 663 | 0.43 (129) | 0.32 (136) | 0.33 (162) | 0.32 (60) | 0.32 (66) | 0.22 (41) | 0.19 (36) | 0.19 (16) | 0.27 (11) | 0.17 (6) | 2.32 |
-| 1000 | 100 | 406 | 0.44 (81) | 0.37 (84) | 0.34 (97) | 0.45 (29) | 0.27 (41) | 0.21 (24) | 0.20 (25) | 0.25 (12) | 0.25 (8) | 0.20 (5) | 2.22 |
+| 250 | none | 223 | 0.20 (30) | 0.19 (42) | 0.16 (64) | 0.20 (20) | 0.26 (27) | 0.25 (16) | 0.09 (11) | 0.40 (5) | 0.33 (6) | 0.00 (2) | 0.89 |
+| 250 | 100 | 133 | 0.13 (15) | 0.19 (26) | 0.18 (38) | 0.33 (9) | 0.26 (19) | 0.33 (12) | 0.17 (6) | 0.50 (4) | 0.33 (3) | 0.00 (1) | 0.46 |
+| 500 | none | 354 | 0.25 (56) | 0.26 (73) | 0.27 (95) | 0.27 (33) | 0.24 (38) | 0.21 (24) | 0.06 (18) | 0.33 (6) | 0.29 (7) | 0.25 (4) | 1.46 |
+| 500 | 100 | 217 | 0.23 (35) | 0.29 (45) | 0.26 (54) | 0.40 (15) | 0.22 (27) | 0.24 (17) | 0.08 (12) | 0.40 (5) | 0.25 (4) | 0.33 (3) | 1.04 |
+| 1000 | none | 663 | 0.43 (129) | 0.32 (136) | 0.33 (162) | 0.32 (60) | 0.32 (66) | 0.22 (41) | 0.19 (36) | 0.19 (16) | 0.27 (11) | 0.17 (6) | 2.05 |
+| 1000 | 100 | 406 | 0.44 (81) | 0.37 (84) | 0.34 (97) | 0.45 (29) | 0.27 (41) | 0.21 (24) | 0.20 (25) | 0.25 (12) | 0.25 (8) | 0.20 (5) | 2.02 |
 
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
 |---|---:|---:|---|
-| all | 354 | 4.50 | no |
-| 2019 | 308 | 1.11 | no |
-| 2021 | 260 | 1.49 | no |
-| 2023 | 174 | 1.21 | **yes** |
+| all | 354 | 1.46 | no |
+| 2019 | 308 | 1.18 | no |
+| 2021 | 260 | 1.60 | no |
+| 2023 | 174 | 1.39 | **yes** |
 
 ### Timestamp quality
 
@@ -759,21 +771,23 @@ p10 -3.4 h · median 0.3 h · p90 4.2 h · **51%** within ±2 h (349 timed visit
 | [1.25, 1.50) | 1 | 0 | 0.00 | [0.00, 0.79] | no |
 | [1.50, 3.00) | 1 | 1 | 1.00 | [0.21, 1.00] | no |
 
+**Background band:** [-0.50, 3.00) — 10 of 45 visits, 0.22, pooled from 8 bins. The amplitude gate's denominator: the highest usable bin plus every bin above it, so that no high-tide visit above it goes uncounted (#72).
+
 ### Refusal criteria
 
 | criterion | value | threshold | passed |
 |---|---:|---:|---|
 | too-few-usable-bins | 3.00 | 3.00 | yes |
 | not-declining | 1.00 | 0.70 | yes |
-| amplitude-below-gate | 1.38 | 2.00 | **no** |
+| amplitude-below-gate | 1.13 | 2.00 | **no** |
 | observer-concentration | 0.07 | 0.30 | yes |
 
 - `too-few-usable-bins` — 3 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them.
 - `not-declining` — 3 of 3 comparable bin pairs decline with height (100%, 0 tied and excluded); 70% is needed.
-- `amplitude-below-gate` — the lowest usable bin's rate is 1.38x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+- `amplitude-below-gate` — the lowest usable bin's rate is 1.13x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [-0.50, 3.00), 10 of 45 visits, pooled from 8 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 - `observer-concentration` — the largest single observer contributed 7 of 99 visits (7%); the limit is 30%. One enthusiast is not a distribution.
 
-**null_reason:** Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.38x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+**null_reason:** Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.13x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [-0.50, 3.00), 10 of 45 visits, pooled from 8 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 
 ### Per-taxon height distribution
 
@@ -801,13 +815,13 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | removed | hits | Δ hits | ratio | Δ ratio | flips verdict |
 |---|---:|---:|---:|---:|---|
-| Megathura crenulata | 20 | -3 | 1.83 | 0.46 | no |
-| Strongylocentrotus purpuratus | 22 | -1 | 1.20 | -0.17 | no |
-| Octopus bimaculoides | 20 | -3 | 1.38 | 0.00 | no |
-| Kelletia kelletii | 23 | 0 | 1.38 | 0.00 | no |
-| Aplysia californica | 20 | -3 | 1.38 | 0.00 | no |
-| Phyllospadix | 22 | -1 | 1.83 | 0.46 | no |
-| Pisaster ochraceus | 11 | -12 | 0.34 | -1.03 | no |
+| Megathura crenulata | 20 | -3 | 1.61 | 0.48 | no |
+| Strongylocentrotus purpuratus | 22 | -1 | 0.98 | -0.14 | no |
+| Octopus bimaculoides | 20 | -3 | 1.13 | 0.00 | no |
+| Kelletia kelletii | 23 | 0 | 1.13 | 0.00 | no |
+| Aplysia californica | 20 | -3 | 1.41 | 0.28 | no |
+| Phyllospadix | 22 | -1 | 1.25 | 0.13 | no |
+| Pisaster ochraceus | 11 | -12 | 0.23 | -0.89 | no |
 
 ### Radius × accuracy sensitivity
 
@@ -815,21 +829,21 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | radius | acc bar | visits | [-2.50, -1.00) | [-1.00, -0.50) | [-0.50, 0.00) | [0.00, 0.25) | [0.25, 0.50) | [0.50, 0.75) | [0.75, 1.00) | [1.00, 1.25) | [1.25, 1.50) | [1.50, 3.00) | ratio |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 250 | none | 63 | 0.22 (23) | 0.18 (11) | 0.12 (17) | 0.00 (2) | 0.00 (4) | 0.33 (3) | 0.50 (2) | 1.00 (1) | — | — | 1.85 |
-| 250 | 100 | 52 | 0.26 (19) | 0.22 (9) | 0.13 (15) | 0.00 (1) | 0.00 (3) | 0.50 (2) | 0.50 (2) | 1.00 (1) | — | — | 1.97 |
-| 500 | none | 99 | 0.25 (32) | 0.23 (22) | 0.18 (22) | 0.00 (5) | 0.17 (6) | 0.25 (4) | 0.67 (3) | 0.33 (3) | 0.00 (1) | 1.00 (1) | 1.38 |
-| 500 | 100 | 76 | 0.24 (25) | 0.15 (13) | 0.21 (19) | 0.00 (4) | 0.20 (5) | 0.33 (3) | 1.00 (2) | 0.33 (3) | 0.00 (1) | 1.00 (1) | 1.14 |
-| 1000 | none | 505 | 0.48 (136) | 0.37 (116) | 0.28 (104) | 0.27 (37) | 0.18 (33) | 0.14 (36) | 0.30 (20) | 0.27 (15) | 0.33 (6) | 0.50 (2) | 1.79 |
-| 1000 | 100 | 359 | 0.40 (97) | 0.36 (81) | 0.26 (77) | 0.33 (27) | 0.17 (23) | 0.14 (22) | 0.29 (14) | 0.33 (12) | 0.40 (5) | 1.00 (1) | 2.95 |
+| 250 | none | 63 | 0.22 (23) | 0.18 (11) | 0.12 (17) | 0.00 (2) | 0.00 (4) | 0.33 (3) | 0.50 (2) | 1.00 (1) | — | — | 1.26 |
+| 250 | 100 | 52 | 0.26 (19) | 0.22 (9) | 0.13 (15) | 0.00 (1) | 0.00 (3) | 0.50 (2) | 0.50 (2) | 1.00 (1) | — | — | 1.26 |
+| 500 | none | 99 | 0.25 (32) | 0.23 (22) | 0.18 (22) | 0.00 (5) | 0.17 (6) | 0.25 (4) | 0.67 (3) | 0.33 (3) | 0.00 (1) | 1.00 (1) | 1.13 |
+| 500 | 100 | 76 | 0.24 (25) | 0.15 (13) | 0.21 (19) | 0.00 (4) | 0.20 (5) | 0.33 (3) | 1.00 (2) | 0.33 (3) | 0.00 (1) | 1.00 (1) | 0.91 |
+| 1000 | none | 505 | 0.48 (136) | 0.37 (116) | 0.28 (104) | 0.27 (37) | 0.18 (33) | 0.14 (36) | 0.30 (20) | 0.27 (15) | 0.33 (6) | 0.50 (2) | 1.57 |
+| 1000 | 100 | 359 | 0.40 (97) | 0.36 (81) | 0.26 (77) | 0.33 (27) | 0.17 (23) | 0.14 (22) | 0.29 (14) | 0.33 (12) | 0.40 (5) | 1.00 (1) | 1.55 |
 
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
 |---|---:|---:|---|
-| all | 99 | 1.38 | no |
-| 2019 | 78 | 2.33 | **yes** |
-| 2021 | 60 | 2.03 | **yes** |
-| 2023 | 50 | 2.13 | **yes** |
+| all | 99 | 1.13 | no |
+| 2019 | 78 | 1.78 | **yes** |
+| 2021 | 60 | 1.71 | **yes** |
+| 2023 | 50 | 1.56 | **yes** |
 
 ### Timestamp quality
 
@@ -895,18 +909,20 @@ p10 -2.9 h · median 0.1 h · p90 2.7 h · **69%** within ±2 h (97 timed visits
 | [1.25, 1.50) | 2 | 0 | 0.00 | [0.00, 0.66] | no |
 | [1.50, 3.00) | 1 | 0 | 0.00 | [0.00, 0.79] | no |
 
+**Background band:** [0.50, 3.00) — 4 of 32 visits, 0.13, pooled from 5 bins. The amplitude gate's denominator: the highest usable bin plus every bin above it, so that no high-tide visit above it goes uncounted (#72).
+
 ### Refusal criteria
 
 | criterion | value | threshold | passed |
 |---|---:|---:|---|
 | too-few-usable-bins | 5.00 | 3.00 | yes |
 | not-declining | 0.90 | 0.70 | yes |
-| amplitude-below-gate | 13.33 | 2.00 | yes |
+| amplitude-below-gate | 5.93 | 2.00 | yes |
 | observer-concentration | 0.07 | 0.30 | yes |
 
 - `too-few-usable-bins` — 5 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them.
 - `not-declining` — 9 of 10 comparable bin pairs decline with height (90%, 0 tied and excluded); 70% is needed.
-- `amplitude-below-gate` — the lowest usable bin's rate is 13.33x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+- `amplitude-below-gate` — the lowest usable bin's rate is 5.93x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [0.50, 3.00), 4 of 32 visits, pooled from 5 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 - `observer-concentration` — the largest single observer contributed 29 of 404 visits (7%); the limit is 30%. One enthusiast is not a distribution.
 
 ### Per-taxon height distribution
@@ -935,13 +951,13 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | removed | hits | Δ hits | ratio | Δ ratio | flips verdict |
 |---|---:|---:|---:|---:|---|
-| Megathura crenulata | 131 | -112 | 6.67 | -6.67 | no |
-| Strongylocentrotus purpuratus | 239 | -4 | 12.89 | -0.44 | no |
-| Octopus bimaculoides | 213 | -30 | 11.78 | -1.56 | no |
-| Kelletia kelletii | 237 | -6 | 12.89 | -0.44 | no |
-| Aplysia californica | 209 | -34 | — | — | **yes** |
-| Phyllospadix | 234 | -9 | 12.89 | -0.44 | no |
-| Pisaster ochraceus | 243 | 0 | 13.33 | 0.00 | no |
+| Megathura crenulata | 131 | -112 | 3.95 | -1.98 | no |
+| Strongylocentrotus purpuratus | 239 | -4 | 5.73 | -0.20 | no |
+| Octopus bimaculoides | 213 | -30 | 5.23 | -0.69 | no |
+| Kelletia kelletii | 237 | -6 | 5.73 | -0.20 | no |
+| Aplysia californica | 209 | -34 | 7.11 | 1.19 | no |
+| Phyllospadix | 234 | -9 | 7.64 | 1.71 | no |
+| Pisaster ochraceus | 243 | 0 | 5.93 | 0.00 | no |
 
 ### Radius × accuracy sensitivity
 
@@ -951,19 +967,19 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 250 | none | 25 | 0.62 (13) | 0.50 (2) | 0.43 (7) | 0.50 (2) | — | — | 0.00 (1) | — | — | — | — |
 | 250 | 100 | 15 | 0.78 (9) | 0.00 (1) | 0.67 (3) | 0.00 (1) | — | — | 0.00 (1) | — | — | — | — |
-| 500 | none | 404 | 0.74 (162) | 0.72 (102) | 0.41 (63) | 0.45 (31) | 0.43 (14) | 0.06 (18) | 0.13 (8) | 0.67 (3) | 0.00 (2) | 0.00 (1) | 13.33 |
-| 500 | 100 | 289 | 0.73 (128) | 0.72 (72) | 0.41 (34) | 0.43 (23) | 0.50 (8) | 0.06 (17) | 0.25 (4) | 0.50 (2) | — | 0.00 (1) | 12.48 |
-| 1000 | none | 507 | 0.76 (201) | 0.69 (123) | 0.48 (83) | 0.53 (38) | 0.42 (19) | 0.08 (25) | 0.10 (10) | 0.67 (3) | 0.00 (2) | 0.00 (3) | 9.45 |
-| 1000 | 100 | 353 | 0.76 (148) | 0.69 (85) | 0.46 (48) | 0.50 (28) | 0.45 (11) | 0.09 (23) | 0.17 (6) | 0.50 (2) | — | 0.00 (2) | 8.78 |
+| 500 | none | 404 | 0.74 (162) | 0.72 (102) | 0.41 (63) | 0.45 (31) | 0.43 (14) | 0.06 (18) | 0.13 (8) | 0.67 (3) | 0.00 (2) | 0.00 (1) | 5.93 |
+| 500 | 100 | 289 | 0.73 (128) | 0.72 (72) | 0.41 (34) | 0.43 (23) | 0.50 (8) | 0.06 (17) | 0.25 (4) | 0.50 (2) | — | 0.00 (1) | 5.88 |
+| 1000 | none | 507 | 0.76 (201) | 0.69 (123) | 0.48 (83) | 0.53 (38) | 0.42 (19) | 0.08 (25) | 0.10 (10) | 0.67 (3) | 0.00 (2) | 0.00 (3) | 6.50 |
+| 1000 | 100 | 353 | 0.76 (148) | 0.69 (85) | 0.46 (48) | 0.50 (28) | 0.45 (11) | 0.09 (23) | 0.17 (6) | 0.50 (2) | — | 0.00 (2) | 6.30 |
 
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
 |---|---:|---:|---|
-| all | 404 | 13.33 | no |
-| 2019 | 374 | 12.64 | no |
-| 2021 | 335 | 13.40 | no |
-| 2023 | 294 | 1.33 | no |
+| all | 404 | 5.93 | no |
+| 2019 | 374 | 6.94 | no |
+| 2021 | 335 | 7.09 | no |
+| 2023 | 294 | 2.29 | no |
 
 ### Timestamp quality
 
@@ -1027,18 +1043,20 @@ No records were withheld by geoprivacy at this spot.
 | [1.25, 1.50) | 11 | 1 | 0.09 | [0.02, 0.38] | no |
 | [1.50, 3.00) | 6 | 0 | 0.00 | [0.00, 0.39] | no |
 
+**Background band:** [1.00, 3.00) — 2 of 35 visits, 0.06, pooled from 3 bins. The amplitude gate's denominator: the highest usable bin plus every bin above it, so that no high-tide visit above it goes uncounted (#72).
+
 ### Refusal criteria
 
 | criterion | value | threshold | passed |
 |---|---:|---:|---|
 | too-few-usable-bins | 8.00 | 3.00 | yes |
 | not-declining | 1.00 | 0.70 | yes |
-| amplitude-below-gate | 12.17 | 2.00 | yes |
+| amplitude-below-gate | 11.83 | 2.00 | yes |
 | observer-concentration | 0.05 | 0.30 | yes |
 
 - `too-few-usable-bins` — 8 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them.
 - `not-declining` — 28 of 28 comparable bin pairs decline with height (100%, 0 tied and excluded); 70% is needed.
-- `amplitude-below-gate` — the lowest usable bin's rate is 12.17x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
+- `amplitude-below-gate` — the lowest usable bin's rate is 11.83x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [1.00, 3.00), 2 of 35 visits, pooled from 3 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.
 - `observer-concentration` — the largest single observer contributed 63 of 1224 visits (5%); the limit is 30%. One enthusiast is not a distribution.
 
 ### Per-taxon height distribution
@@ -1067,13 +1085,13 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | removed | hits | Δ hits | ratio | Δ ratio | flips verdict |
 |---|---:|---:|---:|---:|---|
-| Megathura crenulata | 437 | -155 | 8.13 | -4.04 | no |
-| Strongylocentrotus purpuratus | 570 | -22 | — | — | **yes** |
-| Octopus bimaculoides | 566 | -26 | 11.70 | -0.47 | no |
-| Kelletia kelletii | 480 | -112 | 10.06 | -2.11 | no |
-| Aplysia californica | 512 | -80 | 11.14 | -1.03 | no |
-| Phyllospadix | 567 | -25 | 11.94 | -0.23 | no |
-| Pisaster ochraceus | 590 | -2 | 12.17 | 0.00 | no |
+| Megathura crenulata | 437 | -155 | 7.90 | -3.93 | no |
+| Strongylocentrotus purpuratus | 570 | -22 | 22.57 | 10.74 | no |
+| Octopus bimaculoides | 566 | -26 | 11.38 | -0.46 | no |
+| Kelletia kelletii | 480 | -112 | 9.78 | -2.06 | no |
+| Aplysia californica | 512 | -80 | 10.83 | -1.01 | no |
+| Phyllospadix | 567 | -25 | 23.21 | 11.38 | no |
+| Pisaster ochraceus | 590 | -2 | 11.83 | 0.00 | no |
 
 ### Radius × accuracy sensitivity
 
@@ -1081,21 +1099,21 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 
 | radius | acc bar | visits | [-2.50, -1.00) | [-1.00, -0.50) | [-0.50, 0.00) | [0.00, 0.25) | [0.25, 0.50) | [0.50, 0.75) | [0.75, 1.00) | [1.00, 1.25) | [1.25, 1.50) | [1.50, 3.00) | ratio |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 250 | none | 1108 | 0.65 (349) | 0.57 (230) | 0.44 (303) | 0.33 (52) | 0.23 (71) | 0.13 (46) | 0.11 (27) | 0.07 (14) | 0.10 (10) | 0.00 (6) | 5.88 |
-| 250 | 100 | 782 | 0.64 (246) | 0.54 (154) | 0.45 (216) | 0.25 (36) | 0.20 (54) | 0.14 (35) | 0.05 (20) | 0.10 (10) | 0.00 (8) | 0.00 (3) | 12.85 |
-| 500 | none | 1224 | 0.68 (383) | 0.57 (247) | 0.42 (331) | 0.31 (59) | 0.22 (89) | 0.16 (50) | 0.13 (30) | 0.06 (18) | 0.09 (11) | 0.00 (6) | 12.17 |
-| 500 | 100 | 827 | 0.66 (255) | 0.53 (161) | 0.43 (229) | 0.24 (37) | 0.19 (62) | 0.16 (38) | 0.05 (22) | 0.09 (11) | 0.00 (9) | 0.00 (3) | 14.49 |
-| 1000 | none | 1296 | 0.67 (396) | 0.58 (264) | 0.43 (357) | 0.32 (65) | 0.25 (93) | 0.17 (52) | 0.13 (31) | 0.05 (20) | 0.08 (12) | 0.00 (6) | 13.43 |
-| 1000 | 100 | 847 | 0.65 (260) | 0.54 (168) | 0.43 (237) | 0.24 (37) | 0.21 (62) | 0.16 (38) | 0.05 (22) | 0.09 (11) | 0.00 (9) | 0.00 (3) | 14.38 |
+| 250 | none | 1108 | 0.65 (349) | 0.57 (230) | 0.44 (303) | 0.33 (52) | 0.23 (71) | 0.13 (46) | 0.11 (27) | 0.07 (14) | 0.10 (10) | 0.00 (6) | 7.45 |
+| 250 | 100 | 782 | 0.64 (246) | 0.54 (154) | 0.45 (216) | 0.25 (36) | 0.20 (54) | 0.14 (35) | 0.05 (20) | 0.10 (10) | 0.00 (8) | 0.00 (3) | 13.17 |
+| 500 | none | 1224 | 0.68 (383) | 0.57 (247) | 0.42 (331) | 0.31 (59) | 0.22 (89) | 0.16 (50) | 0.13 (30) | 0.06 (18) | 0.09 (11) | 0.00 (6) | 11.83 |
+| 500 | 100 | 827 | 0.66 (255) | 0.53 (161) | 0.43 (229) | 0.24 (37) | 0.19 (62) | 0.16 (38) | 0.05 (22) | 0.09 (11) | 0.00 (9) | 0.00 (3) | 14.82 |
+| 1000 | none | 1296 | 0.67 (396) | 0.58 (264) | 0.43 (357) | 0.32 (65) | 0.25 (93) | 0.17 (52) | 0.13 (31) | 0.05 (20) | 0.08 (12) | 0.00 (6) | 12.76 |
+| 1000 | 100 | 847 | 0.65 (260) | 0.54 (168) | 0.43 (237) | 0.24 (37) | 0.21 (62) | 0.16 (38) | 0.05 (22) | 0.09 (11) | 0.00 (9) | 0.00 (3) | 14.71 |
 
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
 |---|---:|---:|---|
-| all | 1224 | 12.17 | no |
-| 2019 | 1093 | 10.10 | no |
-| 2021 | 963 | 5.17 | no |
-| 2023 | 726 | 11.20 | no |
+| all | 1224 | 11.83 | no |
+| 2019 | 1093 | 9.76 | no |
+| 2021 | 963 | 6.60 | no |
+| 2023 | 726 | 6.81 | no |
 
 ### Timestamp quality
 

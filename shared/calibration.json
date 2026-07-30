@@ -59,7 +59,7 @@
       "visits": 237,
       "records": 558,
       "observers": 185,
-      "amplitude_ratio": 10.274725274725274,
+      "amplitude_ratio": 9.67032967032967,
       "published": true,
       "null_reason": null,
       "bins": [
@@ -151,9 +151,9 @@
       "visits": 74,
       "records": 98,
       "observers": 50,
-      "amplitude_ratio": 1.0048076923076923,
+      "amplitude_ratio": 0.90625,
       "published": false,
-      "null_reason": "Refused on 2 of 4 criteria. too-few-usable-bins: 2 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. amplitude-below-gate: the lowest usable bin's rate is 1.00x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "null_reason": "Refused on 2 of 4 criteria. too-few-usable-bins: 2 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. amplitude-below-gate: the lowest usable bin's rate is 0.91x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [-1.00, 3.00), 44 of 58 visits, pooled from 9 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -245,7 +245,7 @@
       "observers": 28,
       "amplitude_ratio": null,
       "published": false,
-      "null_reason": "Refused on 3 of 4 criteria. too-few-usable-bins: 0 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. not-declining: no usable pair of bins differs in rate, so the table is flat rather than declining. amplitude-below-gate: the amplitude ratio could not be computed: fewer than two usable bins, or the highest usable bin has no hits at all.",
+      "null_reason": "Refused on 3 of 4 criteria. too-few-usable-bins: 0 of 10 bins hold at least 15 visits; 3 are needed, because the amplitude gate compares a low bin against a high one and needs something between them. not-declining: no usable pair of bins differs in rate, so the table is flat rather than declining. amplitude-below-gate: the amplitude ratio could not be computed: fewer than two usable bins, or the background band has no hits at all.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -335,9 +335,9 @@
       "visits": 239,
       "records": 310,
       "observers": 115,
-      "amplitude_ratio": 0.5944055944055944,
+      "amplitude_ratio": 0.6666666666666666,
       "published": false,
-      "null_reason": "Refused on 2 of 4 criteria. not-declining: 4 of 21 comparable bin pairs decline with height (19%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.59x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "null_reason": "Refused on 2 of 4 criteria. not-declining: 4 of 21 comparable bin pairs decline with height (19%, 0 tied and excluded); 70% is needed. amplitude-below-gate: the lowest usable bin's rate is 0.67x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [1.00, 3.00), 17 of 22 visits, pooled from 3 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -427,9 +427,9 @@
       "visits": 354,
       "records": 545,
       "observers": 307,
-      "amplitude_ratio": 4.5,
-      "published": true,
-      "null_reason": null,
+      "amplitude_ratio": 1.4583333333333333,
+      "published": false,
+      "null_reason": "Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.46x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [0.75, 3.00), 6 of 35 visits, pooled from 4 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -519,9 +519,9 @@
       "visits": 99,
       "records": 158,
       "observers": 89,
-      "amplitude_ratio": 1.375,
+      "amplitude_ratio": 1.125,
       "published": false,
-      "null_reason": "Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.38x the highest usable bin's; 2.0x is needed. The highest bin measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
+      "null_reason": "Refused on 1 of 4 criteria. amplitude-below-gate: the lowest usable bin's rate is 1.13x the background band's; 2.0x is needed. Background is the highest usable bin pooled with everything above it — here [-0.50, 3.00), 10 of 45 visits, pooled from 8 bins — which measures this spot's own tide-independent background, and a distinct low zone has to at least double it.",
       "bins": [
         {
           "lo_ft": -2.5,
@@ -611,7 +611,7 @@
       "visits": 404,
       "records": 794,
       "observers": 264,
-      "amplitude_ratio": 13.333333333333334,
+      "amplitude_ratio": 5.925925925925926,
       "published": true,
       "null_reason": null,
       "bins": [
@@ -703,7 +703,7 @@
       "visits": 1224,
       "records": 3133,
       "observers": 807,
-      "amplitude_ratio": 12.172323759791125,
+      "amplitude_ratio": 11.834203655352482,
       "published": true,
       "null_reason": null,
       "bins": [

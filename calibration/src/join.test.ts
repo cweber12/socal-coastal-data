@@ -21,6 +21,7 @@ import type { LocalDate } from '../../lib/time.ts';
 import {
   BINS,
   amplitudeRatio,
+  backgroundBand,
   binIndexFor,
   binVisits,
   collapseToVisits,
@@ -399,8 +400,58 @@ function table(rows: { visits: number; rate: number }[]) {
   }));
 }
 
+describe('backgroundBand', () => {
+  it('is the highest usable bin alone when nothing sits above it', () => {
+    const band = backgroundBand(
+      table([
+        { visits: 100, rate: 0.6 },
+        { visits: 100, rate: 0.4 },
+        { visits: 100, rate: 0.2 },
+      ]),
+    )!;
+    expect(band.binsPooled).toBe(1);
+    expect(band.visits).toBe(100);
+    expect(band.hits).toBe(20);
+    expect(band.rate).toBeCloseTo(0.2, 10);
+    expect(band.loFt).toBe(BINS[2]!.loFt);
+    expect(band.hiFt).toBe(BINS[2]!.hiFt);
+  });
+
+  it('pools the thin bins above the highest usable one into it', () => {
+    /*
+     * The La Jolla Cove shape, at its real counts. The old top band held those
+     * 17 high-tide visits together at 29.4% and the gate caught the spot at
+     * 0.85x. Split into 6, 7 and 4 they all fall under USABLE_BIN_MIN_VISITS,
+     * and before #72 they were discarded outright -- leaving 1 hit in 18 visits
+     * as the background and reading 4.50x on a flat table.
+     */
+    const bins = table([
+      { visits: 100, rate: 0.25 },
+      { visits: 18, rate: 1 / 18 },
+      { visits: 6, rate: 2 / 6 },
+      { visits: 7, rate: 2 / 7 },
+      { visits: 4, rate: 1 / 4 },
+    ]);
+    const band = backgroundBand(bins)!;
+
+    expect(band.binsPooled).toBe(4);
+    expect(band.visits).toBe(18 + 6 + 7 + 4);
+    expect(band.hits).toBe(1 + 2 + 2 + 1);
+    expect(band.rate).toBeCloseTo(6 / 35, 10);
+    // Nothing above the highest usable bin is left out of the count.
+    expect(band.visits).toBe(bins.slice(1).reduce((n, b) => n + b.visits, 0));
+  });
+
+  it('is null when no bin is usable at all', () => {
+    // A spot with nothing to measure, which is not the same as a background of
+    // zero -- torrey-pines-beach reaches this on the real corpus.
+    expect(backgroundBand(table([{ visits: 3, rate: 0.5 }]))).toBeNull();
+    expect(backgroundBand(table([]))).toBeNull();
+  });
+});
+
 describe('amplitudeRatio', () => {
-  it('is the lowest usable bin over the highest usable one', () => {
+  it('is the lowest usable bin over the pooled background', () => {
     const bins = table([
       { visits: 100, rate: 0.6 },
       { visits: 100, rate: 0.4 },
@@ -409,21 +460,27 @@ describe('amplitudeRatio', () => {
     expect(amplitudeRatio(bins)).toBeCloseTo(3, 6);
   });
 
-  it('ignores thin bins entirely', () => {
-    // The thin 0.02 bin would give a ratio of 30 if it counted.
+  it('folds a thin top bin into the background rather than letting it become one', () => {
+    /*
+     * The thin 0.02 bin standing alone as background would give a ratio of 30.
+     * Pooled into the 0.20 bin above which it sits, 103 visits carry 20 hits, so
+     * the background is 0.194 and the ratio 3.09 -- the thin bin nudges it, it
+     * does not decide it.
+     */
     const bins = table([
       { visits: 100, rate: 0.6 },
       { visits: 100, rate: 0.2 },
       { visits: 3, rate: 0.02 },
     ]);
-    expect(amplitudeRatio(bins)).toBeCloseTo(3, 6);
+    expect(amplitudeRatio(bins)).toBeCloseTo(0.6 / (20 / 103), 6);
+    expect(amplitudeRatio(bins)).toBeLessThan(3.2);
   });
 
-  it('is null rather than Infinity when the highest usable bin has no hits', () => {
+  it('is null rather than Infinity when the background band has no hits', () => {
     /*
-     * A ratio over zero is not "infinitely good". It is a bin with no hits in
+     * A ratio over zero is not "infinitely good". It is a band with no hits in
      * it, and reporting Infinity would let a spot pass the strongest gate in the
-     * pipeline on the strength of one empty high bin.
+     * pipeline on the strength of an empty top of the table.
      */
     const bins = table([
       { visits: 100, rate: 0.6 },
@@ -437,20 +494,16 @@ describe('amplitudeRatio', () => {
     expect(amplitudeRatio(table([]))).toBeNull();
   });
 
-  it('falls when the top bin thins out and the background moves down a band', () => {
+  it('reproduces the wide band exactly when the top band\'s first sub-bin is usable', () => {
     /*
-     * The mechanism by which #43's narrower bins move amplitude ratios, and the
-     * reason a verdict can change without any gate being touched.
+     * The case #72 fully fixes, and the one the real corpus hits at Cabrillo and
+     * La Jolla Shores: the old top band is cut up, its LOWEST slice is still fat
+     * enough to be usable, and the pool therefore spans exactly the old band.
+     * Same 40 visits, same 4 hits, same ratio -- the subdivision costs nothing.
      *
-     * "Background" is not a fixed height. It is whatever the HIGHEST USABLE bin
-     * happens to be, so splitting a wide top band into thin ones that fall under
-     * USABLE_BIN_MIN_VISITS does not merely drop them from the table -- it
-     * promotes a LOWER, and therefore higher-rate, band to background. The
-     * denominator rises and the ratio falls, on identical visits.
-     *
-     * Same 40 visits at the top of both tables. Wide: one usable bin at 0.10, so
-     * the ratio is 6.0. Split: both halves are thin, background falls back to the
-     * 0.30 band, and the ratio is 2.0 -- at the gate rather than triple it.
+     * Before pooling the split table read 6.0x too, but only by luck: it read
+     * the 18-visit slice alone at the same 0.11 rate. Change one hit in the
+     * discarded slices and the old code moves while this one does not.
      */
     const wide = table([
       { visits: 100, rate: 0.6 },
@@ -460,12 +513,71 @@ describe('amplitudeRatio', () => {
     const split = table([
       { visits: 100, rate: 0.6 },
       { visits: 100, rate: 0.3 },
-      { visits: 14, rate: 0.1 },
-      { visits: 14, rate: 0.1 },
+      { visits: 18, rate: 2 / 18 },
+      { visits: 12, rate: 1 / 12 },
+      { visits: 10, rate: 0.1 },
     ]);
 
+    expect(backgroundBand(split)!.visits).toBe(backgroundBand(wide)!.visits);
+    expect(backgroundBand(split)!.hits).toBe(backgroundBand(wide)!.hits);
+    expect(backgroundBand(split)!.loFt).toBe(backgroundBand(wide)!.loFt);
     expect(amplitudeRatio(wide)).toBeCloseTo(6, 6);
-    expect(amplitudeRatio(split)).toBeCloseTo(2, 6);
+    expect(amplitudeRatio(split)).toBeCloseTo(amplitudeRatio(wide)!, 6);
+  });
+
+  it('falls back a band, over MORE visits, when every sub-bin of the top band is thin', () => {
+    /*
+     * The limit of the fix, asserted rather than glossed. Pooling removes the
+     * DISCARDING -- no visit above the highest usable bin goes uncounted -- but
+     * it does not make the gate fully width-invariant, because which bin is
+     * "highest usable" still depends on the widths. Cut the top band finely
+     * enough that no slice reaches 15 visits and the background falls to the band
+     * below, pooling that band in with it.
+     *
+     * The direction is what matters: the background is then measured over MORE
+     * visits than the wide table's, not fewer, and at a HIGHER rate, so the ratio
+     * falls. The gate gets stricter, never looser, which is the direction
+     * README.md requires of it. La Jolla Cove lands here on the real corpus:
+     * 17 visits of background became 35, and 4.50x became 1.46x.
+     */
+    const wide = table([
+      { visits: 100, rate: 0.6 },
+      { visits: 100, rate: 0.3 },
+      { visits: 40, rate: 0.1 },
+    ]);
+    const allThin = table([
+      { visits: 100, rate: 0.6 },
+      { visits: 100, rate: 0.3 },
+      { visits: 14, rate: 2 / 14 },
+      { visits: 13, rate: 1 / 13 },
+      { visits: 13, rate: 1 / 13 },
+    ]);
+
+    // Same 40 visits and 4 hits at the top of the table in both.
+    expect(allThin.slice(2).reduce((n, b) => n + b.visits, 0)).toBe(40);
+    expect(allThin.slice(2).reduce((n, b) => n + b.hits, 0)).toBe(4);
+
+    expect(backgroundBand(allThin)!.visits).toBeGreaterThan(backgroundBand(wide)!.visits);
+    expect(backgroundBand(allThin)!.rate!).toBeGreaterThan(backgroundBand(wide)!.rate!);
+    expect(amplitudeRatio(allThin)!).toBeLessThan(amplitudeRatio(wide)!);
+  });
+
+  it('pools upward only, so a thin bin below the lowest usable one cannot raise it', () => {
+    /*
+     * The asymmetry, asserted. The numerator is the low-tide rate; pooling
+     * DOWNWARD would fold thin extreme-low bins into it and could only raise the
+     * ratio, and this gate has to fail toward the restriction.
+     *
+     * Here the bottom bin is a 3-visit band at 1.0. Pooling it in would take the
+     * numerator from 0.6 to 0.612 and the ratio up with it; discarding it, which
+     * is what happens, leaves the ratio at exactly 3.
+     */
+    const bins = table([
+      { visits: 3, rate: 1 },
+      { visits: 100, rate: 0.6 },
+      { visits: 100, rate: 0.2 },
+    ]);
+    expect(amplitudeRatio(bins)).toBeCloseTo(3, 6);
   });
 });
 

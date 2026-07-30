@@ -175,10 +175,17 @@ export const MIN_CONCORDANT_PAIRS = 0.7;
 /**
  * The contamination detector, and the one number here stated a priori.
  *
- * The highest usable bin measures that spot's TIDE-INDEPENDENT BACKGROUND --
+ * The BACKGROUND BAND measures that spot's TIDE-INDEPENDENT BACKGROUND --
  * surge-channel photos, wrong camera clocks, washed-up specimens -- which runs
  * around 0.20 at every spot. A spot must show a low-tide rate at least double
  * its own background to claim a distinct low zone.
+ *
+ * That band is the highest usable bin POOLED with every bin above it, and the
+ * pooling is #72's fix rather than the original design: it was the highest
+ * usable bin alone until #43's 0.25 ft edges made the bins above it individually
+ * thin, at which point they were discarded and the denominator could land in the
+ * middle of the range. `backgroundBand` in src/join.ts carries the measurement
+ * and the reasoning. The BAR did not move for it.
  *
  * The bar comes from that reasoning and NOT from the observed gap between
  * spots. Reading it off the data would make it a description of this pull

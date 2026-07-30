@@ -632,9 +632,19 @@ permissive than this" and nothing about where the floor actually is. That is
 rule 3's asymmetry applied to elevation: it fails toward the restriction.
 
 **It is computed per spot, from that spot's own background.** Never a
-corridor-wide rate. The highest usable bin measures each spot's own
+corridor-wide rate. The **background band** measures each spot's own
 tide-independent background — surge-channel photos, wrong camera clocks,
 washed-up specimens — and doubling that is a different number at every spot.
+
+> **Mechanism corrected 2026-07-30, #72.** This clause read "the highest usable
+> bin measures each spot's own tide-independent background". That is how
+> `amplitudeRatio` computed it until #43's 0.25 ft edges made the bins above the
+> highest usable one individually thin, at which point they were discarded and
+> the denominator could land mid-range. Background is now the highest usable bin
+> pooled with every bin above it. **The rule itself is unchanged** — 2× that
+> spot's own tide-independent background — and so is the number it produces at
+> Cabrillo, because the pooled band there is exactly the old 1.0–3.0 ft band.
+> Only this description of how background is measured was stale.
 
 **The 2× comes from a bar that predates this data.** `MIN_AMPLITUDE_RATIO = 2.0`
 in `calibration/src/config.ts` already requires a spot to show a low-tide rate at
@@ -663,6 +673,23 @@ indistinguishable from noise. 2 × 5.7% = 11.4%; the 0.5–1.0 band clears it at
 15.0% and the 1.0–3.0 band does not, which puts the ceiling near 1.0 ft. The
 current bins cannot separate 11.4% from 15.0%, both falling in one 0.5 ft band —
 locating the crossing is #43.
+
+**Located, 2026-07-30, #43.** The decision region is binned at 0.25 ft and the
+crossings are these, each computed against that spot's own background band:
+
+| spot | background | 2× bar | ceiling | marginal band | visits |
+|---|---|---:|---|---|---:|
+| `cabrillo-tidepools` | 1.00–3.00 ft, 5.71% | 11.4% | **1.00 ft** | 0.75–1.00 ft, 13.3% | **30, usable** |
+| `sunset-cliffs` | 0.50–3.00 ft, 12.5% | 25.0% | bracketed 0.25–0.50 ft | 0.25–0.50 ft, 42.9% | 14, **thin** |
+| `swamis` | 0.25–3.00 ft, 6.25% | 12.5% | bracketed 0.00–0.25 ft | 0.00–0.25 ft, 25.0% | 8, **thin** |
+
+Only Cabrillo's is usable. Its marginal band holds 30 visits, and its background
+is unchanged by the re-binning at 5.71% either way — so the +1.3 ft in force is
+too permissive and the ceiling is 1.00 ft. The other two are bracketed rather
+than located, because the band that decides each holds fewer than the 15 visits
+`USABLE_BIN_MIN_VISITS` requires — Sunset Cliffs' by a single visit. A ceiling
+resting on a band no gate may read is not a ceiling, so #44 has one spot to act
+on and two to record as unresolved.
 
 An X of roughly 15% would land near the NPS 0.7 ft figure. That is not a reason
 to choose anything: §6 records that the published record cannot say which field
