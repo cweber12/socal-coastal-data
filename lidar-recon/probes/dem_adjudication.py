@@ -39,8 +39,11 @@ has to survive into the finding.
 `post_hoc_restricted_slope`. It regresses elevation inside the
 roughness-restricted set, which the run scored but never regressed. It is
 labelled post-hoc everywhere it appears, the verdict block reads nothing from
-it, and it cannot select a product. It is here because of what it rules out,
-not because of what it chooses.
+it, and it cannot select a product. **It rules out less than first recorded:**
+roughness is derived from the DEM, so restricting on it selects on a quantity
+correlated with the elevation being tested, and
+`selection_effect_on_this_diagnostic` measures how much of the steepening that
+accounts for. The claim rests on the unselected `all_points` fit instead.
 
 **The vintage gap is measured, not corrected.** The survey is February-March
 2004; 2616's source lidar is a nominal 2009-2011 and 6260's is April-May 2016.
@@ -526,7 +529,13 @@ def post_hoc_restricted_slope(paired, low_idx, split):
     it, restricting to smooth ground should WEAKEN it.
 
     It strengthens, in both products and under both ways of drawing the
-    restriction, which is why this is recorded rather than left in a comment.
+    restriction. That was first read as ruling roughness out. It does not:
+    roughness is computed FROM the DEM, so restricting on it selects on a
+    quantity correlated with the elevation under test, and where rough ground is
+    also high ground the restriction strips the DEM's range while leaving the
+    survey's intact -- which pushes this very regression toward slope -1 and
+    r2 -> 1 on its own. `selection_effect_on_this_diagnostic` measures that, and
+    the unselected `all_points` fit is what the finding rests on.
 
     Two conventions are reported because they answer slightly different
     questions and neither is more correct:
@@ -568,8 +577,16 @@ def post_hoc_restricted_slope(paired, low_idx, split):
         "question": "is the confound-1 elevation slope the point-against-cell "
                     "confound in disguise? If rough ground produced it, "
                     "restricting to smooth ground would weaken it.",
-        "answer": "No. It STRENGTHENS on smooth ground, in both products and "
-                  "under both restriction conventions.",
+        "answer": "The slope STRENGTHENS on smooth ground, in both products and "
+                  "under both restriction conventions. But this test cannot "
+                  "carry the weight originally put on it: roughness is derived "
+                  "from the DEM, so restricting on it is not an independent "
+                  "slice. See selection_effect_on_this_diagnostic below, and "
+                  "read the headline off all_points, which involves no "
+                  "selection.",
+        "read_this_one": "all_points. It is unselected, and a DEM reproducing "
+                         "a third to a half of the surveyed relief is the "
+                         "finding on its own.",
         "all_points": {pid: fit(rows, pid) for pid in PRODUCTS},
         "shared_set": {
             "definition": "the finding's own restriction -- points at or below "
@@ -589,10 +606,80 @@ def post_hoc_restricted_slope(paired, low_idx, split):
                and r[pid]["roughness_ft"] <= med]
         per[pid] = {"roughness_median_ft": round(med, 4), **fit(sub, pid)}
     out["per_product"] = per
+
+    # Why this diagnostic cannot rule roughness out, measured rather than
+    # asserted. Roughness is computed FROM the DEM, so the restriction selects
+    # on a quantity correlated with the elevation being tested. Where that
+    # correlation is high, restricting compresses the DEM's spread while leaving
+    # the survey's alone, and a regression of (DEM - survey) on survey is then
+    # driven toward slope -1 and r2 -> 1 whether or not anything is wrong.
+    sel = {
+        "why_it_matters": "roughness is derived from the DEM, so the restricted "
+                          "set is not an independent slice. Rough ground is "
+                          "also high ground here, at r ~ 0.68-0.70, so "
+                          "restricting to smooth ground strips far more of the "
+                          "DEM's range than of the survey's, and the slope is "
+                          "pushed toward -1 and r2 toward 1 mechanically. That "
+                          "is the direction this diagnostic reports, so it "
+                          "cannot distinguish the two explanations. Compare "
+                          "the two sd pairs below rather than either alone: "
+                          "the asymmetry between them is the effect.",
+        "restricted_set": "shared_set (n=%d)" % len(low_idx),
+    }
+    low_rows = [rows[i] for i in low_idx]
+    sur_all = [r["surveyed_ft_above_mllw"] for r in rows]
+    sur_low = [r["surveyed_ft_above_mllw"] for r in low_rows]
+    for pid in PRODUCTS:
+        rg = [(r[pid]["roughness_ft"], r[pid]["cell_ft_mllw"]) for r in rows
+              if r[pid]["roughness_ft"] is not None]
+        dem_all = [r[pid]["cell_ft_mllw"] for r in rows]
+        dem_low = [r[pid]["cell_ft_mllw"] for r in low_rows]
+        sel[pid] = {
+            "corr_roughness_dem_elevation": round(
+                pearson([a for a, _ in rg], [b for _, b in rg]), 4),
+            "dem_sd_all_ft": round(statistics.pstdev(dem_all), 4),
+            "dem_sd_restricted_ft": round(statistics.pstdev(dem_low), 4),
+            "survey_sd_all_ft": round(statistics.pstdev(sur_all), 4),
+            "survey_sd_restricted_ft": round(statistics.pstdev(sur_low), 4),
+        }
+    out["selection_effect_on_this_diagnostic"] = sel
+
+    # The one result the restriction DOES show cleanly. Both products are scored
+    # on the identical shared set, so whatever the selection does to the DEM's
+    # spread it does to both -- which means the difference between them survives
+    # an effect that the absolute values do not.
+    out["the_differential_the_restriction_does_show"] = {
+        "claim": "on the shared restricted set both products face the same "
+                 "selection, so the DIFFERENCE between their survey-DEM "
+                 "correlations is not explained by it.",
+        "corr_survey_dem_on_shared_set": {
+            pid: out["shared_set"][pid]["corr_survey_dem"] for pid in PRODUCTS},
+        "why_it_is_worth_keeping": "none of the three pre-registered metrics "
+                                   "captured it. RMSE, MAE and median absolute "
+                                   "error all measure the size of the error; "
+                                   "this measures whether the product tracks "
+                                   "the bench's shape at all on ground it "
+                                   "resolves smoothly.",
+    }
+
     out["what_it_rules_out"] = {
-        "roughness / point-against-cell": "ruled out as the cause. The slope "
-                                          "gets steeper on smooth ground, not "
-                                          "shallower.",
+        "roughness / point-against-cell": "NOT ruled out. This was previously "
+                                          "recorded as ruled out because the "
+                                          "slope steepens on smooth ground. "
+                                          "That inference does not hold: the "
+                                          "restriction selects on a "
+                                          "DEM-derived quantity, and "
+                                          "selection_effect_on_this_diagnostic "
+                                          "shows it strips about three "
+                                          "quarters of the DEM's spread "
+                                          "against about a quarter of the "
+                                          "survey's -- an asymmetry that "
+                                          "drives this regression toward slope "
+                                          "-1 on its own. "
+                                          "The test cannot separate 'roughness "
+                                          "is not the cause' from 'restricting "
+                                          "on a DEM-derived quantity induced "
+                                          "the steepening'.",
         "sand": "ruled out as the cause. Sand buries low ground; it cannot "
                 "lower high rock, and the slope is driven by the DEM reading "
                 "several feet BELOW surveyed cliff faces and boulder tops.",

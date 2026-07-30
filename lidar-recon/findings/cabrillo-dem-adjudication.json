@@ -684,7 +684,8 @@
  "post_hoc_elevation_slope_in_the_restricted_set": {
   "status": "POST-HOC AND CANNOT SELECT. Computed after the pre-registered comparison returned indeterminate. It is not in the pre-registration, it did not contribute to the verdict, and it could not have: no product is selected either way.",
   "question": "is the confound-1 elevation slope the point-against-cell confound in disguise? If rough ground produced it, restricting to smooth ground would weaken it.",
-  "answer": "No. It STRENGTHENS on smooth ground, in both products and under both restriction conventions.",
+  "answer": "The slope STRENGTHENS on smooth ground, in both products and under both restriction conventions. But this test cannot carry the weight originally put on it: roughness is derived from the DEM, so restricting on it is not an independent slice. See selection_effect_on_this_diagnostic below, and read the headline off all_points, which involves no selection.",
+  "read_this_one": "all_points. It is unselected, and a DEM reproducing a third to a half of the surveyed relief is the finding on its own.",
   "all_points": {
    "2616": {
     "n": 119,
@@ -755,8 +756,34 @@
     "corr_survey_dem": 0.2006
    }
   },
+  "selection_effect_on_this_diagnostic": {
+   "why_it_matters": "roughness is derived from the DEM, so the restricted set is not an independent slice. Rough ground is also high ground here, at r ~ 0.68-0.70, so restricting to smooth ground strips far more of the DEM's range than of the survey's, and the slope is pushed toward -1 and r2 toward 1 mechanically. That is the direction this diagnostic reports, so it cannot distinguish the two explanations. Compare the two sd pairs below rather than either alone: the asymmetry between them is the effect.",
+   "restricted_set": "shared_set (n=61)",
+   "2616": {
+    "corr_roughness_dem_elevation": 0.6973,
+    "dem_sd_all_ft": 1.4464,
+    "dem_sd_restricted_ft": 0.3618,
+    "survey_sd_all_ft": 1.7323,
+    "survey_sd_restricted_ft": 1.3158
+   },
+   "6260": {
+    "corr_roughness_dem_elevation": 0.6743,
+    "dem_sd_all_ft": 1.1603,
+    "dem_sd_restricted_ft": 0.2751,
+    "survey_sd_all_ft": 1.7323,
+    "survey_sd_restricted_ft": 1.3158
+   }
+  },
+  "the_differential_the_restriction_does_show": {
+   "claim": "on the shared restricted set both products face the same selection, so the DIFFERENCE between their survey-DEM correlations is not explained by it.",
+   "corr_survey_dem_on_shared_set": {
+    "2616": 0.5134,
+    "6260": 0.0704
+   },
+   "why_it_is_worth_keeping": "none of the three pre-registered metrics captured it. RMSE, MAE and median absolute error all measure the size of the error; this measures whether the product tracks the bench's shape at all on ground it resolves smoothly."
+  },
   "what_it_rules_out": {
-   "roughness / point-against-cell": "ruled out as the cause. The slope gets steeper on smooth ground, not shallower.",
+   "roughness / point-against-cell": "NOT ruled out. This was previously recorded as ruled out because the slope steepens on smooth ground. That inference does not hold: the restriction selects on a DEM-derived quantity, and selection_effect_on_this_diagnostic shows it strips about three quarters of the DEM's spread against about a quarter of the survey's -- an asymmetry that drives this regression toward slope -1 on its own. The test cannot separate 'roughness is not the cause' from 'restricting on a DEM-derived quantity induced the steepening'.",
    "sand": "ruled out as the cause. Sand buries low ground; it cannot lower high rock, and the slope is driven by the DEM reading several feet BELOW surveyed cliff faces and boulder tops.",
    "any datum term": "ruled out as the cause. A datum error is additive: it moves the intercept of this regression and cannot produce a slope in it. It is also identical for both products and so cancels exactly in the paired difference."
   },
