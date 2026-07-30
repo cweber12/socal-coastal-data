@@ -54,6 +54,7 @@ import {
 import { evaluateRefusals } from './src/refusals.ts';
 import {
   accuracyProfile,
+  centringDiagnostic,
   dayNightSplit,
   leaveOneOut,
   obscuringLossesByTaxon,
@@ -118,6 +119,16 @@ const TAXA_WITH_ROLE = [
   ...taxaFile.targets.map((t) => ({ ...t, role: 'target' as const })),
   ...taxaFile.denominator.map((t) => ({ ...t, role: 'denominator' as const })),
 ];
+
+/**
+ * The radius everything is pulled at: the widest the sensitivity grid reports.
+ *
+ * Named rather than repeated, because the centring grid's reach is DERIVED from
+ * it -- a disc may move `PULL_RADIUS_KM - RADIUS_KM` before it hangs outside the
+ * records that were pulled -- and four copies of `Math.max(...)` is four places
+ * for that derivation to come apart.
+ */
+const PULL_RADIUS_KM = Math.max(...SENSITIVITY_RADII_KM);
 
 const NOW_MS = Date.now();
 const PULLED_AT = new Date(NOW_MS).toISOString().slice(0, 10);
@@ -190,7 +201,7 @@ async function loadPull(spot: (typeof SPOTS)[number]): Promise<RawPull> {
       lon: spot.lon,
       // The widest radius in the sensitivity grid. The shipped radius is applied
       // in memory, so one pull serves every cell.
-      radiusKm: Math.max(...SENSITIVITY_RADII_KM),
+      radiusKm: PULL_RADIUS_KM,
       taxonIds: [...ALL_IDS],
       since: CORPUS_FROM,
     },
@@ -244,13 +255,9 @@ for (const spot of SPOTS) {
   const pull = await loadPull(spot);
   queries.push(pull.firstUrl);
 
-  // Parsed at the WIDEST radius so the sensitivity grid has records to narrow.
-  const wide = parsePull(
-    pull.results,
-    spot,
-    Math.max(...SENSITIVITY_RADII_KM),
-    NOW_MS,
-  );
+  // Parsed at the WIDEST radius so the sensitivity and centring grids have
+  // records to narrow.
+  const wide = parsePull(pull.results, spot, PULL_RADIUS_KM, NOW_MS);
 
   const atRadius = wide.records.filter((r) => r.distanceM <= RADIUS_KM * 1000);
   const visits = placeVisits(
@@ -369,6 +376,12 @@ for (const spot of SPOTS) {
       SENSITIVITY_RADII_KM,
       SENSITIVITY_ACCURACY_M,
     ),
+    // Same record set, narrowed the same way, costing the same nothing in
+    // requests — the grid above moves the disc's edge, this one moves its centre.
+    centring: centringDiagnostic(wide.records, spot, ALL_IDS, TARGET_IDS, {
+      discRadiusM: RADIUS_KM * 1000,
+      pullRadiusM: PULL_RADIUS_KM * 1000,
+    }),
     stability: windowStability(visits),
     timestamps: timestampQuality(visits, series),
     dayNight: dayNightSplit(visits, spot.lat, spot.lon, DISPLAY_TIME_ZONE),

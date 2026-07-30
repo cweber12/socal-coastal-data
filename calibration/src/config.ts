@@ -213,6 +213,70 @@ export const STABILITY_WINDOWS = [null, 2019, 2021, 2023] as const;
 /** The timestamp-quality diagnostic's band. #30 measured 79-82% of visits inside it. */
 export const TIMESTAMP_QUALITY_BAND_HOURS = 2;
 
+/* ---------------------------------------------------------------------------
+ * The centring grid, for #84
+ * -------------------------------------------------------------------------
+ *
+ * The sensitivity grid above varies the disc's SIZE. It has never varied its
+ * CENTRE, and #81 measured why that matters: the disc is centred on the
+ * spots.json pin, and at five of eight spots the pin is not on the rock. "Thin
+ * data here" and "the disc is in the wrong place" were not distinguishable and
+ * the pipeline reported the first.
+ *
+ * These three decide NOTHING. No rate, no gate, no verdict reads them.
+ * Recentring a disc means editing a spots.json coordinate, which is a join
+ * against an authority rather than a fit to observation density -- #80 forbids
+ * it and #69 is where that route lives. This grid reports where the records
+ * are; it does not move a pin toward them.
+ */
+
+/**
+ * The lattice step the centring grid walks the disc through, in metres.
+ *
+ * Fine enough that the grid's RIM does not distort the boundary flag. That flag
+ * says the search could not step outward from the best offset, which is what
+ * makes a ratio a lower bound -- and on a coarse lattice clipped to a disc,
+ * almost every cell touches the rim and the flag fires everywhere. At 125 m the
+ * rim sits at 375-500 m and #81's centred spots, whose optima are within 250 m
+ * of their pins, are interior with all eight neighbours searched.
+ *
+ * NOT a claim about where the optimum is to 125 m. spots.json coordinates carry
+ * a ~100 m error bar, so the LOCATION of a best disc is not resolvable below
+ * that. What is exact is the count inside each disc, which is what the grid
+ * reports.
+ */
+export const CENTRING_STEP_M = 125;
+
+/**
+ * The radius of the "is the pin itself on anything" probe, in metres.
+ *
+ * 100 m because that is the stated error bar on a spots.json coordinate
+ * (CLAUDE.md), so it is the disc the pin can claim without the error bar
+ * swallowing it. #81 measured 0 records inside it at torrey-pines-beach and 1
+ * at windansea and sunset-cliffs -- three of the four spots #80 §7 found with no
+ * sub-zero pixel in their +/-100 m disc, from an unrelated instrument.
+ */
+export const CENTRING_NEAR_PIN_M = 100;
+
+/**
+ * How much richer an offset disc must be before the pin is called off-centre.
+ *
+ * A REPORTING bar, not a gate: it selects an adjective in a report and no
+ * refusal, rate or floor reads it. It exists so "centred" is a stated
+ * comparison rather than an impression, and it is deliberately loose, because
+ * the corpus moves on its own -- #81 measured torrey-pines-beach going 35 to 36
+ * records overnight, 2.9% at the thinnest spot in the corridor.
+ *
+ * The value is not load-bearing and the honest way to say that is to say what
+ * would change if it moved: on #81's figures the centred spots read 1.00-1.01x
+ * and the off-centre ones 1.51-5.48x, so every bar between about 1.05 and 1.5
+ * labels the same eight spots. That is a description of how wide the gap is,
+ * NOT the derivation of the bar -- and it is exactly the reasoning
+ * MIN_AMPLITUDE_RATIO above forbids for itself, which is why this constant is
+ * kept away from that one and marked as deciding nothing.
+ */
+export const CENTRING_MATERIAL_RATIO = 1.1;
+
 /**
  * NPS's own published figure for Cabrillo, for the blind check.
  *

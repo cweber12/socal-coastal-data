@@ -43,6 +43,29 @@ Every one of these is corridor-wide and stated a priori. None may be changed to 
 
 `*` marks a bin below 15 visits. Those are reported but no gate reads them.
 
+## Is each disc on the rock?
+
+Every rate above is measured inside a 500 m disc centred on that spot's `shared/spots.json` coordinate. Whether that coordinate is where the records are had never been checked until #81 checked it, so a refusal could not be told apart from a disc in the wrong place, and the pipeline reported the first. This table is that check, re-run here from the same records every number above comes from.
+
+**It decides nothing.** No rate, gate, verdict or floor reads it, and no coordinate moves because of it — recentring a pin is a join against an authority, not a fit to observation density. **More records is not better data either**: beach-level slugs cover several benches, so a disc recentred 500 m away may be aggregating two of them, which is a different defect rather than a fix.
+
+| spot | records ≤ 100 m of pin | shipped disc | best disc | offset | records | visits | on grid boundary | centred | verdict |
+|---|---:|---|---|---|---:|---:|---|---|---|
+| swamis | 258 | 558 rec / 237 vis | 561 rec / 240 vis | 125 m W | 1.01× | 1.03× | no | yes | **PUBLISH** |
+| cardiff-reef | 20 | 98 rec / 74 vis | 157 rec / 80 vis | 451 m SSE | 1.60× | 1.08× | **yes** | **no** | refuse |
+| torrey-pines-beach | 0 | 35 rec / 31 vis | 71 rec / 56 vis | 451 m NNW | 2.03× | 1.81× | **yes** | **no** | refuse |
+| la-jolla-shores | 42 | 310 rec / 239 vis | 488 rec / 354 vis | 451 m WSW | 1.57× | 1.48× | **yes** | **no** | refuse |
+| la-jolla-cove | 96 | 545 rec / 354 vis | 682 rec / 438 vis | 354 m SW | 1.25× | 1.24× | **yes** | **no** | refuse |
+| windansea | 1 | 158 rec / 99 vis | 568 rec / 356 vis | 500 m N | 3.59× | 3.60× | **yes** | **no** | refuse |
+| sunset-cliffs | 1 | 794 rec / 404 vis | 794 rec / 404 vis | none | 1.00× | 1.00× | no | yes | **PUBLISH** |
+| cabrillo-tidepools | 1983 | 3133 rec / 1224 vis | 3166 rec / 1240 vis | 250 m E | 1.01× | 1.01× | no | yes | **PUBLISH** |
+
+The `records ≤ 100 m` column is a **record** count, not a visit count — it asks whether anything at all is recorded where the pin sits, and 100 m is the stated error bar on a `spots.json` coordinate. `best disc` is the richest of the searched centres by records; the visits ratio beside it is the richest by **visits**, which is not always the same disc.
+
+**`on grid boundary` is the column that decides how much the ratio is worth.** The grid reaches 500 m — the 1000 m pull minus the 500 m disc — because a disc offset further hangs outside the records that were pulled and its count would be a truncation reported as a measurement. When the best disc sits where the grid could not step outward, its ratio is a **lower bound** and the real optimum is somewhere this grid cannot see.
+
+`centred` is `best records ≤ 1.10× the pin's`. It selects an adjective and nothing else.
+
 ## Blind check against NPS
 
 NPS publishes, for Cabrillo: *"a tide of 0.7 or lower provides the best opportunity to explore the tidepools"* (nps.gov/cabr/learn/nature/tidepools.htm, read 2026-07-28). This is the only independent check available, so it is printed once and nothing is tuned against it — tuning consumes it.
@@ -148,6 +171,31 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 500 | 100 | 182 | 0.67 (70) | 0.52 (46) | 0.29 (35) | 0.25 (8) | 0.09 (11) | 0.00 (7) | 0.50 (2) | 0.00 (3) | — | — | 3.17 |
 | 1000 | none | 257 | 0.61 (102) | 0.50 (58) | 0.33 (52) | 0.40 (10) | 0.06 (17) | 0.00 (9) | 0.50 (4) | 0.00 (4) | 0.00 (1) | — | 7.09 |
 | 1000 | 100 | 193 | 0.65 (77) | 0.50 (48) | 0.28 (36) | 0.33 (9) | 0.09 (11) | 0.00 (7) | 0.50 (2) | 0.00 (3) | — | — | 2.94 |
+
+### Centring
+
+The grid above varies the disc's **size**. This one varies its **centre**, over the identical record set and at the same cost in requests: none. #30's radius insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in the corridor, so it is exactly the result that does not carry to a spot whose disc is off the rock.
+
+- **258 records** lie within 100 m of the pin. A record count, not a visit count.
+- **Shipped disc** (500 m, on the pin): 558 records, 237 visits.
+- **Richest disc by records:** 561 records (240 visits) at 125 m W (-125 m E, +0 m N) — 1.01× the shipped disc's records.
+- **Richest disc by visits:** 243 visits (558 records) at 354 m NW (-250 m E, +250 m N) — 1.03× the shipped disc's visits.
+- **On the search boundary: no.** Every one of that centre's eight neighbours was searched, so it is a grid-local optimum rather than the edge of what was looked at.
+- **Centred: yes** — no searched disc holds more than 1.10× the pin's records.
+
+| N ↓ / E → | -500 | -375 | -250 | -125 | 0 | +125 | +250 | +375 | +500 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **+500** | · | · | · | · | 218/114 | · | · | · | · |
+| **+375** | · | · | 481/217 | 544/242 | 552/239 | 536/232 | 125/83 | · | · |
+| **+250** | · | 499/222 | 558/243 | 559/241 | 560/240 | 554/236 | 529/225 | 165/82 | · |
+| **+125** | · | 543/238 | 557/240 | 560/240 | 561/240 | 555/236 | 543/230 | 327/151 | · |
+| **0** | 462/205 | 550/235 | 559/241 | **561/240** | 558/237 | 554/236 | 544/231 | 371/177 | 94/57 |
+| **-125** | · | 539/230 | 550/236 | 554/236 | 555/236 | 548/233 | 534/228 | 348/170 | · |
+| **-250** | · | 529/227 | 540/229 | 546/231 | 547/233 | 544/233 | 531/230 | 244/111 | · |
+| **-375** | · | · | 530/225 | 541/228 | 532/227 | 517/223 | 307/147 | · | · |
+| **-500** | · | · | · | · | 323/159 | · | · | · | · |
+
+Metres east and north of the pin, `records/visits` inside a 500 m disc at each centre. `·` was not searched: its disc would reach past the 1000 m pull. The centre cell is the shipped disc; **bold** is the richest by records. No rate is computed at any of these centres — whether a refusal survives a recentred disc needs a centre somebody can defend, which is a join against an authority and not this measurement.
 
 ### Window stability
 
@@ -283,6 +331,31 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 500 | 100 | 61 | 0.71 (14) | 0.67 (18) | 0.88 (8) | 0.33 (6) | 0.67 (3) | 1.00 (4) | 0.75 (4) | 1.00 (3) | 1.00 (1) | — | — |
 | 1000 | none | 138 | 0.59 (29) | 0.64 (25) | 0.58 (31) | 0.53 (17) | 0.75 (8) | 0.67 (9) | 0.45 (11) | 0.83 (6) | 1.00 (1) | 1.00 (1) | 0.94 |
 | 1000 | 100 | 99 | 0.68 (19) | 0.68 (19) | 0.61 (23) | 0.31 (13) | 0.75 (4) | 0.67 (6) | 0.63 (8) | 1.00 (5) | 1.00 (1) | 1.00 (1) | 1.13 |
+
+### Centring
+
+The grid above varies the disc's **size**. This one varies its **centre**, over the identical record set and at the same cost in requests: none. #30's radius insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in the corridor, so it is exactly the result that does not carry to a spot whose disc is off the rock.
+
+- **20 records** lie within 100 m of the pin. A record count, not a visit count.
+- **Shipped disc** (500 m, on the pin): 98 records, 74 visits.
+- **Richest disc by records:** 157 records (80 visits) at 451 m SSE (+250 m E, -375 m N) — 1.60× the shipped disc's records.
+- **Richest disc by visits:** 80 visits (157 records) at 451 m SSE (+250 m E, -375 m N) — 1.08× the shipped disc's visits.
+- **On the search boundary: yes.** The grid could not step outward from that centre, so 1.60× is a **lower bound** — the real optimum lies further out than 500 m, where a disc would hang outside the 1000 m pull and its count would be a truncation.
+- **Centred: no** — the richest searched disc holds 1.60× the pin's records, over the 1.10× bar. That is a statement about where the records are and **not** a licence to publish this spot.
+
+| N ↓ / E → | -500 | -375 | -250 | -125 | 0 | +125 | +250 | +375 | +500 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **+500** | · | · | · | · | 53/47 | · | · | · | · |
+| **+375** | · | · | 58/49 | 68/56 | 76/62 | 77/61 | 67/52 | · | · |
+| **+250** | · | 54/46 | 72/59 | 81/66 | 93/75 | 94/72 | 80/62 | 56/43 | · |
+| **+125** | · | 63/50 | 80/66 | 95/73 | 100/76 | 97/73 | 84/64 | 71/52 | · |
+| **0** | 24/19 | 60/47 | 85/65 | 97/73 | 98/74 | 91/69 | 89/67 | 81/60 | 68/48 |
+| **-125** | · | 42/34 | 74/58 | 84/64 | 87/65 | 88/66 | 81/60 | 81/60 | · |
+| **-250** | · | 30/22 | 64/50 | 74/55 | 76/56 | 81/60 | 82/61 | 106/75 | · |
+| **-375** | · | · | 54/42 | 69/50 | 71/52 | 83/60 | **157/80** | · | · |
+| **-500** | · | · | · | · | 72/53 | · | · | · | · |
+
+Metres east and north of the pin, `records/visits` inside a 500 m disc at each centre. `·` was not searched: its disc would reach past the 1000 m pull. The centre cell is the shipped disc; **bold** is the richest by records. No rate is computed at any of these centres — whether a refusal survives a recentred disc needs a centre somebody can defend, which is a join against an authority and not this measurement.
 
 ### Window stability
 
@@ -421,6 +494,31 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 1000 | none | 121 | 0.38 (24) | 0.17 (24) | 0.18 (28) | 0.25 (16) | 0.33 (6) | 0.45 (11) | 0.44 (9) | 0.50 (2) | 1.00 (1) | — | 0.99 |
 | 1000 | 100 | 81 | 0.42 (19) | 0.17 (18) | 0.17 (18) | 0.33 (9) | 0.50 (4) | 0.67 (6) | 0.50 (4) | 0.50 (2) | 1.00 (1) | — | 1.16 |
 
+### Centring
+
+The grid above varies the disc's **size**. This one varies its **centre**, over the identical record set and at the same cost in requests: none. #30's radius insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in the corridor, so it is exactly the result that does not carry to a spot whose disc is off the rock.
+
+- **0 records** lie within 100 m of the pin. A record count, not a visit count.
+- **Shipped disc** (500 m, on the pin): 35 records, 31 visits.
+- **Richest disc by records:** 71 records (56 visits) at 451 m NNW (-250 m E, +375 m N) — 2.03× the shipped disc's records.
+- **Richest disc by visits:** 56 visits (71 records) at 451 m NNW (-250 m E, +375 m N) — 1.81× the shipped disc's visits.
+- **On the search boundary: yes.** The grid could not step outward from that centre, so 2.03× is a **lower bound** — the real optimum lies further out than 500 m, where a disc would hang outside the 1000 m pull and its count would be a truncation.
+- **Centred: no** — the richest searched disc holds 2.03× the pin's records, over the 1.10× bar. That is a statement about where the records are and **not** a licence to publish this spot.
+
+| N ↓ / E → | -500 | -375 | -250 | -125 | 0 | +125 | +250 | +375 | +500 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **+500** | · | · | · | · | 16/15 | · | · | · | · |
+| **+375** | · | · | **71/56** | 66/52 | 25/24 | 13/12 | 11/10 | · | · |
+| **+250** | · | 68/53 | 68/54 | 60/48 | 34/30 | 16/15 | 13/12 | 4/4 | · |
+| **+125** | · | 62/50 | 59/47 | 40/36 | 37/33 | 16/15 | 13/12 | 5/5 | · |
+| **0** | 57/45 | 58/46 | 41/37 | 40/36 | 35/31 | 21/18 | 9/9 | 7/7 | 7/7 |
+| **-125** | · | 39/35 | 41/37 | 42/38 | 34/30 | 14/12 | 8/8 | 7/7 | · |
+| **-250** | · | 38/35 | 40/37 | 37/34 | 38/36 | 37/36 | 40/39 | 23/22 | · |
+| **-375** | · | · | 43/39 | 49/44 | 49/46 | 40/39 | 39/38 | · | · |
+| **-500** | · | · | · | · | 47/44 | · | · | · | · |
+
+Metres east and north of the pin, `records/visits` inside a 500 m disc at each centre. `·` was not searched: its disc would reach past the 1000 m pull. The centre cell is the shipped disc; **bold** is the richest by records. No rate is computed at any of these centres — whether a refusal survives a recentred disc needs a centre somebody can defend, which is a join against an authority and not this measurement.
+
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
@@ -557,6 +655,31 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 500 | 100 | 74 | 0.63 (8) | 0.90 (21) | 0.92 (13) | 0.86 (7) | 1.00 (5) | 0.88 (8) | 0.75 (4) | 1.00 (4) | 0.33 (3) | 0.00 (1) | — |
 | 1000 | none | 484 | 0.69 (85) | 0.70 (107) | 0.70 (97) | 0.67 (55) | 0.66 (38) | 0.70 (37) | 0.74 (27) | 0.86 (22) | 0.45 (11) | 0.60 (5) | 0.98 |
 | 1000 | 100 | 210 | 0.72 (39) | 0.83 (47) | 0.72 (39) | 0.75 (20) | 0.67 (18) | 0.57 (14) | 0.73 (11) | 0.89 (9) | 0.40 (10) | 0.33 (3) | 1.14 |
+
+### Centring
+
+The grid above varies the disc's **size**. This one varies its **centre**, over the identical record set and at the same cost in requests: none. #30's radius insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in the corridor, so it is exactly the result that does not carry to a spot whose disc is off the rock.
+
+- **42 records** lie within 100 m of the pin. A record count, not a visit count.
+- **Shipped disc** (500 m, on the pin): 310 records, 239 visits.
+- **Richest disc by records:** 488 records (354 visits) at 451 m WSW (-375 m E, -250 m N) — 1.57× the shipped disc's records.
+- **Richest disc by visits:** 354 visits (488 records) at 451 m WSW (-375 m E, -250 m N) — 1.48× the shipped disc's visits.
+- **On the search boundary: yes.** The grid could not step outward from that centre, so 1.57× is a **lower bound** — the real optimum lies further out than 500 m, where a disc would hang outside the 1000 m pull and its count would be a truncation.
+- **Centred: no** — the richest searched disc holds 1.57× the pin's records, over the 1.10× bar. That is a statement about where the records are and **not** a licence to publish this spot.
+
+| N ↓ / E → | -500 | -375 | -250 | -125 | 0 | +125 | +250 | +375 | +500 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **+500** | · | · | · | · | 139/119 | · | · | · | · |
+| **+375** | · | · | 272/217 | 250/197 | 191/154 | 148/118 | 136/110 | · | · |
+| **+250** | · | 321/258 | 316/256 | 274/221 | 248/194 | 159/123 | 142/108 | 123/93 | · |
+| **+125** | · | 336/267 | 328/262 | 326/262 | 280/215 | 172/133 | 143/108 | 122/91 | · |
+| **0** | 339/268 | 348/276 | 337/267 | 340/269 | 310/239 | 160/122 | 131/99 | 116/87 | 52/34 |
+| **-125** | · | 400/312 | 361/285 | 339/264 | 317/242 | 135/104 | 127/95 | 107/78 | · |
+| **-250** | · | **488/354** | 444/336 | 357/274 | 192/155 | 125/97 | 108/80 | 89/62 | · |
+| **-375** | · | · | 420/300 | 306/234 | 168/134 | 98/76 | 88/63 | · | · |
+| **-500** | · | · | · | · | 106/76 | · | · | · | · |
+
+Metres east and north of the pin, `records/visits` inside a 500 m disc at each centre. `·` was not searched: its disc would reach past the 1000 m pull. The centre cell is the shipped disc; **bold** is the richest by records. No rate is computed at any of these centres — whether a refusal survives a recentred disc needs a centre somebody can defend, which is a join against an authority and not this measurement.
 
 ### Window stability
 
@@ -697,6 +820,31 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 1000 | none | 663 | 0.43 (129) | 0.32 (136) | 0.33 (162) | 0.32 (60) | 0.32 (66) | 0.22 (41) | 0.19 (36) | 0.19 (16) | 0.27 (11) | 0.17 (6) | 2.05 |
 | 1000 | 100 | 406 | 0.44 (81) | 0.37 (84) | 0.34 (97) | 0.45 (29) | 0.27 (41) | 0.21 (24) | 0.20 (25) | 0.25 (12) | 0.25 (8) | 0.20 (5) | 2.02 |
 
+### Centring
+
+The grid above varies the disc's **size**. This one varies its **centre**, over the identical record set and at the same cost in requests: none. #30's radius insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in the corridor, so it is exactly the result that does not carry to a spot whose disc is off the rock.
+
+- **96 records** lie within 100 m of the pin. A record count, not a visit count.
+- **Shipped disc** (500 m, on the pin): 545 records, 354 visits.
+- **Richest disc by records:** 682 records (438 visits) at 354 m SW (-250 m E, -250 m N) — 1.25× the shipped disc's records.
+- **Richest disc by visits:** 438 visits (682 records) at 354 m SW (-250 m E, -250 m N) — 1.24× the shipped disc's visits.
+- **On the search boundary: yes.** The grid could not step outward from that centre, so 1.25× is a **lower bound** — the real optimum lies further out than 500 m, where a disc would hang outside the 1000 m pull and its count would be a truncation.
+- **Centred: no** — the richest searched disc holds 1.25× the pin's records, over the 1.10× bar. That is a statement about where the records are and **not** a licence to publish this spot.
+
+| N ↓ / E → | -500 | -375 | -250 | -125 | 0 | +125 | +250 | +375 | +500 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **+500** | · | · | · | · | 302/209 | · | · | · | · |
+| **+375** | · | · | 431/266 | 353/231 | 362/246 | 376/259 | 356/256 | · | · |
+| **+250** | · | 497/312 | 513/321 | 509/323 | 402/273 | 384/267 | 399/280 | 352/251 | · |
+| **+125** | · | 587/374 | 548/348 | 543/348 | 520/336 | 404/278 | 418/287 | 477/329 | · |
+| **0** | 639/403 | 654/415 | 624/402 | 549/355 | 545/354 | 409/281 | 412/285 | 403/278 | 299/198 |
+| **-125** | · | 672/426 | 668/434 | 567/367 | 551/358 | 411/284 | 390/275 | 260/188 | · |
+| **-250** | · | 666/422 | **682/438** | 576/373 | 541/351 | 381/260 | 296/217 | 128/101 | · |
+| **-375** | · | · | 594/384 | 488/317 | 423/278 | 200/150 | 114/92 | · | · |
+| **-500** | · | · | · | · | 46/39 | · | · | · | · |
+
+Metres east and north of the pin, `records/visits` inside a 500 m disc at each centre. `·` was not searched: its disc would reach past the 1000 m pull. The centre cell is the shipped disc; **bold** is the richest by records. No rate is computed at any of these centres — whether a refusal survives a recentred disc needs a centre somebody can defend, which is a join against an authority and not this measurement.
+
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
@@ -836,6 +984,31 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 1000 | none | 505 | 0.48 (136) | 0.37 (116) | 0.28 (104) | 0.27 (37) | 0.18 (33) | 0.14 (36) | 0.30 (20) | 0.27 (15) | 0.33 (6) | 0.50 (2) | 1.57 |
 | 1000 | 100 | 359 | 0.40 (97) | 0.36 (81) | 0.26 (77) | 0.33 (27) | 0.17 (23) | 0.14 (22) | 0.29 (14) | 0.33 (12) | 0.40 (5) | 1.00 (1) | 1.55 |
 
+### Centring
+
+The grid above varies the disc's **size**. This one varies its **centre**, over the identical record set and at the same cost in requests: none. #30's radius insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in the corridor, so it is exactly the result that does not carry to a spot whose disc is off the rock.
+
+- **1 record** lie within 100 m of the pin. A record count, not a visit count.
+- **Shipped disc** (500 m, on the pin): 158 records, 99 visits.
+- **Richest disc by records:** 568 records (356 visits) at 500 m N (+0 m E, +500 m N) — 3.59× the shipped disc's records.
+- **Richest disc by visits:** 356 visits (568 records) at 500 m N (+0 m E, +500 m N) — 3.60× the shipped disc's visits.
+- **On the search boundary: yes.** The grid could not step outward from that centre, so 3.59× is a **lower bound** — the real optimum lies further out than 500 m, where a disc would hang outside the 1000 m pull and its count would be a truncation.
+- **Centred: no** — the richest searched disc holds 3.59× the pin's records, over the 1.10× bar. That is a statement about where the records are and **not** a licence to publish this spot.
+
+| N ↓ / E → | -500 | -375 | -250 | -125 | 0 | +125 | +250 | +375 | +500 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **+500** | · | · | · | · | **568/356** | · | · | · | · |
+| **+375** | · | · | 217/143 | 203/137 | 139/98 | 117/82 | 41/36 | · | · |
+| **+250** | · | 139/94 | 149/98 | 153/99 | 150/100 | 138/93 | 90/68 | 37/28 | · |
+| **+125** | · | 152/96 | 156/98 | 156/98 | 158/100 | 155/97 | 132/88 | 36/27 | · |
+| **0** | 146/92 | 154/96 | 156/97 | 157/98 | 158/99 | 156/98 | 142/89 | 43/32 | 35/26 |
+| **-125** | · | 153/96 | 164/102 | 168/105 | 167/104 | 165/102 | 87/55 | 65/39 | · |
+| **-250** | · | 147/88 | 164/101 | 168/103 | 157/95 | 133/80 | 67/41 | 41/20 | · |
+| **-375** | · | · | 179/107 | 179/106 | 147/90 | 106/63 | 90/51 | · | · |
+| **-500** | · | · | · | · | 109/64 | · | · | · | · |
+
+Metres east and north of the pin, `records/visits` inside a 500 m disc at each centre. `·` was not searched: its disc would reach past the 1000 m pull. The centre cell is the shipped disc; **bold** is the richest by records. No rate is computed at any of these centres — whether a refusal survives a recentred disc needs a centre somebody can defend, which is a join against an authority and not this measurement.
+
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
@@ -972,6 +1145,31 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 1000 | none | 507 | 0.76 (201) | 0.69 (123) | 0.48 (83) | 0.53 (38) | 0.42 (19) | 0.08 (25) | 0.10 (10) | 0.67 (3) | 0.00 (2) | 0.00 (3) | 6.50 |
 | 1000 | 100 | 353 | 0.76 (148) | 0.69 (85) | 0.46 (48) | 0.50 (28) | 0.45 (11) | 0.09 (23) | 0.17 (6) | 0.50 (2) | — | 0.00 (2) | 6.30 |
 
+### Centring
+
+The grid above varies the disc's **size**. This one varies its **centre**, over the identical record set and at the same cost in requests: none. #30's radius insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in the corridor, so it is exactly the result that does not carry to a spot whose disc is off the rock.
+
+- **1 record** lie within 100 m of the pin. A record count, not a visit count.
+- **Shipped disc** (500 m, on the pin): 794 records, 404 visits.
+- **Richest disc by records:** 794 records (404 visits) at the pin itself — 1.00× the shipped disc's records.
+- **Richest disc by visits:** 404 visits (794 records) at the pin itself — 1.00× the shipped disc's visits.
+- **On the search boundary: no.** Every one of that centre's eight neighbours was searched, so it is a grid-local optimum rather than the edge of what was looked at.
+- **Centred: yes** — no searched disc holds more than 1.10× the pin's records.
+
+| N ↓ / E → | -500 | -375 | -250 | -125 | 0 | +125 | +250 | +375 | +500 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **+500** | · | · | · | · | 342/188 | · | · | · | · |
+| **+375** | · | · | 320/178 | 340/188 | 341/189 | 337/186 | 329/181 | · | · |
+| **+250** | · | 305/175 | 324/187 | 347/197 | 345/196 | 338/190 | 319/175 | 183/112 | · |
+| **+125** | · | 318/188 | 394/237 | 462/271 | 414/241 | 345/198 | 314/174 | 41/33 | · |
+| **0** | 156/99 | 510/281 | 708/369 | 792/404 | **794/404** | 715/368 | 151/105 | 36/30 | 29/24 |
+| **-125** | · | 610/305 | 677/348 | 728/376 | 753/383 | 633/327 | 555/285 | 38/32 | · |
+| **-250** | · | 582/298 | 637/319 | 643/321 | 644/322 | 623/312 | 621/315 | 300/165 | · |
+| **-375** | · | · | 621/312 | 632/320 | 634/318 | 626/314 | 620/310 | · | · |
+| **-500** | · | · | · | · | 644/321 | · | · | · | · |
+
+Metres east and north of the pin, `records/visits` inside a 500 m disc at each centre. `·` was not searched: its disc would reach past the 1000 m pull. The centre cell is the shipped disc; **bold** is the richest by records. No rate is computed at any of these centres — whether a refusal survives a recentred disc needs a centre somebody can defend, which is a join against an authority and not this measurement.
+
 ### Window stability
 
 | from | visits | ratio | any bin outside the full window's interval |
@@ -1105,6 +1303,31 @@ List length is a tuning knob and this is what makes it visible. The label is an 
 | 500 | 100 | 827 | 0.66 (255) | 0.53 (161) | 0.43 (229) | 0.24 (37) | 0.19 (62) | 0.16 (38) | 0.05 (22) | 0.09 (11) | 0.00 (9) | 0.00 (3) | 14.82 |
 | 1000 | none | 1296 | 0.67 (396) | 0.58 (264) | 0.43 (357) | 0.32 (65) | 0.25 (93) | 0.17 (52) | 0.13 (31) | 0.05 (20) | 0.08 (12) | 0.00 (6) | 12.76 |
 | 1000 | 100 | 847 | 0.65 (260) | 0.54 (168) | 0.43 (237) | 0.24 (37) | 0.21 (62) | 0.16 (38) | 0.05 (22) | 0.09 (11) | 0.00 (9) | 0.00 (3) | 14.71 |
+
+### Centring
+
+The grid above varies the disc's **size**. This one varies its **centre**, over the identical record set and at the same cost in requests: none. #30's radius insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in the corridor, so it is exactly the result that does not carry to a spot whose disc is off the rock.
+
+- **1983 records** lie within 100 m of the pin. A record count, not a visit count.
+- **Shipped disc** (500 m, on the pin): 3133 records, 1224 visits.
+- **Richest disc by records:** 3166 records (1240 visits) at 250 m E (+250 m E, +0 m N) — 1.01× the shipped disc's records.
+- **Richest disc by visits:** 1240 visits (3166 records) at 250 m E (+250 m E, +0 m N) — 1.01× the shipped disc's visits.
+- **On the search boundary: no.** Every one of that centre's eight neighbours was searched, so it is a grid-local optimum rather than the edge of what was looked at.
+- **Centred: yes** — no searched disc holds more than 1.10× the pin's records.
+
+| N ↓ / E → | -500 | -375 | -250 | -125 | 0 | +125 | +250 | +375 | +500 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **+500** | · | · | · | · | 1909/847 | · | · | · | · |
+| **+375** | · | · | 2122/911 | 2656/1121 | 2776/1152 | 2721/1140 | 2319/996 | · | · |
+| **+250** | · | 2192/949 | 2813/1148 | 3041/1207 | 3111/1230 | 3087/1226 | 2990/1208 | 2441/1043 | · |
+| **+125** | · | 2819/1141 | 2954/1179 | 3016/1201 | 3158/1236 | 3156/1236 | 3155/1238 | 2995/1204 | · |
+| **0** | 1743/785 | 2896/1157 | 2957/1174 | 3018/1193 | 3133/1224 | 3162/1237 | **3166/1240** | 3067/1203 | 659/356 |
+| **-125** | · | 2787/1107 | 2904/1143 | 3006/1193 | 3067/1210 | 3062/1207 | 3083/1201 | 2965/1156 | · |
+| **-250** | · | 2611/1037 | 2791/1100 | 2903/1145 | 2966/1166 | 2964/1166 | 2871/1123 | 2330/943 | · |
+| **-375** | · | · | 2565/1016 | 2701/1064 | 2733/1081 | 2721/1070 | 2330/939 | · | · |
+| **-500** | · | · | · | · | 1307/564 | · | · | · | · |
+
+Metres east and north of the pin, `records/visits` inside a 500 m disc at each centre. `·` was not searched: its disc would reach past the 1000 m pull. The centre cell is the shipped disc; **bold** is the richest by records. No rate is computed at any of these centres — whether a refusal survives a recentred disc needs a centre somebody can defend, which is a join against an authority and not this measurement.
 
 ### Window stability
 

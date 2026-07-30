@@ -17,11 +17,15 @@
 import { describe, expect, it } from 'vitest';
 
 import { parseCoopsSeries, type TideSeries } from '../../lib/tide.ts';
+import { distanceMetres } from '../../lib/inat.ts';
 import {
   accuracyProfile,
+  centringDiagnostic,
+  compassPoint,
   dayNightSplit,
   leaveOneOut,
   obscuringLossesByTaxon,
+  offsetCentre,
   percentile,
   sensitivityGrid,
   taxonHeightDistribution,
@@ -358,6 +362,256 @@ describe('sensitivityGrid', () => {
     );
     expect(cells[0]!.visits).toBe(1);
     expect(cells[1]!.visits).toBe(0);
+  });
+});
+
+/* ===========================================================================
+ * Centring
+ * ========================================================================= */
+
+const PIN = CABRILLO;
+
+/** A record at a stated offset from the pin, with its distance measured not assumed. */
+function at(eastM: number, northM: number, over: Partial<CalibrationRecord> = {}) {
+  const centre = offsetCentre(PIN.lat, PIN.lon, eastM, northM);
+  return record({
+    lat: centre.lat,
+    lon: centre.lon,
+    distanceM: distanceMetres(PIN.lat, PIN.lon, centre.lat, centre.lon),
+    ...over,
+  });
+}
+
+const centring = (
+  records: CalibrationRecord[],
+  options: Partial<Parameters<typeof centringDiagnostic>[4]> = {},
+) =>
+  centringDiagnostic(records, PIN, ALL_IDS, TARGET_IDS, {
+    discRadiusM: 500,
+    pullRadiusM: 1000,
+    ...options,
+  });
+
+describe('offsetCentre', () => {
+  /*
+   * The one property that matters: the sphere this generates offsets on must be
+   * the sphere lib/inat.ts measures distances on. A centre generated on one and
+   * measured on the other sits somewhere other than where the diagnostic says,
+   * and every count in the grid is a count of the wrong disc. Asserted as a
+   * round trip rather than by comparing two copies of a constant, because that
+   * is the failure, not the mismatch.
+   */
+  it('offsets by a distance distanceMetres agrees with', () => {
+    for (const [eastM, northM, expected] of [
+      [0, 250, 250],
+      [250, 0, 250],
+      [-500, 0, 500],
+      [0, -500, 500],
+      [500, 500, Math.hypot(500, 500)],
+    ] as const) {
+      const p = offsetCentre(PIN.lat, PIN.lon, eastM, northM);
+      expect(distanceMetres(PIN.lat, PIN.lon, p.lat, p.lon)).toBeCloseTo(expected, 1);
+    }
+  });
+
+  it('puts north at higher latitude and east at higher longitude', () => {
+    expect(offsetCentre(PIN.lat, PIN.lon, 0, 250).lat).toBeGreaterThan(PIN.lat);
+    expect(offsetCentre(PIN.lat, PIN.lon, 250, 0).lon).toBeGreaterThan(PIN.lon);
+  });
+
+  it('corrects east for the latitude, which at 33°N is a 16% correction', () => {
+    // Dividing by the equatorial value instead would land ~84 m short of 500 m.
+    const p = offsetCentre(PIN.lat, PIN.lon, 500, 0);
+    expect(distanceMetres(PIN.lat, PIN.lon, p.lat, p.lon)).toBeGreaterThan(499);
+  });
+});
+
+describe('compassPoint', () => {
+  it('labels the sixteen points', () => {
+    expect(compassPoint(0)).toBe('N');
+    expect(compassPoint(90)).toBe('E');
+    expect(compassPoint(180)).toBe('S');
+    expect(compassPoint(270)).toBe('W');
+    expect(compassPoint(315)).toBe('NW');
+    expect(compassPoint(337.5)).toBe('NNW');
+  });
+
+  it('wraps rather than falling off the end of the table', () => {
+    expect(compassPoint(359)).toBe('N');
+    expect(compassPoint(360)).toBe('N');
+  });
+});
+
+describe('centringDiagnostic', () => {
+  it('reproduces the shipped disc exactly at the pin cell', () => {
+    /*
+     * The pin cell IS the shipped disc, and if it were not the whole table would
+     * be comparing offsets against something the pipeline never computed. The
+     * 499/501 pair is the edge the two rules would disagree on first.
+     */
+    const records = [at(0, 0), at(0, 499), at(0, 501), at(900, 0)];
+    const c = centring(records);
+
+    expect(c.pin.records).toBe(records.filter((r) => r.distanceM <= 500).length);
+    expect(c.pin.records).toBe(2);
+    expect(c.pin.offsetM).toBe(0);
+    expect(c.pin.bearingDeg).toBeNull();
+    expect(c.pin.compass).toBeNull();
+  });
+
+  it('counts records within the near-pin probe separately, as records', () => {
+    const c = centring([at(0, 0), at(0, 50), at(0, 300)]);
+    expect(c.recordsNearPin).toBe(2);
+    expect(c.nearPinRadiusM).toBe(100);
+  });
+
+  it('searches a disc of centres, never a square, so no cell reaches past the pull', () => {
+    const c = centring([at(0, 0)]);
+
+    for (const cell of c.cells) {
+      expect(cell.offsetM).toBeLessThanOrEqual(c.maxOffsetM);
+      // The whole point: a disc at this centre is entirely inside the pull, so
+      // its count is a measurement rather than a truncation.
+      expect(cell.offsetM + c.discRadiusM).toBeLessThanOrEqual(c.pullRadiusM);
+    }
+    // The square's corner would sit at 707 m and hang 207 m outside the pull.
+    expect(c.cells.some((cell) => cell.eastM === 500 && cell.northM === 500)).toBe(false);
+    expect(c.cells.some((cell) => cell.eastM === 500 && cell.northM === 0)).toBe(true);
+    expect(c.maxOffsetM).toBe(500);
+  });
+
+  it('calls a spot centred when the pin already holds the records', () => {
+    const c = centring([at(0, 0), at(0, 20), at(20, 0), at(-20, 0), at(0, -20)]);
+
+    expect(c.bestByRecords.offsetM).toBe(0);
+    expect(c.recordsRatio).toBe(1);
+    expect(c.centred).toBe(true);
+    // Every neighbour of the pin was searched, so this is a grid-local optimum
+    // rather than the edge of what was looked at.
+    expect(c.onSearchBoundary).toBe(false);
+  });
+
+  it('finds an off-centre cluster the shipped disc misses, and says it is off-centre', () => {
+    const records = [at(0, 0), at(10, 0), ...Array.from({ length: 20 }, () => at(500, 500))];
+    const c = centring(records);
+
+    expect(c.pin.records).toBe(2);
+    expect(c.bestByRecords.records).toBe(22);
+    expect(c.recordsRatio).toBe(11);
+    expect(c.centred).toBe(false);
+    // The cluster is north-east, so the best centre must be too. Which of the
+    // several centres that reach it wins is decided by the tie-break -- nearest
+    // the pin -- so the quadrant is the claim, not the exact cell.
+    expect(c.bestByRecords.eastM).toBeGreaterThan(0);
+    expect(c.bestByRecords.northM).toBeGreaterThan(0);
+    expect(c.bestByRecords.bearingDeg).toBeGreaterThan(0);
+    expect(c.bestByRecords.bearingDeg).toBeLessThan(90);
+    // The nearest centre that reaches the cluster, not the furthest one that does.
+    expect(c.bestByRecords.offsetM).toBeLessThan(c.maxOffsetM);
+    expect(c.onSearchBoundary).toBe(false);
+  });
+
+  it('flags a best offset the grid could not step outward from', () => {
+    /*
+     * The column that decides what the ratio is worth. All five of #81's
+     * refusing spots put their best disc on their grid's boundary, which makes
+     * every one of those ratios a lower bound; a diagnostic that reported the
+     * ratio without the flag would be worse than none.
+     */
+    const c = centring([at(10, 0), at(10, 10), ...Array.from({ length: 20 }, () => at(900, 0))]);
+
+    expect(c.bestByRecords.eastM).toBe(500);
+    expect(c.bestByRecords.northM).toBe(0);
+    expect(c.bestByRecords.records).toBe(22);
+    expect(c.onSearchBoundary).toBe(true);
+    expect(c.bestByRecords.compass).toBe('E');
+  });
+
+  it('gives a tie to the disc nearest the pin', () => {
+    // Two discs holding the same records is not evidence that the disc should
+    // move, so the pin keeps it and the spot is not reported off-centre.
+    const c = centring([at(0, 0), at(0, 10), at(0, -10)]);
+    expect(c.bestByRecords.offsetM).toBe(0);
+    expect(c.centred).toBe(true);
+  });
+
+  it('decides `centred` against the stated bar and nothing else', () => {
+    const pinRecords = () => Array.from({ length: 10 }, () => at(10, 0));
+    // One extra record reachable only from an offset centre is exactly 1.1x.
+    const atBar = centring([...pinRecords(), at(700, 0)]);
+    const overBar = centring([...pinRecords(), at(700, 0), at(700, 10)]);
+
+    expect(atBar.recordsRatio).toBeCloseTo(1.1, 10);
+    expect(atBar.centred).toBe(true);
+    expect(overBar.recordsRatio).toBeCloseTo(1.2, 10);
+    expect(overBar.centred).toBe(false);
+    expect(atBar.materialRatio).toBe(1.1);
+  });
+
+  it('reports visits by the pipeline\'s own collapse, not as a second count', () => {
+    /*
+     * Counts are not visits. #81's figures came from count queries that skip
+     * every in-memory filter, and a diagnostic that presented a count where the
+     * pipeline reports a visit would be reporting a different quantity under the
+     * same word. Thirty records from one observer on one day are one visit.
+     */
+    const day = { year: 2026, month: 7, day: 15 };
+    const c = centring(
+      Array.from({ length: 30 }, () => at(10, 0, { observerLogin: 'one-walk', observedOn: day })),
+    );
+
+    expect(c.pin.records).toBe(30);
+    expect(c.pin.visits).toBe(1);
+  });
+
+  it('lets the richest disc by visits differ from the richest by records', () => {
+    /*
+     * More records is not automatically more visits, and beach-level slugs cover
+     * several benches -- so the two bests are carried separately rather than one
+     * standing in for the other.
+     */
+    const day = { year: 2026, month: 7, day: 15 };
+    const records = [
+      at(10, 0),
+      // A photo-heavy walk east: many records, one visit.
+      ...Array.from({ length: 12 }, () => at(700, 0, { observerLogin: 'walker', observedOn: day })),
+      // Six separate people west: fewer records, more visits.
+      ...Array.from({ length: 6 }, () => at(-700, 0)),
+    ];
+    const c = centring(records);
+
+    expect(c.bestByRecords.eastM).toBeGreaterThan(0);
+    expect(c.bestByVisits.eastM).toBeLessThan(0);
+    expect(c.bestByVisits.visits).toBe(7);
+  });
+
+  it('is null-safe on an empty record set rather than dividing by zero', () => {
+    const c = centring([]);
+    expect(c.pin.records).toBe(0);
+    expect(c.recordsRatio).toBeNull();
+    expect(c.visitsRatio).toBeNull();
+    // Nothing anywhere beats nothing at the pin.
+    expect(c.centred).toBe(true);
+  });
+
+  it('refuses to search a grid the pull cannot cover', () => {
+    /*
+     * A disc offset further than pull minus radius hangs outside the records
+     * that were pulled, and its count would be a truncation reported as a
+     * measurement. Rather than caveat that, there is no grid.
+     */
+    expect(() => centring([at(0, 0)], { pullRadiusM: 550 })).toThrow(/truncated disc/);
+  });
+
+  it('never computes a rate, because that would answer a question it cannot', () => {
+    /*
+     * Whether a refusal survives a recentred disc needs a centre somebody can
+     * defend, which is a join against an authority. The guard is structural: the
+     * diagnostic takes no tide series, so it cannot bin anything.
+     */
+    const c = centring([at(0, 0)]);
+    expect(Object.keys(c)).not.toContain('bins');
+    expect(Object.keys(c)).not.toContain('amplitudeRatio');
   });
 });
 
