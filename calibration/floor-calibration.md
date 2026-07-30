@@ -702,6 +702,113 @@ from the published record. Until both are answered — or until a human explicit
 takes route 2 above and accepts that the figure is spent identifying its own field
 — the check in this section is not ready to be spent.
 
+### Pre-registration: which DEM the surveyed elevations select, written before it runs
+
+The slope gate run under #80 left hypsometry blocked on a question it could not
+answer: **the two products the recon recommended disagree with each other, and
+nothing in the repo can say which is right.** They put the knee 0.4 ft apart —
++0.3 ft for 2616
+against +0.7 ft for 6260 — their normalised peak slopes differ by 91%, and 6260
+cannot reach the analysis band at all inside the mapped bench.
+
+The 137 surveyed Cabrillo elevations landed in
+`findings/cabrillo-surveyed-elevations.json` are the only surveyed ground truth in
+this corridor, and they are the obvious arbiter. **The trap is that 6260's knee is
+numerically the NPS figure.** If NPS-surveyed elevations select the product, and
+the selected product's knee reproduces the NPS threshold, then NPS is on both sides
+of this section's check.
+
+Rule 2 above requires the comparison's parameters be frozen in writing before it
+runs. This subsection is that freeze, written while the outcome is unknown. Nothing
+in it is a number chosen by preference: each rule is either a measurement or a
+default that fails toward *no result*.
+
+**How independent the two NPS artifacts are, measured rather than assumed.** The
+2006 report is the document that *contains* the survey, so if the threshold were
+derived from it the link would most likely show there. Searched 2026-07-30 over the
+extracted text: **29 tokens matching `0.7*` across 24 lines — every one a
+regression coefficient, an r², a p-value, a percent-cover figure or a size-table
+entry, and not one on a line that also contains "tide", "tidal", "feet", "foot",
+"ft", "MLLW", "threshold" or "lower".** There is no 0.7 tide value in it.
+
+What the report does state, three times, is its own operational criterion:
+
+> Bird and visitor censuses were conducted more often, ideally every negative tide
+> (less than or equal to 0, mean lower low water [MLLW]) that occurred between 10AM
+> and 4PM.
+>
+> Bird and visitor census were conducted on days when the tide was negative (<0
+> MLLW) between 10am and 4pm.
+>
+> Ideally, these "Bird and People Counts" were to be conducted on all days when
+> tides that are 0.0 feet or lower (relative to mean low lower water, MLLW), and
+> fall between 1000 and 1600 hours
+
+(The third's "mean low lower water" is the report's own transposition, reproduced
+verbatim.) **The park's science programme worked to 0.0 ft MLLW. The visitor-facing
+0.7 ft appears nowhere in it.** That does not prove the two are independent — an
+undocumented channel between the 2004 survey and a later visitor page cannot be
+ruled out from here — but it replaces "unknown, assume the worst" with "no link
+visible, and they do not even agree on the number."
+
+**The metric set is fixed at three, and agreement is required.** RMSE, mean
+absolute error and median absolute error, computed over the 126 points carrying a
+published height, all three reported. A product is selected only if **all three
+choose the same one**. A split selects nothing and is itself the finding — it would
+mean the two products differ in the shape of their error rather than its size, and
+no single scalar should adjudicate that. Fixing three in advance is what stops the
+metric being chosen after its answer is visible.
+
+**Exclusions are the report's own and no others.** Zone II M2 and the 8 February
+16:20 reading, both already flagged in the finding. Any further exclusion is a
+change to this pre-registration and is made in writing, before re-running, with the
+reason.
+
+**Indeterminacy is computed, not judged.** A 95% bootstrap confidence interval over
+points on the paired per-point difference in absolute residual. **If the interval
+spans zero the result is indeterminate and no product is selected.** #46 does not
+proceed on a coin flip dressed as a measurement.
+
+**Confound 1 — sand, and it is measurable.** The survey is spring 2004; the DEMs
+are roughly 2014. These reefs bury and scour seasonally, so a poor match may be a
+decade of sand rather than DEM error, and it will not announce which. Sand buries
+low, flat, sand-adjacent bench and does not move cliff faces or boulder tops, so
+the residual is regressed on plot elevation and on plot type — both already columns
+in the finding. Residuals concentrated low and flat indicate sand; residuals
+uniform across elevation and type indicate the DEM. Reported either way.
+
+**Confound 2 — point against cell, and the restricted comparison may never
+select.** These are Long-Term Monitoring plots, and the report places circular plots
+"three on cliff faces and three on boulders". A 1 m cell sampled where a laser level
+read the top of a boulder disagrees for reasons that are not DEM accuracy. Residual
+magnitude is therefore tested against local DEM roughness. **The primary comparison
+is all points; the roughness-restricted comparison is diagnostic only, reported
+beside it, and can never override it.** If the two disagree, the result is
+indeterminate. Otherwise "restrict until the answer changes" is available, and it
+is the same fitting this section exists to prevent.
+
+**The conditional on 0.7, committed here rather than afterwards:**
+
+- **2616 selected** — nothing in this section changes. Its knee is +0.3 ft, so no
+  independence question arises and the check is untouched.
+- **6260 selected** — the subsequent 0.7 ft comparison is recorded as
+  **corroboration, not independent verification**, because NPS data chose the
+  product whose knee reproduces the NPS number. It may not then satisfy clause 1 of
+  §7's promotion rule on its own.
+- **Indeterminate** — no product is selected, nothing is recorded against 0.7, and
+  the check stays unspent.
+
+Deciding this after seeing which product wins would be exactly what rule 2
+forbids, and it costs nothing to decide now.
+
+**What this subsection does not do.** It does not run the comparison, set or change
+any floor, or answer the field question — whether 0.7 marks the floor or the knee
+is still unresolved above and still needs the ask. And the adjudication itself does
+not spend the check: validating a DEM against surveyed heights is model selection
+against ground truth, not a comparison against the published threshold. What it can
+degrade is what a later comparison is *worth*, which is why the conditional is
+written above.
+
 **Related, and cheap:** the tidepool area's gate hours are #59, and nps.gov
 publishes them itself —
 "The park opens at 9 am every day", and "Most of the year the tidepools close at
