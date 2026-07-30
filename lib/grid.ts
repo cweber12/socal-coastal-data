@@ -17,6 +17,7 @@ import {
   type SpotSwell,
 } from './upstream';
 import { swellCeilingFor, type SwellCeiling } from './thresholds';
+import { gateWindowFor } from './gate-hours';
 import { findExtrema, sliceSeries, type TideExtremum, type TideSeries } from './tide';
 import { INAT_WINDOW_DAYS, type InatExclusions, type Sighting } from './inat';
 import {
@@ -220,6 +221,9 @@ function evaluateDays(
         lat: spot.lat,
         lon: spot.lon,
         timeZone: DISPLAY_TIME_ZONE,
+        // null for every spot with no operator gate, which is 25 of 26 and
+        // leaves their predicate exactly as it was.
+        gate: gateWindowFor(spot.slug, date, DISPLAY_TIME_ZONE),
       });
     } catch (cause) {
       notices.push({

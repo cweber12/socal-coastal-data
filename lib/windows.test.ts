@@ -15,6 +15,7 @@ import {
   type WindowState,
 } from './windows';
 import { crossings, parseCoopsSeries, type CoopsRequestContract, type TideSeries } from './tide';
+import { gateWindowFor } from './gate-hours';
 import { utcMsFromZoned, type LocalDate } from './time';
 
 const ZONE = 'America/Los_Angeles';
@@ -155,6 +156,117 @@ const baseInput = (over: Partial<WindowInput> = {}): WindowInput => ({
 });
 
 /* =========================================================================
+ * Operator gate hours -- `closed`
+ *
+ * TODAY is 2026-07-27: sunrise 05:59, sunset 19:51 PDT. A 06:30 low is broad
+ * daylight and three hours before Cabrillo's gate opens, which is exactly the
+ * case #59 was filed about -- the grid offering a 6 a.m. window on a day the
+ * gate opens at 9.
+ * ======================================================================= */
+
+describe('gate hours', () => {
+  /** A low at 06:30, well inside daylight and well outside gate hours. */
+  const dayWithEarlyLow = (lowFt: number): TideSeries =>
+    seriesFromTurns(TODAY, [
+      { hour: 12, ft: 4.5, dayOffset: -1 },
+      { hour: 19, ft: 4.2, dayOffset: -1 },
+      { hour: 6, minute: 30, ft: lowFt },
+      { hour: 13, ft: 4.6 },
+      { hour: 19, minute: 30, ft: 1.4 },
+      { hour: 6, ft: 5.0, dayOffset: 1 },
+      { hour: 13, ft: 0.2, dayOffset: 1 },
+      { hour: 7, ft: 5.1, dayOffset: 2 },
+    ]);
+
+  const cabrilloGate = (date: LocalDate = TODAY) =>
+    gateWindowFor('cabrillo-tidepools', date, ZONE);
+
+  it('closes a daylight window that falls before the gate opens', () => {
+    const series = dayWithEarlyLow(-1.6);
+    const nowMs = pacific(TODAY, 4, 0);
+
+    // Ungated, this is a usable window: light, low enough, long enough.
+    const ungated = evaluateWindow(baseInput({ series, nowMs }));
+    expect(ungated.state).toBe('go');
+
+    // Gated, the same day is shut.
+    const gated = evaluateWindow(baseInput({ series, nowMs, gate: cabrilloGate() }));
+    expect(gated.state).toBe('closed');
+    expect(gated.reason).toMatch(/outside gate hours/);
+    expect(gated.reason).toMatch(/9:00/);
+  });
+
+  it('leaves a window inside gate hours alone', () => {
+    // The midday low is 13:00, comfortably inside 09:00-16:30.
+    const withGate = evaluateWindow(baseInput({ gate: cabrilloGate() }));
+    const without = evaluateWindow(baseInput());
+    expect(withGate.state).toBe(without.state);
+    expect(withGate.usableMinutes).toBe(without.usableMinutes);
+  });
+
+  it('is a no-op when the spot has no gate', () => {
+    // 25 of 26 spots. The predicate must be byte-for-byte what it was.
+    const series = dayWithEarlyLow(-1.6);
+    const nowMs = pacific(TODAY, 4, 0);
+    const omitted = evaluateWindow(baseInput({ series, nowMs }));
+    const explicitNull = evaluateWindow(baseInput({ series, nowMs, gate: null }));
+    expect(explicitNull).toEqual(omitted);
+  });
+
+  it('does not conflate a shut gate with darkness', () => {
+    // A window that daylight already emptied is `dark`, gate or no gate. The
+    // gate only gets to claim a window daylight left something of.
+    const series = seriesFromTurns(TODAY, [
+      { hour: 12, ft: 4.5, dayOffset: -1 },
+      { hour: 19, ft: 4.2, dayOffset: -1 },
+      { hour: 2, minute: 30, ft: -1.6 },
+      { hour: 9, ft: 4.6 },
+      { hour: 19, minute: 30, ft: 1.4 },
+      { hour: 6, ft: 5.0, dayOffset: 1 },
+      { hour: 13, ft: 0.2, dayOffset: 1 },
+      { hour: 7, ft: 5.1, dayOffset: 2 },
+    ]);
+    const nowMs = pacific(TODAY, 1, 0);
+    expect(evaluateWindow(baseInput({ series, nowMs })).state).toBe('dark');
+    expect(evaluateWindow(baseInput({ series, nowMs, gate: cabrilloGate() })).state).toBe('dark');
+  });
+
+  it('reports a published annual closure by name', () => {
+    const xmas: LocalDate = { year: 2026, month: 12, day: 25 };
+    const series = seriesFromTurns(xmas, [
+      { hour: 12, ft: 4.5, dayOffset: -1 },
+      { hour: 19, ft: 4.2, dayOffset: -1 },
+      { hour: 12, ft: -1.6 },
+      { hour: 18, ft: 4.6 },
+      { hour: 6, ft: 5.0, dayOffset: 1 },
+      { hour: 13, ft: 0.2, dayOffset: 1 },
+      { hour: 7, ft: 5.1, dayOffset: 2 },
+    ]);
+    const result = evaluateWindow(
+      baseInput({
+        series,
+        date: xmas,
+        nowMs: utcMsFromZoned({ ...xmas, hour: 8, minute: 0 }, ZONE),
+        gate: cabrilloGate(xmas),
+      }),
+    );
+    // Midday on Christmas: light, low enough, and the park does not open.
+    expect(result.state).toBe('closed');
+    expect(result.reason).toMatch(/Christmas Day/);
+  });
+
+  it('never pre-empts above-floor', () => {
+    // A low that does not uncover the reef is above-floor whatever the gate
+    // does. There was no window for a gate to shut.
+    const series = dayWithEarlyLow(0.4);
+    const result = evaluateWindow(
+      baseInput({ series, floorFt: -0.5, nowMs: pacific(TODAY, 4, 0), gate: cabrilloGate() }),
+    );
+    expect(result.state).toBe('above-floor');
+  });
+});
+
+/* =========================================================================
  * Constants are the documented ones
  * ======================================================================= */
 
@@ -165,9 +277,9 @@ describe('constants', () => {
     expect(SWELL_HORIZON_DAYS).toBe(5);
   });
 
-  it('has presentation for all six states, and only those six', () => {
-    expect(WINDOW_STATES).toHaveLength(6);
-    expect(new Set(WINDOW_STATES).size).toBe(6);
+  it('has presentation for all seven states, and only those seven', () => {
+    expect(WINDOW_STATES).toHaveLength(7);
+    expect(new Set(WINDOW_STATES).size).toBe(7);
     for (const state of WINDOW_STATES) {
       const p = STATE_PRESENTATION[state];
       expect(p, `presentation for ${state}`).toBeDefined();

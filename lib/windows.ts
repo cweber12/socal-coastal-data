@@ -7,8 +7,16 @@
  */
 
 import { formatThreshold } from './format';
+import type { GateWindow } from './gate-hours';
 import { daylightBounds, findExtrema, type TideExtremum, type TideSeries } from './tide';
-import { localDateInZone, localDayBounds, localDaysBetween, sameLocalDate, type LocalDate } from './time';
+import {
+  formatClock,
+  localDateInZone,
+  localDayBounds,
+  localDaysBetween,
+  sameLocalDate,
+  type LocalDate,
+} from './time';
 
 /* ===========================================================================
  * Constants
@@ -60,17 +68,26 @@ export const SWELL_HORIZON_DAYS = 5;
  * ========================================================================= */
 
 /**
- * The six states, in the order they are tested. Certain verdicts come before
+ * The seven states, in the order they are tested. Certain verdicts come before
  * uncertain ones.
  *
  *   above-floor  The low never reaches the floor. The reef does not surface.
+ *   closed       The window falls outside the operator's gate hours.
  *   dark         The window and the available daylight do not overlap.
  *   veto         A known swell reading is over the ceiling.
  *   brief        There is a window, but under MIN_WINDOW_MINUTES of it.
  *   swell-tbd    Everything else clears, but the swell is unknown.
  *   go           Clears everything.
  *
- * Two orderings are deliberate:
+ * Three orderings are deliberate:
+ *
+ *   `closed` sits ABOVE `dark` because a shut gate is decisive whatever the
+ *   light, and because NPS scopes its own Cabrillo threshold by park hours --
+ *   the Superintendent's Compendium binds at low tides "0.7 or lower during park
+ *   hours". The two rarely conflict in practice: the case this exists for is a
+ *   summer 6 a.m. low, which is broad daylight and gated. `dark` still fires
+ *   whenever the daylight clip is what emptied the window, so the two causes are
+ *   never conflated -- see `gateBlocked`.
  *
  *   `brief` sits BELOW `veto` because a swell over the ceiling is a settled no,
  *   and there is no point qualifying a no with how long it would have been.
@@ -78,11 +95,23 @@ export const SWELL_HORIZON_DAYS = 5;
  *   `swell-tbd` sits BELOW `brief` because a 20-minute window is a settled fact
  *   about the tide and should be reported as such rather than deferred to an
  *   unknown. It sits ABOVE `go` so that an unknown can never render as a pass.
+ *
+ * `closed` applies only where an operator publishes gate hours -- one spot of 26
+ * today. Everywhere else `gate` is null and the predicate is unchanged. It is a
+ * clip, not a fifth gate.
  */
-export type WindowState = 'above-floor' | 'dark' | 'veto' | 'brief' | 'swell-tbd' | 'go';
+export type WindowState =
+  | 'above-floor'
+  | 'closed'
+  | 'dark'
+  | 'veto'
+  | 'brief'
+  | 'swell-tbd'
+  | 'go';
 
 export const WINDOW_STATES: readonly WindowState[] = [
   'above-floor',
+  'closed',
   'dark',
   'veto',
   'brief',
@@ -107,6 +136,12 @@ export interface WindowInput {
   lon: number;
   /** Zone the calendar day is expressed in. */
   timeZone: string;
+  /**
+   * Operator gate for this spot on this day, or null where the spot has no
+   * operator. Null for 25 of the 26 spots, and null leaves the predicate exactly
+   * as it was before gates existed.
+   */
+  gate?: GateWindow | null;
 }
 
 export interface WindowResult {
@@ -202,6 +237,7 @@ export function evaluateWindow(input: WindowInput): WindowResult {
     lat,
     lon,
     timeZone,
+    gate = null,
   } = input;
 
   if (!Number.isFinite(floorFt)) {
@@ -374,6 +410,9 @@ export function evaluateWindow(input: WindowInput): WindowResult {
         minutesRemaining: isToday ? 0 : null,
         windowClipped: false,
         reachesFloor: false,
+        // The low never reaches the floor, so nothing was there for a gate to
+        // shut. `above-floor` outranks `closed` and this must not pre-empt it.
+        gateBlocked: false,
       };
     }
 
@@ -381,9 +420,29 @@ export function evaluateWindow(input: WindowInput): WindowResult {
     const windowStartMs = excursion.openMs;
     const windowEndMs = Math.round(low.tMs + FLOOD_SIDE_TRIM * (excursion.closeMs - low.tMs));
 
-    const usableStartMs = Math.max(windowStartMs, sunriseMs);
-    const usableEndMs = Math.min(windowEndMs, sunsetMs);
+    /*
+     * Two clips, applied in sequence and measured separately, so a cell can say
+     * WHICH one shut it. Daylight first: if the window and the daylight do not
+     * overlap at all, the gate is irrelevant and the honest answer is `dark`.
+     * Only if daylight leaves something does the gate get to take it away, and
+     * that is the case `closed` reports.
+     */
+    const daylightStartMs = Math.max(windowStartMs, sunriseMs);
+    const daylightEndMs = Math.min(windowEndMs, sunsetMs);
+    const daylightMinutes = minutesBetween(daylightStartMs, daylightEndMs);
+
+    const usableStartMs = gate ? Math.max(daylightStartMs, gate.openMs) : daylightStartMs;
+    const usableEndMs = gate ? Math.min(daylightEndMs, gate.closeMs) : daylightEndMs;
     const usableMinutes = minutesBetween(usableStartMs, usableEndMs);
+
+    // The gate is the binding constraint: there was daylight to use and the gate
+    // took it. A holiday closure counts however the light falls -- the park does
+    // not open at all, which is not a fact about daylight.
+    const gateBlocked =
+      gate !== null &&
+      gate !== undefined &&
+      usableMinutes <= 0 &&
+      (daylightMinutes > 0 || gate.closedAllDay);
 
     const remainingStartMs = Math.max(usableStartMs, nowMs);
     const minutesRemaining = isToday ? minutesBetween(remainingStartMs, usableEndMs) : null;
@@ -397,6 +456,7 @@ export function evaluateWindow(input: WindowInput): WindowResult {
       minutesRemaining,
       windowClipped: excursion.clipped,
       reachesFloor: true,
+      gateBlocked,
     };
   };
 
@@ -481,6 +541,19 @@ export function evaluateWindow(input: WindowInput): WindowResult {
       `${isToday ? 'The next low' : "The day's best low"} only reaches ` +
       `${low.ft.toFixed(1)} ft, which does not get under the ${formatThreshold(floorFt)} ft floor. ` +
       'The reef stays covered.';
+  } else if (geometry.gateBlocked) {
+    /*
+     * The tide works and there was daylight to use it in; the gate is what took
+     * it. Reported separately from `dark` so the cell says which one shut it --
+     * "come back when it is light" and "the park is shut" are different advice.
+     */
+    state = 'closed';
+    reason = gate!.closedAllDay
+      ? `The tide drops below the floor, but ${gate!.operator} is closed all day for ` +
+        `${gate!.closureName}.`
+      : `The tide drops below the floor, but the window falls outside gate hours — ` +
+        `${gate!.operator} is open ${formatClock(gate!.openMs, timeZone)} to ` +
+        `${formatClock(gate!.closeMs, timeZone)}.`;
   } else if (decisiveMinutes <= 0) {
     state = 'dark';
     reason = isToday
@@ -571,6 +644,7 @@ export const STATE_PRESENTATION: Readonly<Record<WindowState, StatePresentation>
   go: { label: 'Go', spoken: 'go', glyph: '●', usable: true },
   brief: { label: 'Brief', spoken: 'brief', glyph: '◐', usable: false },
   veto: { label: 'Swell', spoken: 'vetoed on swell', glyph: '✕', usable: false },
+  closed: { label: 'Gate shut', spoken: 'outside gate hours', glyph: '⛔', usable: false },
   dark: { label: 'No light', spoken: 'outside daylight', glyph: '☾', usable: false },
   'above-floor': {
     // "Covered", not "too high". The cell already prints the height next to a ▼,
