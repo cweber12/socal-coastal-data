@@ -128,12 +128,35 @@ call — it is a point on a curve.
 
 **Inputs.** USGS CoNED 1 m topobathymetric DEM for the Southern California
 coast, or NOAA Digital Coast topobathy lidar via the Data Access Viewer. Both
-are open. Green-laser returns are patchy where clarity is poor, and vertical
-reference differs by vintage — older tiles carry a tidal datum, newer ones the
-ellipsoid. Run everything through NOAA **VDatum** into MLLW ft before any spot
-is compared to any other spot. Pin the transformation parameters in the output;
-an unrecorded datum conversion is the elevation equivalent of the IBWC m³/s
-error.
+are open. Green-laser returns are patchy where clarity is poor. Run everything
+through NOAA **VDatum** into MLLW ft before any spot is compared to any other
+spot. Pin the transformation parameters in the output; an unrecorded datum
+conversion is the elevation equivalent of the IBWC m³/s error.
+
+**Correction, 2026-07-30.** This paragraph used to say that vertical reference
+"differs by vintage — older tiles carry a tidal datum, newer ones the
+ellipsoid," and that the difference was the whole risk. That was measured and is
+wrong. `lidar-recon/` read the metadata of all seven candidate products covering
+these 8 spots: **none carries a tidal datum and none carries an ellipsoidal
+height. All are NAVD88**, an orthometric datum that is neither, per CoNED's own
+abstract — "all tidally-referenced heights were transformed into orthometric
+heights … based on the North American Vertical Datum of 1988."
+
+The premise told a reader where to look, so the checks it implied would all have
+passed while the real hazards went unexamined. The hazards that are actually
+present, from `lidar-recon/README.md`:
+
+- Two of six rasters declare no vertical datum at all — and one of them, 8684, is
+  the *interpolated* product with the clean coverage, whose void-preserving twin
+  2616 does declare NAVD88. The tile a coverage-optimising pipeline would reach
+  for is the unsafe one.
+- One product, 13968, is in **US survey feet** (`altres` exactly 1200/3937) where
+  everything else is metres.
+- The geoid model is ambiguous across GEOID12A/12B/18 and no raster records it.
+- **VDatum's own uncertainty is ±0.299–0.313 ft at these spots**, which meets or
+  exceeds §7's 0.3 ft promotion tolerance before the DEM contributes anything.
+  That is #65, and it is why §4 rather than this section is now the primary route
+  to `verified`.
 
 **Computation.** Clip each spot's reef polygon, then compute exposed area as a
 function of water level in 0.1 ft steps from +2.0 to −2.0 ft MLLW.
@@ -587,6 +610,64 @@ populated entry with a note, exactly as `county_station_null_reason` works.
 Anything else stays `low`. A floor with three pieces of weak evidence is still
 weak, and the enum only has two values, so there is nowhere to put "better than
 an author estimate but not surveyed."
+
+**The 0.3 ft in clause 1 is now known to be unsatisfiable by clause 2's first
+method.** VDatum's own uncertainty for NAVD88 → MLLW at these spots is
+±0.299–0.313 ft, so a lidar-derived floor spends the whole budget on its datum
+transform. Revising this is #65; until it is revised, the only instrumented
+method that can meet the rule as written is a pressure logger, which measures
+against the 9410230 prediction directly and performs no datum transform at all.
+
+### Permissiveness rule
+
+Declared 2026-07-30, before any re-binned rate was computed, per #42.
+
+> **No `tidepool_floor_ft` may admit a marginal band whose observed sighting rate
+> is below 2× that spot's own tide-independent background.**
+
+Four things this rule is, and one it is not.
+
+**It is a ceiling on the floor, not an estimate of one.** It says "no more
+permissive than this" and nothing about where the floor actually is. That is
+rule 3's asymmetry applied to elevation: it fails toward the restriction.
+
+**It is computed per spot, from that spot's own background.** Never a
+corridor-wide rate. The highest usable bin measures each spot's own
+tide-independent background — surge-channel photos, wrong camera clocks,
+washed-up specimens — and doubling that is a different number at every spot.
+
+**The 2× comes from a bar that predates this data.** `MIN_AMPLITUDE_RATIO = 2.0`
+in `calibration/src/config.ts` already requires a spot to show a low-tide rate at
+least double its own background before it may claim a distinct low zone, and
+`calibration/README.md` states that bar "comes from that reasoning, **not** from
+the observed gap between spots." Applying the same test to the marginal admitted
+band extends a pre-committed bar rather than choosing a new number after seeing
+output.
+
+**It binds only where `shared/calibration.json` publishes.** Three spots today —
+`cabrillo-tidepools`, `sunset-cliffs`, `swamis`. The five that refuse have no
+trustworthy background to double; that is what refusal means. They keep their
+current values with the refusal recorded in `floor_evidence`, which is already
+the state as of `spots.json` 1.3.0.
+
+**It is not a promotion input.** A `floor_evidence` entry derived from this rule
+says so in its `note`, and is never one side of a clause-1 agreement comparison
+at any tolerance. An upper bound from citizen-science inference and a measurement
+are not two estimates of one quantity. `tidepool_floor_confidence` stays `low`
+regardless of how many spots the rule moves.
+
+What it fixes is falsified rather than merely disputed. At Cabrillo the
+1.0–3.0 ft band sits at 5.7%, which is that spot's background, and the floor in
+force is +1.3 ft — so the gate currently admits days whose marginal band is
+indistinguishable from noise. 2 × 5.7% = 11.4%; the 0.5–1.0 band clears it at
+15.0% and the 1.0–3.0 band does not, which puts the ceiling near 1.0 ft. The
+current bins cannot separate 11.4% from 15.0%, both falling in one 0.5 ft band —
+locating the crossing is #43.
+
+An X of roughly 15% would land near the NPS 0.7 ft figure. That is not a reason
+to choose anything: §6 records that the published record cannot say which field
+0.7 calibrates, and this rule is immune by construction because it is computed
+from each spot's own background and 0.7 plays no part in it.
 
 **Open question for you:** does `FloorConfidence` need a middle value? Adding
 one touches `spots.generated.ts`, the window predicate, and every UI surface
