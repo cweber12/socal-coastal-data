@@ -9,6 +9,10 @@
  * per-taxon height distribution that makes diver contamination obvious on sight,
  * and the sensitivity grid that shows the corridor-wide radius is not doing any
  * work.
+ *
+ * The centring grid (#84) is here for the same reason and beside the same
+ * table. A reader of `shared/calibration.json` sees a refusal and its reason; a
+ * reader of this sees whether that refusal was measured in the right place.
  */
 
 import type { SpotResult, CalibrationRun } from './run-types.ts';
@@ -27,6 +31,13 @@ const n = (value: number | null, digits = 2): string =>
 
 const pct = (value: number | null): string =>
   value === null || Number.isNaN(value) ? '—' : `${(value * 100).toFixed(0)}%`;
+
+/** A ratio, or an em dash. The `×` goes with the number and not with the dash. */
+const times = (value: number | null): string =>
+  value === null || Number.isNaN(value) ? '—' : `${value.toFixed(2)}×`;
+
+const plural = (count: number, word: string): string =>
+  `${count} ${word}${count === 1 ? '' : 's'}`;
 
 export function renderReport(run: CalibrationRun): string {
   const out: string[] = [];
@@ -94,6 +105,73 @@ export function renderReport(run: CalibrationRun): string {
       'reads them.',
   );
   out.push('');
+
+  /* --- centring, corridor-wide -------------------------------------------- */
+
+  const anyCentring = run.spots[0]?.centring;
+  if (anyCentring) {
+    out.push('## Is each disc on the rock?');
+    out.push('');
+    out.push(
+      'Every rate above is measured inside a ' +
+        `${anyCentring.discRadiusM} m disc centred on that spot's \`shared/spots.json\` ` +
+        'coordinate. Whether that coordinate is where the records are had never been checked ' +
+        'until #81 checked it, so a refusal could not be told apart from a disc in the wrong ' +
+        'place, and the pipeline reported the first. This table is that check, re-run here from ' +
+        'the same records every number above comes from.',
+    );
+    out.push('');
+    out.push(
+      '**It decides nothing.** No rate, gate, verdict or floor reads it, and no coordinate moves ' +
+        'because of it — recentring a pin is a join against an authority, not a fit to ' +
+        'observation density. **More records is not better data either**: beach-level slugs ' +
+        'cover several benches, so a disc recentred 500 m away may be aggregating two of them, ' +
+        'which is a different defect rather than a fix.',
+    );
+    out.push('');
+    out.push(
+      `| spot | records ≤ ${anyCentring.nearPinRadiusM} m of pin | shipped disc | best disc | ` +
+        'offset | records | visits | on grid boundary | centred | verdict |',
+    );
+    out.push('|---|---:|---|---|---|---:|---:|---|---|---|');
+    for (const spot of run.spots) {
+      const c = spot.centring;
+      const offset =
+        c.bestByRecords.offsetM === 0
+          ? 'none'
+          : `${Math.round(c.bestByRecords.offsetM)} m ${c.bestByRecords.compass}`;
+      out.push(
+        `| ${spot.slug} | ${c.recordsNearPin} | ${c.pin.records} rec / ${c.pin.visits} vis | ` +
+          `${c.bestByRecords.records} rec / ${c.bestByRecords.visits} vis | ${offset} | ` +
+          `${times(c.recordsRatio)} | ${times(c.visitsRatio)} | ` +
+          `${c.onSearchBoundary ? '**yes**' : 'no'} | ${c.centred ? 'yes' : '**no**'} | ` +
+          `${spot.publishes ? '**PUBLISH**' : 'refuse'} |`,
+      );
+    }
+    out.push('');
+    out.push(
+      `The \`records ≤ ${anyCentring.nearPinRadiusM} m\` column is a **record** count, not a ` +
+        'visit count — it asks whether anything at all is recorded where the pin sits, and ' +
+        `${anyCentring.nearPinRadiusM} m is the stated error bar on a \`spots.json\` ` +
+        'coordinate. `best disc` is the richest of the searched centres by records; the visits ' +
+        'ratio beside it is the richest by **visits**, which is not always the same disc.',
+    );
+    out.push('');
+    out.push(
+      '**`on grid boundary` is the column that decides how much the ratio is worth.** The grid ' +
+        `reaches ${anyCentring.maxOffsetM} m — the ${anyCentring.pullRadiusM} m pull minus the ` +
+        `${anyCentring.discRadiusM} m disc — because a disc offset further hangs outside the ` +
+        'records that were pulled and its count would be a truncation reported as a ' +
+        'measurement. When the best disc sits where the grid could not step outward, its ratio ' +
+        'is a **lower bound** and the real optimum is somewhere this grid cannot see.',
+    );
+    out.push('');
+    out.push(
+      `\`centred\` is \`best records ≤ ${anyCentring.materialRatio.toFixed(2)}× the pin's\`. It ` +
+        'selects an adjective and nothing else.',
+    );
+    out.push('');
+  }
 
   /* --- blind check -------------------------------------------------------- */
 
@@ -252,6 +330,105 @@ export function renderReport(run: CalibrationRun): string {
       );
     }
     out.push('');
+
+    out.push('### Centring');
+    out.push('');
+    out.push(
+      'The grid above varies the disc\'s **size**. This one varies its **centre**, over the ' +
+        'identical record set and at the same cost in requests: none. #30\'s radius ' +
+        'insensitivity was measured at Cabrillo, which #81 found to be the best-centred spot in ' +
+        'the corridor, so it is exactly the result that does not carry to a spot whose disc is ' +
+        'off the rock.',
+    );
+    out.push('');
+    {
+      const c = spot.centring;
+      const best = c.bestByRecords;
+      const describe = (cell: typeof best): string =>
+        cell.offsetM === 0
+          ? 'the pin itself'
+          : `${Math.round(cell.offsetM)} m ${cell.compass} (${cell.eastM >= 0 ? '+' : ''}` +
+            `${cell.eastM} m E, ${cell.northM >= 0 ? '+' : ''}${cell.northM} m N)`;
+
+      out.push(
+        `- **${plural(c.recordsNearPin, 'record')}** lie within ${c.nearPinRadiusM} m of the ` +
+          'pin. A record count, not a visit count.',
+      );
+      out.push(
+        `- **Shipped disc** (${c.discRadiusM} m, on the pin): ${plural(c.pin.records, 'record')}, ` +
+          `${plural(c.pin.visits, 'visit')}.`,
+      );
+      // A ratio against an empty shipped disc does not exist, and printing an em
+      // dash where a comparison belongs reads as a missing number rather than as
+      // "there is nothing to compare against".
+      const against = (ratio: number | null, unit: string): string =>
+        ratio === null
+          ? `the shipped disc holds no ${unit} to compare against`
+          : `${times(ratio)} the shipped disc's ${unit}`;
+
+      out.push(
+        `- **Richest disc by records:** ${plural(best.records, 'record')} ` +
+          `(${plural(best.visits, 'visit')}) at ${describe(best)} — ` +
+          `${against(c.recordsRatio, 'records')}.`,
+      );
+      out.push(
+        `- **Richest disc by visits:** ${plural(c.bestByVisits.visits, 'visit')} ` +
+          `(${plural(c.bestByVisits.records, 'record')}) at ${describe(c.bestByVisits)} — ` +
+          `${against(c.visitsRatio, 'visits')}.`,
+      );
+      out.push(
+        c.onSearchBoundary
+          ? '- **On the search boundary: yes.** The grid could not step outward from that ' +
+            `centre, so ${c.recordsRatio === null ? 'that count' : times(c.recordsRatio)} is a ` +
+            `**lower bound** — the real optimum lies further out than ${c.maxOffsetM} m, where ` +
+            `a disc would hang outside the ${c.pullRadiusM} m pull and its count would be a ` +
+            'truncation.'
+          : '- **On the search boundary: no.** Every one of that centre\'s eight neighbours was ' +
+            'searched, so it is a grid-local optimum rather than the edge of what was looked at.',
+      );
+      out.push(
+        c.centred
+          ? `- **Centred: yes** — no searched disc holds more than ${c.materialRatio.toFixed(2)}× ` +
+            "the pin's records."
+          : `- **Centred: no** — the richest searched disc holds ` +
+            (c.recordsRatio === null
+              ? `${plural(best.records, 'record')} where the pin's holds none at all, so there ` +
+                'is no ratio to state'
+              : `${times(c.recordsRatio)} the pin's records, over the ` +
+                `${c.materialRatio.toFixed(2)}× bar`) +
+            '. That is a statement about where the records are and **not** a licence to publish ' +
+            'this spot.',
+      );
+      out.push('');
+
+      const byOffset = new Map(c.cells.map((cell) => [`${cell.eastM},${cell.northM}`, cell]));
+      // Read off the cells rather than rebuilt from the step, so the axes cannot
+      // disagree with the grid that was actually searched.
+      const eastAxis = [...new Set(c.cells.map((cell) => cell.eastM))].sort((a, b) => a - b);
+      const northAxis = [...new Set(c.cells.map((cell) => cell.northM))].sort((a, b) => b - a);
+
+      out.push(`| N ↓ / E → | ${eastAxis.map((e) => `${e > 0 ? '+' : ''}${e}`).join(' | ')} |`);
+      out.push(`|---|${eastAxis.map(() => '---:').join('|')}|`);
+      for (const northM of northAxis) {
+        const row = eastAxis.map((eastM) => {
+          const cell = byOffset.get(`${eastM},${northM}`);
+          if (!cell) return '·';
+          const text = `${cell.records}/${cell.visits}`;
+          return cell === best ? `**${text}**` : text;
+        });
+        out.push(`| **${northM > 0 ? '+' : ''}${northM}** | ${row.join(' | ')} |`);
+      }
+      out.push('');
+      out.push(
+        `Metres east and north of the pin, \`records/visits\` inside a ${c.discRadiusM} m disc at ` +
+          `each centre. \`·\` was not searched: its disc would reach past the ${c.pullRadiusM} m ` +
+          'pull. The centre cell is the shipped disc; **bold** is the richest by records. No ' +
+          'rate is computed at any of these centres — whether a refusal survives a recentred ' +
+          'disc needs a centre somebody can defend, which is a join against an authority and not ' +
+          'this measurement.',
+      );
+      out.push('');
+    }
 
     out.push('### Window stability');
     out.push('');

@@ -17,9 +17,17 @@
  * The window-stability and sensitivity tables exist because #30's radius grid
  * was measured at CABRILLO ONLY, which is the richest spot by a factor of five.
  * Thin spots may be far more sensitive and must not be assumed from it.
+ *
+ * The centring grid is the same argument one step further. The radius grid
+ * varies the disc's SIZE and #81 measured that its CENTRE is the thing that
+ * moves -- the disc sits on the spots.json pin and at five of eight spots the
+ * pin is not on the rock. Cabrillo, the spot #30's radius insensitivity was
+ * measured at, is the best-centred spot in the corridor, so that result is
+ * precisely the one that does not transfer.
  */
 
 import { daylightBounds, findExtrema, type TideExtremum, type TideSeries } from '../../lib/tide.ts';
+import { distanceMetres } from '../../lib/inat.ts';
 import { localDateInZone, type LocalDate } from '../../lib/time.ts';
 import {
   amplitudeRatio,
@@ -31,7 +39,13 @@ import {
   type CalibrationRecord,
   type PlacedVisit,
 } from './join.ts';
-import { STABILITY_WINDOWS, TIMESTAMP_QUALITY_BAND_HOURS } from './config.ts';
+import {
+  CENTRING_MATERIAL_RATIO,
+  CENTRING_NEAR_PIN_M,
+  CENTRING_STEP_M,
+  STABILITY_WINDOWS,
+  TIMESTAMP_QUALITY_BAND_HOURS,
+} from './config.ts';
 
 /* ===========================================================================
  * Small statistics
@@ -262,6 +276,272 @@ export function sensitivityGrid(
     }
   }
   return cells;
+}
+
+/* ===========================================================================
+ * Centring: is the disc on the rock?
+ * ========================================================================= */
+
+/**
+ * Metres per radian of great circle, the sphere `distanceMetres` measures on.
+ *
+ * Restated here because lib/inat.ts keeps it inside the function. The two MUST
+ * agree: a centre generated on one sphere and then measured on another sits
+ * somewhere other than where this diagnostic says it does, and every count in
+ * the grid would be a count of the wrong disc. A test asserts the round trip
+ * rather than the constant -- a centre offset 250 m north reads 250 m from the
+ * pin under `distanceMetres` -- so the agreement is measured, not declared.
+ */
+const EARTH_RADIUS_M = 6_371_000;
+
+const toRad = (deg: number): number => (deg * Math.PI) / 180;
+const toDeg = (rad: number): number => (rad * 180) / Math.PI;
+
+/**
+ * A centre offset `eastM` east and `northM` north of a coordinate.
+ *
+ * First-order local tangent plane. Over the <=500 m this grid reaches, the
+ * error against the sphere is under a millimetre; over the whole earth it would
+ * be nonsense, which is why the caller's offsets are bounded by the pull.
+ */
+export function offsetCentre(
+  lat: number,
+  lon: number,
+  eastM: number,
+  northM: number,
+): { lat: number; lon: number } {
+  return {
+    lat: lat + toDeg(northM / EARTH_RADIUS_M),
+    // The parallel shrinks with latitude and this corridor sits near 33 deg N,
+    // where that is a 16% correction: dividing by the equatorial value would put
+    // a 500 m east offset 84 m short of 500 m east.
+    lon: lon + toDeg(eastM / (EARTH_RADIUS_M * Math.cos(toRad(lat)))),
+  };
+}
+
+const COMPASS = [
+  'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+  'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
+];
+
+/** 16-point compass label for a bearing in degrees clockwise from north. */
+export function compassPoint(bearingDeg: number): string {
+  return COMPASS[Math.round((((bearingDeg % 360) + 360) % 360) / 22.5) % 16]!;
+}
+
+export interface CentringCell {
+  /** Metres east of the pin. Negative is west. */
+  eastM: number;
+  /** Metres north of the pin. Negative is south. */
+  northM: number;
+  /** Metres from the pin to this centre. Zero at the pin itself. */
+  offsetM: number;
+  /** Degrees clockwise from north, or null at the pin, which has no bearing. */
+  bearingDeg: number | null;
+  /** 16-point compass label, or null at the pin. */
+  compass: string | null;
+  /**
+   * RECORDS inside the disc at this centre.
+   *
+   * A record count. The pipeline's unit is the visit and `visits` beside this is
+   * that, collapsed by the pipeline's own function. Both are carried because
+   * they are not interchangeable and #81's figures were counts.
+   */
+  records: number;
+  /** Visits -- one (observer, local day) -- inside the disc at this centre. */
+  visits: number;
+  /**
+   * True when the grid could not step OUTWARD from this cell: at least one of
+   * its eight lattice neighbours was not searched, because it fell outside the
+   * pull. A best offset sitting here makes its ratio a LOWER BOUND -- the real
+   * optimum is somewhere this grid cannot see. All five of #81's refusing spots
+   * put their best disc on their grid's boundary.
+   */
+  onSearchBoundary: boolean;
+}
+
+export interface CentringDiagnostic {
+  /** The shipped disc's radius, in metres. The grid never varies this. */
+  discRadiusM: number;
+  /** How far the pulled record set reaches. The grid cannot look past it. */
+  pullRadiusM: number;
+  stepM: number;
+  /** `pullRadiusM - discRadiusM`: the furthest a disc can move and stay whole. */
+  maxOffsetM: number;
+  /** The probe radius for `recordsNearPin`. */
+  nearPinRadiusM: number;
+  /** RECORDS within `nearPinRadiusM` of the pin. A record count, not visits. */
+  recordsNearPin: number;
+  /** The pin's own cell: the shipped disc, recomputed by this grid. */
+  pin: CentringCell;
+  /** Every searched centre, in row-major order from the south-west. */
+  cells: CentringCell[];
+  /** The richest disc on the grid by RECORDS. Ties go to the one nearest the pin. */
+  bestByRecords: CentringCell;
+  /** The richest disc on the grid by VISITS. Not always the same cell. */
+  bestByVisits: CentringCell;
+  /** `bestByRecords.records / pin.records`, or null when the pin holds none. */
+  recordsRatio: number | null;
+  /** `bestByVisits.visits / pin.visits`, or null when the pin holds none. */
+  visitsRatio: number | null;
+  /** `bestByRecords.onSearchBoundary`, hoisted: the headline ratio's caveat. */
+  onSearchBoundary: boolean;
+  /** True when no searched disc holds materially more records than the pin's. */
+  centred: boolean;
+  /** The bar `centred` was decided against. Decides nothing else. */
+  materialRatio: number;
+}
+
+/**
+ * Where the records are, relative to where the pin says they are.
+ *
+ * #81 measured the disc centred on the spots.json pin and found the pin off the
+ * rock at five of eight spots -- the same five that refuse. The pipeline could
+ * not tell "few people go here" from "we looked in the wrong place" and reported
+ * the first, so this reports the second where it is true.
+ *
+ * ---------------------------------------------------------------------------
+ * What it deliberately does not compute
+ * ---------------------------------------------------------------------------
+ *
+ * No rate, no bin table, no amplitude ratio at an offset centre. Whether a
+ * refusal survives a recentred disc is #62's open question 7, and answering it
+ * needs a DEFENSIBLE centre rather than the densest one -- a coordinate is a
+ * join against an authority, which is #69. Binning an offset disc here would
+ * produce a publishable-looking rate for a spot at a centre nobody has
+ * justified, so the shape of this function is the guard: it never touches the
+ * tide series and cannot produce a rate.
+ *
+ * And more records is NOT automatically better data. floor-calibration.md §1
+ * flags beach-level slugs covering several benches -- la-jolla-cove and
+ * la-jolla-shores most of all -- so a disc recentred 500 m away may be
+ * aggregating two of them, which is a different defect rather than a fix.
+ *
+ * ---------------------------------------------------------------------------
+ * Why the grid stops at `pullRadiusM - discRadiusM`
+ * ---------------------------------------------------------------------------
+ *
+ * The pull is made once, at the widest radius in the sensitivity grid, and every
+ * cell is narrowed from it in memory -- so this costs no requests, exactly as
+ * the radius grid does. A disc offset further than the difference would hang
+ * partly outside the pulled set, and its count would be a truncation reported as
+ * a measurement: the low number this repo exists not to emit. Cells beyond it
+ * are not searched at all rather than searched and caveated, and
+ * `onSearchBoundary` is how the reader learns the search stopped.
+ *
+ * At the shipped 1000 m pull and 500 m disc that reach is 500 m, which is
+ * narrower than #81's count queries, whose 5x5 grid corners sat at 707 m. Every
+ * ratio here is therefore a lower bound on #81's, and #81's were themselves
+ * lower bounds. Both instruments say the same thing about direction.
+ */
+export function centringDiagnostic(
+  records: readonly CalibrationRecord[],
+  spot: { lat: number; lon: number },
+  allTaxonIds: ReadonlySet<number>,
+  targetTaxonIds: ReadonlySet<number>,
+  options: {
+    discRadiusM: number;
+    pullRadiusM: number;
+    stepM?: number;
+    nearPinRadiusM?: number;
+    materialRatio?: number;
+  },
+): CentringDiagnostic {
+  const { discRadiusM, pullRadiusM } = options;
+  const stepM = options.stepM ?? CENTRING_STEP_M;
+  const nearPinRadiusM = options.nearPinRadiusM ?? CENTRING_NEAR_PIN_M;
+  const materialRatio = options.materialRatio ?? CENTRING_MATERIAL_RATIO;
+  const maxOffsetM = pullRadiusM - discRadiusM;
+
+  if (maxOffsetM < stepM) {
+    throw new Error(
+      `centringDiagnostic: a ${discRadiusM} m disc inside a ${pullRadiusM} m pull can move ` +
+        `${maxOffsetM} m before it hangs outside the records that were pulled, which is less ` +
+        `than one ${stepM} m step. There is no grid to search, and searching one anyway would ` +
+        'report a truncated disc as a fuller one.',
+    );
+  }
+
+  const rings = Math.floor(maxOffsetM / stepM);
+  // Which lattice points were searched, so a cell can ask whether the grid could
+  // have stepped outward from it. Integer keys: eastM and northM are whole
+  // multiples of an integer step, so there is no float equality here.
+  const searched = new Set<string>();
+  const offsets: { eastM: number; northM: number; offsetM: number }[] = [];
+  for (let row = -rings; row <= rings; row++) {
+    for (let col = -rings; col <= rings; col++) {
+      const eastM = col * stepM;
+      const northM = row * stepM;
+      const offsetM = Math.hypot(eastM, northM);
+      // A DISC of candidate centres, not a square. A corner of the square would
+      // reach 1.41x further than the axes and hang outside the pull.
+      if (offsetM > maxOffsetM) continue;
+      searched.add(`${eastM},${northM}`);
+      offsets.push({ eastM, northM, offsetM });
+    }
+  }
+
+  const onSearchBoundary = (eastM: number, northM: number): boolean => {
+    for (const de of [-stepM, 0, stepM]) {
+      for (const dn of [-stepM, 0, stepM]) {
+        if (de === 0 && dn === 0) continue;
+        if (!searched.has(`${eastM + de},${northM + dn}`)) return true;
+      }
+    }
+    return false;
+  };
+
+  const cells: CentringCell[] = offsets.map(({ eastM, northM, offsetM }) => {
+    const centre = offsetCentre(spot.lat, spot.lon, eastM, northM);
+    const inDisc = records.filter(
+      (r) => distanceMetres(centre.lat, centre.lon, r.lat, r.lon) <= discRadiusM,
+    );
+    const bearingDeg =
+      offsetM === 0 ? null : ((toDeg(Math.atan2(eastM, northM)) % 360) + 360) % 360;
+    return {
+      eastM,
+      northM,
+      offsetM,
+      bearingDeg,
+      compass: bearingDeg === null ? null : compassPoint(bearingDeg),
+      records: inDisc.length,
+      // The pipeline's own collapse, not a second definition of a visit.
+      visits: collapseToVisits(inDisc, allTaxonIds, targetTaxonIds).length,
+      onSearchBoundary: onSearchBoundary(eastM, northM),
+    };
+  });
+
+  const pin = cells.find((c) => c.offsetM === 0)!;
+
+  // Ties go to the cell NEAREST the pin, and the pin is nearest to itself. Two
+  // discs holding the same records is not evidence that the disc should move.
+  const best = (key: 'records' | 'visits'): CentringCell =>
+    [...cells].sort(
+      (a, b) => b[key] - a[key] || a.offsetM - b.offsetM || a.eastM - b.eastM || a.northM - b.northM,
+    )[0]!;
+
+  const bestByRecords = best('records');
+  const bestByVisits = best('visits');
+
+  return {
+    discRadiusM,
+    pullRadiusM,
+    stepM,
+    maxOffsetM,
+    nearPinRadiusM,
+    recordsNearPin: records.filter((r) => r.distanceM <= nearPinRadiusM).length,
+    pin,
+    cells,
+    bestByRecords,
+    bestByVisits,
+    recordsRatio: pin.records === 0 ? null : bestByRecords.records / pin.records,
+    visitsRatio: pin.visits === 0 ? null : bestByVisits.visits / pin.visits,
+    onSearchBoundary: bestByRecords.onSearchBoundary,
+    // <=, so a spot whose pin already holds the most records is centred rather
+    // than failing a strict comparison against itself.
+    centred: bestByRecords.records <= pin.records * materialRatio,
+    materialRatio,
+  };
 }
 
 /* ===========================================================================

@@ -9,6 +9,7 @@ import type { BackgroundBand } from './join.ts';
 import type { CriterionResult } from './refusals.ts';
 import type {
   AccuracyProfile,
+  CentringDiagnostic,
   DayNightSplit,
   FilterStage,
   LeaveOneOutRow,
@@ -59,6 +60,14 @@ export interface SpotResult {
   taxonHeights: TaxonHeightRow[];
   leaveOneOut: LeaveOneOutRow[];
   sensitivity: SensitivityCell[];
+  /**
+   * Where the records are, relative to where the pin says they are.
+   *
+   * Reported only. Nothing above reads it: no rate, no gate, no verdict, and
+   * deliberately no bin table at an offset centre — recentring is a join
+   * against an authority (#69), not a fit to observation density.
+   */
+  centring: CentringDiagnostic;
   stability: StabilityRow[];
   timestamps: TimestampQuality;
   dayNight: DayNightSplit;
