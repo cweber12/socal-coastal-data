@@ -806,6 +806,20 @@ Three things to be careful about before that is read as a cause.
 - **Counts are not visits,** and none of the pipeline's in-memory filters ran.
   This is a question about where, not how many.
 
+**The same question has since been measured a second way, and the two tables are
+not in conflict.** #86 re-ran the centring check inside the pipeline itself and
+published it in `calibration/out/report.md` — same spots, same conclusion about
+which five are off the rock, different ratios: `windansea` 3.59× there against
+5.48× here, `la-jolla-cove` 1.25× against 2.98×. Two things differ and both
+lower the ratio. That table counts the pipeline's **filtered records with visits
+collapsed**, where this one counts raw iNaturalist **records**; and its grid
+stops at a 500 m total offset, because a disc centred further hangs outside the
+1000 m pull it re-uses, where this grid steps ±500 m on each axis and so reaches
+707 m on the diagonals. **Both are lower bounds** — every refusing spot sits on
+its own grid's boundary in both — so neither number is the optimum and neither
+contradicts the other. Read this table for where the records are and that one for
+what the shipped pipeline sees.
+
 Two findings that do not depend on the correlation.
 
 **Two independent instruments agree the pin is off the rock at the same spots.**
@@ -839,3 +853,296 @@ richest one" — and the grid it re-runs varies the radius, not the centre.
    refuses on one criterion at 1.13× against a 2.0× bar with 99 visits, and its
    best disc holds 5.5× the records. That is the cheapest test in the corridor
    and it is a `calibration/` change, not a lidar one.
+
+---
+
+## 12. The pre-registered adjudication: the surveyed elevations select neither product
+
+§10 left hypsometry blocked on a disagreement it could not settle — two
+qualifying products, 0.4 ft apart on the only metric that survived perturbation,
+and nothing in the repo able to say which was right. #89 ran the comparison that
+answers it against the corridor's only surveyed ground truth.
+
+**It returns indeterminate on two independent grounds, and that is the result.**
+No product is selected. `probes/dem_adjudication.py`, full output in
+`findings/cabrillo-dem-adjudication.json`.
+
+### Every parameter was frozen before the comparison ran
+
+This is the part that makes the answer worth anything. The metric set, the
+exclusions, the indeterminacy rule and both confounds were written into
+`calibration/floor-calibration.md` §6 and committed in #88 **before any DEM was
+sampled at a surveyed point**. Nothing in this section revises them, and a
+parameter changed after the data is visible is tuning whatever the commit
+message calls it.
+
+Four mechanical choices the pre-registration does not fix had to be made here.
+Each is resolved toward the option with no free number in it, and all four are
+carried in the finding rather than left in the code:
+
+| choice | resolved as | why |
+|---|---|---|
+| DEM sampling rule | the single cell containing the coordinate | the only rule with no radius to pick |
+| horizontal tolerance | none beyond that cell | the comparison does not need one; the report's `Std. Dev.` column is **unresolved** and is neither read nor assumed to be metres |
+| roughness window | sd of valid cells within **5.0 m** | a fixed ground radius, so it means the same thing on a 1 m grid and a 0.5 m one |
+| roughness restriction | the low half by median | a median split has no threshold to choose |
+
+### Points used, and points dropped
+
+126 of the 137 surveyed points carry a published height. The pre-registration
+admits the report's own two exclusions and no others, and **neither removes a
+point from the 126**: Zone II M2's height is published as `ND` because the report
+withdrew it, so it was never in the 126, and the 8 February 16:20 exclusion is a
+reading-level one the report already applied to its own averages, leaving all 35
+affected points intact. **No further exclusion was applied.**
+
+| step | n | why |
+|---|---:|---|
+| surveyed points | 137 | |
+| with a published height | 126 | 11 are `ND` |
+| with published coordinates | **124** | Zone 2 L7 and L8 publish a height and no coordinate — no coordinate, no cell to sample |
+| valid in both products | **119** | 5 fall on 2616 voids; 6260 voids none |
+
+The 5 voids are 2616's, and every one is a low point — 0.10 to 2.06 ft MLLW, in
+Zone 2 M5 and the Zone 3 K5/K6 transect. §10 measured 2616's voids sitting on the
+wet reef from area coverage; here the same thing shows up as which individual
+surveyed points it cannot answer for. Each drop is applied to **both** products,
+so no drop can favour either.
+
+### The three metrics disagree, and the interval spans zero
+
+Residual is DEM minus surveyed, in feet above MLLW, over the 119 paired points.
+
+| product | RMSE | MAE | median abs err | mean signed | median signed |
+|---|---:|---:|---:|---:|---:|
+| 2616 | **2.017** | **1.602** | 1.518 | −1.302 | −1.433 |
+| 6260 | 2.079 | 1.663 | **1.439** | −1.324 | −1.429 |
+| chooses | 2616 | 2616 | **6260** | | |
+
+**Two metrics choose 2616 and one chooses 6260, so nothing is selected.** The
+pre-registration required all three to agree and said why: a split "would mean
+the two products differ in the shape of their error rather than its size, and no
+single scalar should adjudicate that." That is exactly what happened. 6260 is
+closer at the centre of the distribution and 2616 is closer in the tail, which is
+a difference in error shape, and it was pre-registered as a non-answer rather
+than discovered as one.
+
+**The bootstrap agrees, independently.** 95% percentile bootstrap over points on
+the paired per-point difference in absolute residual, 10,000 resamples:
+
+```
+mean |resid 2616| - |resid 6260|  =  -0.062 ft
+95% CI                            =  [-0.160, +0.034] ft   spans zero
+```
+
+Re-run at five seeds the interval moves in the third decimal and spans zero at
+every one. The three metric-difference intervals, reported as description and
+never allowed to select, span zero too. **On the pre-registration's own rule the
+result is indeterminate and no product is selected.**
+
+**The bigger number is the one neither product wins.** Both sit about **1.3 ft
+below** the surveyed heights, while they differ from each other by 0.06 ft — a
+factor of twenty. Whatever separates these two products is small against what
+separates both of them from the survey, and the paired comparison is blind to it
+by construction: any datum term is additive and identical for both, so VDatum's
+±0.305 ft and the MLLW realisation gap between NOAA 9410170 and 9410230 cancel
+exactly in the difference and cannot bias the choice. They also cannot explain a
+1.3 ft common-mode bias, and this section does not claim to know what does.
+
+### Confound 1 — sand, measured and left in
+
+Regressing the signed residual on plot elevation gives a strong, tight slope in
+both products, and it is not the pattern the pre-registration expected to find.
+
+| product | slope, ft per ft of elevation | 95% CI | r² | intercept |
+|---|---:|---|---:|---:|
+| 2616 | −0.546 | [−0.695, −0.394] | 0.378 | +0.130 |
+| 6260 | −0.704 | [−0.822, −0.567] | 0.579 | +0.521 |
+
+Binned, which is the same fit read directly:
+
+| surveyed band, ft MLLW | n | 2616 mean residual | 6260 mean residual |
+|---|---:|---:|---:|
+| −1 … 0 | 7 | **+0.55** | **+0.99** |
+| 0 … +1 | 15 | −0.03 | +0.32 |
+| +1 … +2 | 19 | −0.47 | −0.34 |
+| +2 … +3 | 33 | −1.57 | −1.58 |
+| +3 … +4 | 18 | −2.02 | −2.31 |
+| +4 … +5 | 16 | −1.44 | −1.43 |
+| +5 … +8 | 11 | **−3.47** | **−4.19** |
+
+**Sand explains the low end's sign and not the high end's size.** Below 0 ft both
+DEMs read *higher* than the 2004 survey, which is the direction burial predicts
+and is where burial happens. But sand does not remove rock, and by +5 ft the DEMs
+read 3.5–4.2 ft *below* surveyed heights that were taken with a laser level on
+cliff faces and boulder tops. The residual is neither "concentrated low and flat"
+nor "uniform across elevation and type" — it is a slope across the whole range,
+which is a third outcome, and it is reported as one rather than pushed into
+whichever box it half fits.
+
+**Plot type is mostly elevation in disguise.** By type alone the mean residual is
+−2.35 ft on Circular Plots, −1.52 on Photoplots and −0.50 on Line Transects
+(2616; 6260 is within 0.25 ft of each). But Circular Plots average 4.14 ft MLLW
+and Line Transects 1.15 ft, and in the joint model the type coefficients collapse
+to +0.26/+0.30 ft (2616) and +0.01/+0.30 ft (6260) while r² barely moves —
+0.378 → 0.382 and 0.579 → 0.586. The type effect is the elevation effect.
+
+**No correction was applied.** Not a sand offset, not an epoch adjustment,
+nothing. The gap is a confound to measure, and the residuals carry it.
+
+### Confound 2 — point against cell, diagnostic and never selecting
+
+Absolute residual against local DEM roughness — the sd of valid cells within 5 m:
+
+| product | Pearson r | 95% CI | OLS slope | r² |
+|---|---:|---|---:|---:|
+| 2616 | 0.265 | [−0.016, +0.500] | 0.258 | 0.070 |
+| 6260 | **0.370** | [+0.112, +0.583] | 0.335 | 0.137 |
+
+The confound is real, and it is clearer in the finer product: a laser level read
+the top of a boulder, and a DEM cell reports the cell. For 6260 the interval
+excludes zero.
+
+**The roughness-restricted comparison names no product either.** Restricted to
+the 61 points below the median of the two products' 5 m roughness (0.209 ft), the
+three metrics split 6260 / 2616 / 6260 and the paired interval is
+[−0.143, +0.057] ft, spanning zero. It **cannot** override the primary and it did
+not need to: it does not point anywhere. The pre-registration's ambiguity about
+whether a restricted comparison that names nothing counts as "disagreeing" is
+moot — both readings return indeterminate, and both are reported in the finding.
+
+The same is true of the one sensitivity check that is not pre-registered at all:
+sampling a 3 m neighbourhood mean instead of the containing cell reproduces the
+metric split exactly, 2616 / 2616 / 6260. **The verdict does not turn on sub-cell
+placement.**
+
+### The vintage gap, reported and not corrected
+
+| | acquired | published | gap to the survey |
+|---|---|---|---|
+| the survey | 2004-02-07 … 2004-03-19 | 2006-06 | — |
+| 2616 | nominal 2009-01-01 … 2011-01-01 | 2014-03 | ~5–7 years |
+| 6260 | 2016-04-28 … 2016-05-28 | 2017-04 | ~12 years |
+
+**The pre-registration's "roughly 2014" is loose, and the correction is worth
+recording.** 2616's source lidar is a nominal 2009–2011 and publishes no finer
+date; 6260's is one month in spring 2016. The two products are **five years apart
+from each other** on a bench that buries and scours seasonally, which is a
+confound between them and not only between each and 2004. It makes the
+indeterminate verdict easier to believe and it is not a reason to adjust
+anything.
+
+### Post-hoc, and it cannot select: the slope gets *worse* on smooth ground
+
+**Everything from here to the end of this subsection was computed after the
+comparison above had run and returned indeterminate.** It is not in the
+pre-registration, it contributed nothing to the verdict, and it selects no
+product. It is recorded for what it rules out.
+
+The run scored the roughness-restricted set but never regressed elevation inside
+it. Doing so asks one question: is the confound-1 slope really the
+point-against-cell confound wearing a disguise? If rough ground were producing
+it, restricting to smooth ground should **weaken** it.
+
+| set | 2616 slope | r² | 6260 slope | r² |
+|---|---:|---:|---:|---:|
+| all 119 points | −0.547 | 0.378 | −0.704 | 0.579 |
+| shared restricted set, n = 61 | **−0.859** | 0.930 | **−0.985** | 0.957 |
+| each product on its own roughness median, n = 60 | −0.858 | 0.948 | −0.966 | 0.971 |
+
+**It strengthens, in both products and under both ways of drawing the
+restriction.** The second convention is reported because it restricts each
+product to the ground *that* product resolves smoothly; it gives two different
+point sets, so it can never be a paired comparison, which is why it appears only
+here.
+
+Read as a transfer function the numbers are stark. Residual is DEM minus survey,
+so a slope of −0.985 means `d(DEM)/d(survey)` = **0.015** — a faithful DEM would
+give 1.0. On the shared restricted set the surveyed heights span 5.30 ft while
+2616 spans 1.52 ft and 6260 spans 1.42 ft, and over all 119 paired points
+`corr(survey, DEM)` is only **0.54** and **0.44**. On smooth ground 6260's
+correlation with the surveyed heights falls to 0.07.
+
+**Three explanations are ruled out by this, and none of them is the one left
+standing:**
+
+- **Roughness / point against cell.** Ruled out as *the cause*. The slope gets
+  steeper on smooth ground, not shallower. Confound 2 is real and it is not this.
+- **Sand.** Ruled out as the cause. Sand buries low ground and cannot lower high
+  rock, and this slope is driven by the DEM reading feet below surveyed cliff
+  faces and boulder tops.
+- **Any datum term.** Ruled out as the cause. A datum error is additive: it moves
+  this regression's *intercept* and cannot produce a *slope* in it. It is also
+  identical for both products, so it cancels exactly in the paired difference.
+
+**Three candidates survive, and this section chooses between none of them.**
+
+1. **Coordinates that do not locate the plots on a 1 m grid.** The survey's
+   horizontal is a 2004 Trimble fix whose accuracy claim and `Std. Dev.` column
+   cannot be reconciled — that column's unit is **unresolved** and is not read
+   here. Metre-class horizontal error on a bench with metre-class relief samples
+   the wrong feature.
+2. **A scale problem in the surveyed heights.** The report ties stadia readings
+   to MLLW through a conversion formula it attributes to UCSC and a still-water
+   line read by eye. A scale error there stretches the surveyed range against a
+   DEM that is correct.
+3. **DEMs that do not resolve this bench.** Both products may simply be too
+   smooth here, which §10's void coverage already makes plausible.
+
+None is tested here, none is preferred, and **nothing was adjusted to close the
+gap**. Separating them is new work, not a repair.
+
+**What it means for the adjudication, plainly: no product could have been
+selected whichever way the metrics fell.** A comparison can rank two products by
+how well they reproduce ground truth only if at least one of them reproduces it.
+Neither tracks the surveyed relief — correlation 0.44–0.54 over all points, and
+`d(DEM)/d(survey)` of 0.01–0.14 on smooth ground against an ideal 1.0. A metric
+win would have been a win on noise. **The indeterminate verdict is not a near
+miss between two close candidates; it is what a comparison returns when neither
+candidate is measuring the thing.** That does not change the verdict — the
+pre-registered rules returned it on their own terms and stand as run — but it
+changes what the verdict was ever capable of being.
+
+### What this leaves
+
+- **Indeterminate, no product selected**, on a metric split and a bootstrap
+  interval that spans zero, either of which was sufficient alone.
+- **No floor is set or changed**, `shared/spots.json` is untouched, and the §6
+  check stays unspent with nothing recorded against it — which is the branch §6
+  committed to for this outcome before it knew which branch it would be taking.
+- **The blocker moved, and the post-hoc diagnostic says how far.** It is no
+  longer "which of these two products is right": they are indistinguishable
+  against 126 surveyed heights, both are ~1.3 ft off, and on smooth ground
+  neither DEM tracks the surveyed relief at all — `d(DEM)/d(survey)` of
+  0.01–0.14 against an ideal 1.0. Choosing between them was never a question the
+  data could answer.
+- Re-running the slope gate on a bench-scale polygon, §10's obvious next step,
+  still has no product to prefer, and now has a measured reason why not.
+
+### Open questions, third round
+
+8. **What is the 1.3 ft, given that it is not a constant?** Both products sit
+   that far below the survey on average, more than VDatum's ±0.305 ft — but the
+   post-hoc diagnostic shows the gap is not an offset at all. It is ~0 near
+   datum and 3.5–4.2 ft at the top of the range, so any candidate that is a
+   *constant* is thereby excluded as the whole story: the 9410170-vs-9410230
+   realisation gap and the VDatum transform are both constants and both move the
+   intercept only. What remains has to be something that scales with height, and
+   the 2006 report never made the station comparison that would retire the
+   constant part.
+9. **Why does `d(DEM)/d(survey)` collapse to 0.01–0.14 on smooth ground?** This
+   is the sharpest unexplained result in the directory, and the post-hoc
+   diagnostic narrowed it rather than answering it. The elevation slope
+   *strengthens* under roughness restriction — −0.547/−0.704 over all points
+   against −0.859/−0.985 on the smooth half — which rules out the
+   point-against-cell confound, sand, and any additive datum term as the cause.
+   Three candidates survive and are listed above: horizontal coordinates that do
+   not locate the plots on a 1 m grid, a scale error in the surveyed heights, or
+   DEMs that do not resolve this bench. Separating them is the work; **the
+   consequence for §8's recommendation is already in hand, because a product
+   chosen between these two was never going to be chosen on this evidence.**
+10. **Does anything select a product?** Not these 126 points. If a product must
+    be chosen, it is chosen on grounds this comparison did not supply, and that
+    should be said out loud rather than inherited from §8's recommendation.
+
+Section 12 was added under #89, and §9 was written before it.

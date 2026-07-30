@@ -21,6 +21,7 @@ Standard library only — `struct`, `zlib`, `math`, `json`, `urllib`, `http.clie
 | `hypsometry.py` | The #80 slope gate. A(w) over a polygon in 0.1 ft steps from +2.0 to −2.0 ft MLLW, on a 2×2 tile mosaic, for 19 polygon variants across two products and two extents. Produced `findings/cabrillo-slope-gate.json`. |
 | `window_truncation.py` | Audits every committed sample window for silent clipping at a tile edge, and re-measures the ones that were. Produced `findings/window-truncation.json`. |
 | `rate_centring.py` | Whether `calibration/`'s 0.5 km discs are centred on the bench or merely contain it, from iNaturalist count queries — radial profile plus a 5×5 grid of offset disc centres. Produced `findings/rate-curve-centring.json`. |
+| `dem_adjudication.py` | The #89 adjudication: 2616 and 6260 sampled at the 2004 NPS-surveyed monitoring points and scored against them under rules frozen in `calibration/floor-calibration.md` §6 before it ran. Three metrics, a paired bootstrap, both confound regressions. Produced `findings/cabrillo-dem-adjudication.json`. Added under #89. |
 
 ## Notes on the ones that took real work
 
@@ -53,6 +54,16 @@ in both recommended products, on the seaward side, so single-tile windows there
 were clipped and reported as whole — see `window_truncation.py` and §7's
 correction. `hypsometry.mosaic()` stitches a 2×2 block and asserts every tile onto
 the first one's grid rather than resampling.
+
+**A probe whose parameters were fixed before it ran.** `dem_adjudication.py` is
+the only one here that implements a rule set written somewhere else and
+committed first — `calibration/floor-calibration.md` §6, landed in #88 before any
+DEM was sampled at a surveyed point. It therefore has a constraint the others do
+not: **the four mechanical choices the pre-registration does not fix are named in
+`IMPLEMENTATION_CHOICES` at the top of the file and copied into the output**, so
+a reader can tell a parameter that was pre-registered from one this module
+picked. Its constants are imported from `hypsometry.py` rather than restated, so
+it cannot convert elevations differently from the slope gate it adjudicates.
 
 ## What these read, and what they still never write
 
