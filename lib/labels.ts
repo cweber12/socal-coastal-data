@@ -9,14 +9,20 @@
  * about the tide.
  */
 
+import { formatThreshold, MINUS } from './format';
 import { formatClock, formatDateLong, formatDuration, formatWeekdayLong, type LocalDate } from './time';
 import { lowLighting, STATE_PRESENTATION, type WindowResult } from './windows';
 import type { SightingTide } from './sightings';
 
-/** U+2212 MINUS SIGN, not a hyphen: it aligns with digits and reads as a sign. */
-const MINUS = '−';
-
-/** `-0.6` becomes `−0.6`, with a true minus sign. For display only. */
+/**
+ * A measured or predicted tide height. `-0.6` becomes `−0.6`, with a true minus
+ * sign. For display only.
+ *
+ * One decimal is right here and wrong for a threshold. A tide prediction carries
+ * more digits than anyone can act on, so rounding it is a kindness; a threshold
+ * is the number a verdict is computed from, so rounding it is a lie. Thresholds
+ * go through `formatThreshold` in `lib/format.ts`.
+ */
 export function formatHeight(ft: number): string {
   const rounded = ft.toFixed(1);
   return rounded.startsWith('-') ? MINUS + rounded.slice(1) : rounded;
@@ -210,8 +216,8 @@ export function thresholdDisclosure(
   ceilingConfidence: string,
 ): string {
   return (
-    `Floor ${formatHeight(floorFt)} ft (${floorConfidence}), ` +
-    `swell ceiling ${ceilingFt.toFixed(1)} ft (${ceilingConfidence}). ` +
+    `Floor ${formatThreshold(floorFt)} ft (${floorConfidence}), ` +
+    `swell ceiling ${formatThreshold(ceilingFt)} ft (${ceilingConfidence}). ` +
     'Neither has been field-checked.'
   );
 }

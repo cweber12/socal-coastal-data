@@ -6,6 +6,7 @@
  * there, and if there is none, why not.
  */
 
+import { formatThreshold } from './format';
 import { daylightBounds, findExtrema, type TideExtremum, type TideSeries } from './tide';
 import { localDateInZone, localDayBounds, localDaysBetween, sameLocalDate, type LocalDate } from './time';
 
@@ -478,7 +479,7 @@ export function evaluateWindow(input: WindowInput): WindowResult {
     state = 'above-floor';
     reason =
       `${isToday ? 'The next low' : "The day's best low"} only reaches ` +
-      `${low.ft.toFixed(1)} ft, which does not get under the ${floorFt.toFixed(1)} ft floor. ` +
+      `${low.ft.toFixed(1)} ft, which does not get under the ${formatThreshold(floorFt)} ft floor. ` +
       'The reef stays covered.';
   } else if (decisiveMinutes <= 0) {
     state = 'dark';
