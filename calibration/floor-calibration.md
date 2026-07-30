@@ -421,6 +421,17 @@ the pin finds 1.5× the records at `la-jolla-shores`, 1.6× at `cardiff-reef`, 2
 1.00–1.01× at `swamis`, `sunset-cliffs` and `cabrillo-tidepools`. All five best
 offsets sit on the search grid's boundary, so those are lower bounds.
 
+**The pipeline has since measured the same quantity and reports smaller ratios**
+— 3.59× at `windansea` and 1.25× at `la-jolla-cove` against the 5.5× and 3.0×
+above — in `calibration/out/report.md` under "Is each disc on the rock?", added
+by #86. That is not a contradiction. The figures above are raw iNaturalist
+observation counts on a 5×5 grid of ±250/±500 m offsets whose corners reach
+707 m; the report's are the filtered, visit-collapsed records every rate in this
+section is computed from, on a lattice that cannot step past 500 m. Both are
+lower bounds — the five refusing spots sit on their grid's boundary in the
+report too — and the report's column is the one to read when the question is
+what the shipped pipeline sees.
+
 This is not licence to move a coordinate — that is a join against an authority, not
 a fit to observation density — and it does not overturn any refusal. Three cautions
 carry equal weight: counts are observations rather than visits and skip every
@@ -971,14 +982,150 @@ binary, but it's your call.
 
 ---
 
-## 8. Also worth pulling: MARINe
+## 8. MARINe surveyed seven of these benches, and the datum is unresolved
 
-MARINe's Biodiversity Surveys sample four components along the same transects,
-one of which is topography — elevation relative to MLLW — across 200+ rocky
-intertidal sites from Alaska to Mexico. If any corridor spot is in the network,
-the surveyed elevation already exists and §2 is unnecessary there.
+**The hour this section used to recommend has been spent.** It said MARINe's
+Biodiversity Surveys measure topography "relative to MLLW" and that the site
+list was worth an hour before modelling anything. That check was made and is
+recorded on #82, which carries the full reference index — every URL, read date
+and extraction method behind what follows. Both of the old sentences need
+replacing: the site list holds seven corridor benches, and "relative to MLLW" is
+one of five disagreeing statements rather than a fact.
 
-Worth an hour to check the site list before modelling anything.
+### What is published
+
+A rendered topography surface per site, at
+`marinedb.ucsc.edu/static/biodiversity/<slug>-topo.jpg`. Seven return 200 with
+real content:
+
+| MARINe site | slug | candidate spot |
+|---|---|---|
+| Cabrillo I | `cabrillo1` | `cabrillo-tidepools` |
+| Wind and Sea | `windandsea` | `windansea` |
+| Sunset Cliffs | `sunsetcliffs` | `sunset-cliffs` |
+| La Jolla Caves | `lajollacaves` | `la-jolla-cove` |
+| Cardiff Reef | `cardiffreef` | `cardiff-reef` |
+| Scripps | `scripps` | possibly `la-jolla-shores` |
+| Sea Ridge | `searidge` | unassigned |
+
+**That third column is a candidate pairing, not a join.** MARINe's published site
+coordinates carry ±350 m against `spots.json`'s ±100 m, so nothing here
+identifies a MARINe site with one of our spots — and §2 above records
+`la-jolla-cove` sitting 1142 m from MARINe's position for it, which #45 left
+unresolved. Resolving the identity is #69. Two of the eight calibration spots are
+not covered at all: `torrey-pines-beach`, and `swamis`, which is Long-Term
+Monitoring only.
+
+> **Correction to #82, found re-checking on 2026-07-30.** #82 offers a 404 at
+> `marine.ucsc.edu/sites/<slug>-bio/` as the cheap in-network test. That path
+> 404s for **every** slug, including all seven that publish — the per-site
+> Biodiversity page is nested, at `/sites/<slug>/<slug>-bio`. The test that
+> works is the topography JPEG itself: 200 at all seven above, 404 at `swamis`,
+> probed 2026-07-30.
+
+Each figure is a 3-D surface on three labelled axes — `Distance (m)` running
+land to ocean, `Transect (m)` across the baseline, elevation vertical. Read off
+the images directly, 2026-07-30: Cabrillo I is a 30 m baseline × ~42 m
+cross-shore spanning −2 to +2 m, its transect axis ticked every 3 m; Cardiff
+Reef is a 20 m baseline × ~14 m spanning −0.5 to +0.5 m. The 30 m and 20 m
+baselines and the 3 m transect spacing are the protocol's own, so these are
+Coastal Biodiversity Survey grids and not something else.
+
+### Why this changes what §2 is for
+
+**The grid in its local frame is the whole of §2's computation.** A hypsometric
+curve is exposed area against water level; distance × transect × elevation,
+sampled wherever the slope changes across a bench somebody walked, *is* that
+surface. Given the grid and a named datum, the curve needs no absolute
+coordinates, no reef polygon, no lidar tile and no VDatum transform — so it walks
+past every blocker §2 records:
+
+- *"the clip cannot be located"* — nothing is clipped. The survey footprint **is**
+  the polygon, walked by the surveyors, and the pins sitting 100–400 m inland
+  stop mattering.
+- #63's failed acceptance test — no polygon is traced, so there is nothing to
+  perturb, and #80's measurement that curve slope moves 25–27% under a ±25 m
+  perturbation does not arise.
+- The ±0.299–0.313 ft VDatum term that consumes §7's entire 0.3 ft budget is
+  **zero**, because no transform is performed. That is the same structural
+  advantage §7 credits to the pressure logger of §4 — at seven benches instead
+  of one, and with no fieldwork.
+
+Every one of those is conditional on "a named datum", which is the next
+subsection and is the reason this section promotes nothing.
+
+### The datum is stated five ways and they do not agree
+
+| source | says | read |
+|---|---|---|
+| CBS methods page, `marine.ucsc.edu/survey-methods/biodiversity-surveys/` | "Topography measurements (elevation relative to mean low low water (mllw))"; sampling records "the elevation (relative to mean low low water) along each transect using a rotating laser leveller" | 2026-07-30, page HTML |
+| Cardiff Reef Biodiversity page, topography caption | "The map below displays the topography of the site in meters above mean lower low water (MLLW)." | 2026-07-30, **re-read by eye from the page HTML** — #82 had it via a summarising fetch |
+| The figures' own vertical axis, 3 of 3 opened | **`MSL (m)`** | 2026-07-29 (#82); Cabrillo I and Cardiff Reef re-read from the images 2026-07-30 |
+| Data Use Guidelines, 2025-10-21 | benchmark-bolt referencing, **no datum named**: "datum" occurs **0** times and "MLLW" **0** times in the whole document | 2026-07-30, `pdftotext -layout` |
+| Protocol Handbook 2025 | **no topography protocol at all** — MLLW 0, NAVD 0, laser 0. "Site topography" appears once, in a list of which databases exist; the document's single "datum" is horizontal, NAD83/WGS84, for GPS | 2026-07-30, `pdftotext -layout` |
+
+**At 9410230 the MLLW/MSL fork is 2.73 ft** — MLLW 4.37 ft, MSL 7.10 ft on the
+station's own staff, from the CO-OPS metadata API, read 2026-07-30. That is
+wider than the entire decision region for a floor: nine times §7's 0.3 ft
+promotion tolerance, and nearly twice the 1.5 ft blanket raise §1 exists to
+undo. A caption and the figure printed directly beneath it disagree by that
+much.
+
+**A sixth source says MLLW and does not close it.** Gerraty et al. 2026,
+*Ecological Applications* 36(2):e70215, whose authors include the network's own
+leads, determines the tidal height of each mussel detection "relative to mean
+lower low water (MLLW)" by "integrating biological survey data with
+transect-level topographic profiles obtained using a rotating laser level" —
+read directly from the open text 2026-07-30. That is the same instrument the
+methods page names and the same kind of product, which narrows #82's caveat that
+Gerraty may be a different measurement chain from CBS topography. It does not
+close it: the paper does not say those profiles are the CBS grids, and a
+peer-reviewed methods sentence is evidence about what the authors believe the
+numbers mean, not about what a plotting routine put on an axis. `MSL` looks like
+a label defect. Looking like one is not being one.
+
+### The tie exists; its datum is the gap
+
+Verbatim from the Data Use Guidelines, under "Topography and Tidal Height"
+(re-read 2026-07-30):
+
+> Survey equipment is used to record elevation data along each sampling transect
+> at intervals appropriate for adequately capturing changes in slope and
+> topography. GPS measurements (X, Y, and Z coordinates) are recorded for each
+> permanent marker bolt, one of which is selected as a "benchmark bolt" that all
+> topography measurements can be referenced to.
+
+**X, Y and Z, for every bolt.** So the grid is bolt-relative *with* a tie rather
+than a floating local frame — the benchmark carries its own absolute Z, and the
+surface can in principle be placed on a datum rather than only compared to
+itself. The gap is exactly what surface that Z is on, and the document making
+the statement is the one that uses the word "datum" zero times.
+
+### Routing is a split, not one ask
+
+`marinedb.ucsc.edu/marine/data-downloads/nps_navy_sites.csv` is MARINe's own
+machine-readable carve-out list: 76 rows, read 2026-07-30. `CABR / Cabrillo
+National Monument` owns Cabrillo I, II and III. Wind and Sea, Sunset Cliffs, La
+Jolla Caves, Cardiff Reef, Scripps and Sea Ridge are **absent**, so they are not
+carved out. Against the data-request page's instruction that requests for NPS
+and Navy sites go directly to the appropriate research group: **Cabrillo I goes
+to CABR, the other six go through the form. Two messages, not one.** Sending
+either is #69 and is a human action; nothing has been sent.
+
+### Status: this is not evidence yet
+
+**Nothing here is a `floor_evidence` entry and no floor moves.** §7 lists
+`marine_topography` as an instrumented method able to satisfy clause 2 of the
+promotion rule, and this section deliberately does not invoke it. That entry
+carries a `value_ft` documented as ft MLLW and a `datum_transform` field, and
+today both would have to be filled from a guess between two surfaces 2.73 ft
+apart — nine times the tolerance the entry would be promoted under. An elevation
+whose reference surface was guessed at is the hazard this repository exists to
+prevent.
+
+What §8 now records is narrower and firmer than what it used to promise: the
+surveyed surface exists for seven of these benches, it needs none of the
+machinery §2 is blocked on, and one question stands between it and being usable.
 
 ---
 
