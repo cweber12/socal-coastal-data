@@ -18,7 +18,9 @@
     "gen:calibration:check": "node scripts/gen-calibration-types.mjs --check",
     "calibrate": "node --import ./tools/calibration/loader.mjs tools/calibration/run.ts",
     "calibrate:fetch": "node --import ./tools/calibration/loader.mjs tools/calibration/run.ts --fetch",
-    "calibrate:taxa:check": "node tools/calibration/resolve-taxa.mjs --check"
+    "calibrate:taxa:check": "node tools/calibration/resolve-taxa.mjs --check",
+    "ui:capture": "node tools/ui-capture/capture.mjs",
+    "ui:compare": "node tools/ui-capture/compare.mjs"
   },
   "dependencies": {
     "next": "^16.2.12",
@@ -31,6 +33,7 @@
     "@types/node": "^22.18.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "playwright": "^1.62.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"

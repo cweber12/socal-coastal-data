@@ -7,6 +7,7 @@ investigate a question — never things the app imports.
 | --- | --- |
 | `calibration/` | The revealed-preference pipeline. Turns iNaturalist observations and CO-OPS predictions into `shared/calibration.json`, with a refusal and a reason wherever the evidence does not support a rate. |
 | `lidar-recon/` | Point-cloud and DEM investigation of the intertidal benches. Produces the findings under `lidar-recon/findings/` that back `floor_evidence` entries. Python, standard library only. |
+| `ui-capture/` | Captures the rendered pages before and after a refactor and diffs the text, so a behaviour-preserving move can be proved rather than asserted. Playwright, `devDependency` only. |
 | `verify-apis/` | Probes every upstream the stack depends on and reports status, latency, and the age of the newest observation. Not in CI: it calls live NOAA, IBWC and USGS endpoints, so a per-push run would be both flaky and rude. |
 
 ## What belongs here, and what belongs next door
@@ -40,4 +41,6 @@ npm run calibrate:fetch                              # live; the only mode that 
 npm run calibrate:taxa:check                         # re-verify every taxon id upstream
 python tools/verify-apis/verify_coastal_apis.py      # exits nonzero only on real failures
 python tools/lidar-recon/probes/<probe>.py           # each writes one findings file
+npm run ui:capture -- <out-dir>                      # needs `npm run build` first
+npm run ui:compare -- <before> <after>               # non-zero on any difference
 ```
