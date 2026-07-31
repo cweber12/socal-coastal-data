@@ -29,10 +29,10 @@ import {
 } from './src/config.ts';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
-const REPO = fileURLToPath(new URL('..', import.meta.url));
+const REPO = fileURLToPath(new URL('../../', import.meta.url));
 const OUT = `${HERE}__fixtures__`;
 
-const taxa = JSON.parse(await readFile(`${HERE}target_taxa.json`, 'utf8'));
+const taxa = JSON.parse(await readFile(`${REPO}shared/target_taxa.json`, 'utf8'));
 const ids = [...taxa.targets, ...taxa.denominator].map((t: { taxon_id: number }) => t.taxon_id);
 
 const spots = JSON.parse(await readFile(`${REPO}shared/spots.json`, 'utf8'))

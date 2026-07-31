@@ -1,5 +1,5 @@
 /**
- * Resolve, or re-verify, every taxon id in calibration/target_taxa.json.
+ * Resolve, or re-verify, every taxon id in shared/target_taxa.json.
  *
  *   node calibration/resolve-taxa.mjs --check     re-resolve and compare, exit 1 on drift
  *   node calibration/resolve-taxa.mjs --write     re-resolve and rewrite the ids
@@ -20,7 +20,7 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 
-const FILE = new URL('./target_taxa.json', import.meta.url);
+const FILE = new URL('../../shared/target_taxa.json', import.meta.url);
 const USER_AGENT =
   'socal-coastal-data/0.1 (+https://github.com/cweber12/socal-coastal-data) calibration';
 
@@ -113,7 +113,7 @@ for (const entry of entries) {
 
 if (mode === 'write') {
   await writeFile(FILE, `${JSON.stringify(file, null, 2)}\n`, 'utf8');
-  console.log(`\nRewrote ${entries.length} ids into calibration/target_taxa.json.`);
+  console.log(`\nRewrote ${entries.length} ids into shared/target_taxa.json.`);
   process.exit(0);
 }
 
@@ -121,7 +121,7 @@ if (problems.length > 0) {
   console.error(`\n${problems.length} problem(s):`);
   for (const p of problems) console.error(`  - ${p}`);
   console.error(
-    '\ncalibration/target_taxa.json is FROZEN. If an id genuinely moved upstream, that is a\n' +
+    '\nshared/target_taxa.json is FROZEN. If an id genuinely moved upstream, that is a\n' +
       'finding for a human and a new version of the file, not something to rewrite mid-run.',
   );
   process.exit(1);

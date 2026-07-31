@@ -52,7 +52,7 @@ export function renderReport(run: CalibrationRun): string {
   out.push('| | |');
   out.push('|---|---|');
   out.push(`| calibration version | ${run.calibrationVersion} |`);
-  out.push(`| taxa config | \`calibration/target_taxa.json\` ${run.taxaVersion} |`);
+  out.push(`| taxa config | \`shared/target_taxa.json\` ${run.taxaVersion} |`);
   out.push(`| pulled | ${run.pulledAt} |`);
   out.push(`| source | ${run.source} |`);
   out.push(`| corpus from | ${run.corpusFrom} |`);

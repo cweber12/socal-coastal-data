@@ -2,7 +2,7 @@
  * The calibration entry point.
  *
  *   node calibration/run.ts                 offline, against committed fixtures
- *   node calibration/run.ts --fetch         live, and writes shared/calibration.json
+ *   node tools/calibration/run.ts --fetch   live, and writes shared/calibration.json
  *
  * Offline is the default deliberately. A pipeline whose only mode reaches the
  * network cannot be run by a reviewer, cannot be run in CI, and cannot be tested
@@ -20,8 +20,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-import { parseCoopsSeries, type TideSeries } from '../lib/tide.ts';
-import type { LocalDate } from '../lib/time.ts';
+import { parseCoopsSeries, type TideSeries } from '../../lib/tide.ts';
+import type { LocalDate } from '../../lib/time.ts';
 import {
   CALIBRATION_VERSION,
   CORPUS_START,
@@ -69,7 +69,7 @@ import type { CalibrationRun, SpotResult } from './src/run-types.ts';
 import { MIN_AMPLITUDE_RATIO } from './src/config.ts';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
-const REPO = fileURLToPath(new URL('..', import.meta.url));
+const REPO = fileURLToPath(new URL('../../', import.meta.url));
 
 const live = process.argv.includes('--fetch');
 const CACHE_DIR = `${HERE}cache`;
@@ -81,7 +81,7 @@ const OUT_DIR = `${HERE}out`;
  * ========================================================================= */
 
 const taxaFile = JSON.parse(
-  await readFile(`${HERE}target_taxa.json`, 'utf8'),
+  await readFile(`${REPO}shared/target_taxa.json`, 'utf8'),
 ) as {
   version: string;
   targets: { taxon_id: number; name: string }[];

@@ -48,7 +48,7 @@ pure modules. Only `--fetch` may write `shared/calibration.json`.
 
 | | |
 |---|---|
-| `target_taxa.json` | **Frozen.** The list, its split into targets and denominator, a rationale per entry, and what was rejected. |
+| `../../shared/target_taxa.json` | **Frozen.** The list, its split into targets and denominator, a rationale per entry, and what was rejected. It sits in `shared/` rather than here because three readers outside this pipeline need it: the spot day page renders the target count, and `tools/lidar-recon/probes/rate_centring.py` reads the ids. A file this directory owned but the app imported was a producer being read back, which is the one edge `scripts/check-boundaries.mjs` exists to forbid. |
 | `__fixtures__/` | A `cc0`/`cc-by`-only capture, byte-for-byte, `linguist-vendored`. |
 | `out/report.md` | Every diagnostic, per spot. Written by the live run. |
 | `../shared/calibration.json` | The counts, the queries, the content hash, and a `null_reason` for every refusal. |

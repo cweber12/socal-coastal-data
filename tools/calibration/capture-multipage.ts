@@ -21,8 +21,9 @@ import { pullSpot } from './src/acquire.ts';
 import { CORPUS_START, FIXTURE_LICENCES, SENSITIVITY_RADII_KM } from './src/config.ts';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
+const REPO = fileURLToPath(new URL('../../', import.meta.url));
 
-const taxa = JSON.parse(await readFile(`${HERE}target_taxa.json`, 'utf8'));
+const taxa = JSON.parse(await readFile(`${REPO}shared/target_taxa.json`, 'utf8'));
 const ids = [...taxa.targets, ...taxa.denominator].map((t: { taxon_id: number }) => t.taxon_id);
 
 const pull = await pullSpot(

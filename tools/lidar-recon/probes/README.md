@@ -76,7 +76,7 @@ Nothing here writes anywhere but `../findings/`.
 The original probes read coordinates from a hardcoded list of the 8 spots,
 duplicated inline, which is fine for a throwaway probe. The ones added under #80
 read instead — `shared/spots.json` for which spots carry a floor,
-`calibration/target_taxa.json` and `calibration/src/config.ts` for the taxon ids
+`shared/target_taxa.json` and `tools/calibration/src/config.ts` for the taxon ids
 and corpus start. That is deliberate and it is the opposite of the original
 reasoning: an audit of a shipped pull that keeps its own copy of that pull's
 parameters can silently stop auditing it. `widen_window.py` made the same move

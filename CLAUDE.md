@@ -7,7 +7,7 @@ Guidance for agents working in this repository.
 A coastal conditions data stack for the San Diego corridor, Oceanside Harbor
 down to Border Field at the Mexican border.
 
-- `verify_coastal_apis.py` — probes every upstream endpoint the stack depends
+- `tools/verify-apis/verify_coastal_apis.py` — probes every upstream endpoint the stack depends
   on and reports status, latency, and **the age of the newest observation**.
 - `spots.json` — the spot inventory: 26 locations with their buoy, tide
   station, county water-quality station, and marine protected area bindings.
@@ -176,8 +176,8 @@ direction and must be flagged unresolved.
 ## Running things
 
 ```bash
-python verify_coastal_apis.py          # exits nonzero only on real failures
-EBIRD_API_KEY=xxx python verify_coastal_apis.py   # includes the eBird check
+python tools/verify-apis/verify_coastal_apis.py          # exits nonzero only on real failures
+EBIRD_API_KEY=xxx python tools/verify-apis/verify_coastal_apis.py   # includes the eBird check
 ```
 
 Standard library only — no dependencies, and it should stay that way.
