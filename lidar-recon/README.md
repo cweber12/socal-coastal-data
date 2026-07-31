@@ -1177,3 +1177,80 @@ changes what the verdict was ever capable of being.
     should be said out loud rather than inherited from §8's recommendation.
 
 Section 12 was added under #89, and §9 was written before it.
+
+---
+
+## 13. A different product entirely: `CA_SCRIPPS_APR_2005`, a point cloud
+
+Added under [#109](https://github.com/cweber12/socal-coastal-data/issues/109),
+for [#108](https://github.com/cweber12/socal-coastal-data/issues/108). Read
+2026-07-31. Full record in `findings/scripps2005-acquisition.json`.
+
+**Sections 1–12 all read derived DEM rasters.** This one is an airborne
+**point cloud** — 43 legacy LAZ tiles, LAS 1.1, point format 1 — which is what
+makes it able to test whether §12's slope deficiency survives with no gridding
+in the path.
+
+**It declares no vertical datum, and that is worse than §2's worst case.** The
+GeoKeyDirectory carries `GTModelType`, `GTRasterType` and
+`ProjectedCSType = 26911` and nothing else; keys 4096–4099 are absent. The FGDC
+metadata's `<spref>` holds `<horizsys>` only, with no `<vertdef>`, and the whole
+11.6 kB file contains no occurrence of NAVD, NGVD, geoid, ellipsoid, meters or
+feet. For product 8684 the datum was at least a sibling's claim. Here neither
+the container nor the sidecar asserts anything.
+
+**So it was measured.** Tied to the 124 NPS laser-levelled points from §12,
+using the test that needs no regression: 21 of them sit on the MLLW datum zero,
+so the cloud reads the offset directly with nothing fitted.
+
+| | R = 2 m | R = 5 m |
+|---|---:|---:|
+| plots on the MLLW datum zero | 21 | 21 |
+| mean lidar Z | −0.019 m | −0.013 m |
+| se | 0.022 | 0.019 |
+| vs NAVD88 (−0.068) | **2.3 se** | **2.9 se** |
+| vs NGVD29 (≈ −0.870) | 39.5 se | 44.5 se |
+
+**NAVD88.** The residual sits inside VDatum's own 0.093 m uncertainty at
+Cabrillo.
+
+**The obvious comparison would have given the wrong answer.** Mean
+(survey − lidar) over all 124 points is +0.45 to +0.55 m, matching neither
+candidate — because `offset = mean_survey × (1 − slope) − intercept`, and at a
+mean height of 0.778 m with slope ≈0.45 that is ≈0.50 m of pure artifact. This
+is almost certainly what §12's −1.302 and −1.324 ft biases are; they were
+reported separately from the slopes and are the same phenomenon.
+`dem_adjudication.py:686` ruled out a datum term as their cause, and this agrees
+from a different direction. **A datum error is constant at every height. This
+residual grows with height, from +0.059 m at the bottom to +1.534 m at the top.**
+
+**§12's "DEMs too smooth" explanation is falsified as a *processing* artifact.**
+Same 124 points, raw returns, no gridding anywhere:
+
+| radius | slope | | radius | slope |
+|---:|---:|---|---:|---:|
+| 1.0 m | 0.607 | | 5.0 m | 0.420 |
+| 1.5 m | 0.460 | | 10.0 m | 0.395 |
+| 2.0 m | 0.495 | | 20.0 m | 0.338 |
+
+§12 got **0.45 and 0.30** from the two rasters. The cloud gives 0.34–0.61 over
+the same points. A defect present in the returns cannot have been caused by
+gridding. Measured density is **1.04 distinct XY per m²** — sparse sampling of a
+rough surface systematically misses narrow high features, which is exactly the
+growing-under-read-with-height above. §12's other two explanations, coordinates
+and survey scale, are untouched.
+
+**Acquisition, and why it does not rescue the floor route.** The corridor was
+flown **Monday 4 April 2005, 12:19–13:44 PDT**, sitting on the day's low, with
+observed water at **−0.88 to −0.54 ft MLLW** — below all eight floors in force.
+That sounds ideal and is not sufficient: NDBC 46224 and 46225 both read
+**1.10 m at 14.0 s** during the sortie, and at 14 s a modest swell drives large
+runup. Stockdon puts the dense-return level at **+1.80 to +3.42 ft MLLW**
+depending on foreshore slope, which is above every floor. Stockdon is a sandy
+beach parameterisation applied to a reef, so that is an upper bound of unknown
+tightness — but still water is not the floor of what this product can see.
+
+**What it settles for §8 and §9.** Floor calibration from this product is dead
+for a third independent reason, alongside VDatum's ±0.299–0.313 ft and the
+missing reef polygons at 7 of 8 spots. Zone extent is a different and much
+coarser question, and the datum result unblocks it.

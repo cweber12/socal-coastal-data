@@ -1,0 +1,238 @@
+{
+ "read_date": "2026-07-31",
+ "issue": 108,
+ "question": "Is USGS LPC CA_SCRIPPS_APR_2005 usable for defining coastal zones by elevation, and what vertical datum is it on?",
+ "headline": "Flown at the day's low on Monday 4 April 2005; the file declares NO vertical datum and it is NAVD88, established against surveyed ground truth; the cloud cannot reproduce bench relief at any radius",
+
+ "not_claimed": [
+  "No floor is set, promoted or moved. No floor_evidence entry follows from any of this.",
+  "This is NOT a re-run of #89. That asked whether a 1 m DEM reproduces bench microtopography to 0.3 ft. This asks where the intertidal band sits along 75 km of coast, which is a different precision by an order of magnitude.",
+  "Still water is NOT the lowest reliably-lased elevation. Runup rides on top of it.",
+  "The datum is established at Cabrillo, the only spot in the corridor with surveyed ground truth. GeoKeys are identical across all tiles, which is suggestive and is not the same as measured.",
+  "No raster produced from this product is committed to this repo, and none is proposed for it."
+ ],
+
+ "product": {
+  "name": "USGS LPC CA_SCRIPPS_APR_2005 (legacy)",
+  "kind": "airborne lidar POINT CLOUD, not a derived DEM raster",
+  "why_that_matters": "The seven products read for #80 are all derived rasters. This is the first point cloud the recon has examined, which is what makes it able to test whether #89's slope deficiency survives without any gridding.",
+  "base_url": "https://rockyweb.usgs.gov/vdelivery/Datasets/Staged/Elevation/LPC/Projects/legacy/CA_SCRIPPS_APR_2005/",
+  "las_version": "1.1",
+  "point_format": 1,
+  "point_record_length": 28,
+  "vlr_count": 2,
+  "classification": "1 (Unclassified) for every point in the file. There is nothing for a ground filter to work with.",
+  "returns": {
+   "number_of_returns": "2 for every pulse",
+   "return_number_split": "exactly 50/50 (216,983 / 216,982 over the Cabrillo crop)",
+   "xy_positions_carrying_both": 104767,
+   "median_abs_z_difference_m": 0.030,
+   "max_abs_z_difference_m": 0.190,
+   "identical_z_fraction": 0.118,
+   "conclusion": "On bare rock and sand with no canopy the two returns are the same surface. Return selection is a 3 cm decision, not a structural one.",
+   "sampling_hazard": "Returns alternate in first/second pairs, so decimating with an EVEN step samples the same member of every pair. A step of 1000 returned 97.8% first returns from a file that is 50/50. The Z distribution survived the bias (23.3% below 0.0 m against 23.4% from the full file); the ReturnNumber split did not."
+  }
+ },
+
+ "tiles": {
+  "listed": 43,
+  "headers_read": 42,
+  "unreachable": [
+   {"tile": "000012", "reason": "HTTP 404 on the LAZ. The downloader's own docstring separately notes its metadata XML is missing."}
+  ],
+  "in_corridor": 19,
+  "corridor_box_utm11n": {"x": [458000.0, 492500.0], "y": [3600900.0, 3675700.0]},
+  "present_but_empty": [
+   {"tile": "000037", "points": 60, "bytes": 1211, "z_range_m": [-0.64, 1.30],
+    "why_recorded": "Its footprint legitimately intersects the corridor so the selector kept it, and it contributes nothing. A tile that is present but empty reads as coverage it does not provide, on the same terms as 000012's 404."}
+  ],
+  "points_in_19_corridor_tiles": 178980958,
+  "points_after_merge_and_crop_to_aoi": 162308591
+ },
+
+ "acquisition": {
+  "gps_time_type": "GPS week time (global encoding bit 0 clear): day-of-week and time-of-day absolute, calendar week not stored",
+  "gps_minus_utc_seconds_2005": 13,
+  "read_method": "First point of the first LAZ chunk is stored uncompressed after the 8-byte chunk table offset, so point 0 costs a 28-byte HTTP range read and no laszip.",
+  "file_creation_date": "year 1970, day 1 on every tile. An unset field, not a date. Checked and rejected rather than overlooked.",
+  "fgdc_range": {"begdate": "20050404", "enddate": "20050408"},
+  "corridor_sortie": {
+   "date": "2005-04-04",
+   "day_of_week": "Monday",
+   "utc": "19:19-20:45",
+   "local_pdt": "12:19-13:44",
+   "duration_minutes": 85,
+   "tiles": 19
+  },
+  "other_sortie": {
+   "date": "2005-04-08",
+   "day_of_week": "Friday",
+   "utc": "22:02-22:20",
+   "local_pdt": "15:02-15:20",
+   "note": "LA-area tiles, outside the corridor. Lands exactly on the FGDC enddate, which is mutual confirmation."
+  },
+  "how_the_week_was_resolved": "The FGDC range 20050404-20050408 contains exactly one Monday and one Friday.",
+  "method_note_worth_keeping": "Before the metadata was fetched, an attempt was made to pin the week by asking which Monday/Friday pair had BOTH sorties on their day's low. That favoured the week of 18 April and was WRONG. Tide-timing inference looked convincing and the metadata contradicted it."
+ },
+
+ "water_level_during_the_sortie": {
+  "station": "9410230",
+  "station_name": "La Jolla (Scripps Pier)",
+  "product": "water_level (OBSERVED, not predictions)",
+  "why_observed": "What the laser saw is the actual water, not the astronomical forecast. #104 measures predictions drifting off the 1983-2001 datum epoch at +2.02 mm/yr at this station.",
+  "datum": "MLLW",
+  "units": "ft",
+  "determined": {
+   "date": "20050404",
+   "window_ft_mllw": [-0.88, -0.54],
+   "day_low_ft_mllw": -0.88,
+   "day_high_ft_mllw": 5.03,
+   "note": "The sortie sat ON the day's low, and it was a good low rather than merely the best available that day."
+  },
+  "candidates_recorded_including_the_three_that_fail": {
+   "20050404": {"window_ft_mllw": [-0.88, -0.54], "day_low": -0.88, "above_day_low": 0.00},
+   "20050411": {"window_ft_mllw": [2.94, 3.36], "day_low": -0.64, "above_day_low": 3.59},
+   "20050418": {"window_ft_mllw": [0.50, 0.70], "day_low": 0.50, "above_day_low": 0.00},
+   "20050425": {"window_ft_mllw": [2.48, 3.35], "day_low": -0.73, "above_day_low": 3.21}
+  },
+  "floors_in_force_ft_mllw": {
+   "swamis": 0.0, "sunset-cliffs": 0.25, "la-jolla-shores": 0.8,
+   "torrey-pines-beach": 0.9, "cardiff-reef": 1.0, "windansea": 1.0,
+   "cabrillo-tidepools": 1.0, "la-jolla-cove": 1.1
+  },
+  "all_eight_floors_above_still_water": true
+ },
+
+ "sea_state_during_the_sortie": {
+  "source": "NDBC historical stdmet archive for 2005",
+  "format_note": "The 2005 archive header carries NO leading '#' and NO units row, and names wind direction WD where the modern realtime2 feed uses WDIR. lib/ndbc.ts pins the modern shape; anything reaching into the historical archive needs its own parser.",
+  "observations_at_2005-04-04T20:00Z": {
+   "46224": {"name": "Oceanside Offshore", "wvht_m": 1.10, "dpd_s": 14.0, "role": "corridor nearshore"},
+   "46225": {"name": "Torrey Pines Outer", "wvht_m": 1.10, "dpd_s": 14.0, "role": "corridor nearshore"},
+   "46086": {"name": "San Clemente Basin", "wvht_m": 1.90, "dpd_s": 12.9, "role": "deepwater, island-sheltered"},
+   "46047": {"name": "Tanner Banks", "wvht_m": 2.88, "dpd_s": 12.9, "role": "deepwater, outside the island shadow"}
+  },
+  "why_period_dominates": "Deepwater wavelength goes as T^2, so L0 = 306 m at 14 s. A modest 1.10 m swell at that period drives far more runup than its height suggests. The sea was mixed: DPD drops to 6.0 s an hour later, and APD is 99.0 (missing) at both corridor buoys, so swell and windsea cannot be separated from stdmet alone.",
+  "runup_stockdon_2006_corridor_nearshore": {
+   "units": "ft MLLW, still water plus the runup term",
+   "by_foreshore_slope": {
+    "0.010": {"description": "near-horizontal reef platform", "no_returns_below": -0.65, "dense_returns_above": 1.80},
+    "0.020": {"description": "low-gradient bench", "no_returns_below": -0.42, "dense_returns_above": 2.08},
+    "0.040": {"description": "typical SoCal sandy foreshore", "no_returns_below": 0.05, "dense_returns_above": 2.70},
+    "0.060": {"description": "steeper sandy foreshore", "no_returns_below": 0.51, "dense_returns_above": 3.42}
+   },
+   "consequence": "At every plausible slope, all eight floors fall inside the swash band and none is above the dense-return level. The highest floor in force is 1.1 ft; the lowest dense-return level is 1.80 ft.",
+   "upper_bound_caveat": "Stockdon is calibrated on SANDY beaches. A rocky bench is far rougher and dissipates more, so applied to a reef these are upper bounds, plausibly by a wide margin. How wide is not established here.",
+   "not_absent_data": "R2% is the 2%-exceedance level, so a surface there is dry for 98% of pulses. Inside the swash band returns thin and a wet bias grows; they do not vanish.",
+   "what_should_supersede_this": "Return density against elevation, measured from the cloud. The parameterisation says where to look, not what will be found."
+  }
+ },
+
+ "vertical_datum": {
+  "declared_by_the_file": false,
+  "where_it_is_absent": [
+   "LAS GeoKeyDirectory (VLR 34735) carries GTModelType, GTRasterType and ProjectedCSType = 26911 only. Keys 4096-4099 are absent.",
+   "FGDC metadata <spref> carries <horizsys> only. No <vertdef>.",
+   "The whole 11.6 kB metadata XML contains no occurrence of NAVD, NGVD, geoid, ellipsoid, meters or feet."
+  ],
+  "severity": "This is lidar-recon/README.md hazard 1 repeating, one notch worse. For product 8684 the datum was at least a sibling's claim; here neither the container nor the sidecar asserts anything.",
+  "established": "NAVD88",
+  "established_on": "2026-07-31",
+  "established_how": "Tie to the 124 NPS laser-levelled points in findings/cabrillo-surveyed-elevations.json (#83), published in inches above MLLW at published coordinates.",
+  "the_test_that_works": {
+   "method": "No regression. 21 of the 124 plots sit on the MLLW datum zero, so the cloud reads the offset directly with nothing fitted.",
+   "radius_2m": {
+    "plots": 21, "mean_survey_m_mllw": 0.040, "mean_lidar_z_m": -0.019,
+    "sd": 0.099, "se": 0.022,
+    "navd88_predicts": -0.068, "navd88_off_by_se": 2.3,
+    "ngvd29_predicts": -0.870, "ngvd29_off_by_se": 39.5
+   },
+   "radius_5m": {
+    "plots": 21, "mean_survey_m_mllw": 0.040, "mean_lidar_z_m": -0.013,
+    "sd": 0.088, "se": 0.019,
+    "navd88_off_by_se": 2.9, "ngvd29_off_by_se": 44.5
+   },
+   "residual_note": "The 0.049 m residual against NAVD88 is statistically visible but sits inside VDatum's own uncertainty at Cabrillo, 0.093 m."
+  },
+  "why_the_obvious_comparison_misleads": {
+   "naive_mean_offset_m": [0.45, 0.55],
+   "explanation": "offset = mean_survey x (1 - slope) - intercept. With mean survey height 0.778 m and slope near 0.45 that is about 0.50 m on its own. Evaluating a slope-deficient relationship at a nonzero mean height manufactures something that looks like a datum error.",
+   "relation_to_89": "Almost certainly the same artifact as #89's -1.302 and -1.324 ft biases, which were reported separately from the slopes and are the same phenomenon. dem_adjudication.py:686 ruled out a datum term as their cause; this agrees from a different direction.",
+   "how_to_tell_them_apart": "A datum error is CONSTANT at every height. This residual grows with height."
+  },
+  "residual_by_height_band_radius_2m": [
+   {"band_m_mllw": [-0.3, 0.2], "plots": 21, "mean_survey": 0.040, "mean_lidar_z": -0.019, "survey_minus_lidar": 0.059},
+   {"band_m_mllw": [0.2, 0.6], "plots": 24, "mean_survey": 0.418, "mean_lidar_z": 0.243, "survey_minus_lidar": 0.175},
+   {"band_m_mllw": [0.6, 1.0], "plots": 40, "mean_survey": 0.771, "mean_lidar_z": 0.189, "survey_minus_lidar": 0.582},
+   {"band_m_mllw": [1.0, 1.4], "plots": 21, "mean_survey": 1.176, "mean_lidar_z": 0.659, "survey_minus_lidar": 0.517},
+   {"band_m_mllw": [1.4, 1.8], "plots": 15, "mean_survey": 1.564, "mean_lidar_z": 0.837, "survey_minus_lidar": 0.726},
+   {"band_m_mllw": [1.8, 2.4], "plots": 3, "mean_survey": 2.208, "mean_lidar_z": 0.673, "survey_minus_lidar": 1.534}
+  ],
+  "navd88_to_mllw_m": 0.068,
+  "navd88_to_mllw_uncertainty_m": 0.093,
+  "navd88_to_mllw_corroboration": [
+   "VDatum 4.8 at Cabrillo: 0.068 m",
+   "VDatum 4.8 at swamis: 0.054 m (findings/vdatum-transforms.json)",
+   "CO-OPS station datums at 9410230: 0.058 m"
+  ],
+  "ngvd29_note": "The NGVD29 shift is NOT measured. VDatum rejects NGVD29 as a west coast source frame with errorCode 412. The approximate 0.87 m figure is used only to state how far the rejected candidate sits, and the discrimination is 39.5 se, so its imprecision changes nothing."
+ },
+
+ "resolution_limit": {
+  "question": "Does this dataset test #89's 'DEMs too smooth' hypothesis, or is the 2005 sensor a worse instrument regardless of processing?",
+  "answer": "A worse instrument. The defect is present in the raw returns, before any gridding.",
+  "regression_lidar_z_on_surveyed_height": [
+   {"radius_m": 1.0, "n": 79, "slope": 0.607, "intercept": -0.092, "se_intercept": 0.069, "r_squared": 0.480, "points_per_plot": 5.7},
+   {"radius_m": 1.5, "n": 124, "slope": 0.460, "intercept": -0.021, "se_intercept": 0.049, "r_squared": 0.390, "points_per_plot": 9.8},
+   {"radius_m": 2.0, "n": 124, "slope": 0.495, "intercept": -0.051, "se_intercept": 0.054, "r_squared": 0.379, "points_per_plot": 16.9},
+   {"radius_m": 3.0, "n": 124, "slope": 0.451, "intercept": -0.052, "se_intercept": 0.056, "r_squared": 0.320, "points_per_plot": 38.3},
+   {"radius_m": 5.0, "n": 124, "slope": 0.420, "intercept": -0.070, "se_intercept": 0.049, "r_squared": 0.348, "points_per_plot": 105.6},
+   {"radius_m": 10.0, "n": 124, "slope": 0.395, "intercept": -0.077, "se_intercept": 0.046, "r_squared": 0.352, "points_per_plot": 423.9},
+   {"radius_m": 20.0, "n": 124, "slope": 0.338, "intercept": -0.049, "se_intercept": 0.043, "r_squared": 0.305, "points_per_plot": 1716.0}
+  ],
+  "ideal_slope": 1.0,
+  "issue_89_raster_slopes": [0.45, 0.30],
+  "conclusion": "The raw cloud gives 0.34 to 0.61 over the same 124 points where the two DEM rasters gave 0.45 and 0.30. A defect present in the returns themselves cannot have been caused by gridding, so 'DEMs too smooth to resolve this bench' is FALSIFIED as a processing explanation. Slope does improve as the sampling radius shrinks, so resolution matters, but the mechanism is upstream of any raster.",
+  "point_density": {
+   "cabrillo_crop_points": 433965,
+   "distinct_xy": 329178,
+   "bbox_m": [439, 724],
+   "distinct_xy_per_m2": 1.04,
+   "why_it_explains_the_signature": "Sparse sampling of a rough surface systematically misses narrow high features, which is exactly the growing-under-read-with-height in residual_by_height_band."
+  },
+  "issue_89_explanations_still_standing": [
+   "coordinates that do not locate the plots",
+   "a scale problem in the surveyed heights"
+  ]
+ },
+
+ "elevation_distribution": {
+  "note": "Z as measured, in NAVD88 metres. MLLW = NAVD88 + 0.068 m.",
+  "full_file_counts": [
+   {"below_m": -15.0, "points": 4, "reading": "blunders"},
+   {"below_m": -10.0, "points": 9, "reading": "blunders"},
+   {"below_m": -5.0, "points": 15, "reading": "blunders"},
+   {"below_m": -3.0, "points": 22, "reading": "blunders"},
+   {"below_m": -2.0, "points": 65, "reading": "blunders"},
+   {"below_m": -1.0, "points": 15359, "reading": "sparse; genuine returns off the sea in wave troughs"},
+   {"below_m": 0.0, "points": 37985892, "reading": "real surface, 23.4% of the file"}
+  ],
+  "recommended_z_clip_m": -2.0,
+  "why_not_higher": "The 15,294 points between -2 and -1 m are genuine returns off the sea in wave troughs, not blunders. With H_s 1.1 m the instantaneous surface swings roughly 0.5-0.8 m below still water. Discarding real measurements as blunders is how a measured absence gets manufactured, which osm_reef.py's own comment forbids."
+ },
+
+ "what_this_means": {
+  "floor_calibration": "Dead from this product, now for a third independent reason. It was already blocked on VDatum's +/-0.299-0.313 ft exceeding floor-calibration.md section 7's 0.3 ft tolerance, and separately on no reef polygon existing at 7 of 8 spots. It is now also blocked on the cloud not reproducing bench relief at any radius.",
+  "zone_extent": "Viable, and unblocked by the datum result. Mapping the reef platform from the dense-return level upward is intact, and the seaward edge of returns is itself a waterline-plus-runup contour, which is a real zone boundary rather than a defect.",
+  "beach_zone": "April 2005 is one epoch, 21 years old. Rock position is stable; sand extent in 2005 is a historical fact, not a current one.",
+  "subtidal_zone": "Absent. Near-IR returns nothing through water.",
+  "acquisition_quality": "Nothing here says 4 April was a poor choice. Any other day that week had higher still water and no better swell. The acquisition floor is simply higher than the tide alone implied."
+ },
+
+ "probes": [
+  "probes/scripps2005_header.py",
+  "probes/scripps2005_gpstime.py",
+  "probes/scripps2005_acquisition_tide.py",
+  "probes/scripps2005_cabrillo_tie.py"
+ ]
+}
