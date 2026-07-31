@@ -72,13 +72,13 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
  * may not import another zone), and it cannot be expressed if self is a
  * hardcoded exemption.
  *
- * `calibration` appears in no other slice's list, and that absence IS the
- * producer rule -- tools are things this repo runs to make data, and nothing the
- * app renders may depend on one. It is stated as an absence rather than as a
+ * `tools` appears in no other slice's list, and that absence IS the producer
+ * rule -- tools are things this repo runs to make data, and nothing the app
+ * renders may depend on one. It is stated as an absence rather than as a
  * separate deny-list because a single table with one direction is checkable;
  * two tables that can disagree are not.
  *
- * `lidar-recon/` is Python and has no JavaScript imports to walk. Its
+ * `tools/lidar-recon/` is Python and has no JavaScript imports to walk. Its
  * relationship to `shared/spots.json` is a file read, not an import, and is
  * checked by the probes themselves -- see #124, where that read is the largest
  * silent-failure risk in the PRD.
