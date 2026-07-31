@@ -28,3 +28,9 @@ tools/calibration/cache/
 # CI run, and it is not the deliverable -- tools/calibration/out/report.md, written by
 # the live run against the whole corpus, is.
 tools/calibration/out/report.fixtures.md
+
+# Written by tools/ui-capture. A before/after control is compared and then
+# thrown away -- committing it would put a live tide reading under version
+# control and invite it being diffed against months later, which is the mistake
+# the tool exists to avoid.
+tools/ui-capture/out/
