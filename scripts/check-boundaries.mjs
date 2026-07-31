@@ -40,9 +40,16 @@
  * generates. Reading that as an edge would report the generator as importing
  * what it writes.
  *
- * An unresolvable relative specifier is a hard error, not a skip. A path this
- * cannot resolve is a path it cannot check, and a checker that quietly passes
- * what it could not read is the same failure as a 200 carrying an empty payload.
+ * An unresolvable specifier is a hard error, not a skip. A path this cannot
+ * resolve is a path it cannot check, and a checker that quietly passes what it
+ * could not read is the same failure as a 200 carrying an empty payload.
+ *
+ * That includes a specifier that resolves to a slice but not to a FILE. Classing
+ * an edge without confirming its target exists is how a checker reports a clean
+ * graph over paths that are simply wrong: during #121, `../../lib/tide.ts` from
+ * a moved tools/calibration/src/ resolved to `tools/lib/tide.ts`, which is a
+ * perfectly legal `tools -> tools` edge to a file that does not exist. The edge
+ * count printed at the end is only trustworthy if every edge in it is real.
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -324,6 +331,36 @@ function resolveSpec(spec, fromFile) {
   return null;
 }
 
+/**
+ * The suffixes a specifier may omit. `''` first, because this repo's
+ * tools/calibration/ imports name the file extension explicitly -- it runs under
+ * `node --experimental-strip-types`, which resolves the way the runtime does.
+ */
+const CANDIDATE_SUFFIXES = [
+  '',
+  '.ts',
+  '.tsx',
+  '.mjs',
+  '.js',
+  '.jsx',
+  '.json',
+  '/index.ts',
+  '/index.tsx',
+  '/index.js',
+  '/index.mjs',
+];
+
+function pointsAtAFile(relTarget) {
+  for (const suffix of CANDIDATE_SUFFIXES) {
+    try {
+      if (statSync(join(ROOT, relTarget + suffix)).isFile()) return true;
+    } catch {
+      /* next candidate */
+    }
+  }
+  return false;
+}
+
 /* ===========================================================================
  * The check
  * =========================================================================== */
@@ -355,6 +392,14 @@ for (const root of ROOTS) {
 
       const to = sliceOf(target);
       if (to === null) continue;
+
+      // Confirm the target is a real file before classing the edge. A path that
+      // lands in a legal slice but on nothing is not a passing edge, it is an
+      // unchecked one.
+      if (!pointsAtAFile(target)) {
+        unresolved.push(`${rel}:${line}  ${spec}  resolves to ${target}, which does not exist`);
+        continue;
+      }
 
       edgesChecked++;
       if (ALLOWED[from].includes(to)) continue;
