@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
     "gen:types": "node scripts/gen-spots-types.mjs",
     "gen:types:check": "node scripts/gen-spots-types.mjs --check",
     "gen:calibration": "node scripts/gen-calibration-types.mjs",

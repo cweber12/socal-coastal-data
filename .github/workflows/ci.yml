@@ -53,6 +53,18 @@ jobs:
 
       - run: npm ci
 
+      # The architecture is a set of directed edges between slices, and every one
+      # of them is a claim about import direction. Cheapest check here -- it
+      # reads files and matches specifiers, nothing else -- and it is the one
+      # that catches a refactor going in the wrong direction before three
+      # minutes of typecheck and build report a consequence instead of a cause.
+      #
+      # It also prints the temporary edges: concessions that exist today, each
+      # naming the issue that removes it. An unused one fails, so the list
+      # cannot quietly become permanent.
+      - name: Import boundaries
+        run: npm run check:boundaries
+
       # shared/spots.generated.ts is derived from shared/spots.json. If it has
       # drifted, the compiler is enforcing rules the inventory no longer states,
       # so this runs before anything that trusts those types.
