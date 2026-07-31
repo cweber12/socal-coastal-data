@@ -33,7 +33,7 @@ shared/calibration.generated.ts linguist-generated=true
 # The calibration's captured payloads. A deliberate cc0/cc-by-only capture, kept
 # byte-for-byte, so it can be redistributed at all -- roughly a third of the full
 # corpus is All Rights Reserved or No Derivatives and is never committed.
-calibration/__fixtures__/** linguist-vendored=true
+tools/calibration/__fixtures__/** linguist-vendored=true
 
-# Written by calibration/run.ts. Reviewed as a diff, not authored.
-calibration/out/** linguist-generated=true
+# Written by tools/calibration/run.ts. Reviewed as a diff, not authored.
+tools/calibration/out/** linguist-generated=true

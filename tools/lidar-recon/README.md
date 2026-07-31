@@ -768,7 +768,7 @@ never been checked". Checked now: `probes/rate_centring.py`, output in
 
 Method: iNaturalist **count** queries only — no records pulled — with the
 calibration's own 13 taxon ids and corpus start, read out of
-`calibration/target_taxa.json` and `calibration/src/config.ts` so the audit
+`shared/target_taxa.json` and `tools/calibration/src/config.ts` so the audit
 cannot drift from the pull it audits. Two measurements per spot: counts at
 0.1–2.0 km of the pin, and the count inside a 0.5 km disc centred on each of a
 5×5 grid of offsets from −500 to +500 m.
@@ -871,7 +871,7 @@ No product is selected. `probes/dem_adjudication.py`, full output in
 
 This is the part that makes the answer worth anything. The metric set, the
 exclusions, the indeterminacy rule and both confounds were written into
-`calibration/floor-calibration.md` §6 and committed in #88 **before any DEM was
+`tools/calibration/floor-calibration.md` §6 and committed in #88 **before any DEM was
 sampled at a surveyed point**. Nothing in this section revises them, and a
 parameter changed after the data is visible is tuning whatever the commit
 message calls it.

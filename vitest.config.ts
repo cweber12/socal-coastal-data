@@ -37,12 +37,12 @@ export default defineConfig({
     // fetch rather than reaching out. upstream.test.ts asserts that the stub was
     // never called for cases that must not issue a request at all, which is the
     // only way to prove a short-circuit actually short-circuits.
-    // calibration/ is included on the same terms: its pure modules -- the join,
+    // tools/calibration/ is included on the same terms: its pure modules -- the join,
     // the refusal criteria, the diagnostics -- decide every published number, and
     // they run against synthetic cases and the committed fixtures, never a
-    // network. calibration/run.ts itself is not under test here; it is I/O and a
+    // network. tools/calibration/run.ts itself is not under test here; it is I/O and a
     // command line, and what it composes is.
-    include: ['lib/**/*.test.ts', 'calibration/**/*.test.ts'],
+    include: ['lib/**/*.test.ts', 'tools/calibration/**/*.test.ts'],
     environment: 'node',
   },
 });

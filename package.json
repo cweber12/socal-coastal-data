@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Web frontend for the San Diego corridor tide window grid. Shares shared/spots.json with verify_coastal_apis.py.",
+  "description": "Web frontend for the San Diego corridor tide window grid.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,13 +11,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
     "gen:types": "node scripts/gen-spots-types.mjs",
     "gen:types:check": "node scripts/gen-spots-types.mjs --check",
     "gen:calibration": "node scripts/gen-calibration-types.mjs",
     "gen:calibration:check": "node scripts/gen-calibration-types.mjs --check",
-    "calibrate": "node --import ./calibration/loader.mjs calibration/run.ts",
-    "calibrate:fetch": "node --import ./calibration/loader.mjs calibration/run.ts --fetch",
-    "calibrate:taxa:check": "node calibration/resolve-taxa.mjs --check"
+    "calibrate": "node --import ./tools/calibration/loader.mjs tools/calibration/run.ts",
+    "calibrate:fetch": "node --import ./tools/calibration/loader.mjs tools/calibration/run.ts --fetch",
+    "calibrate:taxa:check": "node tools/calibration/resolve-taxa.mjs --check"
   },
   "dependencies": {
     "next": "^16.2.12",

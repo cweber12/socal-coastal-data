@@ -34,7 +34,7 @@ Standard library only.
 import json, math, os, time, urllib.parse, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(os.path.dirname(HERE))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 FINDINGS = os.path.join(os.path.dirname(HERE), "findings")
 
 UA = {"User-Agent": "socal-coastal-data/0.1 "
@@ -56,10 +56,10 @@ OFFSETS_M = [-500, -250, 0, 250, 500]
 def config():
     """Taxon ids and corpus start, read from the calibration's own config so
     this audit cannot drift from the pull it is auditing."""
-    taxa = json.load(open(os.path.join(ROOT, "calibration", "target_taxa.json")))
+    taxa = json.load(open(os.path.join(ROOT, "shared", "target_taxa.json")))
     ids = [t["taxon_id"] for t in taxa["targets"]] + \
           [t["taxon_id"] for t in taxa["denominator"]]
-    src = open(os.path.join(ROOT, "calibration", "src", "config.ts")).read()
+    src = open(os.path.join(ROOT, "tools", "calibration", "src", "config.ts")).read()
     i = src.index("export const CORPUS_START")
     year = int(src[i:i + 200].split("year:")[1].split(",")[0])
     month = int(src[i:i + 200].split("month:")[1].split(",")[0])

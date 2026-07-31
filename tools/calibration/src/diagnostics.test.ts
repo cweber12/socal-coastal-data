@@ -16,8 +16,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { parseCoopsSeries, type TideSeries } from '../../lib/tide.ts';
-import { distanceMetres } from '../../lib/inat.ts';
+import { parseCoopsSeries, type TideSeries } from '../../../lib/tide.ts';
+import { distanceMetres } from '../../../lib/inat.ts';
 import {
   accuracyProfile,
   centringDiagnostic,

@@ -9,7 +9,7 @@ import { RateRefusal } from '@/components/rate-panel';
 import { SwellProvenance } from '@/components/spot-summary';
 import { UnresolvedDisclosure } from '@/components/unresolved';
 import { calibrationFor, CALIBRATION_PULLED_AT, TAXA_VERSION } from '@/lib/calibration';
-import TARGET_TAXA from '@/calibration/target_taxa.json';
+import TARGET_TAXA from '@/shared/target_taxa.json';
 import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/lib/grid';
 import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/lib/labels';
 import {
