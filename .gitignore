@@ -22,9 +22,9 @@ next-env.d.ts
 # Reserved or No Derivatives, so the joined rows cannot be redistributed. What IS
 # committed is the counts, the queries and the content hash -- everything needed
 # to check a number without republishing the records behind it.
-calibration/cache/
+tools/calibration/cache/
 
 # The offline run's report. Regenerated on every `npm run calibrate` and on every
-# CI run, and it is not the deliverable -- calibration/out/report.md, written by
+# CI run, and it is not the deliverable -- tools/calibration/out/report.md, written by
 # the live run against the whole corpus, is.
-calibration/out/report.fixtures.md
+tools/calibration/out/report.fixtures.md

@@ -32,7 +32,7 @@ import json, math, os, time, urllib.parse, urllib.request
 import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(os.path.dirname(HERE))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 FINDINGS = os.path.join(os.path.dirname(HERE), "findings")
 
 UA = {"User-Agent": "socal-coastal-data-recon/1.0 "

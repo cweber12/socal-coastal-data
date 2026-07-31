@@ -72,13 +72,13 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
  * may not import another zone), and it cannot be expressed if self is a
  * hardcoded exemption.
  *
- * `calibration` appears in no other slice's list, and that absence IS the
- * producer rule -- tools are things this repo runs to make data, and nothing the
- * app renders may depend on one. It is stated as an absence rather than as a
+ * `tools` appears in no other slice's list, and that absence IS the producer
+ * rule -- tools are things this repo runs to make data, and nothing the app
+ * renders may depend on one. It is stated as an absence rather than as a
  * separate deny-list because a single table with one direction is checkable;
  * two tables that can disagree are not.
  *
- * `lidar-recon/` is Python and has no JavaScript imports to walk. Its
+ * `tools/lidar-recon/` is Python and has no JavaScript imports to walk. Its
  * relationship to `shared/spots.json` is a file read, not an import, and is
  * checked by the probes themselves -- see #124, where that read is the largest
  * silent-failure risk in the PRD.
@@ -100,10 +100,10 @@ const ALLOWED = {
   // learned about `lib` would be a rule the Python side cannot see.
   shared: ['shared'],
 
-  // A producer. It may read the domain -- the calibration pipeline reuses the
-  // CO-OPS parser rather than growing a second one, which is the whole reason
-  // its numbers are comparable -- but nothing may read it back.
-  calibration: ['calibration', 'lib', 'shared'],
+  // The producers. They may read the domain -- the calibration pipeline reuses
+  // the CO-OPS parser rather than growing a second one, which is the whole
+  // reason its numbers are comparable -- but nothing may read them back.
+  tools: ['tools', 'lib', 'shared'],
 
   // Codegen and checks. Node standard library only, deliberately: a generator
   // that imports the types it generates cannot fail honestly.
@@ -128,18 +128,7 @@ const ALLOWED = {
  *     has been fixed but not deleted is how a list like this rots into a set of
  *     rules nobody can tell are still load-bearing.
  */
-const TEMPORARY = [
-  {
-    from: 'app',
-    to: 'calibration',
-    issue: 121,
-    why:
-      'app/spot/[slug]/[date]/page.tsx reads calibration/target_taxa.json for a ' +
-      'single count. target_taxa.json is a product definition consumed by both ' +
-      'the pipeline and the page, so it is shared data sitting in a producer. ' +
-      'The move to tools/ breaks this import outright, so #121 has to resolve it.',
-  },
-];
+const TEMPORARY = [];
 
 /** Directories walked. Anything outside these is not this check's business. */
 const ROOTS = Object.keys(ALLOWED);

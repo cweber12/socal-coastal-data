@@ -16,8 +16,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { parseCoopsSeries, type TideSeries } from '../../lib/tide.ts';
-import type { LocalDate } from '../../lib/time.ts';
+import { parseCoopsSeries, type TideSeries } from '../../../lib/tide.ts';
+import type { LocalDate } from '../../../lib/time.ts';
 import {
   BINS,
   amplitudeRatio,
