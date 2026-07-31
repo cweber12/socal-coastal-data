@@ -86,14 +86,21 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ALLOWED = {
   // The composition root. It may import every slice -- that is what makes it the
   // composition root -- except a producer.
-  app: ['app', 'components', 'lib', 'shared'],
+  app: ['app', 'components', 'core', 'lib', 'shared'],
 
-  // Presentation. Reads the domain, never the other way round: `lib -> components`
+  // Presentation. Reads the domain, never the other way round: `core -> components`
   // would put rendering inside the predicate.
-  components: ['components', 'lib', 'shared'],
+  components: ['components', 'core', 'lib', 'shared'],
 
-  // The domain. Depends on the data contract and on itself, and on nothing that
-  // renders.
+  // Activity-neutral facts: time, the feed parsers, the fetch and failure
+  // policy, and the spot facts that are true regardless of cross-shore band.
+  // It may NOT import lib/, which is where the judgement still lives until #123
+  // moves it under activities/.
+  core: ['core', 'shared'],
+
+  // What is left of the old flat domain: the window predicate, the grid
+  // composition, labels, thresholds, sightings and the calibration reader.
+  // Emptied by #123.
   lib: ['lib', 'shared'],
 
   // The cross-language contract. Imports nothing but its own JSON. Anything it
@@ -103,7 +110,7 @@ const ALLOWED = {
   // The producers. They may read the domain -- the calibration pipeline reuses
   // the CO-OPS parser rather than growing a second one, which is the whole
   // reason its numbers are comparable -- but nothing may read them back.
-  tools: ['tools', 'lib', 'shared'],
+  tools: ['tools', 'core', 'lib', 'shared'],
 
   // Codegen and checks. Node standard library only, deliberately: a generator
   // that imports the types it generates cannot fail honestly.
@@ -128,7 +135,20 @@ const ALLOWED = {
  *     has been fixed but not deleted is how a list like this rots into a set of
  *     rules nobody can tell are still load-bearing.
  */
-const TEMPORARY = [];
+const TEMPORARY = [
+  {
+    from: 'lib',
+    to: 'core',
+    issue: 123,
+    why:
+      'The move in #122 split the leaf modules into core/ and left the window ' +
+      'predicate, the grid, labels, thresholds, sightings and the calibration ' +
+      'reader behind in lib/. Those read core/ -- windows.ts needs the tide ' +
+      'parser and daylight, grid.ts needs upstream. The edge disappears when ' +
+      '#123 moves lib/ under activities/tidepool/ and app/, at which point the ' +
+      'importers are an activity and the composition root, both of which may.',
+  },
+];
 
 /** Directories walked. Anything outside these is not this check's business. */
 const ROOTS = Object.keys(ALLOWED);

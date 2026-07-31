@@ -14,7 +14,7 @@ import {
   formatLocalDate,
   formatWeekdayShort,
   startOfLocalDay,
-} from '@/lib/time';
+} from '@/core/time';
 import { MIN_WINDOW_MINUTES, STATE_PRESENTATION, SWELL_HORIZON_DAYS, WINDOW_STATES } from '@/lib/windows';
 import { SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
 

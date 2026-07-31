@@ -20,7 +20,7 @@ import {
   formatLocalDate,
   localDateInZone,
   sameLocalDate,
-} from '@/lib/time';
+} from '@/core/time';
 import { MIN_WINDOW_MINUTES } from '@/lib/windows';
 import { DISPLAY_TIME_ZONE, SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
 

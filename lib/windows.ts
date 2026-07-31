@@ -6,9 +6,10 @@
  * there, and if there is none, why not.
  */
 
-import { formatThreshold } from './format';
-import type { GateWindow } from './gate-hours';
-import { daylightBounds, findExtrema, type TideExtremum, type TideSeries } from './tide';
+import { formatThreshold } from '../core/format';
+import type { GateWindow } from '../core/spot/access';
+import { findExtrema, type TideExtremum, type TideSeries } from '../core/feeds/coops-predictions';
+import { daylightBounds } from '../core/spot/daylight';
 import {
   formatClock,
   localDateInZone,
@@ -16,7 +17,7 @@ import {
   localDaysBetween,
   sameLocalDate,
   type LocalDate,
-} from './time';
+} from '../core/time';
 
 /* ===========================================================================
  * Constants

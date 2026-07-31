@@ -1,4 +1,4 @@
-import { formatStamp } from '@/lib/time';
+import { formatStamp } from '@/core/time';
 import type { Notice } from '@/lib/grid';
 
 /**

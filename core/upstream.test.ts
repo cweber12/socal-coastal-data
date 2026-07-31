@@ -32,13 +32,13 @@ import {
   fetchTideSeries,
   resolveSpotSwell,
 } from './upstream';
-import coops6min from './__fixtures__/coops-9410230-20260727-6min.json';
-import sunsetCliffsPage from './__fixtures__/inat-sunset-cliffs-20260728.json';
+import coops6min from './feeds/__fixtures__/coops-9410230-20260727-6min.json';
+import sunsetCliffsPage from './feeds/__fixtures__/inat-sunset-cliffs-20260728.json';
 import { SPOT_BY_SLUG, type BuoyId, type Spot } from '@/shared/spots.generated';
 import { readFileSync } from 'node:fs';
 
 const NDBC_FIXTURE = readFileSync(
-  new URL('./__fixtures__/ndbc-46254-20260728.txt', import.meta.url),
+  new URL('./feeds/__fixtures__/ndbc-46254-20260728.txt', import.meta.url),
   'utf8',
 );
 

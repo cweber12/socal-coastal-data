@@ -10,7 +10,7 @@ export default defineConfig({
        * `server-only` resolved to its own empty module, which is exactly what
        * the `react-server` export condition resolves to.
        *
-       * Without this, lib/upstream.ts and lib/grid.ts cannot be imported here at
+       * Without this, core/upstream.ts and lib/grid.ts cannot be imported here at
        * all. The package's `exports` map sends every condition except
        * `react-server` to index.js, whose entire body is a `throw`, and vitest
        * runs under `node`. That left 712 lines carrying the failure policy this
@@ -28,12 +28,12 @@ export default defineConfig({
     },
   },
   test: {
-    // lib/ is pure and offline by construction. Nothing under test is allowed to
-    // reach the network -- the CO-OPS and NDBC fixtures are captured payloads
-    // committed under lib/__fixtures__, so a test that starts needing a live
+    // core/ and lib/ are pure and offline by construction. Nothing under test is
+    // allowed to reach the network -- the CO-OPS and NDBC fixtures are captured payloads
+    // committed under core/feeds/__fixtures__, so a test that starts needing a live
     // endpoint is a design regression, not a flake.
     //
-    // lib/upstream.ts and lib/grid.ts do fetch, and their tests stub global
+    // core/upstream.ts and lib/grid.ts do fetch, and their tests stub global
     // fetch rather than reaching out. upstream.test.ts asserts that the stub was
     // never called for cases that must not issue a request at all, which is the
     // only way to prove a short-circuit actually short-circuits.
@@ -42,7 +42,7 @@ export default defineConfig({
     // they run against synthetic cases and the committed fixtures, never a
     // network. tools/calibration/run.ts itself is not under test here; it is I/O and a
     // command line, and what it composes is.
-    include: ['lib/**/*.test.ts', 'tools/calibration/**/*.test.ts'],
+    include: ['core/**/*.test.ts', 'lib/**/*.test.ts', 'tools/calibration/**/*.test.ts'],
     environment: 'node',
   },
 });

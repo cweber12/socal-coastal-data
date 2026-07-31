@@ -15,11 +15,11 @@ import {
   resolveSpotSwell,
   UpstreamError,
   type SpotSwell,
-} from './upstream';
+} from '../core/upstream';
 import { swellCeilingFor, type SwellCeiling } from './thresholds';
-import { gateWindowFor } from './gate-hours';
-import { findExtrema, sliceSeries, type TideExtremum, type TideSeries } from './tide';
-import { INAT_WINDOW_DAYS, type InatExclusions, type Sighting } from './inat';
+import { gateWindowFor } from '../core/spot/access';
+import { findExtrema, sliceSeries, type TideExtremum, type TideSeries } from '../core/feeds/coops-predictions';
+import { INAT_WINDOW_DAYS, type InatExclusions, type Sighting } from '../core/feeds/inat-observations';
 import {
   annotateWithTide,
   newestSightings,
@@ -33,7 +33,7 @@ import {
   localDaysBetween,
   tryParseLocalDate,
   type LocalDate,
-} from './time';
+} from '../core/time';
 import {
   DISPLAY_TIME_ZONE,
   SPOT_BY_SLUG,

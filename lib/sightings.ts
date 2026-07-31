@@ -32,8 +32,8 @@
  * what people are seeing would be a claim about what people are licensing.
  */
 
-import { findExtrema, heightAt, type TideSeries } from './tide';
-import type { Sighting } from './inat';
+import { findExtrema, heightAt, type TideSeries } from '../core/feeds/coops-predictions';
+import type { Sighting } from '../core/feeds/inat-observations';
 
 /** How many sightings the gallery shows. */
 export const SIGHTINGS_GALLERY_MAX = 6;

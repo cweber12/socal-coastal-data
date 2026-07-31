@@ -40,8 +40,8 @@ import {
   parseCoopsSeries,
   type CoopsRequestContract,
   type TideSeries,
-} from './tide';
-import { NdbcDriftError, NdbcNoDataError, parseNdbcRealtime2, type Wvht } from './ndbc';
+} from './feeds/coops-predictions';
+import { NdbcDriftError, NdbcNoDataError, parseNdbcRealtime2, type Wvht } from './feeds/ndbc-realtime2';
 import {
   INAT_RADIUS_KM,
   INAT_WINDOW_DAYS,
@@ -50,7 +50,7 @@ import {
   parseInatObservations,
   type InatObservations,
   type InatRequestContract,
-} from './inat';
+} from './feeds/inat-observations';
 import { addLocalDays, formatLocalDate, type LocalDate } from './time';
 import type { BuoyId, Spot, TideStationId } from '@/shared/spots.generated';
 import { BUOYS, TIDE_DATUM } from '@/shared/spots.generated';

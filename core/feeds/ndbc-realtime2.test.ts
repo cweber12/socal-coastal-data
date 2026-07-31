@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-import { NdbcDriftError, NdbcNoDataError, parseNdbcRealtime2 } from './ndbc';
+import { NdbcDriftError, NdbcNoDataError, parseNdbcRealtime2 } from './ndbc-realtime2';
 
 /*
  * Fixture: realtime2 for 46254 (Scripps Nearshore), captured 2026-07-28 07:08 UTC.

@@ -14,12 +14,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { parseCoopsSeries, findExtrema, heightAt, type TideSeries } from './tide';
-import { parseInatObservations, INAT_RADIUS_KM, type Sighting } from './inat';
+import { parseCoopsSeries, findExtrema, heightAt, type TideSeries } from '../core/feeds/coops-predictions';
+import { parseInatObservations, INAT_RADIUS_KM, type Sighting } from '../core/feeds/inat-observations';
 import { annotateWithTide, newestSightings, SIGHTINGS_GALLERY_MAX } from './sightings';
 import { formatSightingTide, describeSighting } from './labels';
-import coops384h from './__fixtures__/coops-9410230-20260713-384h.json';
-import sunsetCliffs from './__fixtures__/inat-sunset-cliffs-20260728.json';
+import coops384h from '../core/feeds/__fixtures__/coops-9410230-20260713-384h.json';
+import sunsetCliffs from '../core/feeds/__fixtures__/inat-sunset-cliffs-20260728.json';
 
 const SERIES: TideSeries = parseCoopsSeries(coops384h, {
   stationId: '9410230',
