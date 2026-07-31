@@ -1,5 +1,5 @@
 import { formatStamp } from '@/core/time';
-import type { Notice } from '@/lib/grid';
+import type { Notice } from '@/core/notice';
 
 /**
  * The evaluation stamp.

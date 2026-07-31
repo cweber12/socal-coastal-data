@@ -37,16 +37,16 @@ import {
   tidepoolSpotBySlug,
   type SpotRow,
 } from './grid';
-import { addLocalDays } from '../core/time';
-import coops240h from '../core/feeds/__fixtures__/coops-9410230-20260727-240h.json';
-import coops384h from '../core/feeds/__fixtures__/coops-9410230-20260713-384h.json';
-import coops72h from '../core/feeds/__fixtures__/coops-9410230-20260727-6min.json';
-import sunsetCliffsPage from '../core/feeds/__fixtures__/inat-sunset-cliffs-20260728.json';
+import { addLocalDays } from '../../core/time';
+import coops240h from '../../core/feeds/__fixtures__/coops-9410230-20260727-240h.json';
+import coops384h from '../../core/feeds/__fixtures__/coops-9410230-20260713-384h.json';
+import coops72h from '../../core/feeds/__fixtures__/coops-9410230-20260727-6min.json';
+import sunsetCliffsPage from '../../core/feeds/__fixtures__/inat-sunset-cliffs-20260728.json';
 import { SPOTS_WITHOUT_FLOOR, TIDEPOOL_SPOTS } from '@/shared/spots.generated';
 import { readFileSync } from 'node:fs';
 
 const NDBC_FIXTURE = readFileSync(
-  new URL('../core/feeds/__fixtures__/ndbc-46254-20260728.txt', import.meta.url),
+  new URL('../../core/feeds/__fixtures__/ndbc-46254-20260728.txt', import.meta.url),
   'utf8',
 );
 

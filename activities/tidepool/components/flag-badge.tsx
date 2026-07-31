@@ -1,4 +1,5 @@
-import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
+import type { WindowResult } from '@/activities/tidepool/policy';
+import { STATE_PRESENTATION } from '@/activities/tidepool/states';
 
 /**
  * The window state, behind a badge.

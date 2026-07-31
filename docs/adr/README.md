@@ -43,3 +43,4 @@ is worth as much as the fact that it was.
 | [0007](0007-polling-is-weekly-and-transition-triggered.md) | Upstream polling is weekly and transition-triggered |
 | [0008](0008-surf-is-the-second-activity.md) | Surf is the second activity |
 | [0009](0009-horizon-is-a-property-of-the-input.md) | Forecast horizon is a property of the input |
+| [0010](0010-activity-composition-belongs-to-the-activity.md) | Activity composition belongs to the activity, not the composition root |

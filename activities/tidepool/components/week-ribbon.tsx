@@ -1,12 +1,12 @@
 import Link from 'next/link';
 
-import { FlagBadge } from '@/components/flag-badge';
-import { SpotHeader, SwellProvenance } from '@/components/spot-summary';
-import { CellShell, FloorGap, TideLine } from '@/components/window-cell';
-import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
+import { FlagBadge } from '@/activities/tidepool/components/flag-badge';
+import { SpotHeader, SwellProvenance } from '@/activities/tidepool/components/spot-summary';
+import { CellShell, FloorGap, TideLine } from '@/activities/tidepool/components/window-cell';
+import { cellAriaLabel, flagBadgeLabel } from '@/activities/tidepool/labels';
 import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/core/time';
-import { lowLighting, type WindowResult } from '@/lib/windows';
-import type { SwellCeiling } from '@/lib/thresholds';
+import { lowLighting, type WindowResult } from '@/activities/tidepool/policy';
+import type { SwellCeiling } from '@/core/thresholds';
 import type { SpotSwell } from '@/core/upstream';
 import type { TidepoolSpot } from '@/shared/spots.generated';
 

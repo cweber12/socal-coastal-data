@@ -1,13 +1,13 @@
 import Link from 'next/link';
 
-import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
-import { MidnightNotice } from '@/components/midnight-notice';
-import { SpotRow } from '@/components/spot-row';
-import { SpotDisclosure } from '@/components/spot-summary';
-import { UnresolvedDisclosure } from '@/components/unresolved';
-import { UnevaluatedCell, WindowCell } from '@/components/window-cell';
-import { HORIZON_DAYS, loadGrid, sortRows, type SortKey } from '@/lib/grid';
-import { rowAriaLabel } from '@/lib/labels';
+import { EvaluationStamp, Notices, UpstreamFailure } from '@/core/components/disclosure';
+import { MidnightNotice } from '@/core/components/midnight-notice';
+import { SpotRow } from '@/core/components/spot-row';
+import { SpotDisclosure } from '@/activities/tidepool/components/spot-summary';
+import { UnresolvedDisclosure } from '@/core/components/unresolved';
+import { UnevaluatedCell, WindowCell } from '@/activities/tidepool/components/window-cell';
+import { HORIZON_DAYS, loadGrid, sortRows, type SortKey } from '@/activities/tidepool/grid';
+import { rowAriaLabel } from '@/activities/tidepool/labels';
 import {
   formatDateLong,
   formatDayMonth,
@@ -15,7 +15,8 @@ import {
   formatWeekdayShort,
   startOfLocalDay,
 } from '@/core/time';
-import { MIN_WINDOW_MINUTES, STATE_PRESENTATION, SWELL_HORIZON_DAYS, WINDOW_STATES } from '@/lib/windows';
+import { MIN_WINDOW_MINUTES, SWELL_HORIZON_DAYS } from '@/activities/tidepool/policy';
+import { STATE_PRESENTATION, WINDOW_STATES } from '@/activities/tidepool/states';
 import { SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
 
 /**

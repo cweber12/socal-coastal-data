@@ -2,16 +2,16 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
-import { DayChart } from '@/components/day-chart';
-import { EvaluationStamp, Notices, UpstreamFailure } from '@/components/disclosure';
-import { FlagBadge } from '@/components/flag-badge';
-import { RateRefusal } from '@/components/rate-panel';
-import { SwellProvenance } from '@/components/spot-summary';
-import { UnresolvedDisclosure } from '@/components/unresolved';
-import { calibrationFor, CALIBRATION_PULLED_AT, TAXA_VERSION } from '@/lib/calibration';
+import { DayChart } from '@/activities/tidepool/components/day-chart';
+import { EvaluationStamp, Notices, UpstreamFailure } from '@/core/components/disclosure';
+import { FlagBadge } from '@/activities/tidepool/components/flag-badge';
+import { RateRefusal } from '@/activities/tidepool/components/rate-panel';
+import { SwellProvenance } from '@/activities/tidepool/components/spot-summary';
+import { UnresolvedDisclosure } from '@/core/components/unresolved';
+import { calibrationFor, CALIBRATION_PULLED_AT, TAXA_VERSION } from '@/activities/tidepool/calibration';
 import TARGET_TAXA from '@/shared/target_taxa.json';
-import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/lib/grid';
-import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/lib/labels';
+import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/activities/tidepool/grid';
+import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/activities/tidepool/labels';
 import {
   addLocalDays,
   formatClock,
@@ -21,7 +21,7 @@ import {
   localDateInZone,
   sameLocalDate,
 } from '@/core/time';
-import { MIN_WINDOW_MINUTES } from '@/lib/windows';
+import { MIN_WINDOW_MINUTES } from '@/activities/tidepool/policy';
 import { DISPLAY_TIME_ZONE, SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
 
 export const dynamic = 'force-dynamic';

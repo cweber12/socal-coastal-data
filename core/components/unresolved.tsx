@@ -1,4 +1,4 @@
-import { THRESHOLDS_UNRESOLVED, THRESHOLDS_VERSION } from '@/lib/thresholds';
+import { THRESHOLDS_UNRESOLVED, THRESHOLDS_VERSION } from '@/core/thresholds';
 import { SPOTS_FILE, SPOTS_VERSION } from '@/shared/spots.generated';
 
 /**
