@@ -1,6 +1,6 @@
 import { sightingsSummaryLine, describeSighting, formatSightingTide } from '@/lib/labels';
 import type { SpotSightingsGallery, SpotSightingsSummary } from '@/lib/grid';
-import { formatClock, formatDayMonth } from '@/lib/time';
+import { formatClock, formatDayMonth } from '@/core/time';
 import type { AnnotatedSighting } from '@/lib/sightings';
 
 /**

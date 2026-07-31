@@ -43,9 +43,9 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
-import { coopsPredictionsUrl, parseCoopsSeries, type TideSeries } from '../../../lib/tide.ts';
-import { distanceMetres } from '../../../lib/inat.ts';
-import type { LocalDate } from '../../../lib/time.ts';
+import { coopsPredictionsUrl, parseCoopsSeries, type TideSeries } from '../../../core/feeds/coops-predictions.ts';
+import { distanceMetres } from '../../../core/feeds/inat-observations.ts';
+import type { LocalDate } from '../../../core/time.ts';
 import type { CalibrationRecord } from './join.ts';
 import { PER_PAGE, REQUEST_INTERVAL_MS, RESULT_WINDOW_LIMIT } from './config.ts';
 

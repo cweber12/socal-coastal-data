@@ -26,9 +26,10 @@
  * precisely the one that does not transfer.
  */
 
-import { daylightBounds, findExtrema, type TideExtremum, type TideSeries } from '../../../lib/tide.ts';
-import { distanceMetres } from '../../../lib/inat.ts';
-import { localDateInZone, type LocalDate } from '../../../lib/time.ts';
+import { findExtrema, type TideExtremum, type TideSeries } from '../../../core/feeds/coops-predictions.ts';
+import { daylightBounds } from '../../../core/spot/daylight.ts';
+import { distanceMetres } from '../../../core/feeds/inat-observations.ts';
+import { localDateInZone, type LocalDate } from '../../../core/time.ts';
 import {
   amplitudeRatio,
   binVisits,

@@ -8,7 +8,7 @@ import {
   formatHeight,
   unevaluatedAriaLabel,
 } from '@/lib/labels';
-import { formatClock, formatDuration, formatLocalDate, type LocalDate } from '@/lib/time';
+import { formatClock, formatDuration, formatLocalDate, type LocalDate } from '@/core/time';
 import { lowLighting, type WindowResult } from '@/lib/windows';
 
 /**

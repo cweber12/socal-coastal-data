@@ -25,7 +25,7 @@ shared/spots.generated.ts linguist-generated=true
 
 # Captured upstream payloads, kept byte-for-byte as the endpoint served them.
 # They are evidence, not source, and reviewing them line by line is noise.
-lib/__fixtures__/** linguist-vendored=true
+core/feeds/__fixtures__/** linguist-vendored=true
 
 # Generated from shared/calibration.json, on the same terms as the spots union.
 shared/calibration.generated.ts linguist-generated=true

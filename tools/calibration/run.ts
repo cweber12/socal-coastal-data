@@ -20,8 +20,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-import { parseCoopsSeries, type TideSeries } from '../../lib/tide.ts';
-import type { LocalDate } from '../../lib/time.ts';
+import { parseCoopsSeries, type TideSeries } from '../../core/feeds/coops-predictions.ts';
+import type { LocalDate } from '../../core/time.ts';
 import {
   CALIBRATION_VERSION,
   CORPUS_START,

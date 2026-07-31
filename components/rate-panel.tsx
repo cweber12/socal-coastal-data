@@ -1,5 +1,5 @@
 import { binFor, USABLE_BIN_MIN_VISITS, type SpotCalibration } from '@/lib/calibration';
-import { formatThreshold } from '@/lib/format';
+import { formatThreshold } from '@/core/format';
 
 /**
  * The observed sighting rate, as a marginal panel on the day chart's height

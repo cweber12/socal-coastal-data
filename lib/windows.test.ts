@@ -14,9 +14,9 @@ import {
   type WindowInput,
   type WindowState,
 } from './windows';
-import { crossings, parseCoopsSeries, type CoopsRequestContract, type TideSeries } from './tide';
-import { gateWindowFor } from './gate-hours';
-import { utcMsFromZoned, type LocalDate } from './time';
+import { crossings, parseCoopsSeries, type CoopsRequestContract, type TideSeries } from '../core/feeds/coops-predictions';
+import { gateWindowFor } from '../core/spot/access';
+import { utcMsFromZoned, type LocalDate } from '../core/time';
 
 const ZONE = 'America/Los_Angeles';
 
@@ -823,7 +823,7 @@ describe('refusals', () => {
 describe('the real 27 July corridor tide', () => {
   const payload = JSON.parse(
     readFileSync(
-      fileURLToPath(new URL('./__fixtures__/coops-9410230-20260727-6min.json', import.meta.url)),
+      fileURLToPath(new URL('../core/feeds/__fixtures__/coops-9410230-20260727-6min.json', import.meta.url)),
       'utf8',
     ),
   );

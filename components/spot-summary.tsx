@@ -4,7 +4,7 @@ import { SightingsSummary } from '@/components/sightings';
 import type { SpotSightingsSummary } from '@/lib/grid';
 import { thresholdDisclosure } from '@/lib/labels';
 import type { SwellCeiling } from '@/lib/thresholds';
-import type { SpotSwell } from '@/lib/upstream';
+import type { SpotSwell } from '@/core/upstream';
 import type { TidepoolSpot } from '@/shared/spots.generated';
 
 /**

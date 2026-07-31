@@ -12,7 +12,7 @@ import { UnresolvedDisclosure } from '@/components/unresolved';
 import { CellShell, FloorGap, TideLine } from '@/components/window-cell';
 import { loadSpotWeek, tidepoolSpotBySlug } from '@/lib/grid';
 import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
-import { formatDateLong, formatLocalDate, startOfLocalDay } from '@/lib/time';
+import { formatDateLong, formatLocalDate, startOfLocalDay } from '@/core/time';
 import { lowLighting } from '@/lib/windows';
 import { SPOTS_VERSION, TIDE_DATUM, TIDEPOOL_SPOTS } from '@/shared/spots.generated';
 

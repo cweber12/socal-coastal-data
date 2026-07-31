@@ -33,7 +33,7 @@
  */
 
 import gateHoursJson from '@/shared/gate-hours.json';
-import { startOfLocalDay, type LocalDate } from './time';
+import { startOfLocalDay, type LocalDate } from '../time';
 
 interface AnnualClosure {
   rule: string;

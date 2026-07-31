@@ -30,8 +30,8 @@
  * against a gate of 2.0, uncomfortably marginal. Under B it scores 0.95.
  */
 
-import { localDayBounds, type LocalDate } from '../../../lib/time.ts';
-import type { TideSeries } from '../../../lib/tide.ts';
+import { localDayBounds, type LocalDate } from '../../../core/time.ts';
+import type { TideSeries } from '../../../core/feeds/coops-predictions.ts';
 import { BIN_EDGES, USABLE_BIN_MIN_VISITS } from './config.ts';
 
 /* ===========================================================================

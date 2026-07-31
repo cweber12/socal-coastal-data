@@ -1,7 +1,7 @@
-import { formatThreshold } from '@/lib/format';
+import { formatThreshold } from '@/core/format';
 import { formatHeight } from '@/lib/labels';
-import { formatClock } from '@/lib/time';
-import type { TideExtremum, TideSeries } from '@/lib/tide';
+import { formatClock } from '@/core/time';
+import type { TideExtremum, TideSeries } from '@/core/feeds/coops-predictions';
 import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
 import { binFor, type SpotCalibration } from '@/lib/calibration';
 import { PANEL, RateBands, RateTable } from '@/components/rate-panel';

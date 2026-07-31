@@ -4,10 +4,10 @@ import { FlagBadge } from '@/components/flag-badge';
 import { SpotHeader, SwellProvenance } from '@/components/spot-summary';
 import { CellShell, FloorGap, TideLine } from '@/components/window-cell';
 import { cellAriaLabel, flagBadgeLabel } from '@/lib/labels';
-import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/lib/time';
+import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/core/time';
 import { lowLighting, type WindowResult } from '@/lib/windows';
 import type { SwellCeiling } from '@/lib/thresholds';
-import type { SpotSwell } from '@/lib/upstream';
+import type { SpotSwell } from '@/core/upstream';
 import type { TidepoolSpot } from '@/shared/spots.generated';
 
 /**

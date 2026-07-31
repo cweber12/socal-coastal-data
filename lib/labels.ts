@@ -9,8 +9,8 @@
  * about the tide.
  */
 
-import { formatThreshold, MINUS } from './format';
-import { formatClock, formatDateLong, formatDuration, formatWeekdayLong, type LocalDate } from './time';
+import { formatThreshold, MINUS } from '../core/format';
+import { formatClock, formatDateLong, formatDuration, formatWeekdayLong, type LocalDate } from '../core/time';
 import { lowLighting, STATE_PRESENTATION, type WindowResult } from './windows';
 import type { SightingTide } from './sightings';
 

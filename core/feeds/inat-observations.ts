@@ -79,7 +79,7 @@
  * not a licence grant.
  */
 
-import type { LocalDate } from './time';
+import type { LocalDate } from '../time';
 
 /* ===========================================================================
  * The request contract, pinned in one place

@@ -34,7 +34,7 @@ import {
   parseInatObservations,
   squareToMedium,
   type InatRequestContract,
-} from './inat';
+} from './inat-observations';
 import sunsetCliffs from './__fixtures__/inat-sunset-cliffs-20260728.json';
 import laJollaShoresUnfiltered from './__fixtures__/inat-la-jolla-shores-unfiltered-20260728.json';
 

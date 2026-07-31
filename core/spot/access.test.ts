@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { closureFallsOn, gateWindowFor, gatedSlugs, gateUnresolved } from './gate-hours';
-import { zonedPartsFromUtc, type LocalDate } from './time';
+import { closureFallsOn, gateWindowFor, gatedSlugs, gateUnresolved } from './access';
+import { zonedPartsFromUtc, type LocalDate } from '../time';
 
 const ZONE = 'America/Los_Angeles';
 
