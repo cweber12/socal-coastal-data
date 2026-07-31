@@ -86,36 +86,39 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ALLOWED = {
   // The composition root. It may import every slice -- that is what makes it the
   // composition root -- except a producer.
-  app: ['app', 'components', 'core', 'lib', 'shared'],
+  app: ['app', 'activities', 'core', 'shared'],
 
-  // Presentation. Reads the domain, never the other way round: `core -> components`
-  // would put rendering inside the predicate.
-  components: ['components', 'core', 'lib', 'shared'],
+  // An activity composes the core facts it needs plus its own thresholds into a
+  // verdict. The generic row; the per-activity row below is the one that binds.
+  activities: ['activities', 'core', 'shared'],
+
+  // One activity may NOT import another. Decision 8. Longest prefix wins, so
+  // this row overrides the generic `activities` row above for everything under
+  // it -- and #129 adding activities/surf/ gets an identical row, at which point
+  // a surf -> tidepool import fails the moment it is written.
+  'activities/tidepool': ['activities/tidepool', 'core', 'shared'],
 
   // Activity-neutral facts: time, the feed parsers, the fetch and failure
-  // policy, and the spot facts that are true regardless of cross-shore band.
-  // It may NOT import lib/, which is where the judgement still lives until #123
-  // moves it under activities/.
+  // policy, the spot facts true regardless of cross-shore band, and the shells
+  // that carry no activity in them. It may not import an activity, which is the
+  // edge that decides where anything ambiguous goes.
   core: ['core', 'shared'],
 
-  // What is left of the old flat domain: the window predicate, the grid
-  // composition, labels, thresholds, sightings and the calibration reader.
-  // Emptied by #123.
-  lib: ['lib', 'shared'],
-
   // The cross-language contract. Imports nothing but its own JSON. Anything it
-  // learned about `lib` would be a rule the Python side cannot see.
+  // learned about a slice would be a rule the Python side cannot see.
   shared: ['shared'],
 
-  // The producers. They may read the domain -- the calibration pipeline reuses
-  // the CO-OPS parser rather than growing a second one, which is the whole
-  // reason its numbers are comparable -- but nothing may read them back.
-  tools: ['tools', 'core', 'lib', 'shared'],
+  // The producers. They may read the core facts -- the calibration pipeline
+  // reuses the CO-OPS parser rather than growing a second one, which is the
+  // whole reason its numbers are comparable -- but nothing may read them back,
+  // and they have no business inside an activity's judgement.
+  tools: ['tools', 'core', 'shared'],
 
   // Codegen and checks. Node standard library only, deliberately: a generator
   // that imports the types it generates cannot fail honestly.
   scripts: [],
 };
+
 
 /**
  * Edges that exist today, that the architecture forbids, and that a named issue
@@ -135,20 +138,7 @@ const ALLOWED = {
  *     has been fixed but not deleted is how a list like this rots into a set of
  *     rules nobody can tell are still load-bearing.
  */
-const TEMPORARY = [
-  {
-    from: 'lib',
-    to: 'core',
-    issue: 123,
-    why:
-      'The move in #122 split the leaf modules into core/ and left the window ' +
-      'predicate, the grid, labels, thresholds, sightings and the calibration ' +
-      'reader behind in lib/. Those read core/ -- windows.ts needs the tide ' +
-      'parser and daylight, grid.ts needs upstream. The edge disappears when ' +
-      '#123 moves lib/ under activities/tidepool/ and app/, at which point the ' +
-      'importers are an activity and the composition root, both of which may.',
-  },
-];
+const TEMPORARY = [];
 
 /** Directories walked. Anything outside these is not this check's business. */
 const ROOTS = Object.keys(ALLOWED);
@@ -359,6 +349,33 @@ const CANDIDATE_SUFFIXES = [
   '/index.mjs',
 ];
 
+/**
+ * Does an allow-list permit an edge to `to`?
+ *
+ * An entry permits itself and everything beneath it, so naming `activities`
+ * means "any activity" while naming `activities/tidepool` means that one only.
+ * That asymmetry is what lets `app` import whichever activities exist without
+ * the row being edited per activity, while `activities/tidepool` still cannot
+ * reach `activities/surf` -- its own row is not a prefix of that.
+ *
+ * A plain `includes` broke the moment the first per-activity row existed: the
+ * target slice resolves by longest prefix to `activities/tidepool`, which no
+ * `activities` entry equals.
+ */
+function permits(allowed, to) {
+  return allowed.some((entry) => to === entry || to.startsWith(`${entry}/`));
+}
+
+/**
+ * Which activity a repo-relative path belongs to, or null if it is not in one.
+ *
+ * `activities/tidepool/components/window-cell.tsx` -> `activities/tidepool`.
+ */
+function activityOf(relPath) {
+  const parts = toPosix(relPath).split('/');
+  return parts[0] === 'activities' && parts.length > 1 ? `activities/${parts[1]}` : null;
+}
+
 function pointsAtAFile(relTarget) {
   for (const suffix of CANDIDATE_SUFFIXES) {
     try {
@@ -399,19 +416,40 @@ for (const root of ROOTS) {
         continue;
       }
 
-      const to = sliceOf(target);
-      if (to === null) continue;
-
-      // Confirm the target is a real file before classing the edge. A path that
-      // lands in a legal slice but on nothing is not a passing edge, it is an
-      // unchecked one.
+      // Existence is checked BEFORE the slice is classified, and the order
+      // matters. Classifying first means a specifier pointing into a directory
+      // that no longer exists -- `@/lib/labels` after lib/ is deleted -- lands
+      // in no declared slice, reads as "not this check's business", and is
+      // skipped in silence. #123 deleted lib/ and components/ and this check
+      // reported a clean graph over twenty dangling imports until the order was
+      // swapped. A path inside the repo that points at nothing is always this
+      // check's business; only its SLICE is optional.
       if (!pointsAtAFile(target)) {
         unresolved.push(`${rel}:${line}  ${spec}  resolves to ${target}, which does not exist`);
         continue;
       }
 
+      const to = sliceOf(target);
+      if (to === null) continue;
+
       edgesChecked++;
-      if (ALLOWED[from].includes(to)) continue;
+      // Sibling activities, checked structurally rather than by table row.
+      //
+      // The table alone could not carry this. `activities` has to permit
+      // `activities` so an activity can import its own modules, and that entry
+      // is a prefix of every other activity -- so a generic row silently
+      // permits surf -> tidepool. A per-activity row fixes it only for
+      // activities that remembered to add one, which makes the rule depend on
+      // nobody forgetting. Derived from the paths instead, it holds for an
+      // activity that does not exist yet.
+      const mine = activityOf(rel);
+      const theirs = activityOf(target);
+      if (mine && theirs && mine !== theirs) {
+        violations.push({ rel, line, spec, from: mine, to: theirs });
+        continue;
+      }
+
+      if (permits(ALLOWED[from], to)) continue;
 
       const excused = TEMPORARY.find((t) => t.from === from && t.to === to);
       if (excused) {
@@ -439,7 +477,15 @@ if (violations.length > 0) {
     console.error(`  ${v.from} -> ${v.to} is not an allowed edge`);
     console.error(`    ${v.rel}:${v.line}`);
     console.error(`    imports '${v.spec}'`);
-    console.error(`    ${v.from} may import: ${ALLOWED[v.from].join(', ') || '(nothing)'}\n`);
+    // A sibling-activity violation names an activity that may have no row of
+    // its own -- that is the whole point of deriving the rule from the paths --
+    // so fall back to the generic row rather than crashing on a lookup.
+    const list = ALLOWED[v.from] ?? ALLOWED[v.from.split('/')[0]] ?? [];
+    console.error(`    ${v.from} may import: ${list.join(', ') || '(nothing)'}`);
+    if (!ALLOWED[v.from]) {
+      console.error('    (no row of its own; one activity may never import another)');
+    }
+    console.error('');
   }
   process.exit(1);
 }

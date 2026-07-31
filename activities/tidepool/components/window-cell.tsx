@@ -1,15 +1,15 @@
 import Link from 'next/link';
 
-import { FlagBadge } from '@/components/flag-badge';
+import { FlagBadge } from '@/activities/tidepool/components/flag-badge';
 import {
   cellAriaLabel,
   flagBadgeLabel,
   formatFloorGap,
   formatHeight,
   unevaluatedAriaLabel,
-} from '@/lib/labels';
+} from '@/activities/tidepool/labels';
 import { formatClock, formatDuration, formatLocalDate, type LocalDate } from '@/core/time';
-import { lowLighting, type WindowResult } from '@/lib/windows';
+import { lowLighting, type WindowResult } from '@/activities/tidepool/policy';
 
 /**
  * One spot on one day.

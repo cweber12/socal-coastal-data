@@ -1,9 +1,9 @@
 import Link from 'next/link';
 
-import { SightingsSummary } from '@/components/sightings';
-import type { SpotSightingsSummary } from '@/lib/grid';
-import { thresholdDisclosure } from '@/lib/labels';
-import type { SwellCeiling } from '@/lib/thresholds';
+import { SightingsSummary } from '@/activities/tidepool/components/sightings';
+import type { SpotSightingsSummary } from '@/activities/tidepool/grid';
+import { thresholdDisclosure } from '@/activities/tidepool/labels';
+import type { SwellCeiling } from '@/core/thresholds';
 import type { SpotSwell } from '@/core/upstream';
 import type { TidepoolSpot } from '@/shared/spots.generated';
 

@@ -1,4 +1,4 @@
-import { binFor, USABLE_BIN_MIN_VISITS, type SpotCalibration } from '@/lib/calibration';
+import { binFor, USABLE_BIN_MIN_VISITS, type SpotCalibration } from '@/activities/tidepool/calibration';
 import { formatThreshold } from '@/core/format';
 
 /**

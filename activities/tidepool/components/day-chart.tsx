@@ -1,10 +1,11 @@
 import { formatThreshold } from '@/core/format';
-import { formatHeight } from '@/lib/labels';
+import { formatHeight } from '@/activities/tidepool/labels';
 import { formatClock } from '@/core/time';
 import type { TideExtremum, TideSeries } from '@/core/feeds/coops-predictions';
-import { STATE_PRESENTATION, type WindowResult } from '@/lib/windows';
-import { binFor, type SpotCalibration } from '@/lib/calibration';
-import { PANEL, RateBands, RateTable } from '@/components/rate-panel';
+import type { WindowResult } from '@/activities/tidepool/policy';
+import { STATE_PRESENTATION } from '@/activities/tidepool/states';
+import { binFor, type SpotCalibration } from '@/activities/tidepool/calibration';
+import { PANEL, RateBands, RateTable } from '@/activities/tidepool/components/rate-panel';
 
 /**
  * One local day of tide, drawn server-side as plain SVG.

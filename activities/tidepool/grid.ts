@@ -8,24 +8,25 @@
 
 import 'server-only';
 
-import { evaluateWindow, countUsable, type WindowResult } from './windows';
+import { evaluateWindow, countUsable, type WindowResult } from './policy';
 import {
   fetchSpotSightings,
   fetchTideSeries,
   resolveSpotSwell,
   UpstreamError,
   type SpotSwell,
-} from '../core/upstream';
-import { swellCeilingFor, type SwellCeiling } from './thresholds';
-import { gateWindowFor } from '../core/spot/access';
-import { findExtrema, sliceSeries, type TideExtremum, type TideSeries } from '../core/feeds/coops-predictions';
-import { INAT_WINDOW_DAYS, type InatExclusions, type Sighting } from '../core/feeds/inat-observations';
+} from '../../core/upstream';
+import { swellCeilingFor, type SwellCeiling } from '../../core/thresholds';
+import type { Notice } from '../../core/notice';
+import { gateWindowFor } from '../../core/spot/access';
+import { findExtrema, sliceSeries, type TideExtremum, type TideSeries } from '../../core/feeds/coops-predictions';
+import { INAT_WINDOW_DAYS, type InatExclusions, type Sighting } from '../../core/feeds/inat-observations';
 import {
   annotateWithTide,
   newestSightings,
   SIGHTINGS_GALLERY_MAX,
   type AnnotatedSighting,
-} from './sightings';
+} from '../../core/sightings';
 import {
   addLocalDays,
   localDateInZone,
@@ -33,7 +34,7 @@ import {
   localDaysBetween,
   tryParseLocalDate,
   type LocalDate,
-} from '../core/time';
+} from '../../core/time';
 import {
   DISPLAY_TIME_ZONE,
   SPOT_BY_SLUG,
@@ -92,10 +93,6 @@ export interface SpotRow {
   sightings: SpotSightingsSummary;
 }
 
-export interface Notice {
-  severity: 'info' | 'warn' | 'drift';
-  message: string;
-}
 
 export interface GridData {
   evaluatedAtMs: number;

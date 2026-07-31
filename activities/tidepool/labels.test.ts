@@ -4,14 +4,43 @@ import {
   cellAriaLabel,
   describeFloorGap,
   describeHeight,
+  describeSighting,
   describeWindowLength,
   flagBadgeLabel,
   formatFloorGap,
   formatHeight,
+  formatSightingTide,
   rowAriaLabel,
   thresholdDisclosure,
 } from './labels';
-import type { WindowResult, WindowState } from './windows';
+import type { WindowResult } from './policy';
+import type { WindowState } from './states';
+import { parseCoopsSeries, type TideSeries } from '../../core/feeds/coops-predictions';
+import { parseInatObservations, INAT_RADIUS_KM } from '../../core/feeds/inat-observations';
+import { annotateWithTide } from '../../core/sightings';
+import coops384h from '../../core/feeds/__fixtures__/coops-9410230-20260713-384h.json';
+import sunsetCliffs from '../../core/feeds/__fixtures__/inat-sunset-cliffs-20260728.json';
+
+/*
+ * The same captured payloads the sightings join is tested against, because
+ * describeSighting's sentences are asserted against real observation
+ * timestamps rather than round numbers chosen to make interpolation easy.
+ */
+const SERIES: TideSeries = parseCoopsSeries(coops384h, {
+  stationId: '9410230',
+  timeZone: 'gmt',
+  units: 'english',
+  datum: 'MLLW',
+});
+
+const OBSERVATIONS = parseInatObservations(sunsetCliffs, {
+  spotSlug: 'sunset-cliffs',
+  lat: 32.723,
+  lon: -117.256,
+  radiusKm: INAT_RADIUS_KM,
+  windowStart: { year: 2026, month: 7, day: 14 },
+  qualityGrade: 'research',
+});
 
 const ZONE = 'America/Los_Angeles';
 
@@ -258,5 +287,101 @@ describe('describeFloorGap', () => {
     // 'above the floor' (the spoken state) and the reason both say floor, and
     // both predate this. What must NOT appear is the gap phrasing on top.
     expect(label).not.toContain('feet under the floor');
+  });
+});
+
+/* ===========================================================================
+ * The sentences a reader and a screen reader get
+ * ========================================================================= */
+
+describe('formatSightingTide', () => {
+  const tide = (heightFt: number, minutesFromLow: number) => ({
+    heightFt,
+    minutesFromLow,
+    lowMs: 0,
+    lowFt: -0.5,
+  });
+
+  it('reads as prose with the height and the distance from the low', () => {
+    expect(formatSightingTide(tide(0.4, 40))).toBe('0.4 ft, 40 min after the low');
+    expect(formatSightingTide(tide(1.2, -25))).toBe('1.2 ft, 25 min before the low');
+  });
+
+  it('uses a true minus sign for a height below the datum', () => {
+    // U+2212, the same one the grid cells use, so a column of these aligns.
+    expect(formatSightingTide(tide(-0.6, 10))).toBe('−0.6 ft, 10 min after the low');
+  });
+
+  it('says "at the low" rather than claiming minutes the extremum time does not have', () => {
+    // findExtrema places a turn within about 60 s of NOAA's own answer, up to
+    // 30 s of which is NOAA's whole-minute rounding.
+    expect(formatSightingTide(tide(-0.4, 0))).toBe('−0.4 ft, at the low');
+    expect(formatSightingTide(tide(-0.4, 2))).toBe('−0.4 ft, at the low');
+    expect(formatSightingTide(tide(-0.4, -2))).toBe('−0.4 ft, at the low');
+  });
+
+  it('rounds to five minutes', () => {
+    expect(formatSightingTide(tide(0.4, 37))).toBe('0.4 ft, 35 min after the low');
+    expect(formatSightingTide(tide(0.4, 38))).toBe('0.4 ft, 40 min after the low');
+  });
+
+  it('reads hours past an hour', () => {
+    expect(formatSightingTide(tide(2.0, 95))).toBe('2.0 ft, 1 h 35 min after the low');
+  });
+});
+
+describe('describeSighting', () => {
+  const annotated = annotateWithTide(OBSERVATIONS.sightings, SERIES);
+
+  it('carries everything the photo conveys visually, plus the tide', () => {
+    const sentence = describeSighting(annotated[0]!, 'America/Los_Angeles');
+    expect(sentence).toContain('American Crow (Corvus brachyrhynchos)');
+    expect(sentence).toContain('July 24');
+    expect(sentence).toContain('12:01 pm');
+    expect(sentence).toContain('morgan');
+    expect(sentence).toMatch(/Predicted tide .* (above|below) the datum/);
+  });
+
+  it('speaks a height rather than a bare negative', () => {
+    // "minus nought point six" tells a listener nothing about whether reef is
+    // showing. Same rule describeHeight already applies to the grid.
+    const s = describeSighting(
+      { ...annotated[0]!, tide: { heightFt: -0.6, minutesFromLow: 0, lowMs: 0, lowFt: -0.6 } },
+      'America/Los_Angeles',
+    );
+    expect(s).toContain('0.6 feet below the datum');
+    expect(s).not.toContain('-0.6');
+  });
+
+  it('does not double the full stop after a name ending in an initial', () => {
+    // "Heidi H." is a real observer in the fixture, and "by Heidi H.." reads
+    // back as "Heidi H dot dot".
+    const s = describeSighting(
+      { ...annotated[0]!, observerName: 'Heidi H.' },
+      'America/Los_Angeles',
+    );
+    expect(s).toContain('by Heidi H. ');
+    expect(s).not.toContain('..');
+  });
+
+  it('says why a photo is absent', () => {
+    const withheld = annotated.find((s) => s.photo === null)!;
+    expect(describeSighting(withheld, 'America/Los_Angeles')).toContain(
+      'No photo shown: All Rights Reserved.',
+    );
+  });
+
+  it('says the time was not stated rather than inventing one', () => {
+    const s = describeSighting(
+      {
+        ...annotated[0]!,
+        observedAtMs: null,
+        tide: null,
+        tideUnavailableReason: 'this observation records a date but no time',
+      },
+      'America/Los_Angeles',
+    );
+    expect(s).toContain('time not stated');
+    expect(s).toContain('No tide height: this observation records a date but no time.');
   });
 });

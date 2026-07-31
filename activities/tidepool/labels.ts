@@ -9,10 +9,11 @@
  * about the tide.
  */
 
-import { formatThreshold, MINUS } from '../core/format';
-import { formatClock, formatDateLong, formatDuration, formatWeekdayLong, type LocalDate } from '../core/time';
-import { lowLighting, STATE_PRESENTATION, type WindowResult } from './windows';
-import type { SightingTide } from './sightings';
+import { formatThreshold, MINUS } from '../../core/format';
+import { formatClock, formatDateLong, formatDuration, formatWeekdayLong, type LocalDate } from '../../core/time';
+import { lowLighting, type WindowResult } from './policy';
+import { STATE_PRESENTATION } from './states';
+import type { SightingTide } from '../../core/sightings';
 
 /**
  * A measured or predicted tide height. `-0.6` becomes `−0.6`, with a true minus

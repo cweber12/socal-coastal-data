@@ -1,7 +1,7 @@
-import { sightingsSummaryLine, describeSighting, formatSightingTide } from '@/lib/labels';
-import type { SpotSightingsGallery, SpotSightingsSummary } from '@/lib/grid';
+import { sightingsSummaryLine, describeSighting, formatSightingTide } from '@/activities/tidepool/labels';
+import type { SpotSightingsGallery, SpotSightingsSummary } from '@/activities/tidepool/grid';
 import { formatClock, formatDayMonth } from '@/core/time';
-import type { AnnotatedSighting } from '@/lib/sightings';
+import type { AnnotatedSighting } from '@/core/sightings';
 
 /**
  * What people have actually seen here lately, and at what tide.
