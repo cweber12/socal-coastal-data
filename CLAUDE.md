@@ -84,7 +84,17 @@ letting the reviewer discover it.
 Every other issue goes in by full URL**, which cross-references without being
 parsed as a keyword. Separate lines are not enough: #47 put `Closes #39.` and
 `Part of #40.` two lines apart, the merge closed both, and #40 was reopened by
-hand with no work in it. Long version: `docs/concurrent-agents.md`.
+hand with no work in it.
+
+**The same rule binds commit messages, and that is the half that gets missed.**
+GitHub fires closing keywords from commit messages on the default branch too.
+#159 wrote a clean body — one `Closes #151`, everything else by full URL — and
+still closed PRD #148, because its commit said "This closes #148 open question
+2". Surrounding prose does not disarm a keyword: that parses as `closes #148`,
+and the PRD had five unshipped children. When you need to say a keyword-shaped
+thing about an issue you are not closing, put the URL where the number was —
+"closes open question 2 of `https://github.com/.../issues/148`". Long version:
+`docs/concurrent-agents.md`.
 
 ### 6. Hand the PR over, and stop
 
