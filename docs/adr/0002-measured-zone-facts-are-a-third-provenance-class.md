@@ -13,8 +13,10 @@ The repo names two classes and silently runs three.
 | class | example | rule |
 | --- | --- | --- |
 | Upstream join | `county_station`, `mpa` | never hand-populated; fix the join and re-run |
-| Author threshold | swell ceiling, `MIN_WINDOW_MINUTES` | a guess until someone who goes there confirms it |
+| Author estimate <sup>†</sup> | swell ceiling, `MIN_WINDOW_MINUTES` | a starting state, superseded through an evidence ledger |
 | **Measured zone fact** | `tidepool_floor_ft` | **this repo's own instruments, with an evidence ledger** |
+
+<sup>†</sup> **Amended by [0012](0012-threshold-is-a-role-and-author-estimate-is-a-provenance-class.md).** This class was named *author threshold* when this ADR was written, and its only stated exit was someone going there to check. 0012 renamed it and gave it a real one. This ADR's own decision — that measured zone facts are a third class with its own files — is unchanged, which is why it is amended here rather than superseded.
 
 The missing category is why the file layout has been quietly incoherent.
 `spots.json` says it holds values "resolved by join against an upstream

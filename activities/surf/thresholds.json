@@ -1,0 +1,35 @@
+{
+  "version": "0.1.0",
+  "generated": "2026-08-01",
+  "activity": "surf",
+
+  "units": "ft",
+  "wave_height_definition": "NDBC WVHT, significant wave height, converted from metres on an exact 'm' unit-string match",
+
+  "_provenance": "PROVENANCE CLASS 2: AUTHOR ESTIMATE. Every value here is a judgement somebody wrote down after reading this spot's own notes, and none has been measured or field-checked. The class was called 'author threshold' until CONTEXT.md separated the two senses of that word -- see docs/adr/0012-threshold-is-a-role-and-author-estimate-is-a-provenance-class.md. An estimate here is a STARTING state, not a permanent one: it leaves by an evidence ledger on the same terms as any other value in this repo, and #135 is the path for these two.",
+
+  "_schema": {
+    "overrides": "Per-spot swell ceilings, keyed by shared/spots.json slug. Only present where that spot's own notes already document a reason the shared buoy reading means something different at that spot. A spot with no override takes the corridor default in shared/thresholds.json.",
+    "overrides[].swell_ceiling_ft": "Significant wave height above which this spot is called off, in the units above.",
+    "overrides[].confidence": "uncalibrated = author estimate, never field-checked, not safe to present as a threshold anyone should trust. calibrated = confirmed against evidence. No value in this file is calibrated.",
+    "overrides[].reason": "Why this spot differs from the corridor default, quoting the spot record that justifies it. An override without one is a number nobody can check."
+  },
+
+  "overrides": {
+    "blacks-beach": {
+      "swell_ceiling_ft": 2.0,
+      "confidence": "uncalibrated",
+      "reason": "spots.json: 'Scripps submarine canyon focuses swell; this spot breaks materially larger than neighbours on the same buoy reading.' A shared 46225 reading understates it, so the ceiling has to sit lower."
+    },
+    "tourmaline": {
+      "swell_ceiling_ft": 4.0,
+      "confidence": "uncalibrated",
+      "reason": "spots.json: 'Longboard and beginner-friendly; surf threshold should skew lower than neighbours.' Read as a gentler break for the same 46258 reading, so the ceiling sits higher."
+    }
+  },
+
+  "unresolved": [
+    "NOTHING READS THESE TWO OVERRIDES YET, and that is the state rather than an oversight. blacks-beach and tourmaline are not members of the intertidal zone, so they are outside the only grid this stack renders today; the surf predicate that would read them is #129. They are recorded here because they are the only two swell offsets any spot record actually justifies, and because putting them in the activity that owns them is what stopped shared/thresholds.json holding per-spot judgements about an activity nobody has built. Stated plainly rather than left as a silent no-op.",
+    "Both values are author estimates read off a sentence in each spot's notes -- Black's breaking materially larger on the same buoy reading, Tourmaline gentler -- and neither has been checked against a single observed session. The corridor caveat applies to them twice over: significant wave height at an offshore or nearshore buoy is not breaking height at the reef, and no shoaling or refraction transform is applied here either."
+  ]
+}

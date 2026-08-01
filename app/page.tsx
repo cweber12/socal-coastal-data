@@ -5,6 +5,7 @@ import { MidnightNotice } from '@/core/components/midnight-notice';
 import { SpotRow } from '@/core/components/spot-row';
 import { SpotDisclosure } from '@/activities/tidepool/components/spot-summary';
 import { UnresolvedDisclosure } from '@/core/components/unresolved';
+import { UNRESOLVED_SOURCES } from '@/app/unresolved-sources';
 import { UnevaluatedCell, WindowCell } from '@/activities/tidepool/components/window-cell';
 import {
   HORIZON_DAYS,
@@ -249,7 +250,7 @@ export default async function GridPage({
         together would let a standing limitation read as a transient upstream
         problem, and a reader would wait for it to clear.
       */}
-      <UnresolvedDisclosure />
+      <UnresolvedDisclosure sources={UNRESOLVED_SOURCES} />
 
       <Notices notices={grid.notices} />
 
