@@ -73,7 +73,7 @@ export function FlagBadge({
         <p className="mt-1 text-ui">{day.reason}</p>
 
         <p className="mt-2 border-t border-[var(--border)] pt-2 text-meta text-[var(--text-dimmer)]">
-          Provisional. The tide band ({day.band.minFt.toFixed(1)}–{day.band.maxFt.toFixed(1)} ft),
+          Provisional. The tide band ({day.detail.band.minFt.toFixed(1)}–{day.detail.band.maxFt.toFixed(1)} ft),
           the swell ceiling ({day.swellCeilingFt.toFixed(1)} ft) and the swell minimum (
           {day.swellMinimumFt.toFixed(1)} ft) this is decided against are all author estimates,
           none has been field-checked, and the surf zone holds no measured fact behind them. Buoy

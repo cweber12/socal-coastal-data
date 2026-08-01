@@ -158,26 +158,26 @@ export async function SurfDay({ slug, dateParam }: { slug: string; dateParam: st
                 <Fact
                   label="Best"
                   value={
-                    day.best && day.best.usableEndMs > day.best.usableStartMs
-                      ? `${formatClock(day.best.usableStartMs, result.timeZone)}–${formatClock(day.best.usableEndMs, result.timeZone)}`
+                    day.detail.best && day.detail.best.usableEndMs > day.detail.best.usableStartMs
+                      ? `${formatClock(day.detail.best.usableStartMs, result.timeZone)}–${formatClock(day.detail.best.usableEndMs, result.timeZone)}`
                       : 'none usable'
                   }
                 />
                 <Fact
                   label={day.isToday ? 'Remaining' : 'Usable'}
                   value={
-                    day.best
+                    day.detail.best
                       ? formatDuration(
                           day.isToday
-                            ? (day.best.minutesRemaining ?? 0)
-                            : day.best.usableMinutes,
+                            ? (day.detail.best.minutesRemaining ?? 0)
+                            : day.detail.best.usableMinutes,
                         )
                       : '—'
                   }
                 />
                 <Fact
                   label="Day range"
-                  value={`${formatHeight(day.dayLowFt)}–${formatHeight(day.dayHighFt)} ft`}
+                  value={`${formatHeight(day.detail.dayLowFt)}–${formatHeight(day.detail.dayHighFt)} ft`}
                 />
               </dl>
             </div>

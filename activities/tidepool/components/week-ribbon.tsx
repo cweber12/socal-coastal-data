@@ -64,7 +64,7 @@ export function WeekRibbon({
         {dates.map((date, i) => {
           const result = days[i] ?? null;
           const dateKey = formatLocalDate(date);
-          const dateMs = result?.lowMs ?? null;
+          const dateMs = result?.detail.lowMs ?? null;
 
           const heading = (
             <span className="block font-medium text-[var(--cell-fg-dim,var(--text-dim))]">
@@ -113,20 +113,20 @@ export function WeekRibbon({
                     <span className="mt-1 block">
                       <TideLine
                         arrow="▼"
-                        heightFt={result.lowFt}
-                        tMs={result.lowMs}
+                        heightFt={result.detail.lowFt}
+                        tMs={result.detail.lowMs}
                         timeZone={timeZone}
                         emphasis
                       />
-                      {result.nextHighMs !== null && result.nextHighFt !== null ? (
+                      {result.detail.nextHighMs !== null && result.detail.nextHighFt !== null ? (
                         <TideLine
                           arrow="▲"
-                          heightFt={result.nextHighFt}
-                          tMs={result.nextHighMs}
+                          heightFt={result.detail.nextHighFt}
+                          tMs={result.detail.nextHighMs}
                           timeZone={timeZone}
                         />
                       ) : null}
-                      <FloorGap lowFt={result.lowFt} floorFt={result.floorFt} />
+                      <FloorGap lowFt={result.detail.lowFt} floorFt={result.detail.floorFt} />
                     </span>
                   </span>
                 </Link>

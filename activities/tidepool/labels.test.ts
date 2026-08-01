@@ -14,6 +14,7 @@ import {
   thresholdDisclosure,
 } from './labels';
 import type { WindowResult } from './policy';
+import type { UsableWindow } from '../../core/window/day';
 import type { WindowState } from './states';
 import { parseCoopsSeries, type TideSeries } from '../../core/feeds/coops-predictions';
 import { parseInatObservations, INAT_RADIUS_KM } from '../../core/feeds/inat-observations';
@@ -44,34 +45,78 @@ const OBSERVATIONS = parseInatObservations(sunsetCliffs, {
 
 const ZONE = 'America/Los_Angeles';
 
-/** A result shaped like a real one, so the label functions can be exercised alone. */
-function result(over: Partial<WindowResult> = {}): WindowResult {
-  const lowMs = Date.parse('2026-12-24T23:47:00Z'); // 15:47 PST
+/**
+ * A result shaped like a real one, so the label functions can be exercised
+ * alone.
+ *
+ * The overrides stay FLAT -- `lowFt`, `usableMinutes`, `reachesFloor` -- rather
+ * than mirroring the nested shape #130 introduced. A fixture builder's job is to
+ * make a case readable at its call site, and `{ reachesFloor: false, lowFt: 2.4 }`
+ * says what the case is where `{ detail: { window: null, lowFt: 2.4, ... } }`
+ * would say how the type is arranged.
+ *
+ * `reachesFloor: false` builds a result with NO window, which is what
+ * `above-floor` now is.
+ */
+interface ResultOverrides {
+  state?: WindowState;
+  isToday?: boolean;
+  daysFromToday?: number;
+  sunriseMs?: number;
+  sunsetMs?: number;
+  reason?: string;
+  lowMs?: number;
+  lowFt?: number;
+  nextHighMs?: number | null;
+  nextHighFt?: number | null;
+  reachesFloor?: boolean;
+  floorFt?: number;
+  usableMinutes?: number;
+  minutesRemaining?: number | null;
+}
+
+function result(over: ResultOverrides = {}): WindowResult {
+  const lowMs = over.lowMs ?? Date.parse('2026-12-24T23:47:00Z'); // 15:47 PST
+  const reachesFloor = over.reachesFloor ?? true;
+  const window: UsableWindow | null = reachesFloor
+    ? {
+        startMs: lowMs - 2 * 3_600_000,
+        endMs: lowMs + 3_600_000,
+        continuesBefore: false,
+        continuesAfter: false,
+        seriesClipped: false,
+        anchors: [],
+        usableStartMs: lowMs - 2 * 3_600_000,
+        usableEndMs: lowMs + 3_600_000,
+        usableMinutes: over.usableMinutes ?? 180,
+        minutesRemaining: over.minutesRemaining ?? null,
+        gateBlocked: false,
+      }
+    : null;
+
   return {
-    state: 'go',
+    state: over.state ?? 'go',
     date: { year: 2026, month: 12, day: 24 },
-    isToday: false,
-    daysFromToday: 3,
-    lowMs,
-    lowFt: -1.878,
-    nextHighMs: Date.parse('2026-12-25T06:23:00Z'),
-    nextHighFt: 3.8,
-    windowStartMs: lowMs - 2 * 3_600_000,
-    windowEndMs: lowMs + 3_600_000,
-    reachesFloor: true,
-    usableStartMs: lowMs - 2 * 3_600_000,
-    usableEndMs: lowMs + 3_600_000,
-    usableMinutes: 180,
-    minutesRemaining: null,
-    sunriseMs: Date.parse('2026-12-24T14:48:00Z'),
-    sunsetMs: Date.parse('2026-12-25T00:48:00Z'),
+    isToday: over.isToday ?? false,
+    daysFromToday: over.daysFromToday ?? 3,
+    windows: window ? [window] : [],
+    sunriseMs: over.sunriseMs ?? Date.parse('2026-12-24T14:48:00Z'),
+    sunsetMs: over.sunsetMs ?? Date.parse('2026-12-25T00:48:00Z'),
     swellFt: 1.2,
     swellKnown: true,
     swellCeilingFt: 3.0,
-    floorFt: -0.2,
-    windowClipped: false,
-    reason: 'Three hours of daylight window with the tide under the floor.',
-    ...over,
+    swellMinimumFt: null,
+    reason: over.reason ?? 'Three hours of daylight window with the tide under the floor.',
+    disclosures: [],
+    detail: {
+      window,
+      lowMs,
+      lowFt: over.lowFt ?? -1.878,
+      nextHighMs: over.nextHighMs === undefined ? Date.parse('2026-12-25T06:23:00Z') : over.nextHighMs,
+      nextHighFt: over.nextHighFt === undefined ? 3.8 : over.nextHighFt,
+      reachesFloor,
+      floorFt: over.floorFt ?? -0.2,
+    },
   };
 }
 

@@ -122,7 +122,7 @@ describe('describeHeight', () => {
 describe('sessionAnchorLabel', () => {
   it('names the single turn a session brackets', () => {
     const result = day();
-    const aroundALow = result.sessions.find(
+    const aroundALow = result.windows.find(
       (s) => s.anchors.length === 1 && s.anchors[0]!.kind === 'low',
     );
     expect(aroundALow).toBeDefined();
@@ -150,14 +150,14 @@ describe('sessionAnchorLabel', () => {
 
 describe('describeSessionCount', () => {
   it('counts sessions, singular and plural', () => {
-    const one = { sessions: [{}] } as unknown as Parameters<typeof describeSessionCount>[0];
-    const two = { sessions: [{}, {}] } as unknown as Parameters<typeof describeSessionCount>[0];
+    const one = { windows: [{}] } as unknown as Parameters<typeof describeSessionCount>[0];
+    const two = { windows: [{}, {}] } as unknown as Parameters<typeof describeSessionCount>[0];
     expect(describeSessionCount(one)).toBe('1 session');
     expect(describeSessionCount(two)).toBe('2 sessions');
   });
 
   it('says no session rather than "0 sessions"', () => {
-    const none = { sessions: [] } as unknown as Parameters<typeof describeSessionCount>[0];
+    const none = { windows: [] } as unknown as Parameters<typeof describeSessionCount>[0];
     expect(describeSessionCount(none)).toBe('no session in the band');
   });
 });

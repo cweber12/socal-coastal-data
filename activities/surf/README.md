@@ -7,45 +7,55 @@ emits.
 | --- | --- |
 | `thresholds.json` | Every number a surf verdict is decided against. The band (1.5–3.5 ft MLLW), the swell minimum (1.0 ft), and the two per-spot ceilings — `blacks-beach` 2.0 ft, `tourmaline` 4.0 ft. All uncalibrated author estimates. |
 | `thresholds.ts` | Reads them, asserts the two different kinds of feet separately, and falls back to the corridor default ceiling. |
-| `states.ts` | The eight states, in the order they are tested, and how each is worded. |
-| `policy.ts` | The band predicate. Returns N sessions per day, not one window. |
+| `states.ts` | The eight states, in the order they are tested. `out-of-band` and the `veto` wording are stated here; the rest come from `core/window/states.ts`. |
+| `policy.ts` | The band predicate, the swell minimum, and which session the day is about. N sessions per day, not one window. |
+| `verdicts.test.ts` | 476 spot-days captured from `main` before #130 and replayed field by field. Evidence, not source. |
 | `grid.ts` | Composes the feeds and the predicate into what a page renders. |
 | `labels.ts` | Every sentence the UI shows, so the ones a screen reader gets are tested. |
 | `routes.ts` | This activity's URL segment, written down once. |
 | `components/` | The cell, the badge, the chart and the row disclosure. |
 
-## Why this is a copy of `activities/tidepool/`
+## This was a copy of `activities/tidepool/`, and #130 collapsed it
 
-Deliberately, and temporarily. #130 extracts a general solver from **two real
-occupants**; pulling one out of tidepool alone would be guessing at what a second
-occupant needs. Two copies is the intended end state of #129.
+Deliberately, and temporarily. #129 built this directory by copying tidepool's
+predicate so that #130 could extract an engine from **two real occupants**;
+pulling one out of tidepool alone would have been guessing at what a second
+occupant needs.
 
-`scripts/check-boundaries.mjs` forbids the import that would collapse them, and
-the rule is derived from the paths rather than from a table row — so it held
-before this directory had a row of its own.
+It was not a guess, and the record of what the copy proved is worth keeping.
 
-## What actually differs, which is the evidence #130 is waiting on
-
-Four things, and they are the reason surf was chosen as the second activity
-rather than dive (ADR 0008):
+**Four things differed**, and they are the reason surf was chosen as the second
+activity rather than dive (ADR 0008):
 
 1. **N intervals, not one.** A band yields two or three disjoint sessions a day.
-   The day's verdict is an aggregate over a list.
+   The day's verdict is an aggregate over a list. → `core/window/solve.ts`, for
+   both occupants.
 2. **No anchor.** Tidepool picks a low and walks outward. This walks once and
    collects every maximal in-band run, then reports which turns each happens to
    contain — **zero, one or two**. All three occur in the committed fixture
    inside a fortnight: on 2026-07-22 one session holds a high *and* a low while
-   the other holds no turn at all.
+   the other holds no turn at all. → the solver takes no anchor at all, which
+   **overturned PRD #101 decision 3**. ADR 0015.
 3. **A two-sided predicate**, strict on both edges, with each crossing
-   interpolated against the edge it actually crossed.
+   interpolated against the edge it actually crossed. → stayed here; the solver
+   takes a predicate and does not hold one.
 4. **No flood-side trim.** Tidepool's 0.6 trim is a fact about being on foot on a
    ledge system while the water returns. It has no equivalent for someone already
-   in the water, and copying it would have been the clearest possible case of
-   generalising one occupant's safety judgement into a solver.
+   in the water. → stayed in tidepool, which is where a safety judgement belongs.
 
-The swell horizon, the daylight clip, the gate clip and the minimum-duration rule
-came across **unchanged**. That is the other half of the evidence: those four are
-gate behaviour and belong in `core/window/gates.ts`.
+**A fifth thing the copy found, after the issue was written.** A swell *ceiling*
+alone called a 0.4 ft day `go`. The swell gate is a **window**, and its lower
+answer is `flat` — worded as "there is nothing there" rather than "do not go",
+because a reader who reads the two the same way treats a flat day as a dangerous
+one. Tidepool passes no minimum and can never reach it. ADR 0016.
+
+**And four things came across the copy unchanged**: the swell horizon, the
+daylight clip, the gate clip and the minimum-duration rule. That is the other
+half of the evidence, and it is why `core/window/gates.ts` exists.
+
+`scripts/check-boundaries.mjs` still forbids the import that would collapse the
+two activities into each other, and the rule is derived from the paths rather
+than from a table row — so it held before this directory had a row of its own.
 
 ## What belongs here, and what belongs next door
 
@@ -55,6 +65,9 @@ feeds into a grid of verdicts for **this** activity.
 
 Belongs next door:
 
+- **The window engine** — the run walk, the two clips, the swell gate, the gate
+  states — is `core/window/`. Nothing here re-implements one, and the sentences
+  both activities word identically are built from its fragments.
 - **What is physically true in the surf zone** — which spots have one — is
   `core/zones/surf.ts`. It holds membership derived from the wave binding and no
   measured fact; see ADR 0014. Nothing here may assert a zone fact.

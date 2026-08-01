@@ -246,7 +246,7 @@ describe('sortRows', () => {
       swell: {} as SurfRow['swell'],
       ceiling: {} as SurfRow['ceiling'],
       days: minutes.map(
-        (m) => ({ sessions: [{ usableMinutes: m }] }) as unknown as SurfRow['days'][number],
+        (m) => ({ windows: [{ usableMinutes: m }] }) as unknown as SurfRow['days'][number],
       ),
       usableCount,
     }) as SurfRow;

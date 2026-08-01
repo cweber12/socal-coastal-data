@@ -48,3 +48,5 @@ is worth as much as the fact that it was.
 | [0012](0012-threshold-is-a-role-and-author-estimate-is-a-provenance-class.md) | "Threshold" is a role; the provenance class is "author estimate" |
 | [0013](0013-the-spot-page-is-activity-neutral-and-stays-outside-the-activity-segment.md) | The spot page is activity-neutral, and stays outside the activity segment |
 | [0014](0014-the-surf-zone-is-derived-membership-and-no-measured-fact.md) | The surf zone is derived membership and no measured fact |
+| [0015](0015-the-solver-reports-anchors-rather-than-taking-one.md) | The solver reports the extrema an interval contains, rather than taking one |
+| [0016](0016-the-swell-gate-is-a-window-not-a-ceiling.md) | The swell gate is a window, not a ceiling |

@@ -434,7 +434,7 @@ export function usableMinutes(row: SurfRow): number {
   let total = 0;
   for (const day of row.days) {
     if (!day) continue;
-    for (const session of day.sessions) total += session.usableMinutes;
+    for (const session of day.windows) total += session.usableMinutes;
   }
   return total;
 }

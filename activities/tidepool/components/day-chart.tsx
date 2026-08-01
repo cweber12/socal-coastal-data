@@ -102,6 +102,16 @@ export function DayChart({
   }
 
   const published = calibration?.published === true ? calibration : null;
+
+  /*
+   * The window this day's verdict is about, or null.
+   *
+   * Null is `above-floor` -- the low never gets under the floor -- and it used
+   * to be a zero-length placeholder sitting at the low's own instant, which the
+   * band below had to test `reachesFloor` to avoid drawing. #130 made absence
+   * absent, so there is nothing to guard against.
+   */
+  const usable = result?.detail.window ?? null;
   const PLOT_W = plotWidth(published !== null);
 
   const heights = daySeries.samples.map((s) => s.ft);
@@ -197,28 +207,28 @@ export function DayChart({
           uncalibrated ceiling, and the band's job is to show WHERE the window
           falls, which is the same job whatever the verdict.
         */}
-        {result && result.reachesFloor && result.usableEndMs > result.usableStartMs ? (
+        {usable && usable.usableEndMs > usable.usableStartMs ? (
           <g>
             <rect
-              x={clampX(result.usableStartMs)}
+              x={clampX(usable.usableStartMs)}
               y={PAD.top}
-              width={Math.max(0, clampX(result.usableEndMs) - clampX(result.usableStartMs))}
+              width={Math.max(0, clampX(usable.usableEndMs) - clampX(usable.usableStartMs))}
               height={PLOT_H}
               fill="var(--color-window)"
               opacity="0.18"
             />
             <line
-              x1={clampX(result.usableStartMs)}
+              x1={clampX(usable.usableStartMs)}
               y1={PAD.top}
-              x2={clampX(result.usableStartMs)}
+              x2={clampX(usable.usableStartMs)}
               y2={PAD.top + PLOT_H}
               stroke="var(--color-window)"
               strokeWidth="1.5"
             />
             <line
-              x1={clampX(result.usableEndMs)}
+              x1={clampX(usable.usableEndMs)}
               y1={PAD.top}
-              x2={clampX(result.usableEndMs)}
+              x2={clampX(usable.usableEndMs)}
               y2={PAD.top + PLOT_H}
               stroke="var(--color-window)"
               strokeWidth="1.5"

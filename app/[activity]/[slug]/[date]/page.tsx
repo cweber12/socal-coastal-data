@@ -232,20 +232,20 @@ async function TidepoolDay({ slug, dateParam }: { slug: string; dateParam: strin
               />
 
               <dl className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-data wide:grid-cols-4">
-                <Fact label="Low" value={`${formatHeight(result.lowFt)} ft at ${formatClock(result.lowMs, day.timeZone)}`} />
+                <Fact label="Low" value={`${formatHeight(result.detail.lowFt)} ft at ${formatClock(result.detail.lowMs, day.timeZone)}`} />
                 <Fact
                   label="Next high"
                   value={
-                    result.nextHighMs !== null && result.nextHighFt !== null
-                      ? `${formatHeight(result.nextHighFt)} ft at ${formatClock(result.nextHighMs, day.timeZone)}`
+                    result.detail.nextHighMs !== null && result.detail.nextHighFt !== null
+                      ? `${formatHeight(result.detail.nextHighFt)} ft at ${formatClock(result.detail.nextHighMs, day.timeZone)}`
                       : 'beyond the series'
                   }
                 />
                 <Fact
                   label="Window"
                   value={
-                    result.reachesFloor && result.usableMinutes > 0
-                      ? `${formatClock(result.usableStartMs, day.timeZone)}–${formatClock(result.usableEndMs, day.timeZone)} (${formatDuration(result.usableMinutes)})`
+                    result.detail.window && result.detail.window.usableMinutes > 0
+                      ? `${formatClock(result.detail.window.usableStartMs, day.timeZone)}–${formatClock(result.detail.window.usableEndMs, day.timeZone)} (${formatDuration(result.detail.window.usableMinutes)})`
                       : 'none'
                   }
                 />

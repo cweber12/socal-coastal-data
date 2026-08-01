@@ -85,26 +85,26 @@ export function WindowCell({
         <span aria-hidden className="block">
           <TideLine
             arrow="▼"
-            heightFt={result.lowFt}
-            tMs={result.lowMs}
+            heightFt={result.detail.lowFt}
+            tMs={result.detail.lowMs}
             timeZone={timeZone}
             emphasis
           />
 
-          {result.nextHighMs !== null && result.nextHighFt !== null ? (
+          {result.detail.nextHighMs !== null && result.detail.nextHighFt !== null ? (
             <TideLine
               arrow="▲"
-              heightFt={result.nextHighFt}
-              tMs={result.nextHighMs}
+              heightFt={result.detail.nextHighFt}
+              tMs={result.detail.nextHighMs}
               timeZone={timeZone}
             />
           ) : null}
 
-          <FloorGap lowFt={result.lowFt} floorFt={result.floorFt} />
+          <FloorGap lowFt={result.detail.lowFt} floorFt={result.detail.floorFt} />
 
-          {result.isToday && result.minutesRemaining !== null && result.minutesRemaining > 0 ? (
+          {result.isToday && (result.detail.window?.minutesRemaining ?? 0) > 0 ? (
             <span className="mt-1 block font-medium">
-              {formatDuration(result.minutesRemaining)} left
+              {formatDuration(result.detail.window!.minutesRemaining!)} left
             </span>
           ) : null}
         </span>

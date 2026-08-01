@@ -84,7 +84,7 @@ export function FlagBadge({
         <p className="mt-1 text-ui">{result.reason}</p>
 
         <p className="mt-2 border-t border-[var(--border)] pt-2 text-meta text-[var(--text-dimmer)]">
-          Provisional. The floor ({result.floorFt.toFixed(1)} ft) and swell ceiling (
+          Provisional. The floor ({result.detail.floorFt.toFixed(1)} ft) and swell ceiling (
           {result.swellCeilingFt.toFixed(1)} ft) this is decided against are author estimates and
           have not been field-checked. Read the tide and the clock above it as the primary
           evidence.

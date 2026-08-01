@@ -124,7 +124,7 @@ export function describeSessionLength(session: SurfSession, isToday: boolean): s
  * the band is too wide to be saying anything.
  */
 export function describeSessionCount(day: SurfDay): string {
-  const n = day.sessions.length;
+  const n = day.windows.length;
   if (n === 0) return 'no session in the band';
   return n === 1 ? '1 session' : `${n} sessions`;
 }
@@ -141,7 +141,7 @@ export function cellAriaLabel(spotName: string, day: SurfDay, timeZone: string):
 
   const parts: string[] = [`${spotName}, ${when}: ${spoken}.`];
 
-  if (day.sessions.length === 0) {
+  if (day.windows.length === 0) {
     // The reason already gives the day's range against the band in full, so
     // repeating the numbers here would make every out-of-band cell say them
     // twice. This is 24 rows' worth on a flat week.
@@ -152,7 +152,7 @@ export function cellAriaLabel(spotName: string, day: SurfDay, timeZone: string):
 
   parts.push(`${describeSessionCount(day)} in the ${bandPhrase(day)} band.`);
 
-  for (const session of day.sessions) {
+  for (const session of day.windows) {
     /*
      * The lighting is spoken because the cell says it with a background and
      * nothing else, and a surf day routinely carries one session in the light
@@ -169,8 +169,8 @@ export function cellAriaLabel(spotName: string, day: SurfDay, timeZone: string):
     );
   }
 
-  if (day.best && (day.state === 'go' || day.state === 'brief' || day.state === 'swell-tbd')) {
-    parts.push(`Best is ${describeSessionLength(day.best, day.isToday)} of usable daylight.`);
+  if (day.detail.best && (day.state === 'go' || day.state === 'brief' || day.state === 'swell-tbd')) {
+    parts.push(`Best is ${describeSessionLength(day.detail.best, day.isToday)} of usable daylight.`);
   }
 
   parts.push(day.reason);
@@ -181,7 +181,7 @@ export function cellAriaLabel(spotName: string, day: SurfDay, timeZone: string):
 
 /** `1.5 to 3.5 foot`, for a spoken sentence. */
 function bandPhrase(day: SurfDay): string {
-  return `${formatThreshold(day.band.minFt)} to ${formatThreshold(day.band.maxFt)} foot`;
+  return `${formatThreshold(day.detail.band.minFt)} to ${formatThreshold(day.detail.band.maxFt)} foot`;
 }
 
 /**

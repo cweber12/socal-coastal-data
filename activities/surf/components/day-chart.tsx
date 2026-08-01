@@ -67,7 +67,7 @@ export function SurfDayChart({
   /**
    * The band. Passed in rather than read off `day`, because a day that could not
    * be evaluated still has a curve worth drawing and the band is what makes the
-   * curve mean anything. Reading `day.band` would have drawn the chart with no
+   * curve mean anything. Reading `day.detail.band` would have drawn the chart with no
    * band in exactly the case a reader most needs to see where it sits.
    */
   band: { minFt: number; maxFt: number };
@@ -115,11 +115,11 @@ export function SurfDayChart({
     `${formatHeight(Math.max(...extrema.map((e) => e.ft)))} feet. ` +
     `The surf band is ${formatThreshold(band.minFt)} to ${formatThreshold(band.maxFt)} feet. ` +
     (day
-      ? `${day.sessions.length === 0 ? 'The tide never enters it' : `${day.sessions.length} session${day.sessions.length === 1 ? '' : 's'}`}. ` +
+      ? `${day.windows.length === 0 ? 'The tide never enters it' : `${day.windows.length} session${day.windows.length === 1 ? '' : 's'}`}. ` +
         `${STATE_PRESENTATION[day.state].spoken}. ${day.reason}`
       : 'This day could not be evaluated.') +
     ' The turning points are listed in the table below this chart' +
-    (day && day.sessions.length > 0 ? ', and the sessions in a second table under that one.' : '.');
+    (day && day.windows.length > 0 ? ', and the sessions in a second table under that one.' : '.');
 
   return (
     <figure className="m-0">
@@ -237,7 +237,7 @@ export function SurfDayChart({
             so a session entirely in the dark shows as a gap between the band and
             the shading rather than as a claim that it was available.
           */}
-          {day?.sessions.map((session, i) =>
+          {day?.windows.map((session, i) =>
             session.usableEndMs > session.usableStartMs ? (
               <g key={i}>
                 <rect
@@ -369,7 +369,7 @@ export function SurfDayChart({
       </figcaption>
 
       <ExtremaTable extrema={extrema} band={band} timeZone={timeZone} />
-      {day && day.sessions.length > 0 ? (
+      {day && day.windows.length > 0 ? (
         <SessionTable day={day} timeZone={timeZone} />
       ) : null}
     </figure>
@@ -434,9 +434,9 @@ function SessionTable({ day, timeZone }: { day: SurfDay; timeZone: string }) {
   return (
     <table className="mt-4 w-full text-left text-data">
       <caption className="pb-1.5 text-left text-meta text-[var(--text-dim)]">
-        {day.sessions.length === 1
+        {day.windows.length === 1
           ? 'The one session the band produced'
-          : `The ${day.sessions.length} sessions the band produced`}
+          : `The ${day.windows.length} sessions the band produced`}
       </caption>
       <thead>
         <tr className="text-[var(--text-dimmer)]">
@@ -447,7 +447,7 @@ function SessionTable({ day, timeZone }: { day: SurfDay; timeZone: string }) {
         </tr>
       </thead>
       <tbody className="font-mono tabular-nums">
-        {day.sessions.map((session, i) => (
+        {day.windows.map((session, i) => (
           <tr key={i} className="border-t border-[var(--border)]">
             <td className="py-1 pr-3">
               {session.continuesBefore ? '‹' : ''}
