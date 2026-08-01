@@ -13,8 +13,8 @@ export const MINUS = '−';
 /**
  * A threshold: a value in force that a reader compares a height against.
  *
- * `tidepool_floor_ft` and the calibration bin edges are both quarter-foot
- * quantities as of `shared/spots.json` 1.4.0 and `BIN_EDGES_FT`, and the
+ * The intertidal floor and the calibration bin edges are both quarter-foot
+ * quantities as of `shared/intertidal.json` 1.0.0 and `BIN_EDGES_FT`, and the
  * one-decimal `formatHeight` cannot render them. It printed `sunset-cliffs`'
  * 0.25 ft floor as "0.3", which is wrong in the **permissive** direction: a
  * reader comparing a 0.28 ft low against "0.3" concludes it passes, while

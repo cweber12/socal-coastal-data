@@ -68,8 +68,20 @@ def config():
 
 
 def spots():
-    d = json.load(open(os.path.join(ROOT, "shared", "spots.json")))
-    return [s for s in d["spots"] if s.get("tidepool_floor_ft") is not None]
+    """The intertidal members, joined to their inventory records on slug.
+
+    EVERY LOOKUP HERE IS `[]`, NEVER `.get()`. This read
+    `s.get("tidepool_floor_ft") is not None` off spots.json until the floor moved
+    to shared/intertidal.json in spots.json 2.0.0; `.get()` on the departed key
+    returns None, the comprehension matches nothing, and this audit reports a
+    clean run over ZERO spots -- which would read as "the shipped disc is
+    centred everywhere" when nothing was measured at all. `[]` raises KeyError
+    on the same drift instead.
+    """
+    spots_file = json.load(open(os.path.join(ROOT, "shared", "spots.json")))
+    zone = json.load(open(os.path.join(ROOT, "shared", "intertidal.json")))
+    by_slug = {s["slug"]: s for s in spots_file["spots"]}
+    return [by_slug[m["slug"]] for m in zone["membership"]["members"]]
 
 
 def count(lat, lon, radius_km, ids, since):

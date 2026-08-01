@@ -58,8 +58,8 @@ import type { SpotSlug } from '@/shared/spots.generated';
 const FILE = calibrationJson as unknown as { datum: string; tide_station: string };
 
 if (FILE.datum !== 'MLLW') {
-  // Bin edges are feet above the datum, and lib/windows.ts compares a predicted
-  // height against tidepool_floor_ft on the same one. A file on another datum
+  // Bin edges are feet above the datum, and the window predicate compares a
+  // predicted height against the intertidal floor on the same one. Another datum
   // would shift every bin by the offset between them, silently.
   throw new Error(
     `shared/calibration.json declares datum ${JSON.stringify(FILE.datum)}; this module and ` +
@@ -101,10 +101,10 @@ export type { CalibrationBin, CalibratedSlug, SpotCalibration };
  * A spot's calibration, or null when the pipeline never ran against it.
  *
  * Null here means ABSENT, which is a third state distinct from published and
- * refused: a spot with no `tidepool_floor_ft` is not in the grid at all, so
- * there is nothing for a rate to sit beside. A caller must not read that as a
- * refusal, because a refusal is a measured verdict and this is the absence of a
- * measurement.
+ * refused: a spot that is not a member of the intertidal is not in the grid at
+ * all, so there is nothing for a rate to sit beside. A caller must not read that
+ * as a refusal, because a refusal is a measured verdict and this is the absence
+ * of a measurement.
  */
 export function calibrationFor(slug: SpotSlug | string): SpotCalibration | null {
   return CALIBRATION_BY_SLUG[slug as CalibratedSlug] ?? null;

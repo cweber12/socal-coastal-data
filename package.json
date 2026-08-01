@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Web frontend for the San Diego corridor tide window grid.",
+  "description": "Web frontend for the San Diego corridor tide window grid. shared/spots.json and shared/intertidal.json are read across the language boundary by the Python probes in tools/lidar-recon/.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -14,6 +14,8 @@
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "gen:types": "node scripts/gen-spots-types.mjs",
     "gen:types:check": "node scripts/gen-spots-types.mjs --check",
+    "gen:intertidal": "node scripts/gen-intertidal-types.mjs",
+    "gen:intertidal:check": "node scripts/gen-intertidal-types.mjs --check",
     "gen:calibration": "node scripts/gen-calibration-types.mjs",
     "gen:calibration:check": "node scripts/gen-calibration-types.mjs --check",
     "calibrate": "node --import ./tools/calibration/loader.mjs tools/calibration/run.ts",

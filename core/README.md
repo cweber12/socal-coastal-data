@@ -10,6 +10,7 @@ and what is true of a whole spot — never whether any of it is *good*.
 | `feeds/` | One parser per upstream **product**. See its README. |
 | `upstream.ts` | Fetch, cache and failure policy. `server-only`. |
 | `spot/` | Facts true of a whole spot regardless of cross-shore band. See its README. |
+| `zones/` | Facts true of one cross-shore band. One module per zone; the intertidal is the only one with facts today. See its README. |
 
 ## What belongs here, and what belongs next door
 
@@ -26,13 +27,11 @@ Belongs next door:
 - **Composition** — assembling feeds and a predicate into what a page renders —
   belongs to the composition root.
 - **A measured zone fact** — the tide height at which a reef surfaces — is a
-  fact, but a fact about one cross-shore band. It belongs to `core/zones/`, which
-  does not exist yet; #124 creates it with the intertidal.
+  fact, but a fact about one cross-shore band, so it goes to `core/zones/` and
+  not to the root of this directory.
 
-`core/` may not import `lib/`. Today `lib/` still holds the window predicate and
-the grid, and they import `core/` — a temporary edge declared in
-`scripts/check-boundaries.mjs` and removed by #123. The table there is the one
-statement of the import rules; this file does not restate it.
+`scripts/check-boundaries.mjs` is the one statement of the import rules; this
+file does not restate it.
 
 ## Why `feeds/` and `spot/` are separate
 

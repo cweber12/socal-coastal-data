@@ -118,8 +118,8 @@ export default async function DayPage({
           </h1>
           <p className="mt-1 text-meta text-[var(--text-dimmer)]">
             {thresholdDisclosure(
-              spot.tidepool_floor_ft,
-              spot.tidepool_floor_confidence,
+              spot.floorFt,
+              spot.floorConfidence,
               day.ceiling.ceilingFt,
               day.ceiling.confidence,
             )}
@@ -216,7 +216,7 @@ export default async function DayPage({
               dayEndMs={day.dayEndMs}
               sunriseMs={result?.sunriseMs ?? day.dayStartMs}
               sunsetMs={result?.sunsetMs ?? day.dayEndMs}
-              floorFt={spot.tidepool_floor_ft}
+              floorFt={spot.floorFt}
               timeZone={day.timeZone}
               nowMs={now}
               isToday={isToday}

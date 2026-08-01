@@ -1,7 +1,9 @@
 {
-  "version": "1.4.0",
-  "generated": "2026-07-30",
+  "version": "2.0.0",
+  "generated": "2026-07-31",
   "corridor": "Oceanside Harbor to Border Field, San Diego County, CA",
+
+  "_moved": "2.0.0 REMOVES tidepool_floor_ft, tidepool_floor_confidence and the 8 floor_evidence ledgers. They are in shared/intertidal.json as floor_ft, floor_confidence and floor_evidence under membership.members, with that file's _provenance header stating the derivation and the commit they came from. Major, not minor: any reader of the three fields breaks, and two of them are Python. This file is bindings and joins -- values resolved by join against an upstream authority, never hand-populated -- which is what its _schema has always claimed and what the floor never was. See docs/adr/0002-measured-zone-facts-are-a-third-provenance-class.md. Note that this file's own unresolved array still carries the floor caveats, including the entry marked SAFETY: they are rendered verbatim from here today and moving them is #132, not this change.",
 
   "conventions": {
     "datum": "MLLW",
@@ -27,17 +29,6 @@
     "county_station_suspect": "true when the match exceeds 1000 m, meaning the station may sit on a different beach cell carrying different water. The UI must disclose a suspect match rather than render it as a clean reading. null when there is no match.",
     "county_station_null_reason": "Present only when county_station is null, and required whenever it is. States why the field is empty: out of join scope, or genuinely unresolved. A null county_station without this key is a bug.",
     "audiences": "Which audience filters include this spot. Drives column visibility, not thresholds.",
-    "tidepool_floor_ft": "Tide height below which the reef is WORKABLE -- the level at which enough of the intertidal is out of the water to be worth the trip. NOT the level at which it is at its best; that is lower, and encoding it here silently rejects every ordinary usable day. UNCALIBRATED estimates; see tidepool_floor_confidence.",
-    "tidepool_floor_confidence": "low = author estimate, needs local verification. verified = confirmed by someone who goes there.",
-    "floor_evidence": "Append-only ledger of every method that has been run against this spot's floor, oldest entry first. Present on the 8 spots that carry a floor. It does NOT set tidepool_floor_ft -- that field is the value in force, a human sets it against this ledger, and the newest entry is not automatically the answer. Promotion of tidepool_floor_confidence to 'verified' takes two entries from DIFFERENT methods agreeing within 0.3 ft, at least one of them instrumented (lidar hypsometry, pressure logger, MARINe transect topography); two author_estimate or two inat_revealed entries are one method run twice. See calibration/floor-calibration.md section 7.",
-    "floor_evidence[].method": "Which method produced the entry: author_estimate | lidar_hypsometry | inat_revealed | pressure_logger | marine_topography | published_threshold. Not free text; that list is the whole set.",
-    "floor_evidence[].source": "The artifact the entry came from, named precisely enough to find again: dataset and product name, or the committed file and its version.",
-    "floor_evidence[].source_date": "When the underlying data was acquired, not when it was downloaded. For an author estimate, the date that estimate was written.",
-    "floor_evidence[].value_ft": "The floor this method produced, in ft above MLLW per conventions.datum. null means the run yielded no usable value -- read note to tell 'has not run' from 'ran and produced nothing usable'. A null value_ft with an empty note is a bug, on the same terms as county_station_null_reason.",
-    "floor_evidence[].datum_transform": "The vertical datum transformation applied, with its version pinned, e.g. 'VDatum 4.7, NAVD88 -> MLLW'. null where none was applied because the source is already MLLW ft.",
-    "floor_evidence[].n": "Sample count in whatever unit the method counts in; the note states the unit. null where the method has no sample count.",
-    "floor_evidence[].run_date": "When this entry's value was computed or set.",
-    "floor_evidence[].note": "What the run established, in prose. Required whenever value_ft is null. Figures that came from a generated file are summarised here, never copied, because a re-run rewrites them.",
     "mpa": "Marine protected area NAME from CDFW ds582, resolved by point-in-polygon. null means the point fell outside every MPA polygon. Do not hand-populate. Read together with mpa_resolved: a null with mpa_resolved false is unknown, not unprotected.",
     "mpa_resolved": "true once the CDFW point-in-polygon join has run AND the result survives this file's ~100 m coordinate precision. false where the spot lies within 150 m of an MPA boundary, i.e. inside the coordinate error bar, so the in/out call is not trustworthy either way. Legally load-bearing for the tidepool audience.",
     "notes": "Free text. Not parsed."
@@ -76,8 +67,6 @@
       "county_station_distance_m": 400,
       "county_station_suspect": false,
       "audiences": ["sail", "surf", "swim"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Harbor mouth; sailing departure point. Watch PZZ740 for small craft advisories."
     },
@@ -91,8 +80,6 @@
       "county_station_distance_m": 176,
       "county_station_suspect": false,
       "audiences": ["surf", "swim", "bird"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "San Luis Rey outfall is just north; USGS 11042000 is the relevant discharge signal after rain."
     },
@@ -106,8 +93,6 @@
       "county_station_distance_m": 142,
       "county_station_suspect": false,
       "audiences": ["swim", "surf"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Loma Alta Creek outlet; chronic dry-weather bacteria site. County station join matters here."
     },
@@ -121,8 +106,6 @@
       "county_station_distance_m": 207,
       "county_station_suspect": false,
       "audiences": ["surf", "swim"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Agua Hedionda lagoon mouth immediately north."
     },
@@ -136,8 +119,6 @@
       "county_station_distance_m": 751,
       "county_station_suspect": false,
       "audiences": ["surf", "swim"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": ""
     },
@@ -152,8 +133,6 @@
       "county_station_suspect": null,
       "county_station_null_reason": "bird-only site, no water-contact audience",
       "audiences": ["bird"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "No wave binding. Tide still drives mudflat exposure and shorebird foraging; keep tide_station populated."
     },
@@ -167,8 +146,6 @@
       "county_station_distance_m": 1402,
       "county_station_suspect": true,
       "audiences": ["surf", "dive"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Bluff access; trail condition is a real hazard independent of surf."
     },
@@ -182,8 +159,6 @@
       "county_station_distance_m": 177,
       "county_station_suspect": false,
       "audiences": ["swim", "surf"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": false,
       "notes": "Cottonwood Creek outlet; lifeguarded, family default for Encinitas."
     },
@@ -197,40 +172,6 @@
       "county_station_distance_m": 67,
       "county_station_suspect": false,
       "audiences": ["surf", "tidepool", "dive"],
-      "tidepool_floor_ft": 0.0,
-      "tidepool_floor_confidence": "low",
-      "floor_evidence": [
-        {
-          "method": "author_estimate",
-          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
-          "source_date": "2026-07-27",
-          "value_ft": 0.9,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-28",
-          "note": "1.1.1 set -0.6 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.9 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
-        },
-        {
-          "method": "marine_topography",
-          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Swami's Beach site page, read for network membership and survey type; nearest Biodiversity Survey site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-29",
-          "note": "Ran and found no Biodiversity Survey site here, so no surveyed elevation exists at this spot at any distance. A MARINe site named 'Swami's Beach' does exist, but it runs Long-Term Monitoring only, established 2017 by National Park Service staff, and LTM has no topography component -- elevation along transects belongs to the Biodiversity Survey, which has never been run there. Its coordinate cannot be checked against ours either: MARINe's public LTM extracts hold no record south of 33.2 degrees N, so the San Diego LTM sites are absent from the machine-readable feed entirely. Name-matching would have misled twice over, because MARINe places its Swami's Beach site 'within Cardiff State Beach and the Swami's State Marine Conservation Area', which is south of Swami's proper. Nearest Biodiversity Survey site of any kind is MARINe's 'Cardiff Reef' at 32.99984, -117.27867, 4132 m away and a different reef by any reading. The instrumented route here remains lidar hypsometry."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.1.0 (taxa 1.0.0, spots 1.3.1, content_hash 6ece7b19), read against the permissiveness rule in calibration/floor-calibration.md section 7: iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-30",
-          "value_ft": 0.0,
-          "datum_transform": null,
-          "n": 237,
-          "run_date": "2026-07-30",
-          "note": "A CEILING, not an estimate: the most permissive floor the rule allows on a band the gates may read, and it says nothing about where this reef actually surfaces. NOT A PROMOTION INPUT -- never one side of a section 7 clause-1 agreement comparison at any tolerance, because an upper bound from citizen-science inference and an instrumented measurement are not two estimates of one quantity. tidepool_floor_confidence stays low. Derivation, and the reason this value is the CONSERVATIVE end of a bracket: 2x this spot's background band is the bar, and walking up, the highest band clearing it is 0.00-0.25 ft -- but that band holds only 8 visits against the 15 a bin needs to be usable, so a ceiling of 0.25 ft would rest on a band no gate may read. The highest clearing band that IS usable is -0.50-0.00 ft, holding 51 visits. The true ceiling therefore lies somewhere in 0.00-0.25 ft and this corpus cannot say where; 0.00 ft is the end of that bracket that fails toward the restriction, which is the direction the rule requires. Worth flagging for whoever reads this next: this spot's background band is the widest of the three that publish, spanning 0.25-3.00 ft pooled from 6 bins, and its measured background moved by roughly half on a bin-width change alone between calibration.json 1.0.0 and 1.1.0 -- so the quantity being doubled here is the least stable of the three. n is 237 collapsed visits from 185 observers. Figures summarised rather than copied because a re-run rewrites them. The standing limitation: sighting rate is not walkability, so the curve's SHAPE is trustworthy at 9.67x amplitude and its LEVEL is an assumption."
-        }
-      ],
       "mpa": null, "mpa_resolved": false,
       "notes": "Reef point. MPA UNRESOLVED: point-in-polygon puts this 18 m OUTSIDE Swami's SMCA, far inside this file's ~100 m coordinate precision, so neither in nor out can be asserted. Do not present collection rules from the mpa field until the coordinate is surveyed."
     },
@@ -244,50 +185,6 @@
       "county_station_distance_m": 177,
       "county_station_suspect": false,
       "audiences": ["surf", "tidepool"],
-      "tidepool_floor_ft": 1.0,
-      "tidepool_floor_confidence": "low",
-      "floor_evidence": [
-        {
-          "method": "author_estimate",
-          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
-          "source_date": "2026-07-27",
-          "value_ft": 1.0,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-28",
-          "note": "1.1.1 set -0.5 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.0 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 74,
-          "run_date": "2026-07-29",
-          "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (too-few-usable-bins, amplitude-below-gate). 2 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 1.00x against the 2.0x gate. n is 74 collapsed visits, from 98 records by 50 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        },
-        {
-          "method": "marine_topography",
-          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Cardiff Reef site page, read for network membership and survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-29",
-          "note": "Ran and found no Biodiversity Survey site at THIS reef, so no surveyed elevation exists here. A Biodiversity Survey site named 'Cardiff Reef' does exist, surveyed once in 2012, but it is a different reef 1950 m away at 32.99984, -117.27867: MARINe describes it as 'at the south end of Cardiff State Beach' and 'roughly 1.7 km south of the entrance to San Elijo Lagoon, and about 100 meters south of a large beach parking lot', whereas this spot is the break at the lagoon mouth. The prose corroborates the published coordinate, so this is a genuine name collision and not a coordinate error, and 1950 m is 5.4x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record. Binding the two on the strength of the shared name would have imported a stranger's elevation into this spot's floor. The instrumented route here remains lidar hypsometry."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.1.0 (taxa 1.0.0, spots 1.3.1, content_hash 6ece7b19): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-30",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 74,
-          "run_date": "2026-07-30",
-          "note": "Ran again and refused again, so no floor is set from it here: refused on 2 of 4 criteria (too-few-usable-bins, amplitude-below-gate). 2 of 10 bins hold the 15 visits a bin needs to be usable and 3 are needed, and the amplitude ratio is 0.91x against the 2.0x gate. Both failures are the same ones the 1.0.0 run found. n is 74 collapsed visits, from 98 records by 50 observers -- thin, and the rate does not fall with height either, so more observations are not obviously the fix. Supersedes the figures in this spot's calibration.json 1.0.0 entry above, which is kept unedited because this ledger is append-only. The bin scheme changed from 6 bins to 10 and the amplitude gate's background became the highest usable bin pooled with everything above it, so the per-bin counts and the ratio are not comparable line for line with that entry. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        }
-      ],
       "mpa": "Swami's SMCA", "mpa_resolved": false,
       "notes": "San Elijo lagoon mouth adjacent; post-rain water quality degrades quickly."
     },
@@ -302,8 +199,6 @@
       "county_station_suspect": null,
       "county_station_null_reason": "bird-only site, no water-contact audience",
       "audiences": ["bird"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Ecological reserve. High eBird hotspot density."
     },
@@ -317,8 +212,6 @@
       "county_station_distance_m": 228,
       "county_station_suspect": false,
       "audiences": ["swim", "surf"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": ""
     },
@@ -332,50 +225,6 @@
       "county_station_distance_m": 580,
       "county_station_suspect": false,
       "audiences": ["swim", "bird", "tidepool"],
-      "tidepool_floor_ft": 0.9,
-      "tidepool_floor_confidence": "low",
-      "floor_evidence": [
-        {
-          "method": "author_estimate",
-          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
-          "source_date": "2026-07-27",
-          "value_ft": 0.9,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-28",
-          "note": "1.1.1 set -0.6 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.9 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 31,
-          "run_date": "2026-07-29",
-          "note": "Ran and refused, so no floor is set from it here: refused on 3 of 4 criteria (too-few-usable-bins, not-declining, amplitude-below-gate). 0 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and the amplitude ratio could not be computed at all, for want of two usable bins. n is 31 collapsed visits, from 35 records by 28 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        },
-        {
-          "method": "marine_topography",
-          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/), read for absence; nearest Biodiversity Survey site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-29",
-          "note": "Ran and found no Biodiversity Survey site here, so no surveyed elevation exists at this spot. This is a closed-world result rather than a failed search: MARINe's California South region list holds 46 sites, 12 of them in San Diego County, and in coastline order there is nothing at all between 'Cardiff Reef' and 'Scripps' -- no Del Mar, no Torrey Pines, no Black's. Nearest Biodiversity Survey site is 'Scripps Reef' at 32.87165, -117.25328, 6826 m south, which is 18.8x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record. The instrumented route here remains lidar hypsometry."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.1.0 (taxa 1.0.0, spots 1.3.1, content_hash 6ece7b19): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-30",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 31,
-          "run_date": "2026-07-30",
-          "note": "Ran again and refused again, so no floor is set from it here: refused on 3 of 4 criteria (too-few-usable-bins, not-declining, amplitude-below-gate). 0 of 10 bins hold the 15 visits a bin needs to be usable, 3 are needed, and the amplitude ratio cannot be computed at all for want of two usable bins. Narrower bins made this worse rather than better, which is the honest arithmetic of 31 visits spread over 10 bands. n is 31 collapsed visits, from 35 records by 28 observers. The thinnest of the eight by a wide margin. Supersedes the figures in this spot's calibration.json 1.0.0 entry above, which is kept unedited because this ledger is append-only. The bin scheme changed from 6 bins to 10 and the amplitude gate's background became the highest usable bin pooled with everything above it, so the per-bin counts and the ratio are not comparable line for line with that entry. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        }
-      ],
       "mpa": null, "mpa_resolved": true,
       "notes": "Los Penasquitos lagoon mouth. Long beach; a single point is a poor proxy for its full length."
     },
@@ -389,8 +238,6 @@
       "county_station_distance_m": 814,
       "county_station_suspect": false,
       "audiences": ["surf"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Scripps submarine canyon focuses swell; this spot breaks materially larger than neighbours on the same buoy reading. Threshold offsets needed."
     },
@@ -404,50 +251,6 @@
       "county_station_distance_m": 187,
       "county_station_suspect": false,
       "audiences": ["dive", "swim", "tidepool"],
-      "tidepool_floor_ft": 0.8,
-      "tidepool_floor_confidence": "low",
-      "floor_evidence": [
-        {
-          "method": "author_estimate",
-          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
-          "source_date": "2026-07-27",
-          "value_ft": 0.8,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-28",
-          "note": "1.1.1 set -0.7 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.8 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 239,
-          "run_date": "2026-07-29",
-          "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (not-declining, amplitude-below-gate). 6 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 0.67x against the 2.0x gate. n is 239 collapsed visits, from 310 records by 115 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        },
-        {
-          "method": "marine_topography",
-          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Scripps Reef site page, read for absence at this coordinate and for the nearest site's survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-29",
-          "note": "Ran and found no Biodiversity Survey site at this coordinate, so no surveyed elevation exists here. Nearest is 'Scripps Reef' at 32.87165, -117.25328, surveyed in 2002, 2006, 2010, 2013, 2020 and 2025, but it is 1666 m away -- 4.6x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record -- and MARINe places it 'midway between the Scripps Institution of Oceanography Pier and Black's Canyon', which is the far north end of the La Jolla Shores stretch and past the Dike Rock pools this spot's notes mention. Same beach, different bench, and too far to stand in for this coordinate. The instrumented route here remains lidar hypsometry."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.1.0 (taxa 1.0.0, spots 1.3.1, content_hash 6ece7b19): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-30",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 239,
-          "run_date": "2026-07-30",
-          "note": "Ran again and refused again, so no floor is set from it here: refused on 2 of 4 criteria (not-declining, amplitude-below-gate). The amplitude ratio is 0.67x against the 2.0x gate -- unchanged to two decimals from the 1.0.0 run, because this spot's pooled background band is exactly the 1.00-3.00 ft band the old top bin already was. Only 4 of 21 comparable bin pairs decline with height, 19% against a 70% bar: the rate RISES with the tide here, which is the diver signature, not a thin-data problem. 7 of 10 bins are usable and n is 239 collapsed visits from 115 observers, so this is a refusal on 239 visits rather than for want of them. Supersedes the figures in this spot's calibration.json 1.0.0 entry above, which is kept unedited because this ledger is append-only. The bin scheme changed from 6 bins to 10 and the amplitude gate's background became the highest usable bin pooled with everything above it, so the per-bin counts and the ratio are not comparable line for line with that entry. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        }
-      ],
       "mpa": null, "mpa_resolved": false,
       "notes": "Primary shore-dive entry for the corridor. Dike Rock tidepools at the north end. MPA UNRESOLVED: 45 m outside Matlahuayl SMR, inside the ~100 m coordinate error bar. The earlier expectation of San Diego-Scripps Coastal SMCA was simply wrong -- that boundary is 1003 m away. The open question here is Matlahuayl, not Scripps."
     },
@@ -461,50 +264,6 @@
       "county_station_distance_m": 82,
       "county_station_suspect": false,
       "audiences": ["dive", "swim", "tidepool"],
-      "tidepool_floor_ft": 1.1,
-      "tidepool_floor_confidence": "low",
-      "floor_evidence": [
-        {
-          "method": "author_estimate",
-          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
-          "source_date": "2026-07-27",
-          "value_ft": 1.1,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-28",
-          "note": "1.1.1 set -0.4 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.1 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 354,
-          "run_date": "2026-07-29",
-          "note": "Ran and refused, so no floor is set from it here: refused on 2 of 4 criteria (not-declining, amplitude-below-gate). 6 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 0.85x against the 2.0x gate. n is 354 collapsed visits, from 545 records by 307 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        },
-        {
-          "method": "marine_topography",
-          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the La Jolla Caves site page, read for network membership and survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-29",
-          "note": "UNRESOLVED in both directions, and deliberately not decided here. The Biodiversity Survey site 'La Jolla Caves', surveyed in 2009, 2013 and 2020, may or may not be this reef, because MARINe's own two accounts of where it is do not agree. Its published coordinate is 32.84323, -117.28120, which is 1142 m south of this spot on a west-facing stretch -- 3.1x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record -- so on the coordinate alone it is a different reef. But MARINe's prose puts the site 'within the Matlahuayl State Marine Reserve' and describes it as north-facing on relatively flat terrain, which describes the Cove and Goldfish Point, essentially on top of this coordinate; and the ds582 join puts this spot 21 m from the Matlahuayl boundary, so the prose reading is entirely consistent with this being the site. One of the two is wrong and nothing public arbitrates: this spot's own mpa is null with mpa_resolved false, so the file cannot check the reserve claim either. Recorded as a conflict rather than as a distance, because picking either reading would either claim a reef that is not ours or discard one that is. Resolving it needs the survey's benchmark-bolt coordinate, which is not published. Highest-value follow-up of the eight, since this spot also refuses the revealed-preference method and is otherwise unreached."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.1.0 (taxa 1.0.0, spots 1.3.1, content_hash 6ece7b19): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-30",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 354,
-          "run_date": "2026-07-30",
-          "note": "Ran again and refused again, so no floor is set from it here -- but read the criteria count with care. It refused on 1 of 4 criteria (amplitude-below-gate) where the 1.0.0 run refused on 2 of 4, and the criterion it now passes it should not: not-declining reads 76% concordant on a table that is flat across 3.25 ft of tide, because a single thin low band supplies 6 of the 16 concordant pairs. That is a known defect in the criterion, tracked separately, NOT evidence this spot improved. The amplitude ratio is 1.46x against the 2.0x gate. n is 354 collapsed visits from 307 observers, so this is a refusal on a large sample: the rate simply does not depend on the tide here. Do not read the single remaining failure as a near miss. Supersedes the figures in this spot's calibration.json 1.0.0 entry above, which is kept unedited because this ledger is append-only. The bin scheme changed from 6 bins to 10 and the amplitude gate's background became the highest usable bin pooled with everything above it, so the per-bin counts and the ratio are not comparable line for line with that entry. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        }
-      ],
       "mpa": null, "mpa_resolved": false,
       "notes": "MPA UNRESOLVED: 21 m outside Matlahuayl SMR, inside the ~100 m coordinate error bar, so no-take status cannot be asserted either way. Matlahuayl is no take of any kind if the point resolves inside, so treat it as restricted until surveyed. Pinniped closures apply seasonally and are not in any API."
     },
@@ -518,50 +277,6 @@
       "county_station_distance_m": 242,
       "county_station_suspect": false,
       "audiences": ["surf", "tidepool"],
-      "tidepool_floor_ft": 1.0,
-      "tidepool_floor_confidence": "low",
-      "floor_evidence": [
-        {
-          "method": "author_estimate",
-          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
-          "source_date": "2026-07-27",
-          "value_ft": 1.0,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-28",
-          "note": "1.1.1 set -0.5 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.0 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.0.0 (taxa 1.0.0, spots 1.2.0): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 99,
-          "run_date": "2026-07-29",
-          "note": "Ran and refused, so no floor is set from it here: refused on 1 of 4 criteria (amplitude-below-gate). 3 of 6 bins hold the 15 visits a bin needs to be usable, 3 are needed, and amplitude ratio 1.38x against the 2.0x gate. n is 99 collapsed visits, from 158 records by 89 observers. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        },
-        {
-          "method": "marine_topography",
-          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Wind and Sea site page, read for network membership and survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-29",
-          "note": "IN the Biodiversity Surveys network, and the second-closest match of the eight. Site 'Wind and Sea' at 32.83285, -117.28231 is 236 m from this spot, which is 0.65x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record, so the separation is not distinguishable from zero and this is the same reef. Surveyed four times: 2012, 2018, 2020 and 2025. A surveyed elevation therefore exists, and Biodiversity Survey topography is an instrumented method under the section 7 promotion rule, which makes this the most valuable hit of the sweep: this spot refuses the revealed-preference method, so nothing else in this repo reaches it. value_ft is null because the number is not obtainable, NOT because it does not exist. No public MARINe product carries an elevation -- the point contact, quadrat and swath extracts all carry coordinates, event dates and depth 0.0, and no elevation or vertical-datum field of any kind -- topography is not among the assets the data-request page offers, and the datum is stated inconsistently: the survey-methods page says elevation is recorded relative to MLLW, while the Data Assets PDF of 2025-10-21 describes it as referenced to a per-site benchmark bolt and names no vertical datum anywhere in the document. A direct request to the survey PI is required, it must name the vertical datum explicitly or the answer is unusable, and none has been made. This entry does not promote anything: with value_ft null there is nothing for a second method to agree with."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.1.0 (taxa 1.0.0, spots 1.3.1, content_hash 6ece7b19): iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-30",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": 99,
-          "run_date": "2026-07-30",
-          "note": "Ran again and refused again, so no floor is set from it here: refused on 1 of 4 criteria (amplitude-below-gate), the same one as the 1.0.0 run. The amplitude ratio is 1.12x against the 2.0x gate, down from 1.38x -- the pooled background band spans -0.50-3.00 ft across 8 of the 10 bins, which is itself the finding: only 3 bins hold 15 visits and all three sit below the datum, so this corpus cannot resolve a background here distinct from the low-tide rate it would be divided into. n is 99 collapsed visits, from 158 records by 89 observers. Supersedes the figures in this spot's calibration.json 1.0.0 entry above, which is kept unedited because this ledger is append-only. The bin scheme changed from 6 bins to 10 and the amplitude gate's background became the highest usable bin pooled with everything above it, so the per-bin counts and the ratio are not comparable line for line with that entry. The authoritative wording is this slug's null_reason in shared/calibration.json, summarised rather than copied here because a re-run rewrites it."
-        }
-      ],
       "mpa": null, "mpa_resolved": true,
       "notes": "Reef break, rock hazard on low tide."
     },
@@ -575,8 +290,6 @@
       "county_station_distance_m": 194,
       "county_station_suspect": false,
       "audiences": ["surf", "dive"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": "South La Jolla SMR", "mpa_resolved": true,
       "notes": "Longboard and beginner-friendly; surf threshold should skew lower than neighbours."
     },
@@ -590,8 +303,6 @@
       "county_station_distance_m": 150,
       "county_station_suspect": false,
       "audiences": ["swim", "surf"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Highest general-beachgoer volume in the corridor. Rip current statements matter most here."
     },
@@ -605,8 +316,6 @@
       "county_station_distance_m": 28,
       "county_station_suspect": false,
       "audiences": ["surf", "swim", "bird"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "San Diego River mouth immediately north; post-rain plume site."
     },
@@ -620,40 +329,6 @@
       "county_station_distance_m": 418,
       "county_station_suspect": false,
       "audiences": ["surf", "tidepool", "dive"],
-      "tidepool_floor_ft": 0.25,
-      "tidepool_floor_confidence": "low",
-      "floor_evidence": [
-        {
-          "method": "author_estimate",
-          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
-          "source_date": "2026-07-27",
-          "value_ft": 0.7,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-28",
-          "note": "1.1.1 set -0.8 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +0.7 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
-        },
-        {
-          "method": "marine_topography",
-          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Sunset Cliffs site page, read for network membership and survey years; site coordinate from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-29",
-          "note": "In the Biodiversity Surveys network, but the distance is explicitly NOT resolved as the same bench. Site 'Sunset Cliffs' at 32.71913, -117.25683, surveyed once, in 2022, is 437 m from this spot. That is 1.2x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record, which is the awkward middle: the separation can be neither confirmed as zero nor ruled out. Sunset Cliffs is a roughly 3 km run of many separate ledges where being one bench off is easy, and this spot's own notes say a wrong floor here strands people, so same-bench must not be assumed on a 437 m match. Treat as a candidate needing the survey's benchmark-bolt coordinate, not as this spot's elevation. value_ft is null for the reason it is null everywhere in this sweep: no public MARINe product carries an elevation, topography is not among the assets the data-request page offers, and the datum is stated inconsistently between the survey-methods page (relative to MLLW) and the Data Assets PDF of 2025-10-21 (referenced to a per-site benchmark bolt, no vertical datum named). A direct request to the survey PI is required, it must name the vertical datum explicitly, and none has been made."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.1.0 (taxa 1.0.0, spots 1.3.1, content_hash 6ece7b19), read against the permissiveness rule in calibration/floor-calibration.md section 7: iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-30",
-          "value_ft": 0.25,
-          "datum_transform": null,
-          "n": 404,
-          "run_date": "2026-07-30",
-          "note": "A CEILING, not an estimate: the most permissive floor the rule allows on a band the gates may read, and it says nothing about where this reef actually surfaces. NOT A PROMOTION INPUT -- never one side of a section 7 clause-1 agreement comparison at any tolerance, because an upper bound from citizen-science inference and an instrumented measurement are not two estimates of one quantity. tidepool_floor_confidence stays low. Derivation, and the reason this value is the CONSERVATIVE end of a bracket: 2x this spot's background band is the bar, and walking up, the highest band clearing it is 0.25-0.50 ft -- but that band holds only 14 visits, one short of the 15 a bin needs to be usable, so a ceiling of 0.50 ft would rest on a band no gate may read. The highest clearing band that IS usable is 0.00-0.25 ft, holding 31 visits. The true ceiling therefore lies somewhere in 0.25-0.50 ft and this corpus cannot say where; 0.25 ft is the end of that bracket that fails toward the restriction, which is the direction the rule requires. One more visit in the 0.25-0.50 band would resolve it. n is 404 collapsed visits from 264 observers. Figures summarised rather than copied because a re-run rewrites them. The standing limitation: sighting rate is not walkability -- the curve's SHAPE is trustworthy at 5.93x amplitude, its LEVEL is an assumption -- and this spot's own notes say a wrong floor here strands people, which is a further reason to take the strict end."
-        }
-      ],
       "mpa": null, "mpa_resolved": true,
       "notes": "SAFETY: ledge system with cliff access. Getting the tidepool floor wrong here strands people. Verify before shipping."
     },
@@ -667,40 +342,6 @@
       "county_station_distance_m": 445,
       "county_station_suspect": false,
       "audiences": ["tidepool", "bird"],
-      "tidepool_floor_ft": 1.0,
-      "tidepool_floor_confidence": "low",
-      "floor_evidence": [
-        {
-          "method": "author_estimate",
-          "source": "spots.json 1.1.1 author estimate, raised +1.5 ft uniformly in 1.2.0",
-          "source_date": "2026-07-27",
-          "value_ft": 1.3,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-28",
-          "note": "1.1.1 set -0.2 ft, which encoded EXCELLENT tidepooling; 1.2.0 raised it to +1.3 ft by adding exactly +1.5 ft. That constant was applied to all 8 tidepool floors rather than being re-judged per reef, so it moved every floor in the permissive direction and the author's relative ranking of the eight survived the change untested. A placeholder, not a measurement: nothing here was surveyed, modelled or instrumented."
-        },
-        {
-          "method": "marine_topography",
-          "source": "MARINe site list, California South region (marine.ucsc.edu/sites/sites-region/sites-region-ca-south/) and the Cabrillo I, Cabrillo II and Cabrillo III site pages, read for network membership and survey years; site coordinates from OBIS dataset bb638343-bbc9-464d-88d8-18d9ba29ecdd 'MARINe/PISCO: Intertidal: MARINe Coastal Biodiversity Surveys: Point Contact Surveys Summarized' (doi:10.6085/AA/marine_cbs.5.7), WGS84",
-          "source_date": "2026-07-29",
-          "value_ft": null,
-          "datum_transform": null,
-          "n": null,
-          "run_date": "2026-07-29",
-          "note": "IN the Biodiversity Surveys network, and the best-matched spot of the eight. Site 'Cabrillo I' at 32.66947, -117.24550 is 70 m from this spot -- 0.19x the combined uncertainty of this file's ~100 m coordinates and the 350 m coordinateUncertaintyInMeters the MARINe dataset carries per record, so indistinguishable from zero -- and has been surveyed six times: 2002, 2004, 2009, 2013, 2020 and 2025. A second Biodiversity Survey site, 'Cabrillo III', is 361 m away at 32.66583, -117.24417, surveyed in 2002, 2012, 2017 and 2024; both sit inside Cabrillo National Monument, whose benches are separate reefs, so WHICH of the two this coordinate denotes is a question for whoever requests the data rather than one this entry settles. Cabrillo II is Long-Term Monitoring only and carries no topography component. This matters beyond one floor: section 6 spends the NPS 0.7 ft check here exactly once against lidar hypsometry, and a MARINe transect elevation would be a third independent instrumented reading at the one spot that also has a revealed-preference entry, so it could corroborate without consuming that check. value_ft is null because no public MARINe product carries an elevation, topography is not among the assets the data-request page offers, and the datum is stated inconsistently between the survey-methods page (relative to MLLW) and the Data Assets PDF of 2025-10-21 (referenced to a per-site benchmark bolt, no vertical datum named); the data-request page also warns that processing takes longer for NPS sites, which this is. A direct request to the survey PI is required, it must name the vertical datum explicitly, and none has been made."
-        },
-        {
-          "method": "inat_revealed",
-          "source": "shared/calibration.json 1.1.0 (taxa 1.0.0, spots 1.3.1, content_hash 6ece7b19), read against the permissiveness rule in calibration/floor-calibration.md section 7: iNaturalist research-grade sightings of the frozen target taxa within 500 m, corpus from 2016-01-01, binned by the day's lowest predicted low at CO-OPS 9410230 (2016-2026, MLLW)",
-          "source_date": "2026-07-30",
-          "value_ft": 1.0,
-          "datum_transform": null,
-          "n": 1224,
-          "run_date": "2026-07-30",
-          "note": "A CEILING, not an estimate: the most permissive floor the rule allows, and it says nothing about where this reef actually surfaces. NOT A PROMOTION INPUT -- never one side of a section 7 clause-1 agreement comparison at any tolerance, because an upper bound from citizen-science inference and an instrumented measurement are not two estimates of one quantity. tidepool_floor_confidence stays low. Derivation: this spot's background band is the highest usable bin pooled with everything above it, and 2x that rate is the bar; the highest band clearing it is 0.75-1.00 ft, holding 30 visits, which is over the 15 a bin needs to be usable. So 1.00 ft is the ceiling and the +1.3 ft in force was above it -- the band 1.25-1.50 ft that +1.3 admitted sits below the bar AND holds only 11 visits. n is 1224 collapsed visits from 807 observers. Figures summarised rather than copied because a re-run rewrites them; the artifact is authoritative. The standing limitation: sighting rate is not walkability, so the curve's SHAPE is trustworthy at 11.83x amplitude and monotone across eight usable bins, but its LEVEL is an assumption."
-        }
-      ],
       "mpa": "Cabrillo SMR", "mpa_resolved": false,
       "notes": "National Monument: gate hours and entry fee constrain access independently of tide. Point-in-polygon puts this INSIDE Cabrillo SMR -- an SMR, not the SMCA previously assumed, so no take of any kind -- but by only 11 m, inside the ~100 m coordinate error bar, hence mpa_resolved false. The thin margin is a reason to verify the boundary, never to relax the restriction. Best-known tidepool site in the corridor."
     },
@@ -714,8 +355,6 @@
       "county_station_distance_m": 463,
       "county_station_suspect": false,
       "audiences": ["swim", "surf", "bird"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Increasingly affected by south-county transboundary flows. Least Tern nesting closures seasonally."
     },
@@ -729,8 +368,6 @@
       "county_station_distance_m": 178,
       "county_station_suspect": false,
       "audiences": ["swim", "sail"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Ocean side uses 9410230. If a bayside spot is added later it must use 9410170; do not reuse this record."
     },
@@ -744,8 +381,6 @@
       "county_station_distance_m": 172,
       "county_station_suspect": false,
       "audiences": ["surf", "swim", "bird"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": true,
       "notes": "Most closure-affected spot in the corridor. IBWC station 11013300 is the upstream flow signal, but dry-weather canyon collectors enter downstream of that gauge: a low reading does NOT imply clean water here."
     },
@@ -760,8 +395,6 @@
       "county_station_suspect": null,
       "county_station_null_reason": "bird-only site, no water-contact audience",
       "audiences": ["bird"],
-      "tidepool_floor_ft": null,
-      "tidepool_floor_confidence": null,
       "mpa": null, "mpa_resolved": false,
       "notes": "Tijuana River estuary. MPA UNRESOLVED: 3 m outside Tijuana River Mouth SMCA -- effectively on the line and far inside the ~100 m coordinate error bar. Frequently under long-duration closure; water contact audiences should be suppressed, not shown as poor."
     }

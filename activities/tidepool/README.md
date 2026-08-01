@@ -44,12 +44,14 @@ extraction target rather than the thing to keep.
 
 ## What is not here
 
-`tidepool_floor_ft` is **not** a tidepool parameter. It is the tide height at
-which that reef surfaces — the same number for a photographer, a MARINe surveyor
-and a child with a bucket — and it is a measured zone fact belonging to the
-intertidal. #124 moves it to `shared/intertidal.json` and gives it
-`core/zones/intertidal.ts`. Until then it sits in `shared/spots.json` against
-that file's own rule; ADR 0002 explains why it had nowhere else to be.
+**The floor.** It is not a tidepool parameter: it is the tide height at which
+that reef surfaces — the same number for a photographer, a MARINe surveyor and a
+child with a bucket — and it is a measured zone fact belonging to the
+intertidal. It lives in `shared/intertidal.json` and is read through
+`core/zones/intertidal.ts`, which is also where the eight-spot scope of this
+grid comes from. What this activity owns is the comparison, not the number. ADR
+0002 explains why it sat in `shared/spots.json` until #124 against that file's
+own rule.
 
 The swell ceiling is in `core/thresholds.ts` today, which is the pre-split
 resting place rather than a claim. #128 decides that per-activity ceilings live

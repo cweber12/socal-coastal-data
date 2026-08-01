@@ -8,7 +8,7 @@ import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } f
 import { lowLighting, type WindowResult } from '@/activities/tidepool/policy';
 import type { SwellCeiling } from '@/core/thresholds';
 import type { SpotSwell } from '@/core/upstream';
-import type { TidepoolSpot } from '@/shared/spots.generated';
+import type { IntertidalSpot } from '@/core/zones/intertidal';
 
 /**
  * A spot's week at a glance.
@@ -39,7 +39,7 @@ export function WeekRibbon({
   showSpotLink = true,
   nameOnPage = false,
 }: {
-  spot: TidepoolSpot;
+  spot: IntertidalSpot;
   days: readonly (WindowResult | null)[];
   dates: readonly LocalDate[];
   timeZone: string;

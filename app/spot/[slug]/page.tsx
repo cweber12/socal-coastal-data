@@ -14,13 +14,14 @@ import { loadSpotWeek, tidepoolSpotBySlug } from '@/activities/tidepool/grid';
 import { cellAriaLabel, flagBadgeLabel } from '@/activities/tidepool/labels';
 import { formatDateLong, formatLocalDate, startOfLocalDay } from '@/core/time';
 import { lowLighting } from '@/activities/tidepool/policy';
-import { SPOTS_VERSION, TIDE_DATUM, TIDEPOOL_SPOTS } from '@/shared/spots.generated';
+import { INTERTIDAL_SPOTS } from '@/core/zones/intertidal';
+import { SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
 
 export const dynamic = 'force-dynamic';
 
 /** Only the eight evaluable spots have a page; the rest have no floor to compute against. */
 export function generateStaticParams() {
-  return TIDEPOOL_SPOTS.map((spot) => ({ slug: spot.slug }));
+  return INTERTIDAL_SPOTS.map((spot) => ({ slug: spot.slug }));
 }
 
 export async function generateMetadata({

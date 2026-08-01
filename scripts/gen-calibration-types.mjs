@@ -218,6 +218,12 @@ interface CalibrationFile {
   version: string;
   taxa_version: string;
   spots_version: string;
+  /**
+   * The zone file that decided which spots the run covered. Optional because
+   * the committed calibration predates membership moving to
+   * shared/intertidal.json; run.ts writes it from the next --fetch onward.
+   */
+  intertidal_version?: string;
   pulled_at: string;
   corpus_from: string;
   radius_m: number;
