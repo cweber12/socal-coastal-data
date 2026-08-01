@@ -426,6 +426,28 @@ describe('today', () => {
     expect(atDawn.sessions.length).toBeGreaterThanOrEqual(2);
     expect(atDawn.best!.startMs).toBeLessThan(lateAfternoon.best!.startMs);
   });
+
+  it('reports the day’s best session once every session has shut, not the first one', () => {
+    /*
+     * After the last session of today, every session has zero minutes left, so a
+     * rule of "most remaining, earliest wins" picks whichever came first -- on
+     * an ordinary corridor day a stretch at 1 a.m. with no daylight in it. The
+     * day page then said "best: none usable" about a day that had offered five
+     * and a half hours in the afternoon.
+     *
+     * The state is still `dark`, which is the true statement about the clock.
+     * `best` is the true statement about the day.
+     */
+    const result = evaluateSurfDay(baseInput({ nowMs: pacific(TODAY, 23, 30) }));
+
+    expect(result.state).toBe('dark');
+    expect(result.sessions.every((s) => (s.minutesRemaining ?? 0) === 0)).toBe(true);
+
+    const longest = Math.max(...result.sessions.map((s) => s.usableMinutes));
+    expect(longest).toBeGreaterThan(0);
+    expect(result.best!.usableMinutes).toBe(longest);
+    expect(result.best).not.toBe(result.sessions[0]);
+  });
 });
 
 /* =========================================================================

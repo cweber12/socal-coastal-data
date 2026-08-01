@@ -5,10 +5,11 @@ import {
   cellAriaLabel,
   flagBadgeLabel,
   formatHeight,
-  sessionAnchorLabel,
+  formatSessionClock,
+  sessionAnchorShort,
   unevaluatedAriaLabel,
 } from '@/activities/surf/labels';
-import { formatClock, formatDuration, formatLocalDate, type LocalDate } from '@/core/time';
+import { formatDuration, formatLocalDate, type LocalDate } from '@/core/time';
 import { sessionLighting, type SurfDay, type SurfSession } from '@/activities/surf/policy';
 import { surfDayPath } from '@/activities/surf/routes';
 
@@ -117,7 +118,7 @@ function SessionLine({
   timeZone: string;
   isBest: boolean;
 }) {
-  const anchor = sessionAnchorLabel(session);
+  const anchor = sessionAnchorShort(session);
   const usable = day.isToday ? (session.minutesRemaining ?? 0) : session.usableMinutes;
 
   return (
@@ -132,33 +133,35 @@ function SessionLine({
         isBest ? 'font-semibold' : 'font-normal',
       ].join(' ')}
     >
-      <span className="flex items-baseline justify-between gap-1 whitespace-nowrap font-mono tabular-nums">
-        <span>
-          {/*
-            The leading edge marker. `‹` when the session was already running at
-            local midnight, so a reader is not told the tide crossed the band
-            edge at exactly 00:00 -- which is what a bare "12:00 am" would say.
-          */}
-          {session.continuesBefore ? (
-            <span className="text-[0.8em] text-[var(--cell-fg-dimmer,var(--text-dimmer))]">‹</span>
-          ) : null}
-          {formatClock(session.startMs, timeZone)}
-          <span className="text-[var(--cell-fg-dim,var(--text-dim))]">–</span>
-          {formatClock(session.endMs, timeZone)}
-          {session.continuesAfter ? (
-            <span className="text-[0.8em] text-[var(--cell-fg-dimmer,var(--text-dimmer))]">›</span>
-          ) : null}
-        </span>
-        <span className="text-[0.9em] text-[var(--cell-fg-dim,var(--text-dim))]">
-          {usable > 0 ? formatDuration(usable) : '—'}
-        </span>
+      {/*
+        Two lines, not one row with the duration beside the range.
+
+        Side by side needed about 200 units of column and the grid has 151 --
+        the same budget activities/tidepool/components/window-cell.tsx measured
+        for its floor gap, and it reached the same answer: on its own line it
+        costs height instead of width, and every column fits again. Getting this
+        wrong pushed the last two day columns off the side of the page, which are
+        the two that are `swell-tbd` by construction.
+      */}
+      <span className="block whitespace-nowrap font-mono tabular-nums">
+        {/*
+          The edge markers. `‹` when the session was already running at local
+          midnight, so a reader is not told the tide crossed the band edge at
+          exactly 00:00 -- which is what a bare "12:00 am" would say.
+        */}
+        {session.continuesBefore ? (
+          <span className="text-[0.8em] text-[var(--cell-fg-dimmer,var(--text-dimmer))]">‹</span>
+        ) : null}
+        {formatSessionClock(session, timeZone)}
+        {session.continuesAfter ? (
+          <span className="text-[0.8em] text-[var(--cell-fg-dimmer,var(--text-dimmer))]">›</span>
+        ) : null}
       </span>
 
-      {anchor ? (
-        <span className="block text-[0.85em] text-[var(--cell-fg-dim,var(--text-dim))]">
-          {anchor}
-        </span>
-      ) : null}
+      <span className="block whitespace-nowrap text-[0.85em] text-[var(--cell-fg-dim,var(--text-dim))]">
+        <span className="font-mono tabular-nums">{usable > 0 ? formatDuration(usable) : '—'}</span>
+        {anchor ? <span> · {anchor}</span> : null}
+      </span>
     </span>
   );
 }

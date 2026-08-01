@@ -48,9 +48,44 @@ export function describeHeight(ft: number): string {
   return `${magnitude} feet above the datum`;
 }
 
-/** `1:12–3:59 pm`, the clock range of one session. */
+/**
+ * The clock range of one session, with a redundant meridiem dropped.
+ *
+ * `1:32–7:23 pm` rather than `1:32 pm–7:23 pm`, and `11:32 am–1:23 pm` when they
+ * genuinely differ. Not a stylistic preference — a width budget.
+ *
+ * The grid has to fit seven day columns plus a 181px spot column inside a
+ * container that caps at 1360px, which leaves about 151px per column;
+ * activities/tidepool/components/window-cell.tsx records the measurement and the
+ * 13px it had spare. A surf cell prints a RANGE where a tidepool cell prints an
+ * instant, so it starts about 60px over budget, and the first render of this
+ * grid pushed the last two columns off the side of the page — which is exactly
+ * the two columns that are `swell-tbd` by construction and most need to be seen.
+ *
+ * Three characters and a space, dropped on the roughly four sessions in five
+ * that do not straddle noon or midnight.
+ */
 export function formatSessionClock(session: SurfSession, timeZone: string): string {
-  return `${formatClock(session.startMs, timeZone)}–${formatClock(session.endMs, timeZone)}`;
+  const start = formatClock(session.startMs, timeZone);
+  const end = formatClock(session.endMs, timeZone);
+  const meridiem = / ([ap]m)$/i.exec(end)?.[1];
+  return meridiem && start.endsWith(` ${meridiem}`)
+    ? `${start.slice(0, -(meridiem.length + 1))}–${end}`
+    : `${start}–${end}`;
+}
+
+/**
+ * What a session brackets, in one or two words, for the cell face.
+ *
+ * The short form of `sessionAnchorLabel`. The spoken sentence gets the long one
+ * — "around the low" reads as prose and "low" does not — and the cell gets this,
+ * for the width reason above. Null for a pass-through in both.
+ */
+export function sessionAnchorShort(session: SurfSession): string | null {
+  const kinds = session.anchors.map((a) => a.kind);
+  if (kinds.length === 0) return null;
+  if (kinds.length === 1) return kinds[0]!;
+  return 'high + low';
 }
 
 /**
@@ -204,10 +239,23 @@ export function thresholdDisclosure(
   minimumFt: number,
   minimumConfidence: string,
 ): string {
+  /*
+   * The swell window's two ends carry a confidence each, and printing both
+   * unconditionally gave "(uncalibrated/uncalibrated)" -- a slash construction
+   * that makes a reader stop and work out which half is which, to learn that
+   * both halves say the same thing. Collapsed when they agree, which is every
+   * value shipped today, and kept apart the moment one of them is promoted,
+   * which is the only case where the distinction is worth the friction.
+   */
+  const swellConfidence =
+    minimumConfidence === ceilingConfidence
+      ? minimumConfidence
+      : `${minimumConfidence} minimum, ${ceilingConfidence} ceiling`;
+
   return (
     `Tide band ${formatThreshold(band.minFt)}–${formatThreshold(band.maxFt)} ft ` +
     `(${bandConfidence}), swell ${formatThreshold(minimumFt)}–${formatThreshold(ceilingFt)} ft ` +
-    `(${minimumConfidence}/${ceilingConfidence}). None has been field-checked, and the surf ` +
-    'zone carries no measured fact behind them.'
+    `(${swellConfidence}). None has been field-checked, and the surf zone carries no measured ` +
+    'fact behind them.'
   );
 }

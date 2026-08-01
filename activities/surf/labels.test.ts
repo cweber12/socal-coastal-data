@@ -10,6 +10,7 @@ import {
   formatSessionClock,
   rowAriaLabel,
   sessionAnchorLabel,
+  sessionAnchorShort,
   thresholdDisclosure,
   unevaluatedAriaLabel,
 } from './labels';
@@ -170,13 +171,46 @@ describe('describeSessionLength', () => {
 });
 
 describe('formatSessionClock', () => {
-  it('is start to end with an en dash', () => {
-    const session = {
-      startMs: pacific(TODAY, 10, 5),
-      endMs: pacific(TODAY, 13, 20),
-    } as never;
-    expect(formatSessionClock(session, ZONE)).toMatch(/–/);
-    expect(formatSessionClock(session, ZONE)).toMatch(/10:05/);
+  it('keeps both meridiems when the session straddles noon', () => {
+    const session = { startMs: pacific(TODAY, 10, 5), endMs: pacific(TODAY, 13, 20) } as never;
+    expect(formatSessionClock(session, ZONE)).toBe('10:05 am–1:20 pm');
+  });
+
+  it('drops the redundant meridiem when both ends share one', () => {
+    // Three characters and a space, on roughly four sessions in five. The grid
+    // has about 151 units per day column and a range needs more than an instant
+    // does; the first render pushed the last two columns off the page.
+    const session = { startMs: pacific(TODAY, 13, 32), endMs: pacific(TODAY, 19, 23) } as never;
+    expect(formatSessionClock(session, ZONE)).toBe('1:32–7:23 pm');
+  });
+
+  it('drops it for a morning session too', () => {
+    const session = { startMs: pacific(TODAY, 7, 47), endMs: pacific(TODAY, 9, 42) } as never;
+    expect(formatSessionClock(session, ZONE)).toBe('7:47–9:42 am');
+  });
+});
+
+describe('sessionAnchorShort', () => {
+  it('is one word for one turn, and null for a pass-through', () => {
+    const low = { anchors: [{ kind: 'low' }] } as never;
+    const high = { anchors: [{ kind: 'high' }] } as never;
+    const none = { anchors: [] } as never;
+    expect(sessionAnchorShort(low)).toBe('low');
+    expect(sessionAnchorShort(high)).toBe('high');
+    expect(sessionAnchorShort(none)).toBeNull();
+  });
+
+  it('names both when the band holds a high and the low next to it', () => {
+    const both = { anchors: [{ kind: 'high' }, { kind: 'low' }] } as never;
+    expect(sessionAnchorShort(both)).toBe('high + low');
+  });
+
+  it('is shorter than the spoken form, which stays prose', () => {
+    // The cell face is on a width budget; a spoken sentence is not, and "low" is
+    // not a sentence.
+    const low = { anchors: [{ kind: 'low' }] } as never;
+    expect(sessionAnchorShort(low)!.length).toBeLessThan(sessionAnchorLabel(low)!.length);
+    expect(sessionAnchorLabel(low)).toBe('around the low');
   });
 });
 
@@ -279,5 +313,18 @@ describe('thresholdDisclosure', () => {
     expect(text).toMatch(/uncalibrated/);
     expect(text).toMatch(/field-checked/);
     expect(text).toMatch(/no measured fact/);
+  });
+
+  it('states one confidence for the swell window when both ends agree', () => {
+    // "(uncalibrated/uncalibrated)" made a reader work out which half was which
+    // to learn that both halves said the same thing.
+    const text = thresholdDisclosure(BAND, 'uncalibrated', 3.0, 'uncalibrated', 1.0, 'uncalibrated');
+    expect(text).toMatch(/swell 1\.0–3\.0 ft \(uncalibrated\)/);
+    expect(text).not.toMatch(/uncalibrated\/uncalibrated/);
+  });
+
+  it('keeps them apart the moment one end is promoted', () => {
+    const text = thresholdDisclosure(BAND, 'uncalibrated', 3.0, 'calibrated', 1.0, 'uncalibrated');
+    expect(text).toMatch(/uncalibrated minimum, calibrated ceiling/);
   });
 });

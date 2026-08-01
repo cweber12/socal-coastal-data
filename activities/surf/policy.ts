@@ -469,15 +469,35 @@ export function evaluateSurfDay(input: SurfInput): SurfDay {
   const decisiveOf = (s: SurfSession) => (isToday ? (s.minutesRemaining ?? 0) : s.usableMinutes);
 
   /*
-   * The day's best session, by decisive minutes, ties going to the earlier one.
+   * The day's best session: most decisive minutes, then most usable minutes,
+   * then earliest.
    *
-   * `sessions` is already in time order because `runs` is, so a plain reduce
-   * keeping strict improvements gives the earlier of two equals without a
-   * secondary sort key.
+   * The second key is not a tidy-up. On today, after the last session has shut,
+   * EVERY session has zero minutes remaining -- so a rule of "most decisive
+   * minutes, earliest wins" picks whichever session happened to come first,
+   * which on an ordinary corridor day is a 1½-hour stretch at 1 a.m. with no
+   * daylight in it. The day page then reported "best: none usable" for a day
+   * that had offered five and a half hours in the afternoon, which is a false
+   * statement about the day made out of a true one about the clock.
+   *
+   * Falling through to usable minutes makes the panel report on the DAY once the
+   * day is over, while `bestMinutes` below still drives the state off decisive
+   * minutes and correctly says `dark`. "The best session was 1:32-7:23 pm, and
+   * there is nothing left of it" is both facts; the old rule had neither.
+   *
+   * `sessions` is in time order because `runs` is, so keeping only strict
+   * improvements gives the earliest of equals without a third key.
    */
   let best: SurfSession | null = null;
   for (const session of sessions) {
-    if (best === null || decisiveOf(session) > decisiveOf(best)) best = session;
+    if (best === null) {
+      best = session;
+      continue;
+    }
+    const byDecisive = decisiveOf(session) - decisiveOf(best);
+    if (byDecisive > 0 || (byDecisive === 0 && session.usableMinutes > best.usableMinutes)) {
+      best = session;
+    }
   }
 
   const dayHeights = samples.filter((s) => s.tMs >= dayStartMs && s.tMs < dayEndMs).map((s) => s.ft);
