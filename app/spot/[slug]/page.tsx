@@ -9,6 +9,7 @@ import { WeekRibbon } from '@/activities/tidepool/components/week-ribbon';
 import { SpotProtection } from '@/core/components/spot-protection';
 import { SightingsSection } from '@/activities/tidepool/components/sightings';
 import { UnresolvedDisclosure } from '@/core/components/unresolved';
+import { UNRESOLVED_SOURCES } from '@/app/unresolved-sources';
 import { CellShell, FloorGap, TideLine } from '@/activities/tidepool/components/window-cell';
 import { loadSpotWeek, tidepoolSpotBySlug } from '@/activities/tidepool/grid';
 import { cellAriaLabel, flagBadgeLabel } from '@/activities/tidepool/labels';
@@ -203,7 +204,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
         </section>
       ) : null}
 
-      <UnresolvedDisclosure />
+      <UnresolvedDisclosure sources={UNRESOLVED_SOURCES} />
 
       <Notices notices={week.notices} />
 

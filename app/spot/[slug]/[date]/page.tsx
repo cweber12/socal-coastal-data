@@ -8,6 +8,7 @@ import { FlagBadge } from '@/activities/tidepool/components/flag-badge';
 import { RateRefusal } from '@/activities/tidepool/components/rate-panel';
 import { SwellProvenance } from '@/activities/tidepool/components/spot-summary';
 import { UnresolvedDisclosure } from '@/core/components/unresolved';
+import { UNRESOLVED_SOURCES } from '@/app/unresolved-sources';
 import { calibrationFor, CALIBRATION_PULLED_AT, TAXA_VERSION } from '@/activities/tidepool/calibration';
 import TARGET_TAXA from '@/shared/target_taxa.json';
 import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/activities/tidepool/grid';
@@ -258,7 +259,7 @@ export default async function DayPage({
         badge on this panel is where a swell veto gets explained -- so the
         caveats on that ceiling belong here rather than only on the grid.
       */}
-      <UnresolvedDisclosure />
+      <UnresolvedDisclosure sources={UNRESOLVED_SOURCES} />
 
       <Notices notices={day.notices} />
 

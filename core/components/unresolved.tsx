@@ -1,6 +1,3 @@
-import { THRESHOLDS_UNRESOLVED, THRESHOLDS_VERSION } from '@/core/thresholds';
-import { SPOTS_FILE, SPOTS_VERSION } from '@/shared/spots.generated';
-
 /**
  * What the stack does not know, in the words of the files that say so.
  *
@@ -54,7 +51,7 @@ import { SPOTS_FILE, SPOTS_VERSION } from '@/shared/spots.generated';
  */
 const SAFETY_PREFIX = 'SAFETY';
 
-interface UnresolvedSource {
+export interface UnresolvedSource {
   /** What the file is the record of, in a reader's terms. */
   subject: string;
   /** The path, so a reader can go and read the whole thing. */
@@ -64,29 +61,24 @@ interface UnresolvedSource {
 }
 
 /**
- * Thresholds first. They are the values that decide a verdict, and they are the
- * ones with no upstream authority behind them at all.
+ * The sources arrive as a prop, and this component names none of them.
+ *
+ * It hand-assembled two until #128, which is where that stopped being possible:
+ * per-activity thresholds live under activities/ now, `core/` may not import an
+ * activity, and this component is in `core/`. The composition root is the layer
+ * allowed to see every slice, so it is the layer that says which files a reader
+ * is owed disclosure from -- the shells-plus-slots pattern this directory is
+ * built on, applied to data rather than to markup.
+ *
+ * It also stops this file being edited every time a data file is added, which is
+ * what #132 is about. This does not do #132 -- the list is still written out by
+ * hand, one layer up -- but it is now written where the imports are legal.
  */
-const SOURCES: readonly UnresolvedSource[] = [
-  {
-    subject: 'Reef floors and swell ceilings',
-    file: 'shared/thresholds.json',
-    version: THRESHOLDS_VERSION,
-    entries: THRESHOLDS_UNRESOLVED,
-  },
-  {
-    subject: 'The spot inventory',
-    file: 'shared/spots.json',
-    version: SPOTS_VERSION,
-    entries: SPOTS_FILE.unresolved,
-  },
-];
-
-export function UnresolvedDisclosure() {
-  const safety = SOURCES.flatMap((source) =>
+export function UnresolvedDisclosure({ sources }: { sources: readonly UnresolvedSource[] }) {
+  const safety = sources.flatMap((source) =>
     source.entries.filter((e) => e.startsWith(SAFETY_PREFIX)).map((text) => ({ source, text })),
   );
-  const rest = SOURCES.map((source) => ({
+  const rest = sources.map((source) => ({
     source,
     entries: source.entries.filter((e) => !e.startsWith(SAFETY_PREFIX)),
   })).filter((s) => s.entries.length > 0);

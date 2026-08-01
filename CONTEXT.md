@@ -87,13 +87,21 @@ A constraint that can close a window regardless of how good conditions are —
 daylight, an operator's gate hours, a duration minimum, an unknown required
 input. Gates are shared across activities and own their own states.
 
+**Threshold**:
+A number a reading is compared against to decide a verdict. A **role**, never a
+statement about where the number came from — a threshold may be an author
+estimate or a measured zone fact, and the two are the same shape and different
+provenance. Floors and ceilings are the two kinds.
+_Avoid_: using this word for provenance; that is **author estimate**.
+
 **Floor**:
-A tide height a reading must fall _below_ for a zone to be usable. The
+A threshold a reading must fall _below_ for a zone to be usable. The
 intertidal's floor is the level at which enough reef is out of the water to be
 worth the trip — workable, not optimal.
 
 **Ceiling**:
-A reading above which an activity is called off regardless of everything else.
+A threshold a reading must stay _under_; above it an activity is called off
+regardless of everything else.
 
 **State**:
 The single verdict for one spot, one activity, one day. An unknown input can
@@ -108,13 +116,26 @@ is the failure mode the whole stack is built against.
 Resolved by joining against an external authority — a water-quality station, an
 MPA polygon. Never hand-populated. If it is wrong, the join is fixed and re-run.
 
-**Author threshold**:
+**Author estimate**:
 A judgement someone wrote down — a swell ceiling, a minimum useful window.
-Uncalibrated until a person who goes there confirms it, and never presented as
-measured.
+Never presented as measured. Called _author threshold_ until it was noticed that
+"threshold" was already doing a different job above; `author_estimate` is what
+the evidence ledgers had been calling it all along.
+
+A **starting** state, not a permanent one. It leaves the same way any other value
+in this repo does: through an evidence ledger, by an entry that supersedes it.
+The entry may come from an instrument, from a corpus, or from a person who goes
+there — what it may not come from is another author writing a different number
+down. Nothing here has left yet.
 
 **Measured zone fact**:
 Produced by this repo's own instruments — lidar hypsometry, a pressure logger, a
 MARINe transect — and carried by an append-only evidence ledger. Neither joined
 from anyone nor guessed. A value is promoted to `verified` only by two entries
 from different methods agreeing, at least one of them instrumented.
+
+The intertidal floor is one of these, and it stays one. It is a threshold by
+role and a measured zone fact by provenance, and reading "the floor is a
+threshold" as a provenance claim would reclassify it to an author estimate and
+undo the file it lives in. The two axes are orthogonal; see
+`docs/adr/0012-threshold-is-a-role-and-author-estimate-is-a-provenance-class.md`.
