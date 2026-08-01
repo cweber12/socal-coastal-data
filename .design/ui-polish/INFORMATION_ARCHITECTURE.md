@@ -10,6 +10,12 @@ Companion documents: [DESIGN_BRIEF.md](DESIGN_BRIEF.md),
 
 ## Site Map
 
+> **The paths below are this pass's, 2026-07-28.** #127 introduced the activity
+> segment: the grid is `/tidepool`, the day page is `/tidepool/[slug]/[date]`,
+> and `/` and `/spot/[slug]/[date]` are temporary redirects to them. The spot
+> page did not move. Everything this pass decided about content placement holds
+> unchanged; only the addresses moved. See ADR 0013.
+
 - **Grid** `/` — all evaluable spots × 7 days. Indexable. `?sort=geographic` toggles order.
   - **Spot** `/spot/[slug]` — one spot's week. Indexable. 8 pages, fixed set.
     - **Day** `/spot/[slug]/[date]` — one spot, one day, charted. **Not** indexable.

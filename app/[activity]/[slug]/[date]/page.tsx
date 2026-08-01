@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
+import { routedActivity } from '@/app/activities';
 import { DayChart } from '@/activities/tidepool/components/day-chart';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/core/components/disclosure';
 import { FlagBadge } from '@/activities/tidepool/components/flag-badge';
@@ -13,6 +14,7 @@ import { calibrationFor, CALIBRATION_PULLED_AT, TAXA_VERSION } from '@/activitie
 import TARGET_TAXA from '@/shared/target_taxa.json';
 import { isServableDate, loadSpotDay, servableDateParam, tidepoolSpotBySlug } from '@/activities/tidepool/grid';
 import { describeWindowLength, flagBadgeLabel, formatHeight, thresholdDisclosure } from '@/activities/tidepool/labels';
+import { tidepoolDayPath, tidepoolGridPath } from '@/activities/tidepool/routes';
 import {
   addLocalDays,
   formatClock,
@@ -30,10 +32,15 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string; date: string }>;
+  params: Promise<{ activity: string; slug: string; date: string }>;
 }): Promise<Metadata> {
-  const { slug, date } = await params;
-  const spot = tidepoolSpotBySlug(slug);
+  const { activity: segment, slug, date } = await params;
+  /*
+   * The activity is checked here as well as in the page, because metadata is
+   * generated for a request the page then 404s. Without this, `/kayak/x/y`
+   * returns a not-found page carrying a confident title naming a real spot.
+   */
+  const spot = routedActivity(segment) === null ? null : tidepoolSpotBySlug(slug);
   return {
     title: spot ? `${spot.name}, ${date} — tide chart` : 'Not found',
     /*
@@ -53,13 +60,33 @@ export async function generateMetadata({
   };
 }
 
-export default async function DayPage({
+/**
+ * One activity's verdict for one spot on one day.
+ *
+ * The switch and the `never` after it are the same device as the grid route's,
+ * for the same reason: with one occupant, rendering tidepool unconditionally is
+ * correct today and would stay compiling on the day a second activity is routed.
+ * See `app/[activity]/page.tsx` for the full argument.
+ */
+export default async function ActivityDayPage({
   params,
 }: {
-  params: Promise<{ slug: string; date: string }>;
+  params: Promise<{ activity: string; slug: string; date: string }>;
 }) {
-  const { slug, date: dateParam } = await params;
+  const { activity: segment, slug, date: dateParam } = await params;
+  const activity = routedActivity(segment);
+  if (activity === null) notFound();
 
+  switch (activity) {
+    case 'tidepool':
+      return <TidepoolDay slug={slug} dateParam={dateParam} />;
+  }
+
+  const unrendered: never = activity;
+  throw new Error(`Routed activity with no day page: ${String(unrendered)}`);
+}
+
+async function TidepoolDay({ slug, dateParam }: { slug: string; dateParam: string }) {
   const spot = tidepoolSpotBySlug(slug);
   if (!spot) notFound();
 
@@ -99,7 +126,15 @@ export default async function DayPage({
   return (
     <div>
       <nav aria-label="Breadcrumb" className="text-ui">
-        <Link href="/">All spots</Link>
+        {/*
+          Up to the grid this day came from, which is this activity's grid.
+
+          Not `/`. The root is a redirect to the only routed activity today and
+          becomes the corridor overview when #101's `app/page.tsx` lands; either
+          way it is the top of the site, and what "All spots" means here is the
+          seven-day grid one level up.
+        */}
+        <Link href={tidepoolGridPath()}>All spots</Link>
         <span aria-hidden className="mx-1.5 text-[var(--text-dimmer)]">/</span>
         <Link href={`/spot/${spot.slug}`}>{spot.name}</Link>
         <span aria-hidden className="mx-1.5 text-[var(--text-dimmer)]">/</span>
@@ -130,7 +165,7 @@ export default async function DayPage({
         <nav aria-label="Nearby days" className="flex items-center gap-1 text-ui">
           {hasPrevious ? (
             <Link
-              href={`/spot/${spot.slug}/${formatLocalDate(previous)}`}
+              href={tidepoolDayPath(spot.slug, previous)}
               className="rounded border border-[var(--border)] px-2 py-1 no-underline"
             >
               ← {previous.month}/{previous.day}
@@ -138,7 +173,7 @@ export default async function DayPage({
           ) : null}
           {hasNext ? (
             <Link
-              href={`/spot/${spot.slug}/${formatLocalDate(next)}`}
+              href={tidepoolDayPath(spot.slug, next)}
               className="rounded border border-[var(--border)] px-2 py-1 no-underline"
             >
               {next.month}/{next.day} →
@@ -235,7 +270,8 @@ export default async function DayPage({
             Five of the eight refuse on the current corpus, so this is the common
             branch rather than the edge one. A default band or a corridor
             fallback here would be the null-rendering-as-a-pass failure
-            spots.json warns about, and there is no accessor in lib/calibration.ts
+            spots.json warns about, and there is no accessor in
+            activities/tidepool/calibration.ts
             that could produce one.
           */}
           {calibration && !calibration.published ? (

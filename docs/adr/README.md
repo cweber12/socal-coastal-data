@@ -46,3 +46,4 @@ is worth as much as the fact that it was.
 | [0010](0010-activity-composition-belongs-to-the-activity.md) | Activity composition belongs to the activity, not the composition root |
 | [0011](0011-a-join-carries-its-own-scope.md) | A join carries its own scope, in the file, per spot |
 | [0012](0012-threshold-is-a-role-and-author-estimate-is-a-provenance-class.md) | "Threshold" is a role; the provenance class is "author estimate" |
+| [0013](0013-the-spot-page-is-activity-neutral-and-stays-outside-the-activity-segment.md) | The spot page is activity-neutral, and stays outside the activity segment |

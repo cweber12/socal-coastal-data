@@ -13,6 +13,7 @@ import { UNRESOLVED_SOURCES } from '@/app/unresolved-sources';
 import { CellShell, FloorGap, TideLine } from '@/activities/tidepool/components/window-cell';
 import { loadSpotWeek, tidepoolSpotBySlug } from '@/activities/tidepool/grid';
 import { cellAriaLabel, flagBadgeLabel } from '@/activities/tidepool/labels';
+import { tidepoolDayPath, tidepoolGridPath } from '@/activities/tidepool/routes';
 import { formatDateLong, formatLocalDate, startOfLocalDay } from '@/core/time';
 import { lowLighting } from '@/activities/tidepool/policy';
 import { INTERTIDAL_SPOTS } from '@/core/zones/intertidal';
@@ -49,7 +50,14 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
   return (
     <div>
       <nav aria-label="Breadcrumb" className="text-ui">
-        <Link href="/">All spots</Link>
+        {/*
+          The grid, which is where all spots are — and today that is tidepool's,
+          because this page exists only for spots that carry a floor. #133 makes
+          this page activity-neutral, and this link is one of the things it has
+          to answer: an overview stacking two activities' verdicts cannot
+          breadcrumb up into one of them.
+        */}
+        <Link href={tidepoolGridPath()}>All spots</Link>
         <span aria-hidden className="mx-1.5 text-[var(--text-dimmer)]">
           /
         </span>
@@ -146,7 +154,7 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
                     }
                   >
                     <Link
-                      href={`/spot/${spot.slug}/${dateKey}`}
+                      href={tidepoolDayPath(spot.slug, date)}
                       aria-label={cellAriaLabel(spot.name, result, week.timeZone)}
                       className="cell-link flex items-baseline justify-between gap-3 rounded-md py-2 pl-3 pr-8 text-data no-underline"
                     >

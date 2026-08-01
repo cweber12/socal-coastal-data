@@ -380,7 +380,7 @@ export function tidepoolSpotBySlug(slug: string): IntertidalSpot | null {
  * ========================================================================= */
 
 /**
- * How far either side of today `/spot/[slug]/[date]` will serve.
+ * How far either side of today `/[activity]/[slug]/[date]` will serve.
  *
  * This is NOT a claim about where the maths stops holding. Tide predictions are
  * astronomical and CO-OPS serves them across roughly 130 years: `1900-01-01`

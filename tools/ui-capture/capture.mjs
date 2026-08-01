@@ -79,11 +79,21 @@ const THEMES = ['light', 'dark'];
  * a real limit of this tool and is why it supplements the suite rather than
  * replacing it -- the states themselves are asserted in the predicate's own
  * tests against fixtures, where they are chosen rather than hoped for.
+ *
+ * The paths are the canonical ones, not the redirects. #127 moved the grid to
+ * `/tidepool` and the day page under it, leaving `/` and `/spot/<slug>/<date>`
+ * as temporary redirects; capturing through those would still reach the same
+ * pages, and would quietly go on passing on the day a redirect is removed.
+ *
+ * The capture NAMES are unchanged, which is what let #127 use this as its own
+ * control: compare.mjs matches before and after by name, so a run from `main`
+ * requesting `/` and a run from the branch requesting `/tidepool` are compared
+ * as the same page -- which is exactly the claim a route move has to make.
  */
 const pages = (date) => [
-  ['grid', '/'],
-  ['day-cabrillo-published', `/spot/cabrillo-tidepools/${date}`],
-  ['day-windansea-refused', `/spot/windansea/${date}`],
+  ['grid', '/tidepool'],
+  ['day-cabrillo-published', `/tidepool/cabrillo-tidepools/${date}`],
+  ['day-windansea-refused', `/tidepool/windansea/${date}`],
   ['spot-sunset-cliffs', '/spot/sunset-cliffs'],
   ['spot-windansea', '/spot/windansea'],
 ];

@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
+import { ROUTED_ACTIVITIES, routedActivity } from '@/app/activities';
 import { EvaluationStamp, Notices, UpstreamFailure } from '@/core/components/disclosure';
 import { MidnightNotice } from '@/core/components/midnight-notice';
 import { SpotRow } from '@/core/components/spot-row';
@@ -15,6 +17,7 @@ import {
   type SortKey,
 } from '@/activities/tidepool/grid';
 import { rowAriaLabel } from '@/activities/tidepool/labels';
+import { tidepoolGridPath } from '@/activities/tidepool/routes';
 import {
   formatDateLong,
   formatDayMonth,
@@ -32,19 +35,72 @@ import { SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
  * The whole page is a judgement about "now" -- today's column shows the next low
  * from the current time -- so a build-time prerender would freeze the evaluation
  * instant and quietly serve yesterday's answer. The upstream fetches are cached
- * independently by `next: { revalidate }` in lib/upstream.ts, so per-request
+ * independently by `next: { revalidate }` in core/upstream.ts, so per-request
  * rendering costs a re-evaluation of the tide maths, not a re-fetch.
  */
 export const dynamic = 'force-dynamic';
 
-export default async function GridPage({
+/**
+ * The activities with a grid, for the record rather than for the router.
+ *
+ * `dynamic = 'force-dynamic'` above means nothing here is prerendered, so this
+ * neither builds pages nor -- and this is the part worth being explicit about --
+ * restricts which segments the route answers. `dynamicParams = false` only
+ * refuses unlisted params for a statically generated route. What actually 404s
+ * `/kayak` is the `routedActivity` guard below, which runs on every request.
+ *
+ * It is here because it is the same list the guard reads, so the two cannot
+ * disagree, and because when this route stops being force-dynamic the enumerable
+ * segment is already declared. `app/spot/[slug]/page.tsx` has carried one on the
+ * same terms since before the activity segment existed.
+ */
+export function generateStaticParams() {
+  return ROUTED_ACTIVITIES.map((activity) => ({ activity }));
+}
+
+/**
+ * One activity's verdict grid.
+ *
+ * ---------------------------------------------------------------------------
+ * Why a switch over one case
+ * ---------------------------------------------------------------------------
+ *
+ * Tidepool is the only occupant, so this could read `return <TidepoolGrid/>`
+ * and be correct today. It would also be correct today if the segment said
+ * `surf`, which is the whole failure #127 exists to prevent: a URL that quietly
+ * serves a different activity's verdicts than the one it names is the same class
+ * of failure as a null rendering as a pass.
+ *
+ * The switch makes that impossible to get wrong silently. `RoutedActivity` is a
+ * union of the registry's slugs, so the `never` assignment after the switch
+ * fails to compile the moment #129 adds `surf` to the registry without giving it
+ * a grid -- at build time, in this file, rather than as a page rendering the
+ * wrong activity's judgement.
+ */
+export default async function ActivityGridPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ activity: string }>;
   searchParams: Promise<{ sort?: string }>;
 }) {
+  const { activity: segment } = await params;
+  const activity = routedActivity(segment);
+  if (activity === null) notFound();
+
   const { sort: sortParam } = await searchParams;
   const sort: SortKey = sortParam === 'geographic' ? 'geographic' : 'usable';
 
+  switch (activity) {
+    case 'tidepool':
+      return <TidepoolGrid sort={sort} />;
+  }
+
+  const unrendered: never = activity;
+  throw new Error(`Routed activity with no grid: ${String(unrendered)}`);
+}
+
+async function TidepoolGrid({ sort }: { sort: SortKey }) {
   const now = Date.now();
   const grid = await loadGrid(now);
 
@@ -283,7 +339,10 @@ function SortLink({
   const active = current === value;
   return (
     <Link
-      href={value === 'usable' ? '/' : `/?sort=${value}`}
+      // This activity's own grid, from this activity's own route helper. A sort
+      // link that reached another activity's grid would change the verdicts
+      // under a control that claims to change only their order.
+      href={value === 'usable' ? tidepoolGridPath() : `${tidepoolGridPath()}?sort=${value}`}
       aria-current={active ? 'true' : undefined}
       className={[
         'rounded border px-2 py-1 no-underline',
