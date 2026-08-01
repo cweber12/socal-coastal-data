@@ -1,0 +1,607 @@
+{
+ "measured": "2026-08-01",
+ "issue": 153,
+ "question": "What does a predicate inherit from binding 9410230 rather than 9410170?",
+ "product": "NOAA CO-OPS predictions, interval=hilo, datum=MLLW, units=english, time_zone=gmt",
+ "twc0405": {
+  "station": "TWC0405 Point Loma",
+  "source": "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/TWC0405/tidepredoffsets.json",
+  "refStationId": "9410170",
+  "heightOffsetHighTide": 0.92,
+  "heightOffsetLowTide": 0.92,
+  "timeOffsetHighTide": -9,
+  "timeOffsetLowTide": -2
+ },
+ "regression": {
+  "years": [
+   2000,
+   2040
+  ],
+  "n_events_9410230": 57191,
+  "n_events_9410170": 57357,
+  "n_pairs": 57183,
+  "unmatched_9410230_events": 8,
+  "reused_9410170_partners": 0,
+  "match_window_minutes": 60,
+  "match_offset_minutes": {
+   "median": 4.0,
+   "p99": 16.0,
+   "max": 42.0
+  },
+  "pooled": {
+   "slope": 1.06961,
+   "intercept": 0.02452,
+   "r2": 0.998706,
+   "max_abs_residual_ft": 0.2389,
+   "inverse_slope": 0.93492
+  },
+  "per_year": [
+   {
+    "year": 2000,
+    "n": 1409,
+    "slope": 1.07111,
+    "intercept": 0.02053,
+    "r2": 0.998743,
+    "diff_at_band_min_ft": 0.1272,
+    "diff_at_band_max_ft": 0.2694,
+    "diff_at_7ft": 0.5183
+   },
+   {
+    "year": 2001,
+    "n": 1406,
+    "slope": 1.06992,
+    "intercept": 0.02305,
+    "r2": 0.998697,
+    "diff_at_band_min_ft": 0.1279,
+    "diff_at_band_max_ft": 0.2678,
+    "diff_at_7ft": 0.5125
+   },
+   {
+    "year": 2002,
+    "n": 1391,
+    "slope": 1.06846,
+    "intercept": 0.02629,
+    "r2": 0.998676,
+    "diff_at_band_min_ft": 0.129,
+    "diff_at_band_max_ft": 0.2659,
+    "diff_at_7ft": 0.5055
+   },
+   {
+    "year": 2003,
+    "n": 1378,
+    "slope": 1.06711,
+    "intercept": 0.02951,
+    "r2": 0.998664,
+    "diff_at_band_min_ft": 0.1302,
+    "diff_at_band_max_ft": 0.2644,
+    "diff_at_7ft": 0.4992
+   },
+   {
+    "year": 2004,
+    "n": 1379,
+    "slope": 1.06614,
+    "intercept": 0.03189,
+    "r2": 0.998631,
+    "diff_at_band_min_ft": 0.1311,
+    "diff_at_band_max_ft": 0.2634,
+    "diff_at_7ft": 0.4949
+   },
+   {
+    "year": 2005,
+    "n": 1377,
+    "slope": 1.06592,
+    "intercept": 0.03278,
+    "r2": 0.998614,
+    "diff_at_band_min_ft": 0.1317,
+    "diff_at_band_max_ft": 0.2635,
+    "diff_at_7ft": 0.4942
+   },
+   {
+    "year": 2006,
+    "n": 1372,
+    "slope": 1.06589,
+    "intercept": 0.03294,
+    "r2": 0.998622,
+    "diff_at_band_min_ft": 0.1318,
+    "diff_at_band_max_ft": 0.2635,
+    "diff_at_7ft": 0.4941
+   },
+   {
+    "year": 2007,
+    "n": 1375,
+    "slope": 1.06595,
+    "intercept": 0.03279,
+    "r2": 0.998638,
+    "diff_at_band_min_ft": 0.1317,
+    "diff_at_band_max_ft": 0.2636,
+    "diff_at_7ft": 0.4944
+   },
+   {
+    "year": 2008,
+    "n": 1372,
+    "slope": 1.06624,
+    "intercept": 0.03279,
+    "r2": 0.998651,
+    "diff_at_band_min_ft": 0.1322,
+    "diff_at_band_max_ft": 0.2646,
+    "diff_at_7ft": 0.4965
+   },
+   {
+    "year": 2009,
+    "n": 1379,
+    "slope": 1.06737,
+    "intercept": 0.03017,
+    "r2": 0.998655,
+    "diff_at_band_min_ft": 0.1312,
+    "diff_at_band_max_ft": 0.266,
+    "diff_at_7ft": 0.5018
+   },
+   {
+    "year": 2010,
+    "n": 1396,
+    "slope": 1.06873,
+    "intercept": 0.02687,
+    "r2": 0.998683,
+    "diff_at_band_min_ft": 0.13,
+    "diff_at_band_max_ft": 0.2674,
+    "diff_at_7ft": 0.5079
+   },
+   {
+    "year": 2011,
+    "n": 1397,
+    "slope": 1.07013,
+    "intercept": 0.02371,
+    "r2": 0.998729,
+    "diff_at_band_min_ft": 0.1289,
+    "diff_at_band_max_ft": 0.2692,
+    "diff_at_7ft": 0.5146
+   },
+   {
+    "year": 2012,
+    "n": 1404,
+    "slope": 1.0713,
+    "intercept": 0.02121,
+    "r2": 0.998765,
+    "diff_at_band_min_ft": 0.1282,
+    "diff_at_band_max_ft": 0.2707,
+    "diff_at_7ft": 0.5203
+   },
+   {
+    "year": 2013,
+    "n": 1409,
+    "slope": 1.07281,
+    "intercept": 0.01772,
+    "r2": 0.998795,
+    "diff_at_band_min_ft": 0.1269,
+    "diff_at_band_max_ft": 0.2726,
+    "diff_at_7ft": 0.5274
+   },
+   {
+    "year": 2014,
+    "n": 1410,
+    "slope": 1.07385,
+    "intercept": 0.01558,
+    "r2": 0.998822,
+    "diff_at_band_min_ft": 0.1264,
+    "diff_at_band_max_ft": 0.274,
+    "diff_at_7ft": 0.5325
+   },
+   {
+    "year": 2015,
+    "n": 1411,
+    "slope": 1.07439,
+    "intercept": 0.01412,
+    "r2": 0.99883,
+    "diff_at_band_min_ft": 0.1257,
+    "diff_at_band_max_ft": 0.2745,
+    "diff_at_7ft": 0.5348
+   },
+   {
+    "year": 2016,
+    "n": 1414,
+    "slope": 1.07407,
+    "intercept": 0.01475,
+    "r2": 0.998832,
+    "diff_at_band_min_ft": 0.1259,
+    "diff_at_band_max_ft": 0.274,
+    "diff_at_7ft": 0.5332
+   },
+   {
+    "year": 2017,
+    "n": 1411,
+    "slope": 1.07332,
+    "intercept": 0.01606,
+    "r2": 0.998811,
+    "diff_at_band_min_ft": 0.126,
+    "diff_at_band_max_ft": 0.2727,
+    "diff_at_7ft": 0.5293
+   },
+   {
+    "year": 2018,
+    "n": 1410,
+    "slope": 1.07197,
+    "intercept": 0.01889,
+    "r2": 0.998774,
+    "diff_at_band_min_ft": 0.1268,
+    "diff_at_band_max_ft": 0.2708,
+    "diff_at_7ft": 0.5227
+   },
+   {
+    "year": 2019,
+    "n": 1411,
+    "slope": 1.07072,
+    "intercept": 0.02127,
+    "r2": 0.998716,
+    "diff_at_band_min_ft": 0.1274,
+    "diff_at_band_max_ft": 0.2688,
+    "diff_at_7ft": 0.5163
+   },
+   {
+    "year": 2020,
+    "n": 1394,
+    "slope": 1.06933,
+    "intercept": 0.02426,
+    "r2": 0.9987,
+    "diff_at_band_min_ft": 0.1283,
+    "diff_at_band_max_ft": 0.2669,
+    "diff_at_7ft": 0.5096
+   },
+   {
+    "year": 2021,
+    "n": 1383,
+    "slope": 1.06789,
+    "intercept": 0.02779,
+    "r2": 0.998679,
+    "diff_at_band_min_ft": 0.1296,
+    "diff_at_band_max_ft": 0.2654,
+    "diff_at_7ft": 0.503
+   },
+   {
+    "year": 2022,
+    "n": 1382,
+    "slope": 1.06662,
+    "intercept": 0.03071,
+    "r2": 0.998649,
+    "diff_at_band_min_ft": 0.1307,
+    "diff_at_band_max_ft": 0.2639,
+    "diff_at_7ft": 0.4971
+   },
+   {
+    "year": 2023,
+    "n": 1375,
+    "slope": 1.06609,
+    "intercept": 0.03192,
+    "r2": 0.99861,
+    "diff_at_band_min_ft": 0.131,
+    "diff_at_band_max_ft": 0.2632,
+    "diff_at_7ft": 0.4945
+   },
+   {
+    "year": 2024,
+    "n": 1378,
+    "slope": 1.06592,
+    "intercept": 0.03259,
+    "r2": 0.998618,
+    "diff_at_band_min_ft": 0.1315,
+    "diff_at_band_max_ft": 0.2633,
+    "diff_at_7ft": 0.494
+   },
+   {
+    "year": 2025,
+    "n": 1368,
+    "slope": 1.06579,
+    "intercept": 0.03373,
+    "r2": 0.998638,
+    "diff_at_band_min_ft": 0.1324,
+    "diff_at_band_max_ft": 0.264,
+    "diff_at_7ft": 0.4943
+   },
+   {
+    "year": 2026,
+    "n": 1370,
+    "slope": 1.06599,
+    "intercept": 0.03318,
+    "r2": 0.998644,
+    "diff_at_band_min_ft": 0.1322,
+    "diff_at_band_max_ft": 0.2641,
+    "diff_at_7ft": 0.4951
+   },
+   {
+    "year": 2027,
+    "n": 1381,
+    "slope": 1.06667,
+    "intercept": 0.03117,
+    "r2": 0.998625,
+    "diff_at_band_min_ft": 0.1312,
+    "diff_at_band_max_ft": 0.2645,
+    "diff_at_7ft": 0.4979
+   },
+   {
+    "year": 2028,
+    "n": 1394,
+    "slope": 1.06799,
+    "intercept": 0.0283,
+    "r2": 0.998662,
+    "diff_at_band_min_ft": 0.1303,
+    "diff_at_band_max_ft": 0.2663,
+    "diff_at_7ft": 0.5042
+   },
+   {
+    "year": 2029,
+    "n": 1390,
+    "slope": 1.06913,
+    "intercept": 0.02628,
+    "r2": 0.998713,
+    "diff_at_band_min_ft": 0.13,
+    "diff_at_band_max_ft": 0.2682,
+    "diff_at_7ft": 0.5102
+   },
+   {
+    "year": 2030,
+    "n": 1399,
+    "slope": 1.07058,
+    "intercept": 0.02298,
+    "r2": 0.998753,
+    "diff_at_band_min_ft": 0.1288,
+    "diff_at_band_max_ft": 0.27,
+    "diff_at_7ft": 0.517
+   },
+   {
+    "year": 2031,
+    "n": 1408,
+    "slope": 1.07196,
+    "intercept": 0.01946,
+    "r2": 0.998768,
+    "diff_at_band_min_ft": 0.1274,
+    "diff_at_band_max_ft": 0.2713,
+    "diff_at_7ft": 0.5232
+   },
+   {
+    "year": 2032,
+    "n": 1414,
+    "slope": 1.07344,
+    "intercept": 0.01644,
+    "r2": 0.998798,
+    "diff_at_band_min_ft": 0.1266,
+    "diff_at_band_max_ft": 0.2735,
+    "diff_at_7ft": 0.5305
+   },
+   {
+    "year": 2033,
+    "n": 1410,
+    "slope": 1.07403,
+    "intercept": 0.01531,
+    "r2": 0.998831,
+    "diff_at_band_min_ft": 0.1264,
+    "diff_at_band_max_ft": 0.2744,
+    "diff_at_7ft": 0.5335
+   },
+   {
+    "year": 2034,
+    "n": 1411,
+    "slope": 1.07428,
+    "intercept": 0.01424,
+    "r2": 0.998846,
+    "diff_at_band_min_ft": 0.1257,
+    "diff_at_band_max_ft": 0.2742,
+    "diff_at_7ft": 0.5342
+   },
+   {
+    "year": 2035,
+    "n": 1410,
+    "slope": 1.07379,
+    "intercept": 0.01505,
+    "r2": 0.998819,
+    "diff_at_band_min_ft": 0.1257,
+    "diff_at_band_max_ft": 0.2733,
+    "diff_at_7ft": 0.5315
+   },
+   {
+    "year": 2036,
+    "n": 1414,
+    "slope": 1.07299,
+    "intercept": 0.0166,
+    "r2": 0.998777,
+    "diff_at_band_min_ft": 0.1261,
+    "diff_at_band_max_ft": 0.2721,
+    "diff_at_7ft": 0.5276
+   },
+   {
+    "year": 2037,
+    "n": 1410,
+    "slope": 1.07149,
+    "intercept": 0.01999,
+    "r2": 0.998753,
+    "diff_at_band_min_ft": 0.1272,
+    "diff_at_band_max_ft": 0.2702,
+    "diff_at_7ft": 0.5204
+   },
+   {
+    "year": 2038,
+    "n": 1401,
+    "slope": 1.07016,
+    "intercept": 0.02251,
+    "r2": 0.998726,
+    "diff_at_band_min_ft": 0.1277,
+    "diff_at_band_max_ft": 0.2681,
+    "diff_at_7ft": 0.5136
+   },
+   {
+    "year": 2039,
+    "n": 1388,
+    "slope": 1.06867,
+    "intercept": 0.02594,
+    "r2": 0.998693,
+    "diff_at_band_min_ft": 0.1289,
+    "diff_at_band_max_ft": 0.2663,
+    "diff_at_7ft": 0.5067
+   },
+   {
+    "year": 2040,
+    "n": 1392,
+    "slope": 1.06744,
+    "intercept": 0.02876,
+    "r2": 0.998645,
+    "diff_at_band_min_ft": 0.1299,
+    "diff_at_band_max_ft": 0.2648,
+    "diff_at_7ft": 0.5009
+   }
+  ],
+  "slope_extremes": {
+   "min": {
+    "year": 2025,
+    "slope": 1.06579
+   },
+   "max": {
+    "year": 2015,
+    "slope": 1.07439
+   }
+  },
+  "diff_stability_ft": {
+   "at_1.5": 0.0068,
+   "at_3.5": 0.0112,
+   "at_7.0": 0.0408
+  },
+  "raw_9410170_minus_9410230_ft": {
+   "all": {
+    "n": 57183,
+    "min": -0.115,
+    "p05": -0.026,
+    "median": 0.211,
+    "mean": 0.2155,
+    "p95": 0.478,
+    "max": 0.603,
+    "over_0_3_ft_pct": 39.67
+   },
+   "highs": {
+    "n": 28594,
+    "min": 0.11,
+    "p05": 0.239,
+    "median": 0.366,
+    "mean": 0.3686,
+    "p95": 0.506,
+    "max": 0.603,
+    "over_0_3_ft_pct": 79.34
+   },
+   "lows": {
+    "n": 28589,
+    "min": -0.115,
+    "p05": -0.049,
+    "median": 0.059,
+    "mean": 0.0624,
+    "p95": 0.185,
+    "max": 0.294,
+    "over_0_3_ft_pct": 0.0
+   },
+   "in_band": {
+    "n": 14214,
+    "min": -0.096,
+    "p05": -0.023,
+    "median": 0.125,
+    "mean": 0.1463,
+    "p95": 0.351,
+    "max": 0.432,
+    "over_0_3_ft_pct": 13.28
+   },
+   "in_band_highs": {
+    "n": 4148,
+    "min": 0.11,
+    "p05": 0.195,
+    "median": 0.293,
+    "mean": 0.2921,
+    "p95": 0.383,
+    "max": 0.432,
+    "over_0_3_ft_pct": 45.52
+   },
+   "in_band_lows": {
+    "n": 10066,
+    "min": -0.096,
+    "p05": -0.033,
+    "median": 0.084,
+    "mean": 0.0862,
+    "p95": 0.21,
+    "max": 0.294,
+    "over_0_3_ft_pct": 0.0
+   }
+  },
+  "derived_point_loma_minus_9410230_ft": {
+   "_definition": "0.92 * h_9410170 - h_9410230, CO-OPS subordinate station TWC0405 Point Loma against the station every spot binds",
+   "highs": {
+    "n": 28594,
+    "min": -0.2562,
+    "p05": -0.1684,
+    "median": -0.0228,
+    "mean": -0.0283,
+    "p95": 0.0857,
+    "max": 0.1268,
+    "over_0_3_ft_pct": 0.0
+   },
+   "lows": {
+    "n": 28589,
+    "min": -0.2324,
+    "p05": -0.1718,
+    "median": -0.0166,
+    "mean": -0.0142,
+    "p95": 0.1319,
+    "max": 0.2097,
+    "over_0_3_ft_pct": 0.0
+   }
+  }
+ },
+ "issue_102_finding_3_reproduction": {
+  "year": 2026,
+  "n_days": 366,
+  "la_jolla_minus_derived_point_loma_ft": {
+   "n": 366,
+   "min": -1.0884,
+   "p05": -0.156,
+   "median": -0.06,
+   "mean": -0.0568,
+   "p95": 0.0671,
+   "max": 0.8283,
+   "over_0_3_ft_pct": 0.82
+  },
+  "la_jolla_minus_raw_9410170_ft": {
+   "n": 366,
+   "min": -0.345,
+   "p05": -0.185,
+   "median": -0.061,
+   "mean": -0.0607,
+   "p95": 0.062,
+   "max": 0.109,
+   "over_0_3_ft_pct": 0.27
+  }
+ },
+ "band_membership": {
+  "window": {
+   "begin": "20260713",
+   "hours": 384,
+   "samples": 3841
+  },
+  "band_ft": [
+   1.5,
+   3.5
+  ],
+  "band_source": "activities/surf/thresholds.json tide_band, read not restated",
+  "in_band_minutes": {
+   "9410230": 10200,
+   "raw_9410170": 9684,
+   "derived_point_loma": 10740
+  },
+  "misclassified_samples_pct": {
+   "raw_9410170": 11.06,
+   "derived_point_loma": 6.59
+  },
+  "in_band_sample_diff_ft": {
+   "n": 1700,
+   "min": -0.106,
+   "p05": -0.066,
+   "median": 0.107,
+   "mean": 0.1104,
+   "p95": 0.277,
+   "max": 0.371,
+   "over_0_3_ft_pct": 2.47
+  },
+  "_note": "A timestamp-aligned comparison of two SERIES confounds the range difference with the bay's phase lag (TWC0405 publishes -9 min at high water). That is deliberate here: a predicate walking a series inherits both. The regression above matches turning points and isolates range."
+ }
+}

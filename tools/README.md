@@ -8,6 +8,7 @@ investigate a question — never things the app imports.
 | `county-station/` | Re-runs the `county_station` nearest-neighbour join against data.ca.gov and diffs it against `shared/spots.json`, so the repo's "fix the join and re-run it" rule is executable rather than aspirational. Python, standard library only. |
 | `calibration/` | The revealed-preference pipeline. Turns iNaturalist observations and CO-OPS predictions into `shared/calibration.json`, with a refusal and a reason wherever the evidence does not support a rate. |
 | `lidar-recon/` | Point-cloud and DEM investigation of the intertidal benches. Produces the findings under `lidar-recon/findings/` that back `floor_evidence` entries. Python, standard library only. |
+| `tide-station/` | Measures what a predicate inherits from binding tide station 9410230 rather than 9410170 — a 7% scale term that is invisible at a floor and worth up to 0.6 ft at high water. `--check` re-derives the committed coefficients from the live endpoint. Python, standard library only. |
 | `ui-capture/` | Captures the rendered pages before and after a refactor and diffs the text, so a behaviour-preserving move can be proved rather than asserted. Playwright, `devDependency` only. |
 | `verify-apis/` | Probes every upstream the stack depends on and reports status, latency, and the age of the newest observation. Not in CI: it calls live NOAA, IBWC and USGS endpoints, so a per-push run would be both flaky and rude. |
 

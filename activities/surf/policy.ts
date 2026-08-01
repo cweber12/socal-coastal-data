@@ -241,6 +241,27 @@ export function evaluateSurfDay(input: SurfInput): SurfDay {
    * exhaustive because "out of band" has only those two ways of being true, and
    * using the out sample means the exactly-on case picks its own edge instead of
    * falling through a direction test.
+   *
+   * WHICH STATION THESE HEIGHTS CAME FROM IS WORTH MORE HERE THAN AT A FLOOR.
+   * This is the first predicate in the repo to read high water, and the two tide
+   * stations in the registry are related by a 7% SCALE term rather than an
+   * offset: they agree to hundredths at MLLW and diverge as the tide rises.
+   * Over 2000-2040, 79.3% of matched highs differ between the two by more than
+   * 0.3 ft and not one of 28,589 lows does -- so tidepool's floor result, 0.06 ft
+   * in #102 Finding 3, says nothing about this band. Inside the band the fitted
+   * difference runs +0.13 ft at 1.5 to +0.27 ft at 3.5, and 45.5% of in-band
+   * HIGHS exceed 0.3 ft against 0% of in-band lows. 0.3 ft is borrowed as a
+   * yardstick from floor-calibration.md §7's promotion tolerance; surf has no
+   * tolerance of its own, and giving it one is #135's business, not this
+   * comment's.
+   *
+   * Nothing is wrong here and nothing needs changing: every spot binds 9410230,
+   * which is the open-coast station, and this is recorded so that a future edit
+   * to that binding is not read as cosmetic. The size of the choice is measured;
+   * which station a surf predicate actually WANTS at high water is open question
+   * 3 of https://github.com/cweber12/socal-coastal-data/issues/148 and is not
+   * settled by it. core/feeds/coops-predictions.ts trap 4 and
+   * tools/tide-station/README.md carry the measurement.
    * --------------------------------------------------------------------- */
   const intervals = solve(
     series,

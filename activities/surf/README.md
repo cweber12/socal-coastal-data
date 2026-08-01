@@ -73,6 +73,13 @@ Belongs next door:
   measured fact; see ADR 0014. Nothing here may assert a zone fact.
 - **A fact true of the whole spot** — daylight, gate hours, the MPA — is
   `core/spot/`.
+- **Which tide station the heights came from**, and what that binding is worth,
+  is `core/feeds/coops-predictions.ts` trap 4 — activity-neutral, because dive
+  will read high water on the same terms. Worth knowing before touching a band
+  edge: the two stations in the registry differ by a 7% **scale** term, so
+  tidepool's 0.06 ft floor result does not carry up here. 79.3% of matched highs
+  over 2000–2040 differ by more than the 0.3 ft promotion tolerance and not one
+  low does. Measured in `tools/tide-station/`.
 - **The corridor default ceiling** stays in `shared/thresholds.json`: it applies
   to every spot nothing specific has been said about.
 - **Anything tidepool needs** is tidepool's.
