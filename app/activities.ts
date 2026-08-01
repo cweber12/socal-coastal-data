@@ -1,3 +1,4 @@
+import { SURF_SLUG } from '@/activities/surf/routes';
 import { TIDEPOOL_SLUG } from '@/activities/tidepool/routes';
 
 /**
@@ -8,20 +9,23 @@ import { TIDEPOOL_SLUG } from '@/activities/tidepool/routes';
  * Routed is not the same as built
  * ---------------------------------------------------------------------------
  *
- * `activities/surf/` exists today. It holds two per-spot swell ceilings and a
- * reader for them, and `app/unresolved-sources.ts` renders its caveats on every
- * page -- but there is no surf predicate, no surf grid, and nothing that could
- * answer `/surf`. #129 builds that.
+ * `activities/surf/` existed for a whole PR before it was routed. #128 put two
+ * per-spot swell ceilings and a reader for them there, and
+ * `app/unresolved-sources.ts` rendered its caveats on every page -- with no
+ * surf predicate, no surf grid, and nothing that could answer `/surf`.
  *
  * So this list is not "the directories under activities/". A registry derived
  * from the filesystem would have routed `/surf` the day #128 landed the
  * thresholds, and the page would have had nothing to render or, worse, would
- * have fallen back to the one activity that does compute -- serving tidepool's
+ * have fallen back to the one activity that did compute -- serving tidepool's
  * verdicts under a URL that says surf. That is the same class of failure as a
  * null rendering as a pass, and it is why an unrecognised segment is a 404 here
  * rather than a default.
  *
  * A slug enters this list in the same PR that gives it something to render.
+ * #129 is that PR for surf: it added the zone, the band predicate and both
+ * pages, and `surf` joined the list in the same commit. `dive` and `beach` are
+ * the ones the rule still guards -- both named in PRD #101, neither built.
  *
  * ---------------------------------------------------------------------------
  * Why the registry is in app/ and not in activities/
@@ -42,7 +46,13 @@ import { TIDEPOOL_SLUG } from '@/activities/tidepool/routes';
  * to import every slice. It is the same argument ADR 0010 makes for keeping
  * single-activity composition out of `app/`, run in the other direction.
  */
-export const ROUTED_ACTIVITIES = [TIDEPOOL_SLUG] as const;
+/*
+ * Order is corridor-neutral and deliberate: tidepool first because it is the
+ * activity with a measured zone fact behind it. `generateStaticParams` and the
+ * robots.txt disallow list both walk this array, so the order is visible in two
+ * generated artefacts and worth being a decision rather than an accident.
+ */
+export const ROUTED_ACTIVITIES = [TIDEPOOL_SLUG, SURF_SLUG] as const;
 
 /** A URL segment known to name an activity with pages behind it. */
 export type RoutedActivity = (typeof ROUTED_ACTIVITIES)[number];

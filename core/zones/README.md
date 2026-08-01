@@ -5,11 +5,33 @@ there.
 
 | | |
 | --- | --- |
-| `intertidal.ts` | Which spots have a rocky intertidal, and the tide height at which each one surfaces. |
+| `intertidal.ts` | Which spots have a rocky intertidal, and the tide height at which each one surfaces. 8 members. |
+| `surf.ts` | Which spots have a surf zone. Membership only, derived from the wave binding. 24 members. |
 
-The four zones are `beach`, `intertidal`, `surf` and `subtidal`. Only the
-intertidal has a module, because only the intertidal has facts to hold today.
-A file is added when there is a fact for it, never to fill the set out.
+The four zones are `beach`, `intertidal`, `surf` and `subtidal`. Two have
+modules. A file is added when there is something for it to say, never to fill the
+set out.
+
+## The two modules are not the same shape, and that is recorded
+
+`intertidal.ts` joins a **measured fact** — the floor, provenance class 3, with
+an append-only ledger and a promotion rule to `verified` — against
+`shared/spots.json`, and states its membership in three explicit buckets in
+`shared/intertidal.json`.
+
+`surf.ts` has no measured fact and no file. Its membership is **derived**: a spot
+is a member when `shared/spots.json` binds it a wave buoy, which is the only
+machine-readable thing this repo holds about that band. An explicit list would
+have been 26 hand-typed judgements with nothing checking them — which is the
+`audiences` tag #125 deleted, rebuilt under a new name.
+
+So `decision 1`'s symmetry is weaker than PRD #101 wrote it, and that is the
+answer to its open question 2 rather than an omission from it. See
+`docs/adr/0014-the-surf-zone-is-derived-membership-and-no-measured-fact.md`.
+
+A zone with no measured fact still owes disclosure: `SURF_ZONE_UNRESOLVED` says
+in the module what the membership does and does not claim, and
+`app/unresolved-sources.ts` renders it.
 
 ## What belongs here, and what belongs next door
 

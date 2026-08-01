@@ -34,8 +34,7 @@ export function SpotRow({
   spotName,
   spotSlug,
   rowLabel,
-  usableCount,
-  floorFt,
+  subtitle,
   cells,
   detail,
   columnCount,
@@ -43,28 +42,24 @@ export function SpotRow({
   spotName: string;
   spotSlug: string;
   rowLabel: string;
-  usableCount: number;
-  /** The reef floor every gap in this row is measured against. */
-  floorFt: number;
+  /**
+   * The one line under the spot's name, composed by the activity.
+   *
+   * This used to be built here from a `floorFt` and a `usableCount`, which put
+   * a reef floor -- an intertidal fact -- inside a shell that #129 needed to
+   * serve an activity with no floor at all. A shell may not know what its
+   * occupants measure. Each activity now writes the line that makes ITS row
+   * readable: tidepool leads with the floor, because that is the only number
+   * that differs from the row above it, and surf leads with the ceiling, for the
+   * same reason.
+   */
+  subtitle: string;
   cells: React.ReactNode[];
   detail: React.ReactNode;
   columnCount: number;
 }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
-
-  /*
-   * The floor leads, ahead of the usable count.
-   *
-   * It is the only number on this row that differs from the row above it -- all
-   * eight spots share tide station 9410230, so the cells to the right carry the
-   * same seven lows on every row -- and it is the second operand of the
-   * subtraction each of those cells now prints. A reader who cannot see what
-   * `+1.1` was measured against cannot read the row at all.
-   */
-  const subtitle = `floor ${floorFt.toFixed(1)} ft · ${
-    usableCount === 0 ? 'no windows' : `${usableCount} usable`
-  }`;
 
   return (
     <tbody className="border-b border-[var(--border)] last:border-b-0">

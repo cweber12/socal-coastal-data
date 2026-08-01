@@ -1,28 +1,26 @@
 /**
- * Surf's own thresholds: the two per-spot swell ceilings, and nothing else.
+ * Surf's own thresholds: the tide band, the swell minimum, and the two per-spot
+ * swell ceilings.
  *
- * This is the whole of `activities/surf/` for now. #129 builds the predicate;
- * what landed here first is the data, because #128 had to put the per-spot
- * overrides somewhere and `shared/thresholds.json` was the wrong somewhere --
- * a corridor-wide file holding two judgements about one activity nobody has
- * built. See docs/adr/0012.
+ * Everything this module returns is an author estimate. #128 landed the two
+ * overrides here because shared/thresholds.json was the wrong home for
+ * per-activity judgements; #129 added the band and the minimum and built the
+ * predicate that reads all four. See docs/adr/0012 for the provenance class and
+ * docs/adr/0014 for why there is no measured surf fact to sit beside them.
  *
  * ---------------------------------------------------------------------------
- * Nothing computes a surf verdict yet, and this is still not dead code
+ * Two kinds of feet, asserted separately
  * ---------------------------------------------------------------------------
  *
- * `SURF_UNRESOLVED` is read today, by the corridor page's unresolved
- * disclosure. That matters more than it sounds: these two overrides were
- * already inert before the move, and moving them into a file nothing read
- * would have taken their caveats off the page -- a caveat recorded and then
- * not shown, which is the exact failure core/components/unresolved.tsx was
- * written to end. So the disclosure takes its sources as a prop from the
- * composition root now, and this file is one of them.
+ * `units` is wave height at a buoy. `tide_units` with `tide_datum` is tide
+ * height above a vertical datum. They share a unit name and describe different
+ * quantities, and the failure mode of conflating them is silent: a metric wave
+ * file would veto everything over about a foot, and a band on the wrong datum
+ * would shift every session by the offset between the two with nothing in the
+ * output looking wrong.
  *
- * `swellCeilingFor` is exported and has no caller until #129. It is here
- * because the shape of the answer is decided by the data, not by the
- * predicate, and writing it beside the file it reads is what stops #129
- * inventing a second reading of the same JSON.
+ * So both are checked, and checked independently. Reading one 'ft' and reusing
+ * the answer for the other is the shortcut this file exists to refuse.
  */
 
 import surfThresholds from './thresholds.json';
@@ -35,6 +33,19 @@ interface SurfThresholdsFile {
   generated: string;
   activity: string;
   units: string;
+  tide_datum: string;
+  tide_units: string;
+  tide_band: {
+    min_ft: number;
+    max_ft: number;
+    confidence: ThresholdConfidence;
+    reason: string;
+  };
+  swell_minimum_ft: {
+    ft: number;
+    confidence: ThresholdConfidence;
+    reason: string;
+  };
   overrides: Record<
     string,
     { swell_ceiling_ft: number; confidence: ThresholdConfidence; reason: string }
@@ -54,11 +65,91 @@ if (FILE.units !== 'ft') {
   );
 }
 
+if (FILE.tide_units !== 'ft') {
+  throw new Error(
+    `activities/surf/thresholds.json declares tide_units ${JSON.stringify(FILE.tide_units)}; the ` +
+      'band is compared against CO-OPS predictions fetched in feet.',
+  );
+}
+
+if (FILE.tide_datum !== 'MLLW') {
+  /*
+   * The same guard core/zones/intertidal.ts carries on the floor, and it matters
+   * here for the same reason: the band is compared against predictions fetched
+   * in MLLW, nothing in this stack converts between datums, and a band declared
+   * on another datum would move every session by the offset between them
+   * without a single number on the page looking wrong.
+   */
+  throw new Error(
+    `activities/surf/thresholds.json declares tide_datum ${JSON.stringify(FILE.tide_datum)}; the ` +
+      'band is compared against MLLW predictions and nothing in this stack converts between datums.',
+  );
+}
+
+if (!(FILE.tide_band.min_ft < FILE.tide_band.max_ft)) {
+  /*
+   * An inverted or empty band is not a stricter band -- it is a band no tide can
+   * ever be inside, which renders as "out of band" on every spot on every day
+   * and reads exactly like a quiet week. Refused on load rather than discovered
+   * as a page of identical verdicts.
+   */
+  throw new Error(
+    `activities/surf/thresholds.json declares a tide band of [${FILE.tide_band.min_ft}, ` +
+      `${FILE.tide_band.max_ft}] ft, which is empty. No tide can be inside it, so every day ` +
+      'would read out-of-band and look like an ordinary flat week.',
+  );
+}
+
 export const SURF_THRESHOLDS_VERSION = FILE.version;
 export const SURF_UNRESOLVED: readonly string[] = FILE.unresolved;
 
 /** Slugs carrying a surf-specific ceiling. Two, both uncalibrated author estimates. */
 export const SURF_OVERRIDE_SLUGS: readonly string[] = Object.keys(FILE.overrides);
+
+export interface TideBand {
+  /** Tide height below which the spot is out of band. Strict. */
+  minFt: number;
+  /** Tide height above which the spot is out of band. Strict. */
+  maxFt: number;
+  confidence: ThresholdConfidence;
+  reason: string;
+}
+
+/**
+ * The tide band, corridor-wide.
+ *
+ * One band for all twenty-four surf-zone spots, which is the single largest
+ * approximation on the surf page and is stated as such in the file's own
+ * `unresolved` array. There is deliberately no per-spot override mechanism: a
+ * second band for one spot would be a second author estimate with no more
+ * evidence than the first, and the honest move is to leave the approximation
+ * visible rather than to decorate it. #135 is the path.
+ */
+export const SURF_TIDE_BAND: TideBand = {
+  minFt: FILE.tide_band.min_ft,
+  maxFt: FILE.tide_band.max_ft,
+  confidence: FILE.tide_band.confidence,
+  reason: FILE.tide_band.reason,
+};
+
+export interface SwellMinimum {
+  ft: number;
+  confidence: ThresholdConfidence;
+  reason: string;
+}
+
+/**
+ * The swell below which there is nothing to ride.
+ *
+ * The counterpart to the ceiling and not its mirror. Over the ceiling is a
+ * hazard; under this is an absence. They are separate states with separate
+ * sentences precisely so a reader is never told "called off" about a lake.
+ */
+export const SURF_SWELL_MINIMUM: SwellMinimum = {
+  ft: FILE.swell_minimum_ft.ft,
+  confidence: FILE.swell_minimum_ft.confidence,
+  reason: FILE.swell_minimum_ft.reason,
+};
 
 /**
  * This spot's swell ceiling for surf: its own override, or the corridor default.

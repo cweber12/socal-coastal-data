@@ -2,26 +2,35 @@ import { describe, expect, it } from 'vitest';
 
 import { ROUTED_ACTIVITIES, routedActivity } from './activities';
 import robots from './robots';
+import { SURF_SLUG, surfGridPath } from '@/activities/surf/routes';
 import { TIDEPOOL_SLUG, tidepoolGridPath } from '@/activities/tidepool/routes';
 import nextConfig from '../next.config';
 
 describe('routedActivity', () => {
-  it('resolves the one activity that has a grid', () => {
+  it('resolves each activity that has a grid', () => {
     expect(routedActivity('tidepool')).toBe(TIDEPOOL_SLUG);
+    expect(routedActivity('surf')).toBe(SURF_SLUG);
   });
 
   /*
    * The case this registry exists for.
    *
-   * `activities/surf/` has existed since #128 -- two per-spot swell ceilings and
-   * a reader for them, with its caveats rendered on every page. It has no
-   * predicate and no grid, so `/surf` has nothing to answer with. A registry
-   * derived from the directory listing would have routed it, and the page would
-   * either have rendered nothing or fallen back to the only activity that
-   * computes, serving tidepool's verdicts under a URL that says surf.
+   * It used to be argued with `surf`, which had a directory from #128 -- two
+   * per-spot swell ceilings and a reader for them, with its caveats rendered on
+   * every page -- and no predicate, no grid and nothing to answer `/surf` with.
+   * #129 built those and surf joined the registry in the same commit, which is
+   * the rule the registry states: a slug enters this list in the PR that gives
+   * it something to render.
+   *
+   * `dive` and `beach` carry the argument now. Both are named in PRD #101,
+   * neither is built, and a registry derived from the filesystem would route
+   * whichever of them acquires a directory first -- serving another activity's
+   * verdicts under a URL that names it, which is the same class of failure as a
+   * null rendering as a pass.
    */
-  it('refuses an activity that has a directory but no grid', () => {
-    expect(routedActivity('surf')).toBeNull();
+  it('refuses an activity that is planned but not built', () => {
+    expect(routedActivity('dive')).toBeNull();
+    expect(routedActivity('beach')).toBeNull();
   });
 
   it('refuses anything else, exactly rather than approximately', () => {
@@ -33,6 +42,9 @@ describe('routedActivity', () => {
       ' tidepool',
       'tidepool ',
       'tide-pool',
+      'Surf',
+      'surfing',
+      'surfs',
       '',
       'spot',
       'robots.txt',
@@ -71,6 +83,29 @@ describe('ROUTED_ACTIVITIES', () => {
     for (const activity of ROUTED_ACTIVITIES) {
       expect(encodeURIComponent(activity), activity).toBe(activity);
       expect(activity, activity).toMatch(/^[a-z][a-z0-9-]*$/);
+    }
+  });
+
+  /*
+   * Each activity declares its own segment in its own directory, because
+   * scripts/check-boundaries.mjs forbids either from importing the other's. That
+   * makes two independent string literals which must not collide -- and a
+   * collision would be a URL serving one activity's verdicts under the other's
+   * name, which is the failure #127 built the segment for.
+   */
+  it('gives each activity a distinct grid path', () => {
+    expect(tidepoolGridPath()).not.toBe(surfGridPath());
+    expect(new Set([TIDEPOOL_SLUG, SURF_SLUG]).size).toBe(2);
+  });
+
+  it('has no slug that is a path prefix of another', () => {
+    // `/surf` and `/surfing` would both match a prefix rule in robots.txt, and
+    // the day-page disallow patterns are built by prefix.
+    for (const a of ROUTED_ACTIVITIES) {
+      for (const b of ROUTED_ACTIVITIES) {
+        if (a === b) continue;
+        expect(a.startsWith(b), `${a} starts with ${b}`).toBe(false);
+      }
     }
   });
 });
@@ -160,6 +195,7 @@ describe('robots.txt', () => {
 
   it('disallows a day page under a routed activity', () => {
     expect(disallows('/tidepool/cabrillo-tidepools/2026-07-31')).toBe(true);
+    expect(disallows('/surf/windansea/2026-07-31')).toBe(true);
   });
 
   it('disallows a day page at the path it was moved from', () => {
@@ -169,6 +205,8 @@ describe('robots.txt', () => {
   it('leaves the grid, the spot pages and the root indexable', () => {
     expect(disallows('/tidepool')).toBe(false);
     expect(disallows('/tidepool?sort=geographic')).toBe(false);
+    expect(disallows('/surf')).toBe(false);
+    expect(disallows('/surf?sort=geographic')).toBe(false);
     expect(disallows('/spot/windansea')).toBe(false);
     expect(disallows('/')).toBe(false);
     expect(rule().allow).toBe('/');

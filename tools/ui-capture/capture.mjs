@@ -96,6 +96,23 @@ const pages = (date) => [
   ['day-windansea-refused', `/tidepool/windansea/${date}`],
   ['spot-sunset-cliffs', '/spot/sunset-cliffs'],
   ['spot-windansea', '/spot/windansea'],
+
+  /*
+   * Surf, added by #129 with its own capture names.
+   *
+   * A run from before that PR simply has no rows under these names, which is
+   * what compare.mjs should report -- new pages, not changed ones. The tidepool
+   * names above are untouched on purpose, so the same run is still the control
+   * for "no tidepool verdict moved".
+   *
+   * Three pages, chosen for what each one is the only view of:
+   *   the grid          24 rows, the uncollapsed membership caveat, the legend
+   *   windansea         the corridor-default 3.0 ft ceiling, and a reef break
+   *   blacks-beach      the 2.0 ft per-spot override, live for the first time
+   */
+  ['grid-surf', '/surf'],
+  ['day-surf-windansea', `/surf/windansea/${date}`],
+  ['day-surf-blacks-override', `/surf/blacks-beach/${date}`],
 ];
 
 async function reachable() {

@@ -8,6 +8,8 @@ import { EvaluationStamp, Notices, UpstreamFailure } from '@/core/components/dis
 import { FlagBadge } from '@/activities/tidepool/components/flag-badge';
 import { RateRefusal } from '@/activities/tidepool/components/rate-panel';
 import { SwellProvenance } from '@/activities/tidepool/components/spot-summary';
+import { SurfDay } from '@/app/[activity]/[slug]/[date]/surf-day';
+import { surfSpotBySlug } from '@/activities/surf/grid';
 import { UnresolvedDisclosure } from '@/core/components/unresolved';
 import { UNRESOLVED_SOURCES } from '@/app/unresolved-sources';
 import { calibrationFor, CALIBRATION_PULLED_AT, TAXA_VERSION } from '@/activities/tidepool/calibration';
@@ -39,8 +41,22 @@ export async function generateMetadata({
    * The activity is checked here as well as in the page, because metadata is
    * generated for a request the page then 404s. Without this, `/kayak/x/y`
    * returns a not-found page carrying a confident title naming a real spot.
+   *
+   * And the slug is resolved through THAT activity's zone, not through
+   * tidepool's for every segment. `/surf/oceanside-pier/<date>` is a real page
+   * and `/tidepool/oceanside-pier/<date>` is a 404, because the pier is in the
+   * surf zone and not the intertidal -- so a shared lookup would have titled one
+   * of them "Not found" while it rendered, and given the other a confident title
+   * for a page that 404s. The two zones overlap without either containing the
+   * other; eight spots are in both, sixteen in surf alone.
    */
-  const spot = routedActivity(segment) === null ? null : tidepoolSpotBySlug(slug);
+  const activity = routedActivity(segment);
+  const spot =
+    activity === null
+      ? null
+      : activity === 'surf'
+        ? surfSpotBySlug(slug)
+        : tidepoolSpotBySlug(slug);
   return {
     title: spot ? `${spot.name}, ${date} — tide chart` : 'Not found',
     /*
@@ -64,9 +80,9 @@ export async function generateMetadata({
  * One activity's verdict for one spot on one day.
  *
  * The switch and the `never` after it are the same device as the grid route's,
- * for the same reason: with one occupant, rendering tidepool unconditionally is
- * correct today and would stay compiling on the day a second activity is routed.
- * See `app/[activity]/page.tsx` for the full argument.
+ * for the same reason, and #129 is where both of them earned their keep: adding
+ * `surf` to the registry broke this file's compilation until surf had a day page
+ * of its own. See `app/[activity]/page.tsx` for the full argument.
  */
 export default async function ActivityDayPage({
   params,
@@ -80,6 +96,8 @@ export default async function ActivityDayPage({
   switch (activity) {
     case 'tidepool':
       return <TidepoolDay slug={slug} dateParam={dateParam} />;
+    case 'surf':
+      return <SurfDay slug={slug} dateParam={dateParam} />;
   }
 
   const unrendered: never = activity;

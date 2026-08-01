@@ -1,18 +1,44 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "generated": "2026-08-01",
   "activity": "surf",
+
+  "_moved": {
+    "0.2.0": "0.2.0 ADDS tide_band and swell_minimum, and the surf predicate that reads all of this (#129). Minor, not major: nothing was removed and no existing reader breaks. What changed for a READER is that these values now decide a rendered verdict, where 0.1.0's two overrides decided nothing at all — the file's own unresolved array said so, and that entry is rewritten below rather than left standing."
+  },
 
   "units": "ft",
   "wave_height_definition": "NDBC WVHT, significant wave height, converted from metres on an exact 'm' unit-string match",
 
-  "_provenance": "PROVENANCE CLASS 2: AUTHOR ESTIMATE. Every value here is a judgement somebody wrote down after reading this spot's own notes, and none has been measured or field-checked. The class was called 'author threshold' until CONTEXT.md separated the two senses of that word -- see docs/adr/0012-threshold-is-a-role-and-author-estimate-is-a-provenance-class.md. An estimate here is a STARTING state, not a permanent one: it leaves by an evidence ledger on the same terms as any other value in this repo, and #135 is the path for these two.",
+  "tide_datum": "MLLW",
+  "tide_units": "ft",
+
+  "_units_warning": "THIS FILE CARRIES TWO DIFFERENT KINDS OF FEET AND THEY ARE NOT INTERCHANGEABLE. `units` is wave height at a buoy, and governs swell_ceiling_ft, the per-spot overrides and swell_minimum_ft. `tide_units` with `tide_datum` is tide height above a vertical datum, and governs tide_band only. A swell ceiling of 3.0 ft and a tide band edge of 3.5 ft are numbers about different physical quantities that happen to share a unit name, and activities/surf/thresholds.ts asserts both declarations separately rather than checking 'ft' once and reusing the answer.",
+
+  "_provenance": "PROVENANCE CLASS 2: AUTHOR ESTIMATE. Every value here is a judgement somebody wrote down after reading this spot's own notes, and none has been measured or field-checked. The class was called 'author threshold' until CONTEXT.md separated the two senses of that word -- see docs/adr/0012-threshold-is-a-role-and-author-estimate-is-a-provenance-class.md. An estimate here is a STARTING state, not a permanent one: it leaves by an evidence ledger on the same terms as any other value in this repo, and #135 is the path for all of them. There is no class 3 value anywhere in surf: core/zones/surf.ts holds membership and no measured fact, which is docs/adr/0014.",
 
   "_schema": {
+    "tide_band": "The tide heights between which this activity considers a spot workable, above the datum in tide_datum. A BAND, not a floor: it is crossed four times on a semidiurnal day and straddles both a low and a high, which is what makes surf the second activity rather than dive. See docs/adr/0008.",
+    "tide_band.min_ft": "Below this the spot is out of band. STRICT: a tide sitting exactly on this height is out, not in.",
+    "tide_band.max_ft": "Above this the spot is out of band. STRICT, on the same terms.",
+    "swell_minimum_ft": "Significant wave height below which there is nothing to ride, in the units above. Distinct from the ceiling in kind as well as direction: over the ceiling is DANGEROUS, under the minimum is EMPTY, and the two produce different states and different sentences.",
     "overrides": "Per-spot swell ceilings, keyed by shared/spots.json slug. Only present where that spot's own notes already document a reason the shared buoy reading means something different at that spot. A spot with no override takes the corridor default in shared/thresholds.json.",
     "overrides[].swell_ceiling_ft": "Significant wave height above which this spot is called off, in the units above.",
     "overrides[].confidence": "uncalibrated = author estimate, never field-checked, not safe to present as a threshold anyone should trust. calibrated = confirmed against evidence. No value in this file is calibrated.",
     "overrides[].reason": "Why this spot differs from the corridor default, quoting the spot record that justifies it. An override without one is a number nobody can check."
+  },
+
+  "tide_band": {
+    "min_ft": 1.5,
+    "max_ft": 3.5,
+    "confidence": "uncalibrated",
+    "reason": "The band named in PRD #101 decision 15 and in docs/adr/0008 as the shape that breaks the one-window solver. It is ONE band for twenty-four spots, which is the largest single approximation on the surf page: a reef point, a beach break over a shifting sandbar and a harbor mouth do not share a workable tide range, and the corridor's own spot notes already say so — Windansea is 'reef break, rock hazard on low tide' and Tourmaline is 'longboard and beginner-friendly'. Neither of those has been turned into a number here, because turning them into numbers without evidence is what #135 exists to stop."
+  },
+
+  "swell_minimum_ft": {
+    "ft": 1.0,
+    "confidence": "uncalibrated",
+    "reason": "AN AUTHOR ESTIMATE WITH NO EVIDENCE BEHIND IT. It exists so that a flat day cannot read as a pass: with a ceiling alone, a 0.4 ft reading inside the swell horizon, tide in the band and daylight left produced `go`, which is a confident wrong answer of exactly the kind this repo is built to prevent. The VALUE is unverified and should be read as a placeholder holding the shape of the rule; #135 is the path off it, on the same terms as every ceiling here."
   },
 
   "overrides": {
@@ -29,7 +55,10 @@
   },
 
   "unresolved": [
-    "NOTHING READS THESE TWO OVERRIDES YET, and that is the state rather than an oversight. blacks-beach and tourmaline are not members of the intertidal zone, so they are outside the only grid this stack renders today; the surf predicate that would read them is #129. They are recorded here because they are the only two swell offsets any spot record actually justifies, and because putting them in the activity that owns them is what stopped shared/thresholds.json holding per-spot judgements about an activity nobody has built. Stated plainly rather than left as a silent no-op.",
-    "Both values are author estimates read off a sentence in each spot's notes -- Black's breaking materially larger on the same buoy reading, Tourmaline gentler -- and neither has been checked against a single observed session. The corridor caveat applies to them twice over: significant wave height at an offshore or nearshore buoy is not breaking height at the reef, and no shoaling or refraction transform is applied here either."
+    "EVERY NUMBER IN THIS FILE IS UNCALIBRATED AND EVERY ONE OF THEM NOW DECIDES A RENDERED VERDICT. Until 0.2.0 the two overrides here read nothing and changed nothing, and this array said so; #129 built the predicate and they went live, alongside a tide band and a swell minimum that are estimates on the same terms. Nothing here has been checked against a single observed session. Stated first because it is the thing a reader of /surf is most likely to act on and least likely to be told.",
+    "THE TIDE BAND IS ONE RANGE FOR TWENTY-FOUR SPOTS. 1.5 to 3.5 ft MLLW is applied identically to a reef point, a beach break and a harbor mouth. It is not derived from any spot's bathymetry, from any observed session, or from any upstream: it is the band PRD #101 named while arguing about solver shape. A spot whose real workable range is narrower will show sessions it should not, and one whose range is wider will hide sessions it should show, and nothing on the page can tell a reader which they are looking at.",
+    "THE SWELL MINIMUM IS A PLACEHOLDER. 1.0 ft was chosen to make `flat` exist rather than measured to be right. Its direction is defensible — below some height there is nothing to ride — and its value is not defended at all. Treat the boundary between `flat` and a usable day as unknown to within roughly the size of the threshold itself.",
+    "Both per-spot overrides are author estimates read off a sentence in each spot's notes -- Black's breaking materially larger on the same buoy reading, Tourmaline gentler -- and neither has been checked against a single observed session. The corridor caveat applies to them twice over: significant wave height at an offshore or nearshore buoy is not breaking height at the reef, and no shoaling or refraction transform is applied here either.",
+    "TWENTY-TWO OF THE TWENTY-FOUR SURF-ZONE SPOTS TAKE THE CORRIDOR DEFAULT CEILING, which is one number in shared/thresholds.json applied across roughly 60 km of coast and eight buoys. Only Black's Beach and Tourmaline have ever had a reason written down for differing, and the absence of an override elsewhere records that nobody has looked, not that the default fits."
   ]
 }
