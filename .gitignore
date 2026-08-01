@@ -24,6 +24,12 @@ next-env.d.ts
 # to check a number without republishing the records behind it.
 tools/calibration/cache/
 
+# Tide-station probe payloads: 41 years of hi/lo predictions at two stations,
+# re-fetchable in one command. Committed instead is findings/, which carries the
+# coefficients, the queries and the counts needed to check any of it -- and
+# `--check` re-derives them from the live endpoint rather than trusting the file.
+tools/tide-station/cache/
+
 # The offline run's report. Regenerated on every `npm run calibrate` and on every
 # CI run, and it is not the deliverable -- tools/calibration/out/report.md, written by
 # the live run against the whole corpus, is.

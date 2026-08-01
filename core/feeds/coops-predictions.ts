@@ -34,6 +34,45 @@
  *    {"error": {"message": "No Predictions data was found..."}} with a 200
  *    status. Freshness beats status: a 200 carrying no predictions is a dead
  *    response and throws here, so it can never be mistaken for a flat tide.
+ *
+ * 4. THE STATION ID IS A SCALE FACTOR, NOT A LABEL -- and it is the one request
+ *    parameter this module CANNOT check, because every station answers.
+ *
+ *    The two stations in shared/spots.json's registry are related
+ *    multiplicatively, not by an offset. Regressing 57,183 paired hi/lo
+ *    predictions over 2000-2040, each matched to the nearest same-type event
+ *    within 60 min (tools/tide-station/):
+ *
+ *      h_9410170 = 1.0696 x h_9410230 + 0.0245     r2 = 0.99871
+ *
+ *    The intercept is a quarter of an inch. So the two agree near MLLW and
+ *    diverge as the tide rises, and the asymmetry is total: 79.3% of matched
+ *    HIGHS differ by more than 0.3 ft, and not one of 28,589 LOWS does. At the
+ *    surf band's edges the fitted difference is +0.13 ft at 1.5 ft and +0.27 ft
+ *    at 3.5 ft; at +7 ft it is +0.51 ft.
+ *
+ *    WHY THAT IS A TRAP RATHER THAN A FACT. Swapping this station id is a
+ *    one-token edit in spots.json, and it moves high water by up to 0.6 ft while
+ *    moving the daily low by hundredths. A tidepool floor gate would barely
+ *    twitch while a surf band shifted underneath it, so the half of the stack
+ *    most likely to be watched is the half least able to see the change. It is
+ *    also why a result validated at low water -- #102 Finding 3 measured the
+ *    daily low to 0.06 ft -- does not on its own carry to a band or a high-water
+ *    predicate.
+ *
+ *    WHAT IT IS NOT is an argument against 9410170. Raw 9410170 is bound "bay
+ *    side only" and nothing reads it; the published route from it to the open
+ *    coast is CO-OPS subordinate station TWC0405 Point Loma at 0.92, which IS
+ *    this scale term (1/1.0696 = 0.935, 1.6% apart) and which agrees with
+ *    9410230 as well at high water as at low, medians -0.023 and -0.017 ft.
+ *    The divergence above is what a SUBSTITUTION costs, not what a derivation
+ *    costs.
+ *
+ *    The coefficient itself is not a constant: it runs 1.0658 to 1.0744 on an
+ *    ~18.6-year cycle phase-locked to the lunar nodal cycle, so quote the
+ *    difference at a height (stable to 0.011 ft at the band ceiling across all
+ *    41 years) rather than the slope. Full record and the re-runnable probe:
+ *    tools/tide-station/README.md.
  */
 
 import { formatLocalDate, type LocalDate } from '../time';
