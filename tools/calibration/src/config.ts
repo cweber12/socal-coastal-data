@@ -100,9 +100,40 @@ export const DISPLAY_TIME_ZONE = 'America/Los_Angeles';
  * Bin edges, half-open `[lo, hi)`, in feet above MLLW.
  *
  * A DISPLAY CHOICE, and nothing published may depend on them, because the
- * published number IS the per-bin count. NOAA publishes no datum below MLLW for
- * 9410230 -- MLLW 0.00, MLW +0.90, MSL +2.73 -- so these edges cannot be sourced
- * from an authority, which is exactly why nothing is allowed to rest on them.
+ * published number IS the per-bin count. These edges cannot be sourced from an
+ * authority, which is exactly why nothing is allowed to rest on them -- but not
+ * for the reason this comment used to give.
+ *
+ * It used to say NOAA publishes no datum below MLLW for 9410230. It publishes
+ * two. LAT, the lowest astronomical tide, is -2.007 ft MLLW: "the elevation of
+ * the lowest predicted astronomical tide expected to occur at a specific tide
+ * station over the time period of 40 years", on a 2000-2040 window rather than
+ * the 1983-2001 epoch the tidal means are averaged over. STND, the station's
+ * own arbitrary zero, is -4.367 ft MLLW. Re-fetched 2026-08-01 from
+ * `mdapi/prod/webapi/stations/9410230/datums.json?units=metric`; definitions
+ * from `tidesandcurrents.noaa.gov/datum_options.html`, which opens "Below are
+ * definitions of tidal datums maintained by" CO-OPS and lists HAT and LAT
+ * first. That API returns HAT and LAT as top-level keys, OUTSIDE the `datums`
+ * array it returns everything else in. They are counted here anyway: what
+ * matters is whether an authority publishes the level, not which JSON key it
+ * arrives under.
+ *
+ * The published ladder for this station, ft above its own MLLW:
+ *
+ *   STND -4.367, LAT -2.007, MLLW 0.000, NAVD88 +0.190, MLW +0.906,
+ *   DTL +2.664, MSL +2.730, MTL +2.753, MHW +4.600, MHHW +5.328, HAT +7.206
+ *
+ * Eleven published levels against eleven edges, and one coincidence: 0.0, which
+ * is MLLW because MLLW is the zero of the scale, not because an authority put
+ * an edge there. The decision region spans 0.0-1.5 ft and holds two of those
+ * levels -- NAVD88 +0.190 and MLW +0.906 -- both landing mid-bin. Nineteen-year
+ * means, one geodetic tie and two forty-year astronomical extremes have no
+ * spacing in common with the quarter of a foot the decision needs. That is the
+ * narrower ground the conclusion now rests on, and it does still rest.
+ *
+ * How literal the display choice is at the bottom: -2.5 ft sits 0.49 ft below
+ * LAT, so no prediction inside the 2000-2040 window LAT bounds can reach the
+ * lowest edge. The committed 2026 fixture bottoms out at -1.878 ft.
  *
  * ---------------------------------------------------------------------------
  * 0.25 ft over 0.0-1.5 ft, coarse elsewhere. Declared 2026-07-30, for #43.
