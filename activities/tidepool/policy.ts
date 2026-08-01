@@ -1,44 +1,73 @@
 /**
- * The window predicate. Pure: no network, no ambient clock -- `now` is passed
- * in, so every state is reproducible from its inputs.
+ * Tidepool's judgement: a floor, a flood-side trim, and which low the day is
+ * about. Pure: no network, no ambient clock -- `now` is passed in, so every
+ * state is reproducible from its inputs.
  *
  * The question: given a day's tide predictions, how much workable reef time is
  * there, and if there is none, why not.
+ *
+ * ===========================================================================
+ * What this owns, now that the engine is next door
+ * ===========================================================================
+ *
+ * #130 pulled the solver, the gates and the gate states into `core/window/` out
+ * of this file and `activities/surf/policy.ts` together. What is left here is
+ * everything that is a JUDGEMENT about tidepooling, and it is worth naming
+ * because the split is the whole point of the exercise:
+ *
+ *   the floor          a height predicate, one-sided: `ft < floorFt`
+ *   FLOOD_SIDE_TRIM    a safety asymmetry about getting off a reef
+ *   the selection      which low the day reports on
+ *   `above-floor`      the state this predicate emits
+ *   the sentences      what a reader is told, in this activity's words
+ *
+ * The solver returns N intervals and does not know what a low is. Tidepool's
+ * anchor did not disappear in the extraction -- it moved UP, into the selection
+ * below, because "which low is this day about" is this activity's question and
+ * surf answers a different one. See core/window/solve.ts.
  */
 
 import { formatThreshold } from '../../core/format';
 import type { GateWindow } from '../../core/spot/access';
 import { findExtrema, type TideExtremum, type TideSeries } from '../../core/feeds/coops-predictions';
-import { daylightBounds } from '../../core/spot/daylight';
+import type { ActivityDay, UsableWindow } from '../../core/window/day';
 import {
-  formatClock,
+  assertSeriesCoversDay,
+  clipToGates,
+  darkReason,
+  daylightGate,
+  gateClosedReason,
+  gateVerdict,
+  MIN_USABLE_MINUTES,
+  readSwell,
+  swellUnknownReason,
+  swellVetoReason,
+  SWELL_HORIZON_DAYS,
+} from '../../core/window/gates';
+import { intervalAt, solve } from '../../core/window/solve';
+import {
   localDateInZone,
   localDayBounds,
   localDaysBetween,
   sameLocalDate,
   type LocalDate,
 } from '../../core/time';
-import {
-  STATE_PRESENTATION,
-  WINDOW_STATES,
-  type CellLighting,
-  type WindowState,
-} from './states';
+import { STATE_PRESENTATION, type CellLighting, type WindowState } from './states';
+
+export { SWELL_HORIZON_DAYS };
 
 /* ===========================================================================
  * Constants
  * ========================================================================= */
 
 /**
- * Below this, a window is not worth the drive. Covers getting down the trail,
- * being on the reef, and getting back off it.
+ * Below this, a window is not worth the drive.
  *
- * Note the accuracy this sits on: daylight is computed to about 30 s at each
- * end, so a window measured at 45 min is really 45 min plus or minus a minute.
- * The threshold is a judgement, not a measurement, and should not be read as
- * exact to the second.
+ * The shared duration gate's default, named here because this activity's pages
+ * quote it. See core/window/gates.ts for why the number is a judgement rather
+ * than a measurement, and for the accuracy it sits on.
  */
-export const MIN_WINDOW_MINUTES = 45;
+export const MIN_WINDOW_MINUTES = MIN_USABLE_MINUTES;
 
 /**
  * Fraction of the flood side kept.
@@ -54,21 +83,14 @@ export const MIN_WINDOW_MINUTES = 45;
  * to the floor. This is a safety margin, not a measurement, and it is
  * deliberately the one constant here that errs toward less time rather than
  * more.
+ *
+ * It STAYS HERE, and #130 said so before the extraction started. It is a fact
+ * about being on foot on a ledge system while the water returns, not a property
+ * of any solver, and it has no equivalent for someone already in the water --
+ * copying it into core/ would have been the clearest possible case of
+ * generalising one occupant's safety judgement into an engine.
  */
 export const FLOOD_SIDE_TRIM = 0.6;
-
-/**
- * How many days a current swell reading is allowed to stand in for.
- *
- * This stack has no swell forecast -- only a live buoy reading. Using it as a
- * proxy is defensible for a few days and indefensible beyond that, so past this
- * horizon the swell is reported as unknown and the day can never read `go`.
- *
- * Day 0 is today, so a 5-day horizon covers days 0 through 4. On a 7-day grid
- * the last two columns are always `swell-tbd`, which is the honest answer and is
- * meant to be visible rather than smoothed over.
- */
-export const SWELL_HORIZON_DAYS = 5;
 
 export interface WindowInput {
   /** Prediction series covering at least the whole local day being evaluated. */
@@ -95,13 +117,26 @@ export interface WindowInput {
   gate?: GateWindow | null;
 }
 
-export interface WindowResult {
-  state: WindowState;
-  date: LocalDate;
-  /** True when `date` is the local day `nowMs` falls on. */
-  isToday: boolean;
-  /** Whole local days from today to `date`. Negative for the past. */
-  daysFromToday: number;
+/**
+ * Everything about a tidepool day that only tidepool can answer.
+ *
+ * These four -- `lowFt`, `nextHighMs`, `reachesFloor`, `floorFt` -- used to sit
+ * on the shared result type, where they asserted that every activity is anchored
+ * on a low and judged against a floor. Surf is neither. See core/window/day.ts.
+ */
+export interface TidepoolDetail {
+  /**
+   * The window this day's verdict is about, or null.
+   *
+   * Null is exactly the `above-floor` case: the low this day reports on never
+   * gets under the floor, so there is no window rather than a zero-length one.
+   *
+   * Note this can be null while `windows` is NOT empty. Today's rule reports on
+   * the next low from now even when an earlier low had a window and that window
+   * has since shut -- what the reader has ahead of them is the honest answer,
+   * and `above-floor` is a perfectly good one.
+   */
+  window: UsableWindow | null;
 
   /** The low this evaluation is about. */
   lowMs: number;
@@ -110,71 +145,34 @@ export interface WindowResult {
   nextHighMs: number | null;
   nextHighFt: number | null;
 
-  /** The window from the sub-floor excursion, before any clipping. */
-  windowStartMs: number;
-  windowEndMs: number;
-
-  /**
-   * Whether the tide actually gets under the floor around this low. False is
-   * exactly the `above-floor` case, and means the window fields are a
-   * zero-length placeholder at the low rather than a real interval.
-   */
+  /** Whether the tide actually gets under the floor around this low. */
   reachesFloor: boolean;
 
-  /**
-   * The window after clipping to daylight. For today this is NOT clipped to
-   * `now` -- that is `minutesRemaining` -- so the UI can say "1 h 36 min window,
-   * 42 min left".
-   */
-  usableStartMs: number;
-  usableEndMs: number;
-  usableMinutes: number;
-
-  /**
-   * Usable minutes still ahead of `nowMs`, for today only; null on other days.
-   *
-   * When `now` is before the window starts this is the whole window, not the
-   * time until it ends. When `now` is inside the window it is what is left. When
-   * the window has closed it is 0.
-   *
-   * For today, this is what `brief` and `dark` are decided against -- a window
-   * that opened two hours ago and has ten minutes left is brief now, whatever it
-   * was at dawn.
-   */
-  minutesRemaining: number | null;
-
-  sunriseMs: number;
-  sunsetMs: number;
-
-  /** Swell as it was applied. `swellKnown` false means unknown, never calm. */
-  swellFt: number | null;
-  swellKnown: boolean;
-  swellCeilingFt: number;
   floorFt: number;
-
-  /**
-   * True when the window ran past the end of the series and was cut there, so
-   * the reported length is a floor on the real one rather than the real one.
-   */
-  windowClipped: boolean;
-
-  /** One sentence on why this state, for disclosure in the UI. */
-  reason: string;
 }
+
+/**
+ * Narrowed on `swellMinimumFt`: tidepool reads swell as a hazard only, so it is
+ * always null here and the type says so rather than leaving it open.
+ */
+export type WindowResult = ActivityDay<WindowState, TidepoolDetail> & {
+  swellMinimumFt: null;
+};
 
 /* ===========================================================================
  * Evaluation
  * ========================================================================= */
 
-const MINUTE = 60_000;
-const minutesBetween = (fromMs: number, toMs: number) => Math.max(0, (toMs - fromMs) / MINUTE);
+/** The one caveat a tidepool day can carry today. */
+const SERIES_CLIPPED_NOTE =
+  'The window runs past the end of the prediction series, so this length is a minimum.';
 
 /**
  * Evaluate one spot on one local day.
  *
  * Throws when the floor is not a finite number. A null floor means unresolved
- * in `spots.json`, and this refuses to invent one: it would produce a
- * confident-looking state for a spot whose reef depth nobody has established.
+ * in the intertidal zone file, and this refuses to invent one: it would produce
+ * a confident-looking state for a spot whose reef depth nobody has established.
  * Callers filter to spots that carry a floor.
  */
 export function evaluateWindow(input: WindowInput): WindowResult {
@@ -198,58 +196,23 @@ export function evaluateWindow(input: WindowInput): WindowResult {
         'whose workable depth has never been established.',
     );
   }
-  if (!Number.isFinite(swellCeilingFt)) {
-    throw new Error('evaluateWindow: swellCeilingFt must be a finite number.');
-  }
-  if (currentSwellFt !== null && !Number.isFinite(currentSwellFt)) {
-    throw new Error(
-      'evaluateWindow: currentSwellFt must be a finite number or null. Use null ' +
-        'for "not delivering"; NaN would compare false against the ceiling and ' +
-        'read as under it.',
-    );
-  }
 
   const { startMs: dayStartMs, endMs: dayEndMs } = localDayBounds(date, timeZone);
-
-  const firstSample = series.samples[0];
-  const lastSample = series.samples[series.samples.length - 1];
-  if (!firstSample || !lastSample) {
-    throw new Error('evaluateWindow: the series has no samples.');
-  }
-  if (firstSample.tMs > dayStartMs || lastSample.tMs < dayEndMs) {
-    throw new Error(
-      `evaluateWindow: the series does not cover ${date.year}-${date.month}-${date.day} in ` +
-        `${timeZone}. Series spans [${new Date(firstSample.tMs).toISOString()}, ` +
-        `${new Date(lastSample.tMs).toISOString()}]; the local day needs ` +
-        `[${new Date(dayStartMs).toISOString()}, ${new Date(dayEndMs).toISOString()}].`,
-    );
-  }
-
-  const daylight = daylightBounds(lat, lon, date);
-  // Polar cases cannot arise in this corridor, but they are handled rather than
-  // allowed to become a NaN window. Never-rises is a whole dark day; never-sets
-  // gives the tide the full day to work with.
-  const sunriseMs =
-    daylight.kind === 'sun-crosses-horizon'
-      ? daylight.sunriseMs
-      : daylight.kind === 'sun-never-sets'
-        ? dayStartMs
-        : daylight.solarNoonMs;
-  const sunsetMs =
-    daylight.kind === 'sun-crosses-horizon'
-      ? daylight.sunsetMs
-      : daylight.kind === 'sun-never-sets'
-        ? dayEndMs
-        : daylight.solarNoonMs;
 
   const today = localDateInZone(nowMs, timeZone);
   const isToday = sameLocalDate(today, date);
   const daysFromToday = localDaysBetween(today, date);
 
-  // A current reading may only stand in for days inside the horizon. Past it the
-  // swell is unknown, which is a different thing from calm.
-  const swellKnown =
-    currentSwellFt !== null && daysFromToday >= 0 && daysFromToday < SWELL_HORIZON_DAYS;
+  // Tidepool reads swell as a HAZARD ONLY, so it passes no minimum and the gate
+  // is one-sided. It can never emit `flat`, and its states list says so.
+  const swell = readSwell(currentSwellFt, daysFromToday, {
+    ceilingFt: swellCeilingFt,
+    minimumFt: null,
+  });
+
+  assertSeriesCoversDay('evaluateWindow', series, date, timeZone, dayStartMs, dayEndMs);
+
+  const { sunriseMs, sunsetMs } = daylightGate(lat, lon, date, dayStartMs, dayEndMs);
 
   const extrema = findExtrema(series);
   const lowsToday = extrema.filter(
@@ -265,43 +228,25 @@ export function evaluateWindow(input: WindowInput): WindowResult {
   }
 
   /* -----------------------------------------------------------------------
-   * Geometry for one candidate low.
+   * One window per low, from the sub-floor excursion around it.
    *
-   * The window comes from the SUB-FLOOR EXCURSION around this particular low:
-   * walk outward from the low while samples stay under the floor, and
-   * interpolate the crossing at each end.
+   * The solver hands back every maximal sub-floor interval of the day; this
+   * picks the one a given low sits in and applies the flood-side trim to it.
    *
-   * The obvious alternative -- ask for every floor crossing in the series, then
-   * take the nearest falling one before the low and the nearest rising one after
-   * -- is wrong twice over, and both failures look plausible rather than broken:
-   *
-   *   1. For a low that never reaches the floor, those two crossings belong to a
-   *      DIFFERENT low, usually the previous one. The pair spans the intervening
-   *      high and yields a phantom window of ten or twelve hours, which then wins
-   *      the "best daylight low" ranking below and makes the day report on the
-   *      wrong low entirely. Real case: 27 July 2026 at Cabrillo, where the
-   *      sub-floor low is at 03:21 in the dark and the afternoon low at 2.581 ft
-   *      is far above the floor. The phantom makes that afternoon low score a
-   *      twelve-hour daylight window and the day reads `above-floor`, when the
-   *      truth is that the one workable low is before sunrise -- `dark`.
-   *
-   *   2. For a low that touches the floor exactly, the crossing on the way down
-   *      is not emitted at all: the sample sits ON the level, so neither
-   *      neighbouring pair straddles it. The search then finds no falling
-   *      crossing, falls back to the start of the series, and invents a window
-   *      running from whenever the series began. Predictions are quoted to three
-   *      decimals and floors are quoted to one, so an exact tie is not exotic.
-   *
-   * Walking the excursion locally cannot reach another low, and needs no special
-   * case for a tie: a low that only touches the floor has no sample beneath it
-   * and so has no excursion.
-   *
-   * Returns null when no sample around the low is under the floor. A true dip
-   * lasting less than one sample interval is missed, which is a window under six
-   * minutes and far below the 45-minute threshold either way.
+   * The seed is the deepest sample under the floor within one index of the low's
+   * refined vertex, and it is what identifies the interval. Going through a
+   * sample rather than through the vertex directly is deliberate: the vertex is
+   * fitted between samples, and a low that only TOUCHES the floor has no sample
+   * beneath it and so has no excursion -- which is the right answer, because an
+   * instant is not a window.
    * --------------------------------------------------------------------- */
 
   const samples = series.samples;
+  const intervals = solve(
+    series,
+    { holds: (ft) => ft < floorFt, edgeFrom: () => floorFt },
+    { startMs: dayStartMs, endMs: dayEndMs },
+  );
 
   const nearestSampleIndex = (tMs: number): number => {
     let lo = 0;
@@ -314,111 +259,47 @@ export function evaluateWindow(input: WindowInput): WindowResult {
     return tMs - samples[lo]!.tMs <= samples[hi]!.tMs - tMs ? lo : hi;
   };
 
-  /** Instant at which the segment a->b passes `floorFt`, by linear interpolation. */
-  const crossingBetween = (a: { tMs: number; ft: number }, b: { tMs: number; ft: number }) => {
-    const da = a.ft - floorFt;
-    const db = b.ft - floorFt;
-    if (da === db) return a.tMs;
-    return Math.round(a.tMs + (da / (da - db)) * (b.tMs - a.tMs));
-  };
+  const gateContext = { sunriseMs, sunsetMs, gate, nowMs, isToday };
 
-  const excursionFor = (low: TideExtremum) => {
+  const windowFor = (low: TideExtremum): UsableWindow | null => {
     const centre = nearestSampleIndex(low.tMs);
 
-    // The refined vertex sits between samples, so check its immediate
-    // neighbourhood for the deepest sample actually under the floor.
     let seed = -1;
     for (let k = Math.max(0, centre - 1); k <= Math.min(samples.length - 1, centre + 1); k++) {
       if (samples[k]!.ft < floorFt && (seed === -1 || samples[k]!.ft < samples[seed]!.ft)) seed = k;
     }
     if (seed === -1) return null;
 
-    let l = seed;
-    while (l > 0 && samples[l - 1]!.ft < floorFt) l--;
-    let r = seed;
-    while (r < samples.length - 1 && samples[r + 1]!.ft < floorFt) r++;
-
-    return {
-      openMs: l === 0 ? samples[0]!.tMs : crossingBetween(samples[l - 1]!, samples[l]!),
-      closeMs:
-        r === samples.length - 1 ? samples[r]!.tMs : crossingBetween(samples[r]!, samples[r + 1]!),
-      // The excursion ran off the end of the series, so its length is a floor on
-      // the real one rather than the real one.
-      clipped: l === 0 || r === samples.length - 1,
-    };
-  };
-
-  const geometryFor = (low: TideExtremum) => {
-    const excursion = excursionFor(low);
-
-    if (excursion === null) {
-      return {
-        windowStartMs: low.tMs,
-        windowEndMs: low.tMs,
-        usableStartMs: low.tMs,
-        usableEndMs: low.tMs,
-        usableMinutes: 0,
-        minutesRemaining: isToday ? 0 : null,
-        windowClipped: false,
-        reachesFloor: false,
-        // The low never reaches the floor, so nothing was there for a gate to
-        // shut. `above-floor` outranks `closed` and this must not pre-empt it.
-        gateBlocked: false,
-      };
-    }
+    const excursion = intervalAt(intervals, samples[seed]!.tMs);
+    if (excursion === null) return null;
 
     // The ebb side runs to the low in full; the flood side is trimmed.
-    const windowStartMs = excursion.openMs;
-    const windowEndMs = Math.round(low.tMs + FLOOD_SIDE_TRIM * (excursion.closeMs - low.tMs));
-
-    /*
-     * Two clips, applied in sequence and measured separately, so a cell can say
-     * WHICH one shut it. Daylight first: if the window and the daylight do not
-     * overlap at all, the gate is irrelevant and the honest answer is `dark`.
-     * Only if daylight leaves something does the gate get to take it away, and
-     * that is the case `closed` reports.
-     */
-    const daylightStartMs = Math.max(windowStartMs, sunriseMs);
-    const daylightEndMs = Math.min(windowEndMs, sunsetMs);
-    const daylightMinutes = minutesBetween(daylightStartMs, daylightEndMs);
-
-    const usableStartMs = gate ? Math.max(daylightStartMs, gate.openMs) : daylightStartMs;
-    const usableEndMs = gate ? Math.min(daylightEndMs, gate.closeMs) : daylightEndMs;
-    const usableMinutes = minutesBetween(usableStartMs, usableEndMs);
-
-    // The gate is the binding constraint: there was daylight to use and the gate
-    // took it. A holiday closure counts however the light falls -- the park does
-    // not open at all, which is not a fact about daylight.
-    const gateBlocked =
-      gate !== null &&
-      gate !== undefined &&
-      usableMinutes <= 0 &&
-      (daylightMinutes > 0 || gate.closedAllDay);
-
-    const remainingStartMs = Math.max(usableStartMs, nowMs);
-    const minutesRemaining = isToday ? minutesBetween(remainingStartMs, usableEndMs) : null;
+    const startMs = excursion.openMs;
+    const endMs = Math.round(low.tMs + FLOOD_SIDE_TRIM * (excursion.closeMs - low.tMs));
 
     return {
-      windowStartMs,
-      windowEndMs,
-      usableStartMs,
-      usableEndMs,
-      usableMinutes,
-      minutesRemaining,
-      windowClipped: excursion.clipped,
-      reachesFloor: true,
-      gateBlocked,
+      startMs,
+      endMs,
+      continuesBefore: startMs < dayStartMs,
+      continuesAfter: endMs > dayEndMs,
+      seriesClipped: excursion.seriesClipped,
+      anchors: excursion.anchors.filter((e) => e.tMs >= startMs && e.tMs <= endMs),
+      ...clipToGates(startMs, endMs, gateContext),
     };
   };
 
-  type Geometry = ReturnType<typeof geometryFor>;
-  const geometryByLow = new Map<TideExtremum, Geometry>(
-    lowsToday.map((candidate) => [candidate, geometryFor(candidate)]),
+  const windowByLow = new Map<TideExtremum, UsableWindow | null>(
+    lowsToday.map((candidate) => [candidate, windowFor(candidate)]),
   );
-  const geometryOf = (candidate: TideExtremum): Geometry => geometryByLow.get(candidate)!;
+  const windowOf = (candidate: TideExtremum) => windowByLow.get(candidate) ?? null;
+  const usableMinutesOf = (candidate: TideExtremum) => windowOf(candidate)?.usableMinutes ?? 0;
 
   /* -----------------------------------------------------------------------
    * Which low is this day about?
+   *
+   * THE ANCHOR, and it lives here rather than in the solver because it is this
+   * activity's judgement. Surf's answer to the same question is different and
+   * neither is more correct.
    *
    * Today: the NEXT one from the current time -- but a low whose window is
    * still open counts as "next", because being partway through a window is the
@@ -435,7 +316,7 @@ export function evaluateWindow(input: WindowInput): WindowResult {
    * daylight window, breaking ties on the lower tide.
    * --------------------------------------------------------------------- */
   const bestByDaylight = [...lowsToday].sort((a, b) => {
-    const byUsable = geometryOf(b).usableMinutes - geometryOf(a).usableMinutes;
+    const byUsable = usableMinutesOf(b) - usableMinutesOf(a);
     if (byUsable !== 0) return byUsable;
     // Both unusable: prefer the lower tide, which at least gets nearest the floor
     // and is the one the cell should report on.
@@ -447,13 +328,14 @@ export function evaluateWindow(input: WindowInput): WindowResult {
   if (isToday) {
     /*
      * The next low whose window has not already shut. Only lows that actually
-     * reach the floor are eligible: an above-floor low has a zero-length window
-     * sitting at its own instant, which trivially satisfies "ends after now" and
-     * would otherwise be picked up as the next opportunity when it is not one.
+     * reach the floor are eligible: an above-floor low has no window at all, and
+     * before #130 it carried a zero-length one sitting at its own instant, which
+     * trivially satisfied "ends after now" and would otherwise be picked up as
+     * the next opportunity when it is not one.
      */
     const stillOpen = lowsToday.find((candidate) => {
-      const g = geometryOf(candidate);
-      return g.reachesFloor && g.windowEndMs >= nowMs;
+      const w = windowOf(candidate);
+      return w !== null && w.endMs >= nowMs;
     });
 
     /*
@@ -475,93 +357,111 @@ export function evaluateWindow(input: WindowInput): WindowResult {
     low = bestByDaylight;
   }
 
-  const geometry = geometryOf(low);
+  const window = windowOf(low);
   const nextHigh = extrema.find((e) => e.kind === 'high' && e.tMs > low.tMs) ?? null;
 
   /* -----------------------------------------------------------------------
-   * State, in precedence order.
+   * State, in precedence order. `above-floor` first, then the gates.
    * --------------------------------------------------------------------- */
-  const decisiveMinutes = isToday ? (geometry.minutesRemaining ?? 0) : geometry.usableMinutes;
+  const decisiveMinutes =
+    window === null ? 0 : isToday ? (window.minutesRemaining ?? 0) : window.usableMinutes;
+
+  // The clause every gate sentence is built on. Tidepool's shape is ONE window
+  // around one low, so the subject is singular.
+  const TIDE_WORKS = 'The tide drops below the floor';
+  const SUBJECT = 'the window falls';
 
   let state: WindowState;
   let reason: string;
 
-  if (!geometry.reachesFloor) {
+  if (window === null) {
     state = 'above-floor';
     reason =
       `${isToday ? 'The next low' : "The day's best low"} only reaches ` +
       `${low.ft.toFixed(1)} ft, which does not get under the ${formatThreshold(floorFt)} ft floor. ` +
       'The reef stays covered.';
-  } else if (geometry.gateBlocked) {
-    /*
-     * The tide works and there was daylight to use it in; the gate is what took
-     * it. Reported separately from `dark` so the cell says which one shut it --
-     * "come back when it is light" and "the park is shut" are different advice.
-     */
-    state = 'closed';
-    reason = gate!.closedAllDay
-      ? `The tide drops below the floor, but ${gate!.operator} is closed all day for ` +
-        `${gate!.closureName}.`
-      : `The tide drops below the floor, but the window falls outside gate hours — ` +
-        `${gate!.operator} is open ${formatClock(gate!.openMs, timeZone)} to ` +
-        `${formatClock(gate!.closeMs, timeZone)}.`;
-  } else if (decisiveMinutes <= 0) {
-    state = 'dark';
-    reason = isToday
-      ? "The tide is low enough, but there is no daylight left today while it is."
-      : `The tide drops below the floor, but the window falls outside daylight.`;
-  } else if (swellKnown && currentSwellFt! > swellCeilingFt) {
-    state = 'veto';
-    reason =
-      `Swell is ${currentSwellFt!.toFixed(1)} ft against an uncalibrated ceiling of ` +
-      `${swellCeilingFt.toFixed(1)} ft. Called off regardless of the tide.`;
-  } else if (decisiveMinutes < MIN_WINDOW_MINUTES) {
-    state = 'brief';
-    reason =
-      `Only ${Math.round(decisiveMinutes)} min of usable window, under the ` +
-      `${MIN_WINDOW_MINUTES} min minimum.`;
-  } else if (!swellKnown) {
-    state = 'swell-tbd';
-    reason =
-      currentSwellFt === null
-        ? 'The tide works, but the buoy is not delivering a swell reading, so the ' +
-          'swell is unknown rather than calm.'
-        : `The tide works, but this is ${daysFromToday} days out and the swell reading ` +
-          `only stands in for ${SWELL_HORIZON_DAYS}. There is no swell forecast in this stack.`;
   } else {
-    state = 'go';
-    reason =
-      `${Math.round(decisiveMinutes)} min of daylight window with the tide under the ` +
-      `floor and swell at ${currentSwellFt!.toFixed(1)} ft.`;
+    const gated = gateVerdict({
+      decisiveMinutes,
+      gateBlocked: window.gateBlocked,
+      swell,
+      minimumMinutes: MIN_WINDOW_MINUTES,
+    });
+
+    if (gated === 'flat') {
+      /*
+       * Unreachable, and asserted rather than defaulted. Tidepool declares no
+       * swell minimum, so its gate is one-sided and `flat` has no way out of it.
+       * If that ever changes, this is a loud failure rather than a state with no
+       * sentence and no presentation row.
+       */
+      throw new Error(
+        'evaluateWindow: the swell gate emitted `flat`, which needs a minimum, and tidepool ' +
+          'declares none. Swell is a hazard here, not something to ride.',
+      );
+    }
+    state = gated;
+
+    switch (state) {
+      case 'closed':
+        reason = gateClosedReason(gate!, timeZone, TIDE_WORKS, SUBJECT);
+        break;
+      case 'dark':
+        reason = darkReason(isToday, 'The tide is low enough', TIDE_WORKS, SUBJECT);
+        break;
+      case 'veto':
+        reason = swellVetoReason(swell.ft!, swellCeilingFt);
+        break;
+      case 'brief':
+        reason =
+          `Only ${Math.round(decisiveMinutes)} min of usable window, under the ` +
+          `${MIN_WINDOW_MINUTES} min minimum.`;
+        break;
+      case 'swell-tbd':
+        // "calm" rather than "flat": this activity reads swell as a hazard, and
+        // the assumption a reader would otherwise make is that it is quiet.
+        reason = swellUnknownReason(swell, 'calm');
+        break;
+      default:
+        reason =
+          `${Math.round(decisiveMinutes)} min of daylight window with the tide under the ` +
+          `floor and swell at ${swell.ft!.toFixed(1)} ft.`;
+    }
   }
 
-  if (geometry.windowClipped && state !== 'above-floor') {
-    reason += ' The window runs past the end of the prediction series, so this length is a minimum.';
-  }
+  const disclosures = window !== null && window.seriesClipped ? [SERIES_CLIPPED_NOTE] : [];
 
   return {
     state,
     date,
     isToday,
     daysFromToday,
-    lowMs: low.tMs,
-    lowFt: low.ft,
-    nextHighMs: nextHigh?.tMs ?? null,
-    nextHighFt: nextHigh?.ft ?? null,
-    ...geometry,
+    windows: lowsToday
+      .map(windowOf)
+      .filter((w): w is UsableWindow => w !== null),
     sunriseMs,
     sunsetMs,
-    swellFt: swellKnown ? currentSwellFt : null,
-    swellKnown,
+    swellFt: swell.known ? swell.ft : null,
+    swellKnown: swell.known,
     swellCeilingFt,
-    floorFt,
-    reason,
+    swellMinimumFt: null,
+    reason: [reason, ...disclosures].join(' '),
+    disclosures,
+    detail: {
+      window,
+      lowMs: low.tMs,
+      lowFt: low.ft,
+      nextHighMs: nextHigh?.tMs ?? null,
+      nextHighFt: nextHigh?.ft ?? null,
+      reachesFloor: window !== null,
+      floorFt,
+    },
   };
 }
 
-
 export function lowLighting(result: WindowResult): CellLighting {
-  return result.lowMs >= result.sunriseMs && result.lowMs <= result.sunsetMs ? 'day' : 'night';
+  const { lowMs } = result.detail;
+  return lowMs >= result.sunriseMs && lowMs <= result.sunsetMs ? 'day' : 'night';
 }
 
 /** How many of a spot's days are usable. Drives the default sort. */

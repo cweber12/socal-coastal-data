@@ -83,8 +83,8 @@ export function formatFloorGap(lowFt: number, floorFt: number): string {
  * this is the only place a listener gets it.
  */
 export function describeFloorGap(result: WindowResult): string | null {
-  if (!result.reachesFloor) return null;
-  const under = Math.abs(result.floorFt - result.lowFt);
+  if (!result.detail.reachesFloor) return null;
+  const under = Math.abs(result.detail.floorFt - result.detail.lowFt);
   /*
    * The gap only, never the floor's own value.
    *
@@ -97,12 +97,19 @@ export function describeFloorGap(result: WindowResult): string | null {
   return `${under.toFixed(1)} feet under the floor`;
 }
 
-/** `1 h 36 min` of window, or the remaining time when the day is today. */
+/**
+ * `1 h 36 min` of window, or the remaining time when the day is today.
+ *
+ * A null window is `above-floor`, and it reads as zero rather than as absent:
+ * this is only ever called where the caller has already decided to print a
+ * length, and "0 min" is the true one.
+ */
 export function describeWindowLength(result: WindowResult): string {
-  if (result.isToday && result.minutesRemaining !== null) {
-    return `${formatDuration(result.minutesRemaining)} of window left`;
+  const window = result.detail.window;
+  if (result.isToday) {
+    return `${formatDuration(window?.minutesRemaining ?? 0)} of window left`;
   }
-  return `${formatDuration(result.usableMinutes)} of daylight window`;
+  return `${formatDuration(window?.usableMinutes ?? 0)} of daylight window`;
 }
 
 /**
@@ -119,7 +126,7 @@ export function cellAriaLabel(
   const { spoken } = STATE_PRESENTATION[result.state];
   const day = result.isToday
     ? 'today'
-    : formatDateLong(result.lowMs, timeZone);
+    : formatDateLong(result.detail.lowMs, timeZone);
 
   const parts: string[] = [`${spotName}, ${day}: ${spoken}.`];
 
@@ -140,13 +147,13 @@ export function cellAriaLabel(
    */
   const gap = describeFloorGap(result);
   parts.push(
-    `Low ${describeHeight(result.lowFt)} at ${formatClock(result.lowMs, timeZone)}, ${lighting}` +
+    `Low ${describeHeight(result.detail.lowFt)} at ${formatClock(result.detail.lowMs, timeZone)}, ${lighting}` +
       `${gap ? `, ${gap}` : ''}.`,
   );
 
-  if (result.nextHighMs !== null && result.nextHighFt !== null) {
+  if (result.detail.nextHighMs !== null && result.detail.nextHighFt !== null) {
     parts.push(
-      `Next high ${describeHeight(result.nextHighFt)} at ${formatClock(result.nextHighMs, timeZone)}.`,
+      `Next high ${describeHeight(result.detail.nextHighFt)} at ${formatClock(result.detail.nextHighMs, timeZone)}.`,
     );
   }
 
@@ -174,7 +181,7 @@ export function flagBadgeLabel(
   result: WindowResult,
   timeZone: string,
 ): string {
-  const day = result.isToday ? 'today' : formatDateLong(result.lowMs, timeZone);
+  const day = result.isToday ? 'today' : formatDateLong(result.detail.lowMs, timeZone);
   return `Why this reading — ${spotName}, ${day}`;
 }
 

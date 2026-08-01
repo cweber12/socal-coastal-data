@@ -37,3 +37,10 @@ tools/calibration/__fixtures__/** linguist-vendored=true
 
 # Written by tools/calibration/run.ts. Reviewed as a diff, not authored.
 tools/calibration/out/** linguist-generated=true
+
+# Verdict grids captured from the parent commit before the #130 extraction and
+# replayed field by field by activities/*/verdicts.test.ts. Generated evidence,
+# not source: regenerating one to make its test pass is the only thing that
+# makes it worthless, so it is collapsed in review the way every other
+# generated file here is.
+activities/*/__fixtures__/** linguist-generated=true

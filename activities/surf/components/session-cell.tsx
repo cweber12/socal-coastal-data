@@ -71,17 +71,17 @@ export function SessionCell({
       >
         {/* aria-hidden throughout: the label above already says all of this in prose. */}
         <span aria-hidden className="block">
-          {day.sessions.length === 0 ? (
+          {day.windows.length === 0 ? (
             <OutOfBand day={day} />
           ) : (
             <>
-              {day.sessions.map((session, i) => (
+              {day.windows.map((session, i) => (
                 <SessionLine
                   key={i}
                   session={session}
                   day={day}
                   timeZone={timeZone}
-                  isBest={session === day.best}
+                  isBest={session === day.detail.best}
                 />
               ))}
             </>
@@ -179,10 +179,10 @@ function OutOfBand({ day }: { day: SurfDay }) {
   return (
     <span className="block font-mono tabular-nums text-[var(--text-dim)]">
       <span className="block">
-        {formatHeight(day.dayLowFt)}–{formatHeight(day.dayHighFt)} ft
+        {formatHeight(day.detail.dayLowFt)}–{formatHeight(day.detail.dayHighFt)} ft
       </span>
       <span className="mt-0.5 block text-[0.85em] text-[var(--text-dimmer)]">
-        {day.dayLowFt >= day.band.maxFt ? 'never drops in' : 'never rises in'}
+        {day.detail.dayLowFt >= day.detail.band.maxFt ? 'never drops in' : 'never rises in'}
       </span>
     </span>
   );

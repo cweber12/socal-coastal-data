@@ -164,12 +164,12 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
                       <span aria-hidden className="text-right">
                         <TideLine
                           arrow="▼"
-                          heightFt={result.lowFt}
-                          tMs={result.lowMs}
+                          heightFt={result.detail.lowFt}
+                          tMs={result.detail.lowMs}
                           timeZone={week.timeZone}
                           emphasis
                         />
-                        <FloorGap lowFt={result.lowFt} floorFt={result.floorFt} />
+                        <FloorGap lowFt={result.detail.lowFt} floorFt={result.detail.floorFt} />
                       </span>
                     </Link>
                   </CellShell>

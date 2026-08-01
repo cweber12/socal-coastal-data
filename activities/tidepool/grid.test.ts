@@ -715,8 +715,8 @@ describe("loadSpotDay's dayLowFt", () => {
     expect(day.window).not.toBeNull();
     expect(day.dayLowFt).not.toBeNull();
     // The sampled minimum is at or above the refined extremum, never below it.
-    expect(day.dayLowFt!).toBeGreaterThanOrEqual(day.window!.lowFt);
-    expect(day.dayLowFt).not.toBe(day.window!.lowFt);
+    expect(day.dayLowFt!).toBeGreaterThanOrEqual(day.window!.detail.lowFt);
+    expect(day.dayLowFt).not.toBe(day.window!.detail.lowFt);
     // And it really is a sample, not a fitted value.
     expect(day.daySeries.samples.some((s) => s.ft === day.dayLowFt)).toBe(true);
   });
@@ -747,7 +747,10 @@ function row(name: string, floorFt: number, lows: number[], usableCount = 0): Sp
     swell: {} as SpotRow['swell'],
     ceiling: {} as SpotRow['ceiling'],
     days: lows.map(
-      (lowFt) => ({ lowFt, floorFt, minutesRemaining: null, usableMinutes: 0 }) as SpotRow['days'][number],
+      (lowFt) =>
+        ({
+          detail: { lowFt, floorFt, window: null },
+        }) as unknown as SpotRow['days'][number],
     ),
     usableCount,
     // The sort never reads this. It is here so the object typechecks as a

@@ -694,7 +694,7 @@ export function bestGapFt(row: SpotRow): number {
   let best = Infinity;
   for (const day of row.days) {
     if (!day) continue;
-    const gap = day.lowFt - day.floorFt;
+    const gap = day.detail.lowFt - day.detail.floorFt;
     if (gap < best) best = gap;
   }
   return best;
@@ -732,6 +732,18 @@ export function bestGapFt(row: SpotRow): number {
  * station serves every spot, but it is correct on its own terms and would start
  * mattering again the moment a spot binds to a different station.
  */
+/**
+ * How much window today's cell has, for the sort's second tie-break.
+ *
+ * Remaining minutes where there are any, falling back to the window's whole
+ * length -- and to zero for a day whose low never reaches the floor, which has
+ * no window at all rather than a zero-length one.
+ */
+function todayMinutes(row: SpotRow): number {
+  const window = row.days[0]?.detail.window;
+  return window?.minutesRemaining ?? window?.usableMinutes ?? 0;
+}
+
 export function sortRows(rows: readonly SpotRow[], sort: SortKey): SpotRow[] {
   if (sort === 'geographic') {
     // spots.json is already ordered north to south, from Oceanside Harbour down
@@ -748,8 +760,8 @@ export function sortRows(rows: readonly SpotRow[], sort: SortKey): SpotRow[] {
     const bGap = bestGapFt(b);
     if (aGap !== bGap) return aGap - bGap;
 
-    const aToday = a.days[0]?.minutesRemaining ?? a.days[0]?.usableMinutes ?? 0;
-    const bToday = b.days[0]?.minutesRemaining ?? b.days[0]?.usableMinutes ?? 0;
+    const aToday = todayMinutes(a);
+    const bToday = todayMinutes(b);
     if (bToday !== aToday) return bToday - aToday;
 
     return a.spot.name.localeCompare(b.spot.name);

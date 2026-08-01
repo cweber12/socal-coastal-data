@@ -11,6 +11,7 @@ and what is true of a whole spot — never whether any of it is *good*.
 | `upstream.ts` | Fetch, cache and failure policy. `server-only`. |
 | `spot/` | Facts true of a whole spot regardless of cross-shore band. See its README. |
 | `zones/` | Facts true of one cross-shore band. One module per zone; the intertidal is the only one with facts today. See its README. |
+| `window/` | The window engine: the N-interval solver, the gates, and the states they emit. Shared by every activity; owned by none. See its README. |
 
 ## What belongs here, and what belongs next door
 
@@ -29,6 +30,10 @@ Belongs next door:
 - **A measured zone fact** — the tide height at which a reef surfaces — is a
   fact, but a fact about one cross-shore band, so it goes to `core/zones/` and
   not to the root of this directory.
+- **A height predicate, a selection rule, or a verdict's sentence** — `window/`
+  runs the machinery an activity's judgement is expressed through, and holds
+  none of the judgement. ADR 0015 records where the line fell when the engine was
+  extracted from two occupants.
 
 `scripts/check-boundaries.mjs` is the one statement of the import rules; this
 file does not restate it.

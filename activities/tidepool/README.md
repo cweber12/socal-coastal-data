@@ -4,8 +4,9 @@ Is there workable reef time at this spot on this day, and if not, why not.
 
 | | |
 | --- | --- |
-| `policy.ts` | The window predicate. Pure: no network, no ambient clock — `now` is passed in, so every state is reproducible from its inputs. |
-| `states.ts` | The seven states, their order, and how each is presented. |
+| `policy.ts` | The floor predicate, the flood-side trim, and which low the day is about. Pure: no network, no ambient clock — `now` is passed in, so every state is reproducible from its inputs. |
+| `states.ts` | The seven states, their order, and how `above-floor` is presented. The other six come from `core/window/states.ts`. |
+| `verdicts.test.ts` | 336 spot-days captured from `main` before #130 and replayed field by field. Evidence, not source. |
 | `grid.ts` | Composition. Feeds plus the predicate into what a page renders. `server-only`. |
 | `labels.ts` | The sentences a reader and a screen reader get. |
 | `routes.ts` | This activity's URL segment, and the paths built from it. |
@@ -41,14 +42,31 @@ page's choice.
 
 `states.ts` says which verdicts exist and what a reader sees for each.
 `policy.ts` says how a day arrives at one. The dependency runs one way — policy
-imports states — and nothing in `states.ts` mentions `WindowResult`, so #130 can
-lift the shared gate states into `core/window/states.ts` without first
-untangling a cycle.
+imports states — and nothing in `states.ts` mentions `WindowResult`, which is
+what let #130 lift the shared gate states into `core/window/states.ts` without
+first untangling a cycle.
 
 Only `above-floor` is genuinely tidepool's: it is what this activity's height
 predicate emits. The other six — `closed`, `dark`, `veto`, `brief`, `swell-tbd`,
-`go` — are gate states any activity would need, which is what makes them the
-extraction target rather than the thing to keep.
+`go` — are gate states any activity would need, and they now come from
+`core/window/states.ts` with this file declaring which of them it can reach and
+in what order.
+
+The seventh gate state, `flat`, is **not** reachable here and is deliberately
+absent. It needs a swell minimum, and tidepool declares none: swell is a hazard
+on a reef, not something to ride. ADR 0016.
+
+## What `above-floor` is, since #130
+
+The **absence** of a window, not a zero-length one at the low's own instant. The
+placeholder had to be excluded by hand from the "is there still a window open"
+selection, because a window that starts and ends at the same moment trivially
+ends after now. `detail.window === null` is the state.
+
+`detail` is also where `lowFt`, `nextHighMs`, `reachesFloor` and `floorFt` went.
+They used to sit on the shared result type, where they asserted that every
+activity is anchored on a low and judged against a floor — which is false of the
+second occupant. ADR 0015.
 
 ## What is not here
 

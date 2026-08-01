@@ -11,8 +11,8 @@ A reason to go, and the unit that owns **judgement**. An activity composes the
 `surf` is second because it is the only candidate that breaks the one-window
 solver: a tide *band* is crossed four times on a semidiurnal day and straddles
 both a low and a high, which is N sessions rather than one window anchored on a
-low. See ADR 0008. `dive` and `beach` land after #130 extracts a solver from
-these two.
+low. See ADR 0008. #130 extracted `core/window/` from these two, so `dive` and
+`beach` land against an engine proven against two shapes rather than one.
 
 The two overlap without either containing the other — 8 spots are in both, 16 in
 surf alone — because the zones they read overlap. Nothing may assume a spot's
@@ -39,14 +39,29 @@ Belongs next door:
   stacking several activities' verdicts on top — belongs to `app/`. Composition
   *within* one activity lives here; ADR 0010 records why the two are different.
 
+## What an activity holds, now that the engine is next door
+
+#130 pulled the solver, the gates and the gate states into `core/window/` out of
+**two real occupants**. What is left in each activity is what only it can answer:
+
+| | tidepool | surf |
+| --- | --- | --- |
+| height predicate | `ft < floorFt` | `minFt < ft < maxFt`, strict both ends |
+| its own state | `above-floor` | `out-of-band` |
+| the selection | today: the next low whose window has not shut. Otherwise: the best daylight low. | most decisive minutes, then most usable, then earliest |
+| a judgement of its own | `FLOOD_SIDE_TRIM = 0.6` — getting off a reef while the water returns | a swell **minimum**, so a flat day does not read `go` |
+
+The two selection rules are the reason the solver takes no anchor: they answer
+different questions and neither is more correct. ADR 0015.
+
 ## No activity may import another
 
 `scripts/check-boundaries.mjs` derives the rule from the paths, so it holds for
 an activity that has no row of its own — and each activity has one anyway, which
 states its *other* edges. The check fails the moment a cross-activity import is
-written, which is what makes the duplication in `surf/` safe: it was built by
-**copying** tidepool's predicate on purpose, and that duplication is the input to
-the extraction in #130 rather than a defect to fix early.
+written. That is what made the duplication in `surf/` safe while it lasted: it
+was built by **copying** tidepool's predicate on purpose, and that duplication
+was the input to #130's extraction rather than a defect to fix early.
 
 Demonstrated rather than asserted, on a deliberately introduced import:
 
