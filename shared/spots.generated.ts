@@ -1,6 +1,6 @@
 // GENERATED FILE -- do not edit by hand.
 //
-// Source:    shared/spots.json (version 2.0.0, generated 2026-07-31)
+// Source:    shared/spots.json (version 3.0.0, generated 2026-08-01)
 // Generator: scripts/gen-spots-types.mjs
 // Regen:     npm run gen:types      Verify: npm run gen:types:check
 //
@@ -11,9 +11,6 @@ import spotsJson from './spots.json';
 
 /** Every slug present in the inventory. Slugs are the stable primary key. */
 export type SpotSlug = 'oceanside-harbor' | 'oceanside-pier' | 'buccaneer-beach' | 'tamarack-carlsbad' | 'ponto-south-carlsbad' | 'batiquitos-lagoon' | 'beacons-leucadia' | 'moonlight-encinitas' | 'swamis' | 'cardiff-reef' | 'san-elijo-lagoon' | 'del-mar-15th' | 'torrey-pines-beach' | 'blacks-beach' | 'la-jolla-shores' | 'la-jolla-cove' | 'windansea' | 'tourmaline' | 'mission-beach' | 'ocean-beach-pier' | 'sunset-cliffs' | 'cabrillo-tidepools' | 'coronado-central' | 'silver-strand' | 'imperial-beach-pier' | 'border-field';
-
-/** Audience tags. These drive column visibility, not thresholds. */
-export type Audience = 'bird' | 'dive' | 'sail' | 'surf' | 'swim' | 'tidepool';
 
 /** NDBC WMO buoy ids known to the inventory, live or dead. */
 export type BuoyId = '46224' | '46225' | '46232' | '46235' | '46254' | '46258' | '46266' | '46274';
@@ -35,6 +32,13 @@ export interface WaveBinding {
  * the compiler: a null station always carries the reason it is null, and a
  * present station always carries its distance and suspect flag. A bare null can
  * never be read as a pass because there is no shape where it stands alone.
+ *
+ * `county_station_scope` is on both arms rather than being a third one. It is
+ * the join's INPUT -- which spots this repo asked about -- and an in-scope spot
+ * whose station is genuinely unresolved is a legitimate state that no spot is in
+ * today. Modelling that arm now would be a shape with no occupant, which this
+ * repo adds when the case exists and not in anticipation of it. The generator
+ * enforces the half that is decidable: scope `out` and a station cannot coexist.
  */
 export type CountyStationBinding =
   | {
@@ -42,15 +46,56 @@ export type CountyStationBinding =
       county_station_distance_m: number;
       /** true past 1000 m: the station may sit on a different beach cell carrying different water. */
       county_station_suspect: boolean;
+      county_station_scope: 'in';
       county_station_null_reason?: undefined;
     }
   | {
       county_station: null;
       county_station_distance_m: null;
       county_station_suspect: null;
+      /**
+       * Which kind of null this is. `out` means the join never asked -- the null
+       * is deliberate. `in` would mean it asked and got nothing, which is a gap.
+       */
+      county_station_scope: 'in' | 'out';
       /** Required whenever the station is null. States out-of-scope vs genuinely unresolved. */
       county_station_null_reason: string;
     };
+
+/**
+ * The spots the county_station join covers, derived from the file so a re-run
+ * scopes itself the way the recorded one did.
+ *
+ * 23 of 26 today. This is the machine-readable remains of a
+ * sentence that used to read "ONLY for spots tagged swim, surf, dive or
+ * tidepool" against an `audiences` field 3.0.0 deleted -- see
+ * docs/adr/0011-a-join-carries-its-own-scope.md.
+ */
+export const COUNTY_STATION_IN_SCOPE: readonly SpotSlug[] = [
+  'oceanside-harbor',
+  'oceanside-pier',
+  'buccaneer-beach',
+  'tamarack-carlsbad',
+  'ponto-south-carlsbad',
+  'beacons-leucadia',
+  'moonlight-encinitas',
+  'swamis',
+  'cardiff-reef',
+  'del-mar-15th',
+  'torrey-pines-beach',
+  'blacks-beach',
+  'la-jolla-shores',
+  'la-jolla-cove',
+  'windansea',
+  'tourmaline',
+  'mission-beach',
+  'ocean-beach-pier',
+  'sunset-cliffs',
+  'cabrillo-tidepools',
+  'coronado-central',
+  'silver-strand',
+  'imperial-beach-pier',
+];
 
 /**
  * mpa and mpa_resolved are paired deliberately. `{ mpa: null, mpa_resolved:
@@ -77,7 +122,6 @@ export type Spot = {
   lon: number;
   wave: WaveBinding;
   tide_station: TideStationId;
-  audiences: Audience[];
   notes: string;
 } & CountyStationBinding &
   MpaBinding;
@@ -121,8 +165,8 @@ export const BUOYS = SPOTS_FILE.buoys;
 export const TIDE_STATIONS = SPOTS_FILE.tide_stations;
 
 /** Inventory version, surfaced in the UI so a stale deploy is visible. */
-export const SPOTS_VERSION = '2.0.0';
-export const SPOTS_GENERATED = '2026-07-31';
+export const SPOTS_VERSION = '3.0.0';
+export const SPOTS_GENERATED = '2026-08-01';
 
 /** Display timezone for the whole corridor, read from the file's conventions. */
 export const DISPLAY_TIME_ZONE = "America/Los_Angeles";

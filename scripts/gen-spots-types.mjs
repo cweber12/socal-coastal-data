@@ -84,8 +84,34 @@ for (const [i, s] of data.spots.entries()) {
     }
   }
 
-  if (!Array.isArray(s.audiences) || s.audiences.length === 0) {
-    problems.push(`${at}: audiences must be a non-empty array`);
+  /*
+   * The join's scope, required on every spot.
+   *
+   * This is the whole reason `audiences` could be deleted without the
+   * county_station join becoming unrepeatable: the scope used to be the
+   * sentence "ONLY for spots tagged swim, surf, dive or tidepool", evaluated
+   * against a field that no longer exists. Requiring it here is what stops a
+   * spot added later from being silently un-scoped -- which would not fail
+   * anywhere else, and would quietly shrink a join nobody re-reads.
+   */
+  if (s.county_station_scope !== 'in' && s.county_station_scope !== 'out') {
+    problems.push(
+      `${at}: county_station_scope must be 'in' or 'out', got ` +
+        `${JSON.stringify(s.county_station_scope)}. A spot with no scope is one the ` +
+        'county_station join cannot be re-run over.',
+    );
+  }
+  // Out of scope means the join did not ask, so there is nothing for it to have
+  // answered. A station on an out-of-scope spot is a value with no join behind
+  // it, which is the hand-populated result this file forbids.
+  if (s.county_station_scope === 'out' && s.county_station !== null) {
+    problems.push(`${at}: out of the join's scope, but carries county_station ${s.county_station}`);
+  }
+  if ('audiences' in s) {
+    problems.push(
+      `${at}: carries audiences, which 3.0.0 deleted. Zone membership is in ` +
+        "shared/intertidal.json, and the county_station join's scope is county_station_scope.",
+    );
   }
   if (typeof s.tide_station !== 'string' || !data.tide_stations[s.tide_station]) {
     problems.push(`${at}: tide_station ${JSON.stringify(s.tide_station)} is not in tide_stations`);
@@ -110,9 +136,10 @@ const uniqSorted = (xs) => [...new Set(xs)].sort();
 const union = (xs) => (xs.length ? xs.map((x) => `'${x}'`).join(' | ') : 'never');
 
 const slugs = data.spots.map((s) => s.slug);
-const audiences = uniqSorted(data.spots.flatMap((s) => s.audiences));
 const buoyIds = uniqSorted(Object.keys(data.buoys));
 const stationIds = uniqSorted(Object.keys(data.tide_stations));
+const inScope = data.spots.filter((s) => s.county_station_scope === 'in').map((s) => s.slug);
+const inScopeList = inScope.map((s) => `  '${s}',`).join('\n');
 const deadBuoys = buoyIds.filter((id) => data.buoys[id].status !== 'live');
 
 const out = `// GENERATED FILE -- do not edit by hand.
@@ -128,9 +155,6 @@ import spotsJson from './spots.json';
 
 /** Every slug present in the inventory. Slugs are the stable primary key. */
 export type SpotSlug = ${union(slugs)};
-
-/** Audience tags. These drive column visibility, not thresholds. */
-export type Audience = ${union(audiences)};
 
 /** NDBC WMO buoy ids known to the inventory, live or dead. */
 export type BuoyId = ${union(buoyIds)};
@@ -152,6 +176,13 @@ export interface WaveBinding {
  * the compiler: a null station always carries the reason it is null, and a
  * present station always carries its distance and suspect flag. A bare null can
  * never be read as a pass because there is no shape where it stands alone.
+ *
+ * \`county_station_scope\` is on both arms rather than being a third one. It is
+ * the join's INPUT -- which spots this repo asked about -- and an in-scope spot
+ * whose station is genuinely unresolved is a legitimate state that no spot is in
+ * today. Modelling that arm now would be a shape with no occupant, which this
+ * repo adds when the case exists and not in anticipation of it. The generator
+ * enforces the half that is decidable: scope \`out\` and a station cannot coexist.
  */
 export type CountyStationBinding =
   | {
@@ -159,15 +190,34 @@ export type CountyStationBinding =
       county_station_distance_m: number;
       /** true past 1000 m: the station may sit on a different beach cell carrying different water. */
       county_station_suspect: boolean;
+      county_station_scope: 'in';
       county_station_null_reason?: undefined;
     }
   | {
       county_station: null;
       county_station_distance_m: null;
       county_station_suspect: null;
+      /**
+       * Which kind of null this is. \`out\` means the join never asked -- the null
+       * is deliberate. \`in\` would mean it asked and got nothing, which is a gap.
+       */
+      county_station_scope: 'in' | 'out';
       /** Required whenever the station is null. States out-of-scope vs genuinely unresolved. */
       county_station_null_reason: string;
     };
+
+/**
+ * The spots the county_station join covers, derived from the file so a re-run
+ * scopes itself the way the recorded one did.
+ *
+ * ${inScope.length} of ${data.spots.length} today. This is the machine-readable remains of a
+ * sentence that used to read "ONLY for spots tagged swim, surf, dive or
+ * tidepool" against an \`audiences\` field 3.0.0 deleted -- see
+ * docs/adr/0011-a-join-carries-its-own-scope.md.
+ */
+export const COUNTY_STATION_IN_SCOPE: readonly SpotSlug[] = [
+${inScopeList}
+];
 
 /**
  * mpa and mpa_resolved are paired deliberately. \`{ mpa: null, mpa_resolved:
@@ -194,7 +244,6 @@ export type Spot = {
   lon: number;
   wave: WaveBinding;
   tide_station: TideStationId;
-  audiences: Audience[];
   notes: string;
 } & CountyStationBinding &
   MpaBinding;

@@ -56,8 +56,24 @@ export default async function SpotPage({ params }: { params: Promise<{ slug: str
       </nav>
 
       <h1 className="mt-2 text-title font-semibold tracking-tight">{spot.name}</h1>
+      {/*
+        The audience tags used to lead this line: "dive · swim · tidepool · tide
+        station 9410230". They are gone with the field (#125) and nothing
+        replaces them, which is a decision rather than a deletion.
+
+        Two reasons. This page exists only for spots that carry a floor, so
+        "tidepool" was true of all eight and distinguished none of them; and
+        `dive`, `swim` and `sail` named activities this stack does not compute,
+        so the line advertised judgements nothing here makes. What a reader
+        needs from a subtitle is where the numbers below come from, and that is
+        the station and the coordinate precision.
+
+        The one thing the tag carried that was load-bearing was the county_station
+        join's scope, and that is `county_station_scope` in the file now, not
+        anything on this page.
+      */}
       <p className="mt-1 text-meta text-[var(--text-dim)]">
-        {spot.audiences.join(' · ')} · tide station {spot.tide_station} · coordinates are ±100 m
+        Tide station {spot.tide_station} · coordinates are ±100 m
       </p>
 
       {week.failure ? (
