@@ -36,9 +36,12 @@ import {
   type LocalDate,
 } from '../../core/time';
 import {
+  INTERTIDAL_ACCOUNTING,
   INTERTIDAL_SPOTS,
+  INTERTIDAL_VERSION,
   SPOTS_OUTSIDE_INTERTIDAL,
   intertidalSpotBySlug,
+  type IntertidalNonMember,
   type IntertidalSpot,
 } from '../../core/zones/intertidal';
 import { DISPLAY_TIME_ZONE } from '@/shared/spots.generated';
@@ -103,12 +106,26 @@ export interface GridData {
   /** Set when predictions could not be fetched, in which case rows is empty. */
   failure: { message: string; url: string } | null;
   /**
-   * Spots this grid does not cover, so the page can name them rather than
-   * silently omitting them. Corridor order, both exclusion buckets together --
-   * #126 splits them, which is where the reason each one gives starts being
-   * rendered.
+   * Spots this grid does not cover, in corridor order, each carrying which
+   * bucket it is in and the zone file's own reason.
+   *
+   * The reason travels rather than being looked up at the render, so the page
+   * quotes the file instead of re-wording it. Two spots are excluded for
+   * genuinely different reasons -- a harbor has no reef, and an unsurveyed reef
+   * has no floor -- and a page that flattens them back to a list of names is
+   * the misclaim this grid was reported for.
    */
-  excludedSpotNames: string[];
+  excluded: readonly IntertidalNonMember[];
+
+  /**
+   * The three membership counts and the inventory they must sum to, so the
+   * page can show that no spot fell down a gap between the grid and the
+   * disclosure.
+   */
+  membership: typeof INTERTIDAL_ACCOUNTING;
+
+  /** The zone file the floors and the reasons came from, for the stamp. */
+  intertidalVersion: string;
 }
 
 function horizon(today: LocalDate): LocalDate[] {
@@ -256,7 +273,9 @@ export async function loadGrid(nowMs: number): Promise<GridData> {
     timeZone: DISPLAY_TIME_ZONE,
     today,
     days,
-    excludedSpotNames: SPOTS_OUTSIDE_INTERTIDAL.map((n) => n.spot.name),
+    excluded: SPOTS_OUTSIDE_INTERTIDAL,
+    membership: INTERTIDAL_ACCOUNTING,
+    intertidalVersion: INTERTIDAL_VERSION,
   };
 
   let seriesByStation: Map<string, TideSeries>;

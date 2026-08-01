@@ -27,6 +27,23 @@ a refactor — different dates, different floors, a longer unresolved list.
 Diffing against them reports the tide changing. The control has to be **the same
 code, two commits, minutes apart**, which is what this does.
 
+## Disclosures are expanded before the text is read
+
+The PNG is the default view; the text is everything. So each capture screenshots
+first, then sets `open` on every `<details>`, then reads `innerText`.
+
+`innerText` returns *rendered* text, and a collapsed `<details>` renders none of
+its contents. This stack keeps a great deal behind them — the unresolved
+caveats, each row's spot disclosure, and the excluded-spots section. All of it
+was invisible to this control until #126: #124 diffed 30 captures, reported one
+changed line, and **could not have seen the excluded-spots section change at
+all**. A control with a blind region that large is the same failure as a check
+that exits 0 without reading anything.
+
+The count of disclosures expanded is printed per run and recorded per capture in
+`_report.json`, so the expansion silently failing shows up as a number going to
+zero rather than as a diff that quietly gets smaller.
+
 ## Why text and not pixels
 
 A pixel diff on a page whose content is live is either flaky or so tolerant it

@@ -175,9 +175,35 @@ try {
         const stem = `${name}-${width}-${theme}`;
         await page.goto(BASE + path, { waitUntil: 'networkidle', timeout: 60_000 });
         await page.screenshot({ path: join(OUT, `${stem}.png`), fullPage: true });
+
+        /*
+         * The PNG is the DEFAULT view; the text is EVERYTHING. Hence the order:
+         * screenshot first, then expand, then read.
+         *
+         * `innerText` returns rendered text, and a collapsed <details> renders
+         * none of its contents. This page keeps a great deal behind them -- the
+         * unresolved caveats, the per-row spot disclosure, and the excluded-spots
+         * section, which is the one #126 rewrote. All of it was invisible to this
+         * control: #124 diffed 30 captures and reported one changed line, and it
+         * could not have seen the excluded section change at all. A control that
+         * cannot fail over a whole region of the page is the failure this
+         * directory's README warns about in its own terms, one layer in.
+         *
+         * Expanding after the screenshot keeps the image representative of what
+         * a reader lands on, and makes the diffed text cover what they can reach.
+         */
+        const detailsOpened = await page.$$eval('details', (list) => {
+          let n = 0;
+          for (const d of list) {
+            if (!d.open) n++;
+            d.open = true;
+          }
+          return n;
+        });
+
         const body = await page.innerText('body');
         writeFileSync(join(OUT, `${stem}.txt`), body, 'utf8');
-        report.push({ file: stem, route: path, chars: body.length, errors: [...errors] });
+        report.push({ file: stem, route: path, chars: body.length, detailsOpened, errors: [...errors] });
         errors.length = 0;
       }
       await ctx.close();
@@ -191,6 +217,10 @@ try {
 writeFileSync(join(OUT, '_report.json'), JSON.stringify({ date: DATE, captures: report }, null, 1), 'utf8');
 
 const bad = report.filter((r) => r.errors.length > 0);
-console.log(`ui-capture: ${report.length} captures for ${DATE}, ${bad.length} with console or page errors`);
+const opened = report.reduce((n, r) => n + r.detailsOpened, 0);
+console.log(
+  `ui-capture: ${report.length} captures for ${DATE}, ${opened} disclosures expanded before reading text, ` +
+    `${bad.length} with console or page errors`,
+);
 for (const b of bad) console.log(`  ${b.file}: ${b.errors.slice(0, 2).join(' | ')}`);
 process.exit(bad.length > 0 ? 1 : 0);

@@ -1,6 +1,6 @@
 // GENERATED FILE -- do not edit by hand.
 //
-// Source:    shared/intertidal.json (version 1.0.0, generated 2026-07-31)
+// Source:    shared/intertidal.json (version 1.1.0, generated 2026-08-01)
 // Generator: scripts/gen-intertidal-types.mjs
 // Regen:     npm run gen:intertidal      Verify: npm run gen:intertidal:check
 //
@@ -110,8 +110,8 @@ interface IntertidalFile {
 
 const FILE = intertidalJson as unknown as IntertidalFile;
 
-export const INTERTIDAL_VERSION = '1.0.0';
-export const INTERTIDAL_GENERATED = '2026-07-31';
+export const INTERTIDAL_VERSION = '1.1.0';
+export const INTERTIDAL_GENERATED = '2026-08-01';
 export const INTERTIDAL_DATUM = 'MLLW';
 export const INTERTIDAL_FLOOR_UNITS = 'ft';
 
