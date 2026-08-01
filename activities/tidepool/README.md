@@ -8,6 +8,7 @@ Is there workable reef time at this spot on this day, and if not, why not.
 | `states.ts` | The seven states, their order, and how each is presented. |
 | `grid.ts` | Composition. Feeds plus the predicate into what a page renders. `server-only`. |
 | `labels.ts` | The sentences a reader and a screen reader get. |
+| `routes.ts` | This activity's URL segment, and the paths built from it. |
 | `calibration.ts` | Reader over `shared/calibration.json`, the revealed-preference rates. |
 | `components/` | The innards: the cell, the ribbon, the chart, the rate panel, the gallery. |
 
@@ -23,6 +24,13 @@ that the judgement is about, even though the data file is produced by
 **`grid.ts`** composes exactly one activity. ADR 0010 records why that is
 different from the cross-activity composition `app/` does, and why it is not
 being generalised before there is a second occupant.
+
+**`routes.ts`** holds the segment `/tidepool`, which is this activity's identity
+in a URL — the same word that names this directory and the key
+`app/activities.ts` routes on. Written once here and imported by the registry,
+the grid's sort links, the cells that link to a day, and the day page's arrows,
+so a link cannot point at another activity's verdicts by a typo. Which activities
+are *routed* is `app/`'s to say, and it says it by importing this. ADR 0013.
 
 **`labels.ts`** holds `formatSightingTide` and `describeSighting` while the
 sighting-to-tide join itself stayed in `core/sightings.ts`. A sighting annotated

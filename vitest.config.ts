@@ -42,7 +42,19 @@ export default defineConfig({
     // they run against synthetic cases and the committed fixtures, never a
     // network. tools/calibration/run.ts itself is not under test here; it is I/O and a
     // command line, and what it composes is.
-    include: ['core/**/*.test.ts', 'activities/**/*.test.ts', 'tools/calibration/**/*.test.ts'],
+    // app/ joined the glob in #127. The route files were the one part of this
+    // repo nothing could assert against: `/tidepool` and `/spot/x/2026-07-31`
+    // are answered by modules the suite had no way to call, and "an unknown
+    // activity slug is a 404, not a silent fallback to tidepool" is exactly the
+    // kind of claim that holds until someone adds a second activity. The route
+    // guard tests import the page functions directly and stub the grid, so
+    // nothing here fetches either.
+    include: [
+      'app/**/*.test.ts',
+      'core/**/*.test.ts',
+      'activities/**/*.test.ts',
+      'tools/calibration/**/*.test.ts',
+    ],
     environment: 'node',
   },
 });

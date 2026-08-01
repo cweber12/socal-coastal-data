@@ -6,6 +6,7 @@ import { CellShell, FloorGap, TideLine } from '@/activities/tidepool/components/
 import { cellAriaLabel, flagBadgeLabel } from '@/activities/tidepool/labels';
 import { formatDayMonth, formatLocalDate, formatWeekdayShort, type LocalDate } from '@/core/time';
 import { lowLighting, type WindowResult } from '@/activities/tidepool/policy';
+import { tidepoolDayPath } from '@/activities/tidepool/routes';
 import type { SwellCeiling } from '@/core/thresholds';
 import type { SpotSwell } from '@/core/upstream';
 import type { IntertidalSpot } from '@/core/zones/intertidal';
@@ -103,7 +104,7 @@ export function WeekRibbon({
                 }
               >
                 <Link
-                  href={`/spot/${spot.slug}/${dateKey}`}
+                  href={tidepoolDayPath(spot.slug, date)}
                   className="cell-link block rounded py-1.5 pl-2 pr-6 text-data no-underline transition-colors"
                   aria-label={cellAriaLabel(spot.name, result, timeZone)}
                 >

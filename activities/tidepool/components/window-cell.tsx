@@ -10,6 +10,7 @@ import {
 } from '@/activities/tidepool/labels';
 import { formatClock, formatDuration, formatLocalDate, type LocalDate } from '@/core/time';
 import { lowLighting, type WindowResult } from '@/activities/tidepool/policy';
+import { tidepoolDayPath } from '@/activities/tidepool/routes';
 
 /**
  * One spot on one day.
@@ -56,8 +57,10 @@ export function WindowCell({
   timeZone: string;
   compact?: boolean;
 }) {
+  // The date is formatted twice on purpose: once for the badge's dashed-ident
+  // id, and once inside the route helper, which owns the URL's date format.
   const dateKey = formatLocalDate(result.date);
-  const href = `/spot/${spotSlug}/${dateKey}`;
+  const href = tidepoolDayPath(spotSlug, result.date);
 
   return (
     <CellShell
