@@ -35,7 +35,7 @@ import { SPOTS_VERSION, TIDE_DATUM } from '@/shared/spots.generated';
  * The whole page is a judgement about "now" -- today's column shows the next low
  * from the current time -- so a build-time prerender would freeze the evaluation
  * instant and quietly serve yesterday's answer. The upstream fetches are cached
- * independently by `next: { revalidate }` in lib/upstream.ts, so per-request
+ * independently by `next: { revalidate }` in core/upstream.ts, so per-request
  * rendering costs a re-evaluation of the tide maths, not a re-fetch.
  */
 export const dynamic = 'force-dynamic';

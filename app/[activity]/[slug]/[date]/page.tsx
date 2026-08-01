@@ -270,7 +270,8 @@ async function TidepoolDay({ slug, dateParam }: { slug: string; dateParam: strin
             Five of the eight refuse on the current corpus, so this is the common
             branch rather than the edge one. A default band or a corridor
             fallback here would be the null-rendering-as-a-pass failure
-            spots.json warns about, and there is no accessor in lib/calibration.ts
+            spots.json warns about, and there is no accessor in
+            activities/tidepool/calibration.ts
             that could produce one.
           */}
           {calibration && !calibration.published ? (
