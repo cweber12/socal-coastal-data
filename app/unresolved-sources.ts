@@ -1,5 +1,6 @@
 import { THRESHOLDS_UNRESOLVED, THRESHOLDS_VERSION } from '@/core/thresholds';
 import { SURF_THRESHOLDS_VERSION, SURF_UNRESOLVED } from '@/activities/surf/thresholds';
+import { SURF_ZONE_UNRESOLVED } from '@/core/zones/surf';
 import { SPOTS_FILE, SPOTS_VERSION } from '@/shared/spots.generated';
 import type { UnresolvedSource } from '@/core/components/unresolved';
 
@@ -42,10 +43,30 @@ export const UNRESOLVED_SOURCES: readonly UnresolvedSource[] = [
     entries: THRESHOLDS_UNRESOLVED,
   },
   {
-    subject: 'Surf ceilings',
+    subject: 'Surf thresholds — the band, the ceilings and the minimum',
     file: 'activities/surf/thresholds.json',
     version: SURF_THRESHOLDS_VERSION,
     entries: SURF_UNRESOLVED,
+  },
+  /*
+   * The surf zone, which is a module rather than a file.
+   *
+   * Every other source here is a JSON file with a version of its own.
+   * core/zones/surf.ts has neither: its membership is DERIVED from
+   * shared/spots.json's wave bindings rather than listed, which is the whole
+   * point of it -- there is no hand-written surf membership to drift out of
+   * step. So the version that governs it is the version of the file it derives
+   * from, and the subject says where the entries actually live.
+   *
+   * It sits between the thresholds and the inventory because that is the order
+   * of the argument: here are the numbers, here is what the zone they apply to
+   * does and does not claim, here is the inventory underneath both.
+   */
+  {
+    subject: 'The surf zone (derived from shared/spots.json)',
+    file: 'core/zones/surf.ts',
+    version: SPOTS_VERSION,
+    entries: SURF_ZONE_UNRESOLVED,
   },
   {
     subject: 'The spot inventory',

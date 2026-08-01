@@ -5,12 +5,19 @@ A reason to go, and the unit that owns **judgement**. An activity composes the
 
 | | |
 | --- | --- |
-| `tidepool/` | The only one built. Reads the intertidal and the surf zone. |
+| `tidepool/` | Reads the intertidal and the surf zone. 8 spots. |
+| `surf/` | Reads the surf zone. 24 spots, every number uncalibrated. |
 
-`surf` is next — #129 — and it is second because it is the only candidate that
-breaks the current solver: a tide *band* is crossed four times on a semidiurnal
-day and straddles both a low and a high, which is two sessions rather than one
-window anchored on a low. See ADR 0008.
+`surf` is second because it is the only candidate that breaks the one-window
+solver: a tide *band* is crossed four times on a semidiurnal day and straddles
+both a low and a high, which is N sessions rather than one window anchored on a
+low. See ADR 0008. `dive` and `beach` land after #130 extracts a solver from
+these two.
+
+The two overlap without either containing the other — 8 spots are in both, 16 in
+surf alone — because the zones they read overlap. Nothing may assume a spot's
+zones tile its profile, and a route that resolves a slug has to resolve it
+through the activity the URL names.
 
 ## What belongs here, and what belongs next door
 
@@ -34,12 +41,23 @@ Belongs next door:
 
 ## No activity may import another
 
-`scripts/check-boundaries.mjs` declares a row per activity, and an entry permits
-itself and everything beneath it — so `activities/tidepool` permits
-`activities/tidepool` and not `activities/surf`. The check fails the moment a
-cross-activity import is written, which matters most in #129, where surf is built
-by **copying** tidepool's predicate on purpose. That duplication is the input to
-the extraction in #130, not a defect to fix early.
+`scripts/check-boundaries.mjs` derives the rule from the paths, so it holds for
+an activity that has no row of its own — and each activity has one anyway, which
+states its *other* edges. The check fails the moment a cross-activity import is
+written, which is what makes the duplication in `surf/` safe: it was built by
+**copying** tidepool's predicate on purpose, and that duplication is the input to
+the extraction in #130 rather than a defect to fix early.
+
+Demonstrated rather than asserted, on a deliberately introduced import:
+
+```
+check-boundaries: 1 forbidden edge
+
+  activities/surf -> activities/tidepool is not an allowed edge
+    activities/surf/policy.ts:65
+    imports '../tidepool/policy'
+    activities/surf may import: activities/surf, core, shared
+```
 
 The table there is the one statement of the import rules; this file does not
 restate it.

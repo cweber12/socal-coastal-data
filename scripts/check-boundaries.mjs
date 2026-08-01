@@ -93,10 +93,18 @@ const ALLOWED = {
   activities: ['activities', 'core', 'shared'],
 
   // One activity may NOT import another. Decision 8. Longest prefix wins, so
-  // this row overrides the generic `activities` row above for everything under
-  // it -- and #129 adding activities/surf/ gets an identical row, at which point
-  // a surf -> tidepool import fails the moment it is written.
+  // these rows override the generic `activities` row above for everything under
+  // them.
+  //
+  // Neither row is what enforces the rule, and that is worth being exact about
+  // now that there are two of them: the sibling-activity check below is derived
+  // from the paths and would fail a `surf -> tidepool` import with no row here
+  // at all. #128 proved it -- activities/surf/ existed for a whole PR before it
+  // had a row, and the boundary held. What a row adds is that this activity's
+  // OTHER edges are stated, so `activities/surf -> tools` is refused by the same
+  // table that refuses it everywhere else.
   'activities/tidepool': ['activities/tidepool', 'core', 'shared'],
+  'activities/surf': ['activities/surf', 'core', 'shared'],
 
   // Activity-neutral facts: time, the feed parsers, the fetch and failure
   // policy, the spot facts true regardless of cross-shore band, and the shells

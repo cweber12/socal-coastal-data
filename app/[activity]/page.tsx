@@ -6,6 +6,7 @@ import { EvaluationStamp, Notices, UpstreamFailure } from '@/core/components/dis
 import { MidnightNotice } from '@/core/components/midnight-notice';
 import { SpotRow } from '@/core/components/spot-row';
 import { SpotDisclosure } from '@/activities/tidepool/components/spot-summary';
+import { SurfGrid } from '@/app/[activity]/surf-grid';
 import { UnresolvedDisclosure } from '@/core/components/unresolved';
 import { UNRESOLVED_SOURCES } from '@/app/unresolved-sources';
 import { UnevaluatedCell, WindowCell } from '@/activities/tidepool/components/window-cell';
@@ -65,17 +66,18 @@ export function generateStaticParams() {
  * Why a switch over one case
  * ---------------------------------------------------------------------------
  *
- * Tidepool is the only occupant, so this could read `return <TidepoolGrid/>`
- * and be correct today. It would also be correct today if the segment said
- * `surf`, which is the whole failure #127 exists to prevent: a URL that quietly
- * serves a different activity's verdicts than the one it names is the same class
- * of failure as a null rendering as a pass.
+ * With one occupant this could have read `return <TidepoolGrid/>` and been
+ * correct -- and would have gone on compiling, serving tidepool's verdicts under
+ * a URL that said surf, which is the whole failure #127 exists to prevent and is
+ * the same class of failure as a null rendering as a pass.
  *
- * The switch makes that impossible to get wrong silently. `RoutedActivity` is a
- * union of the registry's slugs, so the `never` assignment after the switch
- * fails to compile the moment #129 adds `surf` to the registry without giving it
- * a grid -- at build time, in this file, rather than as a page rendering the
- * wrong activity's judgement.
+ * The switch made that impossible to get wrong silently, and #129 is where it
+ * paid: `RoutedActivity` is a union of the registry's slugs, so adding `surf` to
+ * the registry stopped this file compiling until a surf grid existed. The error
+ * arrived at build time, in this file, naming the missing case -- rather than as
+ * a page rendering the wrong activity's judgement.
+ *
+ * The `never` assignment stays for `dive` and `beach`.
  */
 export default async function ActivityGridPage({
   params,
@@ -94,6 +96,8 @@ export default async function ActivityGridPage({
   switch (activity) {
     case 'tidepool':
       return <TidepoolGrid sort={sort} />;
+    case 'surf':
+      return <SurfGrid sort={sort} />;
   }
 
   const unrendered: never = activity;
@@ -227,8 +231,23 @@ async function TidepoolGrid({ sort }: { sort: SortKey }) {
               key={row.spot.slug}
               spotName={row.spot.name}
               spotSlug={row.spot.slug}
-              usableCount={row.usableCount}
-              floorFt={row.spot.floorFt}
+              /*
+                The floor leads, ahead of the usable count.
+
+                It is the only number on this row that differs from the row
+                above it -- all eight spots share tide station 9410230, so the
+                cells to the right carry the same seven lows on every row -- and
+                it is the second operand of the subtraction each of those cells
+                prints. A reader who cannot see what `+1.1` was measured against
+                cannot read the row at all.
+
+                Composed here rather than inside SpotRow since #129: a shell
+                shared with an activity that has no floor may not know what a
+                floor is.
+              */
+              subtitle={`floor ${row.spot.floorFt.toFixed(1)} ft · ${
+                row.usableCount === 0 ? 'no windows' : `${row.usableCount} usable`
+              }`}
               rowLabel={rowAriaLabel(row.spot.name, row.usableCount, HORIZON_DAYS)}
               columnCount={grid.days.length + 1}
               cells={row.days.map((result, i) =>
