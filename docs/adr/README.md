@@ -44,3 +44,4 @@ is worth as much as the fact that it was.
 | [0008](0008-surf-is-the-second-activity.md) | Surf is the second activity |
 | [0009](0009-horizon-is-a-property-of-the-input.md) | Forecast horizon is a property of the input |
 | [0010](0010-activity-composition-belongs-to-the-activity.md) | Activity composition belongs to the activity, not the composition root |
+| [0011](0011-a-join-carries-its-own-scope.md) | A join carries its own scope, in the file, per spot |

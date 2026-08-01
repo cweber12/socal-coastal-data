@@ -1,9 +1,12 @@
 {
-  "version": "2.0.0",
-  "generated": "2026-07-31",
+  "version": "3.0.0",
+  "generated": "2026-08-01",
   "corridor": "Oceanside Harbor to Border Field, San Diego County, CA",
 
-  "_moved": "2.0.0 REMOVES tidepool_floor_ft, tidepool_floor_confidence and the 8 floor_evidence ledgers. They are in shared/intertidal.json as floor_ft, floor_confidence and floor_evidence under membership.members, with that file's _provenance header stating the derivation and the commit they came from. Major, not minor: any reader of the three fields breaks, and two of them are Python. This file is bindings and joins -- values resolved by join against an upstream authority, never hand-populated -- which is what its _schema has always claimed and what the floor never was. See docs/adr/0002-measured-zone-facts-are-a-third-provenance-class.md. Note that this file's own unresolved array still carries the floor caveats, including the entry marked SAFETY: they are rendered verbatim from here today and moving them is #132, not this change.",
+  "_moved": {
+    "2.0.0": "2.0.0 REMOVES tidepool_floor_ft, tidepool_floor_confidence and the 8 floor_evidence ledgers. They are in shared/intertidal.json as floor_ft, floor_confidence and floor_evidence under membership.members, with that file's _provenance header stating the derivation and the commit they came from. Major, not minor: any reader of the three fields breaks, and two of them are Python. This file is bindings and joins -- values resolved by join against an upstream authority, never hand-populated -- which is what its _schema has always claimed and what the floor never was. See docs/adr/0002-measured-zone-facts-are-a-third-provenance-class.md. Note that this file's own unresolved array still carries the floor caveats, including the entry marked SAFETY: they are rendered verbatim from here today and moving them is #132, not this change.",
+    "3.0.0": "3.0.0 REMOVES audiences. It was a hand-populated tag in a file whose own rule forbids hand-populated values, and it had already duplicated a membership axis in silence: audiences:tidepool and a non-null tidepool_floor_ft were the same 8 spots exactly, with nothing checking it. Membership is a zone property now (shared/intertidal.json), and bird and sail are not activities this stack computes -- their spots stay, only the tag goes. Major, not minor: any reader of the field breaks. WHAT DID NOT GO WITH IT is the scope of the county_station join, which the tag carried: that is county_station_scope now, machine-readable where the predicate was prose. See docs/adr/0011-a-join-carries-its-own-scope.md."
+  },
 
   "conventions": {
     "datum": "MLLW",
@@ -24,13 +27,13 @@
     "wave.fallback": "Used when primary is not delivering. May be geographically distant; UI must disclose substitution.",
     "wave.intended_primary": "Buoy that SHOULD serve this spot but is currently dead. Reassign here when the REVIVED tripwire fires.",
     "tide_station": "NOAA CO-OPS station id.",
-    "county_station": "State/county beach water quality monitoring station code (e.g. OC-080) from the data.ca.gov Beach Water Quality Monitoring Stations resource. Resolved by nearest-neighbour against Active, located stations only, and ONLY for spots tagged swim, surf, dive or tidepool. null means unresolved OR out of join scope -- read county_station_null_reason to tell which. Must never render as a pass.",
+    "county_station": "State/county beach water quality monitoring station code (e.g. OC-080) from the data.ca.gov Beach Water Quality Monitoring Stations resource. Resolved by nearest-neighbour against Active, located, individually-named stations only, over the spots county_station_scope marks 'in'. null means unresolved OR out of join scope -- read county_station_scope to tell which, and county_station_null_reason for why. Must never render as a pass. Re-runnable and diffable: tools/county-station/rejoin.py.",
     "county_station_distance_m": "Great-circle metres from the spot to its matched station; null when there is no match. Replaces the 1.0.0 field county_station_distance_km.",
     "county_station_suspect": "true when the match exceeds 1000 m, meaning the station may sit on a different beach cell carrying different water. The UI must disclose a suspect match rather than render it as a clean reading. null when there is no match.",
     "county_station_null_reason": "Present only when county_station is null, and required whenever it is. States why the field is empty: out of join scope, or genuinely unresolved. A null county_station without this key is a bug.",
-    "audiences": "Which audience filters include this spot. Drives column visibility, not thresholds.",
+    "county_station_scope": "Whether this spot is IN the county_station join's scope. 'in' means the join covers it, so a null station there is genuinely unresolved. 'out' means the join deliberately does not cover it and the null is not a gap; county_station_null_reason says why. Required on every spot, so one added later cannot be silently un-scoped -- scripts/gen-spots-types.mjs fails without it. THIS IS AN INPUT TO THE JOIN, NOT A RESULT OF IT, which is why it is written by hand in a file whose rule forbids hand-populated values: that rule governs what an upstream authority resolves, and no authority can state which spots this repo chose to ask about. HISTORY: up to 2.x the scope was the sentence 'ONLY for spots tagged swim, surf, dive or tidepool' in this schema, evaluated against the audiences field. 3.0.0 deleted that field, and the predicate is kept here as the historical scope that PRODUCED this set rather than as a rule to re-evaluate -- three of its four terms name activities this stack does not compute, and inventing referents for them would be worse than recording what was done. The set is unchanged by the deletion: 23 in, 3 out, exactly the split county_station_null_reason already carried.",
     "mpa": "Marine protected area NAME from CDFW ds582, resolved by point-in-polygon. null means the point fell outside every MPA polygon. Do not hand-populate. Read together with mpa_resolved: a null with mpa_resolved false is unknown, not unprotected.",
-    "mpa_resolved": "true once the CDFW point-in-polygon join has run AND the result survives this file's ~100 m coordinate precision. false where the spot lies within 150 m of an MPA boundary, i.e. inside the coordinate error bar, so the in/out call is not trustworthy either way. Legally load-bearing for the tidepool audience.",
+    "mpa_resolved": "true once the CDFW point-in-polygon join has run AND the result survives this file's ~100 m coordinate precision. false where the spot lies within 150 m of an MPA boundary, i.e. inside the coordinate error bar, so the in/out call is not trustworthy either way. Legally load-bearing wherever collection rules are presented, which today means the intertidal: shared/intertidal.json's members are the spots a reader may be standing on a reef at.",
     "notes": "Free text. Not parsed."
   },
 
@@ -66,7 +69,7 @@
       "county_station": "OC-110",
       "county_station_distance_m": 400,
       "county_station_suspect": false,
-      "audiences": ["sail", "surf", "swim"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Harbor mouth; sailing departure point. Watch PZZ740 for small craft advisories."
     },
@@ -79,7 +82,7 @@
       "county_station": "OC-080",
       "county_station_distance_m": 176,
       "county_station_suspect": false,
-      "audiences": ["surf", "swim", "bird"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "San Luis Rey outfall is just north; USGS 11042000 is the relevant discharge signal after rain."
     },
@@ -92,7 +95,7 @@
       "county_station": "OC-022",
       "county_station_distance_m": 142,
       "county_station_suspect": false,
-      "audiences": ["swim", "surf"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Loma Alta Creek outlet; chronic dry-weather bacteria site. County station join matters here."
     },
@@ -105,7 +108,7 @@
       "county_station": "EH-460",
       "county_station_distance_m": 207,
       "county_station_suspect": false,
-      "audiences": ["surf", "swim"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Agua Hedionda lagoon mouth immediately north."
     },
@@ -118,7 +121,7 @@
       "county_station": "EH-440",
       "county_station_distance_m": 751,
       "county_station_suspect": false,
-      "audiences": ["surf", "swim"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": ""
     },
@@ -131,8 +134,8 @@
       "county_station": null,
       "county_station_distance_m": null,
       "county_station_suspect": null,
-      "county_station_null_reason": "bird-only site, no water-contact audience",
-      "audiences": ["bird"],
+      "county_station_scope": "out",
+      "county_station_null_reason": "bird-only site, no water-contact use",
       "mpa": null, "mpa_resolved": true,
       "notes": "No wave binding. Tide still drives mudflat exposure and shorebird foraging; keep tide_station populated."
     },
@@ -145,7 +148,7 @@
       "county_station": "EH-420A",
       "county_station_distance_m": 1402,
       "county_station_suspect": true,
-      "audiences": ["surf", "dive"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Bluff access; trail condition is a real hazard independent of surf."
     },
@@ -158,7 +161,7 @@
       "county_station": "EH-420",
       "county_station_distance_m": 177,
       "county_station_suspect": false,
-      "audiences": ["swim", "surf"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": false,
       "notes": "Cottonwood Creek outlet; lifeguarded, family default for Encinitas."
     },
@@ -171,7 +174,7 @@
       "county_station": "EH-410",
       "county_station_distance_m": 67,
       "county_station_suspect": false,
-      "audiences": ["surf", "tidepool", "dive"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": false,
       "notes": "Reef point. MPA UNRESOLVED: point-in-polygon puts this 18 m OUTSIDE Swami's SMCA, far inside this file's ~100 m coordinate precision, so neither in nor out can be asserted. Do not present collection rules from the mpa field until the coordinate is surveyed."
     },
@@ -184,7 +187,7 @@
       "county_station": "SE-060",
       "county_station_distance_m": 177,
       "county_station_suspect": false,
-      "audiences": ["surf", "tidepool"],
+      "county_station_scope": "in",
       "mpa": "Swami's SMCA", "mpa_resolved": false,
       "notes": "San Elijo lagoon mouth adjacent; post-rain water quality degrades quickly."
     },
@@ -197,8 +200,8 @@
       "county_station": null,
       "county_station_distance_m": null,
       "county_station_suspect": null,
-      "county_station_null_reason": "bird-only site, no water-contact audience",
-      "audiences": ["bird"],
+      "county_station_scope": "out",
+      "county_station_null_reason": "bird-only site, no water-contact use",
       "mpa": null, "mpa_resolved": true,
       "notes": "Ecological reserve. High eBird hotspot density."
     },
@@ -211,7 +214,7 @@
       "county_station": "EH-360",
       "county_station_distance_m": 228,
       "county_station_suspect": false,
-      "audiences": ["swim", "surf"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": ""
     },
@@ -224,7 +227,7 @@
       "county_station": "FM-100",
       "county_station_distance_m": 580,
       "county_station_suspect": false,
-      "audiences": ["swim", "bird", "tidepool"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Los Penasquitos lagoon mouth. Long beach; a single point is a poor proxy for its full length."
     },
@@ -237,7 +240,7 @@
       "county_station": "FM-090",
       "county_station_distance_m": 814,
       "county_station_suspect": false,
-      "audiences": ["surf"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Scripps submarine canyon focuses swell; this spot breaks materially larger than neighbours on the same buoy reading. Threshold offsets needed."
     },
@@ -250,7 +253,7 @@
       "county_station": "EH-320",
       "county_station_distance_m": 187,
       "county_station_suspect": false,
-      "audiences": ["dive", "swim", "tidepool"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": false,
       "notes": "Primary shore-dive entry for the corridor. Dike Rock tidepools at the north end. MPA UNRESOLVED: 45 m outside Matlahuayl SMR, inside the ~100 m coordinate error bar. The earlier expectation of San Diego-Scripps Coastal SMCA was simply wrong -- that boundary is 1003 m away. The open question here is Matlahuayl, not Scripps."
     },
@@ -263,7 +266,7 @@
       "county_station": "FM-070",
       "county_station_distance_m": 82,
       "county_station_suspect": false,
-      "audiences": ["dive", "swim", "tidepool"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": false,
       "notes": "MPA UNRESOLVED: 21 m outside Matlahuayl SMR, inside the ~100 m coordinate error bar, so no-take status cannot be asserted either way. Matlahuayl is no take of any kind if the point resolves inside, so treat it as restricted until surveyed. Pinniped closures apply seasonally and are not in any API."
     },
@@ -276,7 +279,7 @@
       "county_station": "FM-050",
       "county_station_distance_m": 242,
       "county_station_suspect": false,
-      "audiences": ["surf", "tidepool"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Reef break, rock hazard on low tide."
     },
@@ -289,7 +292,7 @@
       "county_station": "EH-573",
       "county_station_distance_m": 194,
       "county_station_suspect": false,
-      "audiences": ["surf", "dive"],
+      "county_station_scope": "in",
       "mpa": "South La Jolla SMR", "mpa_resolved": true,
       "notes": "Longboard and beginner-friendly; surf threshold should skew lower than neighbours."
     },
@@ -302,7 +305,7 @@
       "county_station": "PL-120",
       "county_station_distance_m": 150,
       "county_station_suspect": false,
-      "audiences": ["swim", "surf"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Highest general-beachgoer volume in the corridor. Rip current statements matter most here."
     },
@@ -315,7 +318,7 @@
       "county_station": "PL-100",
       "county_station_distance_m": 28,
       "county_station_suspect": false,
-      "audiences": ["surf", "swim", "bird"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "San Diego River mouth immediately north; post-rain plume site."
     },
@@ -328,7 +331,7 @@
       "county_station": "PL-070",
       "county_station_distance_m": 418,
       "county_station_suspect": false,
-      "audiences": ["surf", "tidepool", "dive"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "SAFETY: ledge system with cliff access. Getting the tidepool floor wrong here strands people. Verify before shipping."
     },
@@ -341,7 +344,7 @@
       "county_station": "PL-040",
       "county_station_distance_m": 445,
       "county_station_suspect": false,
-      "audiences": ["tidepool", "bird"],
+      "county_station_scope": "in",
       "mpa": "Cabrillo SMR", "mpa_resolved": false,
       "notes": "National Monument: gate hours and entry fee constrain access independently of tide. Point-in-polygon puts this INSIDE Cabrillo SMR -- an SMR, not the SMCA previously assumed, so no take of any kind -- but by only 11 m, inside the ~100 m coordinate error bar, hence mpa_resolved false. The thin margin is a reason to verify the boundary, never to relax the restriction. Best-known tidepool site in the corridor."
     },
@@ -354,7 +357,7 @@
       "county_station": "EH-050",
       "county_station_distance_m": 463,
       "county_station_suspect": false,
-      "audiences": ["swim", "surf", "bird"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Increasingly affected by south-county transboundary flows. Least Tern nesting closures seasonally."
     },
@@ -367,7 +370,7 @@
       "county_station": "IB-069",
       "county_station_distance_m": 178,
       "county_station_suspect": false,
-      "audiences": ["swim", "sail"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Ocean side uses 9410230. If a bayside spot is added later it must use 9410170; do not reuse this record."
     },
@@ -380,7 +383,7 @@
       "county_station": "EH-030",
       "county_station_distance_m": 172,
       "county_station_suspect": false,
-      "audiences": ["surf", "swim", "bird"],
+      "county_station_scope": "in",
       "mpa": null, "mpa_resolved": true,
       "notes": "Most closure-affected spot in the corridor. IBWC station 11013300 is the upstream flow signal, but dry-weather canyon collectors enter downstream of that gauge: a low reading does NOT imply clean water here."
     },
@@ -393,15 +396,15 @@
       "county_station": null,
       "county_station_distance_m": null,
       "county_station_suspect": null,
-      "county_station_null_reason": "bird-only site, no water-contact audience",
-      "audiences": ["bird"],
+      "county_station_scope": "out",
+      "county_station_null_reason": "bird-only site, no water-contact use",
       "mpa": null, "mpa_resolved": false,
       "notes": "Tijuana River estuary. MPA UNRESOLVED: 3 m outside Tijuana River Mouth SMCA -- effectively on the line and far inside the ~100 m coordinate error bar. Frequently under long-duration closure; water contact audiences should be suppressed, not shown as poor."
     }
   ],
 
   "unresolved": [
-    "county_station is resolved on 23 of 26 spots. The nearest-neighbour join runs only for spots tagged swim, surf, dive or tidepool (tidepool added in 1.1.1); the other 3 (batiquitos-lagoon, san-elijo-lagoon, border-field) are bird-only and carry null plus county_station_null_reason. The source resource needs filtering before use as a point set: of 287 San Diego records only 123 are Active, 12 have no coordinates, and All_SanDiego_County_Beaches and Northern_SanDiego_County_Beaches are county-wide aggregates holding one coordinate near San Onofre. Pool: 121.",
+    "county_station is resolved on 23 of 26 spots. The nearest-neighbour join covers the spots county_station_scope marks 'in'; the other 3 (batiquitos-lagoon, san-elijo-lagoon, border-field) are marked 'out' and carry null plus county_station_null_reason. Up to 2.x the scope was 'spots tagged swim, surf, dive or tidepool' read off the audiences field, which 3.0.0 deleted; the set is identical either way, and tools/county-station/rejoin.py re-runs the join and diffs it against these values. The source resource needs filtering before use as a point set: of 287 San Diego records only 123 are Active, 12 have no coordinates, and All_SanDiego_County_Beaches and Northern_SanDiego_County_Beaches are county-wide aggregates holding one coordinate near San Onofre. Pool: 121.",
     "1 in-scope match exceeds 1000 m and is flagged county_station_suspect: beacons-leucadia at 1402 m. Beacon's sits in a real ~4 km monitoring gap between EH-440 and EH-420A, so no closer station exists to find.",
     "mpa point-in-polygon has run against CDFW ds582 for all 26 spots, but 7 carry mpa_resolved false: the spot lies within 150 m of an MPA boundary, inside this file's own ~100 m coordinate precision, so the in/out call cannot be trusted either way (moonlight-encinitas, swamis, cardiff-reef, la-jolla-shores, la-jolla-cove, cabrillo-tidepools, border-field). Their notes now describe the boundary state rather than asserting membership. Surveyed coordinates are the fix; nothing else resolves them.",
     "tidepool_floor_ft values are UNVERIFIED at confidence 'low' on all 8 spots. As of 1.4.0 three of them (swamis, sunset-cliffs, cabrillo-tidepools) are no longer author estimates but CEILINGS derived from observed sighting rates -- upper bounds on how permissive the floor may be, not measurements of where the reef surfaces. The other 5 remain the 1.2.0 author estimates. Sunset Cliffs and Cabrillo are still the two that most need local verification.",
