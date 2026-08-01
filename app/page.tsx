@@ -6,7 +6,13 @@ import { SpotRow } from '@/core/components/spot-row';
 import { SpotDisclosure } from '@/activities/tidepool/components/spot-summary';
 import { UnresolvedDisclosure } from '@/core/components/unresolved';
 import { UnevaluatedCell, WindowCell } from '@/activities/tidepool/components/window-cell';
-import { HORIZON_DAYS, loadGrid, sortRows, type SortKey } from '@/activities/tidepool/grid';
+import {
+  HORIZON_DAYS,
+  loadGrid,
+  sortRows,
+  type GridData,
+  type SortKey,
+} from '@/activities/tidepool/grid';
 import { rowAriaLabel } from '@/activities/tidepool/labels';
 import {
   formatDateLong,
@@ -225,7 +231,11 @@ export default async function GridPage({
         Showing today only. The full week is on each spot&apos;s own page.
       </p>
 
-      <Excluded names={grid.excludedSpotNames} />
+      <Excluded
+        excluded={grid.excluded}
+        membership={grid.membership}
+        fileVersion={grid.intertidalVersion}
+      />
 
       {/*
         Two different kinds of caveat, kept apart deliberately.
@@ -396,34 +406,153 @@ function legendGloss(state: (typeof WINDOW_STATES)[number]): string {
 }
 
 /**
- * The spots this grid does not cover, named rather than silently absent.
+ * The spots this grid does not cover, in the two different senses of "not".
  *
- * Eighteen of the twenty-six are not members of the intertidal zone, and
- * inventing floors to fill the grid out would be exactly the hand-populated
- * number spots.json warns against.
+ * ---------------------------------------------------------------------------
+ * The claim this replaces
+ * ---------------------------------------------------------------------------
  *
- * THE PARAGRAPH BELOW IS STALE AND #126 REWRITES IT. It tells a reader the
- * eighteen "carry no tidepool_floor_ft in spots.json", which no spot does since
- * 2.0.0, and it describes all eighteen as unresolved when four of them are
- * shared/intertidal.json's `not_in_zone` -- two lagoons, a harbor and the
- * Strand, reported here as reefs nobody has measured. That misclaim is the bug
- * #101 is named for. It is deliberately not fixed here: #124 moves the data and
- * changes nothing a reader sees, which is what makes the before/after control
- * meaningful, and the reasons this needs are in the zone file waiting.
+ * Until #126 this said all eighteen "carry no tidepool_floor_ft in spots.json.
+ * A null floor is unresolved". Among the eighteen are Batiquitos Lagoon, San
+ * Elijo Lagoon, Oceanside Harbor and Silver Strand -- two lagoons, a harbor and
+ * a sand barrier, reported to a reader as reefs nobody had got around to
+ * measuring. It is the mirror of the rule this repo enforces everywhere else: a
+ * null never renders as a pass, and here it rendered as UNKNOWN when the truth
+ * was NO SUCH THING IS HERE. One null carried two meanings, and no wording
+ * fixed it while the data could not tell them apart. #124 split the data; this
+ * renders the split.
+ *
+ * ---------------------------------------------------------------------------
+ * Verbatim, and why the headings are careful
+ * ---------------------------------------------------------------------------
+ *
+ * Each reason is printed exactly as shared/intertidal.json writes it, on the
+ * same terms as UnresolvedDisclosure quotes the unresolved arrays: summarising
+ * would put a second wording in a second place, and the file is the one that
+ * gets edited when somebody finally walks a bench.
+ *
+ * The two headings are this component's own words, so they are written not to
+ * make a claim the file does not. "No reef to measure" is not "not intertidal":
+ * a mudflat IS intertidal, and Batiquitos exposes one twice a day. What those
+ * four lack is a ROCKY BENCH whose surfacing height a floor could describe.
+ * Calling them "not in the intertidal" would replace one wrong claim with
+ * another, which is the whole failure mode of this section.
  */
-function Excluded({ names }: { names: readonly string[] }) {
-  if (names.length === 0) return null;
+function Excluded({
+  excluded,
+  membership,
+  fileVersion,
+}: {
+  excluded: GridData['excluded'];
+  membership: GridData['membership'];
+  fileVersion: string;
+}) {
+  if (excluded.length === 0) return null;
+
+  const noReef = excluded.filter((n) => n.membership === 'not_in_zone');
+  const unmeasured = excluded.filter((n) => n.membership === 'unresolved');
+
+  /*
+   * The arithmetic, shown rather than implied.
+   *
+   * A reader seeing 8 rows and 18 excluded spots cannot tell whether 26 is the
+   * whole inventory or whether something fell down the gap between them. The
+   * zone module throws on load for a spot in no bucket, so a page that renders
+   * at all has a complete set -- but "it would have crashed" is not something a
+   * reader can see, and a silently absent spot is the failure one layer up from
+   * the one this section is about.
+   */
+  const accounted = membership.members + membership.notInZone + membership.unresolved;
+  const complete = accounted === membership.inventory;
+
   return (
     <details className="mt-4">
       <summary className="cursor-pointer text-meta text-[var(--text-dimmer)]">
-        {names.length} spots are not in this grid
+        {excluded.length} spots are not in this grid, for two different reasons
       </summary>
+
       <p className="mt-1.5 max-w-prose text-meta text-[var(--text-dimmer)]">
-        These carry no <code>tidepool_floor_ft</code> in spots.json. A null floor is unresolved,
-        not zero, and a window cannot be computed without one. Estimating floors to fill the grid
-        out would put a hand-typed number where a measurement belongs.
+        {complete ? (
+          <>
+            {membership.members} of {membership.inventory} spots carry a measured floor and are in
+            the grid above. The other {excluded.length} are below, and every spot in the inventory
+            is in exactly one of the three groups.
+          </>
+        ) : (
+          // Never reached while the zone module throws on an unclassified spot.
+          // Present because a count that silently fails to add up is the thing
+          // being guarded against, and it must not be invisible if it happens.
+          <strong>
+            {accounted} of {membership.inventory} spots are accounted for. {membership.inventory - accounted}{' '}
+            are in no group at all, which is a bug in shared/intertidal.json and not a fact about
+            the coast.
+          </strong>
+        )}
       </p>
-      <p className="mt-1.5 text-meta text-[var(--text-dimmer)]">{names.join(' · ')}</p>
+
+      <ExcludedGroup
+        heading="No reef to measure"
+        blurb="Nothing here surfaces that a floor could describe. These are not unsurveyed reefs, and no floor will be set for them."
+        entries={noReef}
+      />
+
+      <ExcludedGroup
+        heading="Not established either way"
+        blurb="Whether a reef bench exists at these coordinates has not been determined. A floor is not withheld here — it is unknown, and inventing one to fill the grid out would put a hand-typed number where a measurement belongs."
+        entries={unmeasured}
+      />
+
+      <p className="tint-panel-source mt-3 text-meta">
+        Reasons quoted from <code>shared/intertidal.json</code> {fileVersion},{' '}
+        <code>membership</code>, unedited.
+      </p>
     </details>
+  );
+}
+
+/**
+ * One membership group: a heading, this component's framing, and the file's
+ * words per spot.
+ *
+ * A description list rather than a paragraph each, because that is what this
+ * is: a term and what is said about it. A screen reader announces the pairing;
+ * eighteen loose paragraphs would not.
+ */
+function ExcludedGroup({
+  heading,
+  blurb,
+  entries,
+}: {
+  heading: string;
+  blurb: string;
+  entries: GridData['excluded'];
+}) {
+  if (entries.length === 0) return null;
+  return (
+    <section className="mt-3">
+      {/*
+        The explicit space is load-bearing, and this page already documents the
+        trap once: a JSX text node loses the whitespace at a line break, so
+        `{heading}` followed by a `<span>` on the next line renders "NO REEF TO
+        MEASURE4 spots". The margin hides it on screen and nothing hides it from
+        `innerText` or from a screen reader, which announces the two words run
+        together.
+      */}
+      <h3 className="text-meta font-semibold tracking-wide uppercase text-[var(--text-dim)]">
+        {heading}{' '}
+        <span className="font-normal normal-case tracking-normal text-[var(--text-dimmer)]">
+          {entries.length} {entries.length === 1 ? 'spot' : 'spots'}
+        </span>
+      </h3>
+      <p className="mt-1 max-w-prose text-meta text-[var(--text-dimmer)]">{blurb}</p>
+      <dl className="mt-1.5 space-y-1.5 text-meta text-[var(--text-dimmer)]">
+        {entries.map(({ spot, reason }) => (
+          <div key={spot.slug}>
+            <dt className="font-medium text-[var(--text-dim)]">{spot.name}</dt>
+            <dd className="max-w-prose">{reason}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

@@ -140,13 +140,38 @@ describe('loadGrid', () => {
     expect(grid.rows.every((r) => r.days.every((d) => d !== null))).toBe(true);
   });
 
-  it('names the spots it left out rather than quietly omitting them', async () => {
+  it('names the spots it left out, with which kind of "not" each one is', async () => {
     route();
 
     const grid = await loadGrid(NOW_MS);
 
-    expect(grid.excludedSpotNames).toHaveLength(SPOTS_OUTSIDE_INTERTIDAL.length);
-    expect(grid.excludedSpotNames.length).toBeGreaterThan(0);
+    expect(grid.excluded).toHaveLength(SPOTS_OUTSIDE_INTERTIDAL.length);
+    expect(grid.excluded.length).toBeGreaterThan(0);
+
+    /*
+     * Both buckets reach the page, each with the zone file's own words. A grid
+     * that flattened these back to a list of names is what reported Oceanside
+     * Harbor as a reef nobody had measured -- so "it left them out" is not the
+     * property worth asserting; "it left them out for the right two reasons" is.
+     */
+    expect(grid.excluded.some((n) => n.membership === 'not_in_zone')).toBe(true);
+    expect(grid.excluded.some((n) => n.membership === 'unresolved')).toBe(true);
+    for (const nonMember of grid.excluded) {
+      expect(nonMember.reason.length).toBeGreaterThan(20);
+    }
+  });
+
+  it('accounts for every spot in the inventory, in exactly one group', async () => {
+    route();
+
+    const grid = await loadGrid(NOW_MS);
+    const { members, notInZone, unresolved, inventory } = grid.membership;
+
+    // The page prints this sum. If it stops holding, the page says so rather
+    // than quietly showing a grid and a disclosure that do not add up.
+    expect(members + notInZone + unresolved).toBe(inventory);
+    expect(members).toBe(grid.rows.length);
+    expect(notInZone + unresolved).toBe(grid.excluded.length);
   });
 
   it('fetches each tide station once however many spots share it', async () => {
@@ -181,7 +206,10 @@ describe('loadGrid', () => {
     // says which days and which zone this was about.
     expect(grid.days).toHaveLength(HORIZON_DAYS);
     expect(grid.today).toEqual(TODAY);
-    expect(grid.excludedSpotNames.length).toBeGreaterThan(0);
+    // Including what the grid does not cover and why: a spot with no reef is
+    // still a spot with no reef when CO-OPS is down.
+    expect(grid.excluded.length).toBeGreaterThan(0);
+    expect(grid.membership.inventory).toBeGreaterThan(0);
   });
 
   it('is not fatal when every buoy is down, and no day can then read as a pass', async () => {

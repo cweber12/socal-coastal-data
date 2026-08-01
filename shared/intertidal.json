@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
-  "generated": "2026-07-31",
+  "version": "1.1.0",
+  "generated": "2026-08-01",
   "zone": "intertidal",
   "corridor": "Oceanside Harbor to Border Field, San Diego County, CA",
   "_provenance": "PROVENANCE CLASS 3: MEASURED ZONE FACT. Every value under membership.members is produced by this repo's own instruments and carried by an append-only evidence ledger -- neither resolved by a join against an upstream authority nor typed in as a judgement. CONTEXT.md names three provenance classes and until this file existed only two had a home: shared/spots.json holds class 1, values resolved by join and never hand-populated, and shared/thresholds.json holds class 2, author judgements, and had to write a _provenance paragraph of its own explaining why it is not in spots.json. Class 3 is neither, which is why the floor sat in spots.json against that file's own rule for want of anywhere else to put it. See docs/adr/0002-measured-zone-facts-are-a-third-provenance-class.md.\n\nWhat makes this class 3 and not class 2 is the promotion rule, not the current values. floor_confidence moves low -> verified only on two entries from DIFFERENT methods agreeing within 0.3 ft, at least one of them instrumented -- lidar hypsometry, a pressure logger, or MARINe transect topography. An author_estimate entry here is the starting state of a measurement programme, not a threshold someone chose and could choose differently. Nothing has been promoted: all 8 members are floor_confidence low, and tools/calibration/floor-calibration.md section 7 is the rule.\n\nDERIVATION: this file is a FIELD EXTRACTION from shared/spots.json 1.4.0 at commit f6bd550c8222352799d2208f677e1d42447ca088, not a file rename -- spots.json stays at its path as the cross-language contract it has always been. floor_ft, floor_confidence and floor_evidence carry the values that file held at that commit, unedited; only the two field names lost their tidepool_ prefix, because a tide height at which a reef surfaces is the same number for a photographer, a surveyor and a child with a bucket, and the prefix asserted an ownership this file exists to deny. The ledgers were created by d71154a0ab004e68f145afd7ccfef61c0d4a4cf2 and are append-only from that point: an entry is added, never edited, and the newest entry is not automatically the answer -- a human sets floor_ft against the ledger.\n\ngit log --follow was never going to carry the ledgers across a field extraction from a file that stays. git log -S'floor_evidence' -- shared/ works across both files and is the trail, which is also why floor_evidence kept its name to the letter while the two floor fields did not.",
@@ -11,7 +11,7 @@
     "height_reference": "A floor is a height above the datum named here, compared against the predictions of the CO-OPS station the spot binds to in shared/spots.json. All 8 members currently bind 9410230, so local datum and range error cancels on use; a member bound to another station would need that cancellation re-argued, not assumed."
   },
   "_schema": {
-    "membership": "How a spot relates to this zone, stated three ways so that no null carries two meanings: members, not_in_zone, unresolved. Every spot in shared/spots.json appears in exactly one of them. scripts/gen-intertidal-types.mjs fails when a spot is in none or in two, so the three counts are checked rather than asserted. See docs/adr/0003-zone-membership-is-three-way.md.",
+    "membership": "How a spot relates to this zone, stated three ways so that no null carries two meanings: members, not_in_zone, unresolved. Every spot in shared/spots.json appears in exactly one of them. scripts/gen-intertidal-types.mjs fails when a spot is in none or in two, so the three counts are checked rather than asserted. See docs/adr/0003-zone-membership-is-three-way.md. WHAT MEMBERSHIP MEANS, stated exactly, because 1.0.0 left it implied and the distinction is load-bearing: a member has a ROCKY INTERTIDAL BENCH whose surfacing height a floor can describe. It does NOT mean 'has an intertidal', which is a wider and less useful question -- a sandy foreshore is intertidal, and so is the mudflat Batiquitos exposes twice a day. CONTEXT.md defines the intertidal as where a reef surfaces and defines the floor against a reef, so this is that definition applied rather than narrowed; it is written down here because a not_in_zone entry reading 'this lagoon has no intertidal' would be a second wrong claim replacing the first, which is the exact failure #126 exists to prevent.",
     "membership.members": "The spot has this zone, and here are its facts. 8 of 26.",
     "membership.members[].slug": "shared/spots.json slug, and the only join key. Never reused or changed.",
     "membership.members[].floor_ft": "Tide height below which the reef is WORKABLE -- the level at which enough of the intertidal is out of the water to be worth the trip. NOT the level at which it is at its best; that is lower, and encoding it here silently rejects every ordinary usable day. Named tidepool_floor_ft in spots.json up to 1.4.0. UNCALIBRATED; see floor_confidence.",
@@ -25,7 +25,7 @@
     "membership.members[].floor_evidence[].n": "Sample count in whatever unit the method counts in; the note states the unit. null where the method has no sample count.",
     "membership.members[].floor_evidence[].run_date": "When this entry's value was computed or set.",
     "membership.members[].floor_evidence[].note": "What the run established, in prose. Required whenever value_ft is null. Figures that came from a generated file are summarised here, never copied, because a re-run rewrites them.",
-    "membership.not_in_zone": "The spot does not have this zone, with the reason. A different statement from an unmeasured floor: a harbor entrance is not a reef nobody has surveyed. This is a positive claim and it is overturnable -- the reef sweep named in the unresolved reasons would settle it either way, and a spot moves bucket by editing this file and nothing else. 4 of 26, and they are the four PRD #101 named as wrongly reported to readers as reefs nobody has measured.",
+    "membership.not_in_zone": "The spot has no rocky bench for a floor to describe, with the reason. A different statement from an unmeasured floor: a harbor entrance is not a reef nobody has surveyed. Read it as 'no reef here', never as 'no intertidal here' -- two of the four expose tidal flats daily, and what they lack is rock, not tide. This is a positive claim and it is overturnable: the reef sweep named in this file's unresolved array would settle it either way, and a spot moves bucket by editing this file and nothing else. 4 of 26, and they are the four PRD #101 named as wrongly reported to readers as reefs nobody has measured.",
     "membership.not_in_zone[].reason": "Rendered verbatim to readers. Written for one, and never re-worded in a component: a second wording of a caveat in a second place is how the two drift apart.",
     "membership.unresolved": "Not established either way. #101 defines this bucket as 'the spot is in this zone but the facts are unmeasured', and 14 of these 26 cannot honestly be put on either side of that line: nothing in this repo has looked for a bench at those coordinates, so asserting membership would be as unfounded as denying it. The bucket is therefore read as 'membership or facts unmeasured', and each reason says which. Failing to here rather than into not_in_zone is the direction this repo always fails -- not_in_zone is a positive claim that no zone exists, and a wrong one deletes a real reef from a reader's view. 14 of 26.",
     "membership.unresolved[].reason": "Rendered verbatim, on the same terms as not_in_zone[].reason. Each states what this repo knows about the spot and what has not been done; what would move it is stated once, in this file's unresolved array, rather than fourteen times.",
@@ -417,11 +417,11 @@
       },
       {
         "slug": "beacons-leucadia",
-        "reason": "A bluff-backed beach reached by a trail, whose notes describe the trail as the hazard rather than any reef. Tagged dive, which is a claim about the water and not about what surfaces. Nothing has looked for a bench here."
+        "reason": "A bluff-backed beach reached by a trail, whose notes describe the trail as the hazard rather than any reef. Nothing has looked for a bench here."
       },
       {
         "slug": "moonlight-encinitas",
-        "reason": "Lifeguarded family beach at the Cottonwood Creek outlet, one spot north of Swami's, which is a member. Adjacency is not evidence and nothing has looked for a bench here."
+        "reason": "Lifeguarded family beach at the Cottonwood Creek outlet, one spot north of Swami's, which does carry a measured floor. Adjacency is not evidence, and nothing has looked for a bench at this coordinate."
       },
       {
         "slug": "del-mar-15th",
@@ -433,11 +433,11 @@
       },
       {
         "slug": "tourmaline",
-        "reason": "Surf park inside South La Jolla SMR, tagged surf and dive. The La Jolla reefs immediately north are members, and that says nothing about this coordinate, which nothing has looked at."
+        "reason": "Surf park inside South La Jolla SMR. The La Jolla reefs immediately north carry floors, which says nothing about this coordinate, and nothing has looked at it."
       },
       {
         "slug": "mission-beach",
-        "reason": "The sand spit between the ocean and Mission Bay, and the highest-volume general beach in the corridor per its notes. Very likely sand along its length, but this repo has not looked, and a likely absence is not a stated one -- see this file's unresolved array for why only four spots are in not_in_zone."
+        "reason": "The sand spit between the ocean and Mission Bay, and the highest-volume general beach in the corridor per its notes. Very likely sand along its length -- but nothing here has looked, and a likely absence is not a measured one, so it is left unestablished rather than stated as fact."
       },
       {
         "slug": "ocean-beach-pier",
@@ -445,7 +445,7 @@
       },
       {
         "slug": "coronado-central",
-        "reason": "The ocean side of Coronado, sand on the same terms as Silver Strand to its south. Not placed in not_in_zone for the reason stated in this file's unresolved array: nothing here has looked, and the four spots that are there were named in PRD #101 rather than measured out of the zone."
+        "reason": "The ocean side of Coronado, sand on the same terms as Silver Strand to its south. It is not in the no-reef group for one reason: nothing has looked at this coordinate either, and the four spots that are there were named by hand rather than measured out of the zone. The asymmetry is deliberate and it is recorded rather than tidied away."
       },
       {
         "slug": "imperial-beach-pier",
@@ -459,7 +459,7 @@
   },
   "unresolved": [
     "Membership has been MEASURED for nobody. All 26 classifications here are read off the spot records in shared/spots.json and the corridor's geography, not off a survey: no reef sweep has been run against any coordinate in this corridor. tools/lidar-recon/probes/osm_reef.py asks exactly the right question -- OpenStreetMap natural=reef areas within 1200 m of a spot, traced from satellite imagery and carrying a version, a changeset and the imagery the mapper used -- but it scopes itself to the spots that already carry a floor, so it has never looked at any of the 18 non-members. Widening it to all 26 is the cheapest thing that would move entries out of membership.unresolved, in either direction, and it is not done.",
-    "Only 4 spots are in not_in_zone, and at least 3 in membership.unresolved are arguably the same geomorphology: mission-beach and coronado-central are sand on the same terms as silver-strand, which is in not_in_zone. The asymmetry is deliberate and it is not a measurement. The four are the four PRD #101 and ADR 0003 name by hand -- two lagoons, a harbor and the Strand -- and extending that list on the strength of the same reasoning would be this file's author asserting an absence at coordinates nobody has looked at. A spot in the wrong bucket here is visible to a reader from #126 onward and costs an edit to this file to fix; that is the trade being made, and it fails toward saying 'not established' rather than 'not there'.",
+    "Only 4 spots are in not_in_zone, and at least 3 in membership.unresolved are arguably the same geomorphology: mission-beach and coronado-central are sand on the same terms as silver-strand, which is in not_in_zone. The asymmetry is deliberate and it is not a measurement. The four are the four PRD #101 and ADR 0003 name by hand -- two lagoons, a harbor and the Strand -- and extending that list on the strength of the same reasoning would be this file's author asserting an absence at coordinates nobody has looked at. A spot in the wrong bucket here is visible to a reader and costs an edit to this file to fix; that is the trade being made, and it fails toward saying 'not established' rather than 'not there'. Each affected spot's own reason says so too, because reasons are rendered to readers and this array is not.",
     "The floor caveats for the 8 members were NOT copied here. shared/spots.json's own unresolved array still carries them -- the uniform +1.5 ft raise applied to all 8 floors in 1.2.0, the three ceilings set from the permissiveness rule in 1.4.0, and the entry marked SAFETY that names Sunset Cliffs and Cabrillo as needing a field check before any of these numbers is presented as advice -- and the app still renders them verbatim from there. Copying them would put a second wording of a safety caveat in a second place, which is the drift core/components/unresolved.tsx exists to prevent. Moving them is #132's business, where unresolved.tsx stops naming two files by hand and walks every zone file instead."
   ]
 }

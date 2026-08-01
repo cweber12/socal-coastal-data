@@ -136,9 +136,17 @@ export function UnresolvedDisclosure() {
 
         {rest.map(({ source, entries }) => (
           <div key={source.file} className="mt-3">
+            {/*
+              The `{' '}` is not decoration. Without it JSX drops the whitespace
+              at the line break and this renders "REEF FLOORS AND SWELL
+              CEILINGSshared/thresholds.json 0.1.0" -- invisible on screen
+              behind the margin, and exactly what `innerText` and a screen
+              reader get. Found by #126, which copied this pattern into the
+              excluded-spots disclosure and saw it in the capture.
+            */}
             <h3 className="text-meta font-semibold tracking-wide uppercase text-[var(--text-dim)]">
-              {source.subject}
-              <span className="ml-1.5 font-normal normal-case tracking-normal text-[var(--text-dimmer)]">
+              {source.subject}{' '}
+              <span className="font-normal normal-case tracking-normal text-[var(--text-dimmer)]">
                 {source.file} {source.version}
               </span>
             </h3>

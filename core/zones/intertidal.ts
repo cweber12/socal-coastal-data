@@ -186,6 +186,24 @@ export const INTERTIDAL_SPOTS: readonly IntertidalSpot[] = members;
 export const SPOTS_OUTSIDE_INTERTIDAL: readonly IntertidalNonMember[] = nonMembers;
 
 /**
+ * What this zone can account for, and the total it must add up to.
+ *
+ * Exported so a renderer can SHOW the arithmetic rather than implying it. A
+ * reader looking at a grid of 8 and a disclosure of 18 has no way to tell
+ * whether 26 is the whole inventory or whether a spot fell down a gap between
+ * the two -- and the gap is exactly the failure this zone's three buckets exist
+ * to close. The module throws on load if a spot is in no bucket, so a page that
+ * renders at all has a complete set; this is what lets it say so out loud.
+ */
+export const INTERTIDAL_ACCOUNTING = {
+  members: members.length,
+  notInZone: nonMembers.filter((n) => n.membership === 'not_in_zone').length,
+  unresolved: nonMembers.filter((n) => n.membership === 'unresolved').length,
+  /** Every spot in the inventory. The three counts above must sum to this. */
+  inventory: SPOTS.length,
+} as const;
+
+/**
  * Resolve a slug to a member, or null.
  *
  * Null for an unknown slug, for a spot in `not_in_zone` and for one in

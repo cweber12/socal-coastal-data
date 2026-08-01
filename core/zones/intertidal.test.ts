@@ -13,6 +13,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  INTERTIDAL_ACCOUNTING,
   INTERTIDAL_DATUM,
   INTERTIDAL_FLOOR_UNITS,
   INTERTIDAL_SPOTS,
@@ -49,6 +50,20 @@ describe('membership', () => {
     ];
     expect(new Set(covered).size).toBe(covered.length);
     expect([...covered].sort()).toEqual(SPOTS.map((s) => s.slug).sort());
+  });
+
+  it('publishes an accounting that adds up to the whole inventory', () => {
+    /*
+     * The corridor page prints this sum, so it is a rendered claim and not an
+     * internal one: a reader seeing 8 rows and 18 excluded spots cannot
+     * otherwise tell whether 26 is the whole inventory or whether a spot fell
+     * down the gap between the two.
+     */
+    const { members, notInZone, unresolved, inventory } = INTERTIDAL_ACCOUNTING;
+    expect(members + notInZone + unresolved).toBe(inventory);
+    expect(inventory).toBe(SPOTS.length);
+    expect(members).toBe(INTERTIDAL_SPOTS.length);
+    expect(notInZone + unresolved).toBe(SPOTS_OUTSIDE_INTERTIDAL.length);
   });
 
   it('states not_in_zone and unresolved as different things, each with a reason', () => {
