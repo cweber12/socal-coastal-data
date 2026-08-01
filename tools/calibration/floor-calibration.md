@@ -698,34 +698,120 @@ known.
   above MLLW — CO-OPS station datums, 1983–2001 epoch: MSL 7.10 ft, MLLW 4.37 ft
   on the station datum. A literal reading would put the threshold at 3.43 ft
   MLLW, not 0.7, and would compare the wrong quantity by more than the entire
-  decision region. Against that: `/cabr/learn/nature/tidepools.htm` quotes "high
-  tide was 7.3ft at 8:00am and low tide was a -2.0 at 3:08pm", and referenced to
-  MSL that high would be 10.0 ft MLLW — 3.1 ft above the highest high water in a
-  full year of 9410230 predictions (6.909 ft MLLW, 2016, `interval=hilo`) and
-  4.7 ft above MHHW. So the NPS figures are consistent with MLLW and inconsistent
-  with MSL, and "above sea level" is loose phrasing rather than a datum
-  declaration. **That is an inference, recorded as one, and an inference is not
-  good enough for a check that can only be spent once.** Confirm the datum with
-  NPS before spending it.
+  decision region.
 
-  Two observations from the 2026-07-29 read point the same way and neither closes
-  it. First, the regulatory text does not say "feet" or "above sea level" at all —
-  the compendium binds on "the low tide is 0.7 or lower", units and datum
-  unstated — so the one phrasing that generates the MSL problem is a paraphrase in
-  a Details block on a non-regulatory page. Second, the tables beside the
-  `/cabr/learn/nature/tidepools.htm` quotation are NOAA's, credited to
+  Against that, `/cabr/learn/nature/tidepools.htm` captions a timelapse — re-read
+  2026-08-01, verbatim, and it names a date:
+
+  > This is a time lapse video on January 31, 2022 at Cabrillo National Monument.
+  > High tide was 7.3ft at 8:00am and low tide was a -2.0 at 3:08pm.
+
+  Because it describes one real morning rather than a generic worked example, it
+  can be **measured** instead of bounded. Queried 2026-08-01 from
+  `api/prod/datagetter` for 2022-01-31, `datum=MLLW`, `units=english`,
+  `time_zone=lst_ldt`:
+
+  | | 9410230, the station the page links | 9410170 |
+  |---|---:|---:|
+  | morning high, `predictions` | 6.739 at 07:55 | 7.181 at 08:01 |
+  | morning high, `high_low` observed | 6.881 at 07:54 | 7.466 at 08:00 |
+  | afternoon low, `predictions` | −1.856 at 15:07 | −1.925 at 15:10 |
+  | afternoon low, `high_low` observed | −1.814 at 15:06 | −1.713 at 15:12 |
+
+  Read as MLLW both quoted figures are ordinary for that morning: 7.3 falls
+  between 9410170's predicted 7.181 and observed 7.466, and −2.0 sits just under
+  the four measured lows, 0.08 ft below the lowest of them and 0.29 ft below the
+  highest. Read as MSL neither is reachable at either station. The quoted 7.3 ft
+  becomes **10.03 ft MLLW** (7.3 + 2.730),
+  which is above **HAT** at both candidate stations — the *highest astronomical
+  tide*, which `datum_options.html` defines as "the elevation of the highest
+  predicted astronomical tide expected to occur at a specific tide station over
+  the time period of 40 years", presently the **2000–2040** window rather than
+  the 1983–2001 epoch the tidal means are averaged over. HAT is **7.206 ft MLLW
+  at 9410230** and **7.623 ft at 9410170**, so an MSL reading clears the 40-year
+  astronomical ceiling by 2.8 ft and 2.4 ft respectively, and stands 2.2 ft above
+  the highest water ever *observed* at 9410230 (7.812 ft, 2015-11-25). The quoted
+  −2.0 ft low fails the same way from the other end: read as MSL it is **+0.73 ft
+  MLLW**, a "low tide" numerically *above* the 0.7 ft threshold itself, in the
+  caption of a video of the bench being uncovered. That last point is deliberately
+  field-neutral — it turns only on 0.73 > 0.70, and holds whichever of §1's two
+  fields 0.7 names, which the first bullet above leaves open and rule 6 forbids
+  settling here. It is also arithmetic internal to NPS's own published figures,
+  with no §2 output on either side, so like the #38 resemblance above it spends
+  nothing. So the NPS figures are consistent with MLLW and inconsistent with MSL,
+  and "above sea level" is loose phrasing rather than a datum declaration.
+  **That is an inference, recorded as one, and an inference is not good enough for
+  a check that can only be spent once.** Confirm the datum with NPS before
+  spending it.
+
+  This bullet used to argue that from a single year of 9410230 predictions —
+  6.909 ft, 2016, which re-measures 2026-08-01 as 6.908 ft; CO-OPS reissues
+  predictions and 0.001 ft changes nothing here, but the value is quoted as
+  measured rather than carried forward. A 40-year bound at *both* candidate
+  stations is the stronger form of the same argument, and, unlike the one-year
+  version, it does not depend on knowing which station the page was read from —
+  which the observations below show this section can no longer assume.
+
+  **The bound is tight, not slack, and 7.3 does not reach it by rounding.** A
+  reader given only a year maximum could imagine some other year closing the gap.
+  Two years show what closing it actually looks like: 2022 — the caption's own
+  year — peaks at 7.186 ft, 0.02 ft under HAT, and the committed 2026 fixture
+  (`__fixtures__/coops-9410230-2026.json`, 87,601 six-minute samples) tops out at
+  7.17 ft. Neither reaches 7.3, and neither can: HAT 7.206 is below 7.25, so no
+  prediction at 9410230 inside the 2000–2040 window even *rounds* to 7.3.
+
+  Two observations from the 2026-07-29 read point the same way on the datum and
+  neither closes it. First, the regulatory text does not say "feet" or "above sea
+  level" at all — the compendium binds on "the low tide is 0.7 or lower", units
+  and datum unstated — so the one phrasing that generates the MSL problem is a
+  paraphrase in a Details block on a non-regulatory page. Second, the tables
+  beside the `/cabr/learn/nature/tidepools.htm` quotation are NOAA's, credited to
   `tidesandcurrents.noaa.gov` and linked as `noaatideannual.html?id=9410230` —
   station 9410230, "La Jolla" in the CO-OPS metadata, the Scripps wharf, which is
   the station `spots.json` already binds `cabrillo-tidepools` to and the one
   `shared/calibration.json` predicts from. The page says so: the chart gives
   "predictions for the Scripps Pier in La Jolla" and "there is only a slight
-  difference for the times at Cabrillo". That removes a confound this section
-  never listed — the comparison is not against a different tide series. It still
-  does not name a datum: across all 13 tide-table pages, "MLLW", "mean lower low"
-  and "datum" occur zero times, and the compendium's only low-water reference is
-  the garbled "300 yards below mean low tide lower water level" in the south
-  tidepools closure. The inference stands as an inference and the question still
-  has to be asked.
+  difference for the times at Cabrillo". Confirmed still true on 2026-08-01:
+  three occurrences of `9410230` on that page and none of `9410170`.
+
+  **An earlier version of that second observation read the link as removing a
+  confound — "the comparison is not against a different tide series". Withdraw
+  it. The page's own numbers are what unmade it:** the link says 9410230 and the
+  quoted height says otherwise. 7.3 ft is unreachable as a prediction at the
+  station the page links, in the caption's own year and in every year of the
+  2000–2040 window, while at 9410170 it is routine — 7.181 ft predicted on the
+  very morning quoted, and annual maxima of 7.323 / 7.440 / 7.364 ft for 2015 /
+  2016 / 2019 against 6.752 / 6.908 / 6.993 ft at 9410230. So which tide series
+  the 0.7 ft threshold is stated in is **not** settled by the link, and the
+  confound this section briefly recorded as removed is back on the list.
+
+  **What the date closes.** #148's open question 2 asked whether 7.3 ft might be
+  an *observed* height at 9410230 rather than a prediction — HAT bounds only
+  predictions, and the all-time observed high there is 7.812 ft. On the date the
+  caption names it is neither: 9410230 observed **6.881 ft**, 0.42 ft short, and
+  predicted **6.739 ft**, 0.56 ft short. Neither product at the linked station
+  produces the quoted figure, so the prediction-versus-observation ambiguity does
+  not rescue it. That question is closed, not deferred.
+
+  **What it does not close.** Which table NPS actually read. The measurement says
+  9410230 cannot be the source; it does not say 9410170 is. A San Diego Bay
+  lineage in NPS materials is an established *prior* rather than a finding — the
+  park's own 2006 science report worked from 9410170
+  (`tools/lidar-recon/findings/cabrillo-surveyed-elevations.json:100`) — and a
+  prior is not evidence about this caption. Note also that the low does not
+  discriminate: all four values above sit within 0.29 ft of the quoted −2.0, and
+  the quoted 3:08pm falls between the two predicted times. Only the high
+  separates the stations. That question is tracked in
+  https://github.com/cweber12/socal-coastal-data/issues/152 — a third question
+  folded into the same single ask below, not a new one, per the rule there that
+  these must not go as separate asks — and it asks neutrally.
+
+  None of this names a datum. Across all 13 tide-table pages, "MLLW", "mean lower
+  low" and "datum" occur zero times — re-confirmed 2026-08-01 for
+  `/cabr/learn/nature/tidepools.htm`, which has zero occurrences of all three —
+  and the compendium's only low-water reference is the garbled "300 yards below
+  mean low tide lower water level" in the south tidepools closure. The inference
+  stands as an inference and the question still has to be asked.
 
 ### What would settle the field question
 
