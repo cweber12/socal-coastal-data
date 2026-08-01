@@ -5,7 +5,7 @@ import type { SpotSightingsSummary } from '@/activities/tidepool/grid';
 import { thresholdDisclosure } from '@/activities/tidepool/labels';
 import type { SwellCeiling } from '@/core/thresholds';
 import type { SpotSwell } from '@/core/upstream';
-import type { TidepoolSpot } from '@/shared/spots.generated';
+import type { IntertidalSpot } from '@/core/zones/intertidal';
 
 /**
  * The parts of a spot that are not a tide reading: where it is, what it is
@@ -32,7 +32,7 @@ export function SpotHeader({
    */
   nameOnPage = false,
 }: {
-  spot: TidepoolSpot;
+  spot: IntertidalSpot;
   ceiling: SwellCeiling;
   showSpotLink: boolean;
   nameOnPage?: boolean;
@@ -65,8 +65,8 @@ export function SpotHeader({
       )}
       <p className="text-meta text-[var(--text-dimmer)]">
         {thresholdDisclosure(
-          spot.tidepool_floor_ft,
-          spot.tidepool_floor_confidence,
+          spot.floorFt,
+          spot.floorConfidence,
           ceiling.ceilingFt,
           ceiling.confidence,
         )}
@@ -173,7 +173,7 @@ export function SpotDisclosure({
   sightings,
   nowMs,
 }: {
-  spot: TidepoolSpot;
+  spot: IntertidalSpot;
   swell: SpotSwell;
   ceiling: SwellCeiling;
   sightings: SpotSightingsSummary;

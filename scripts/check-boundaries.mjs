@@ -104,6 +104,13 @@ const ALLOWED = {
   // edge that decides where anything ambiguous goes.
   core: ['core', 'shared'],
 
+  // One zone module per cross-shore band, holding that band's activity-neutral
+  // facts. The row exists because #124 created the directory; it says the same
+  // as the `core` row above it, and it is the sibling rule below that carries
+  // the part a table cannot -- `core` is a prefix of `core/zones`, so no list
+  // written here can forbid one zone importing another.
+  'core/zones': ['core', 'shared'],
+
   // The cross-language contract. Imports nothing but its own JSON. Anything it
   // learned about a slice would be a rule the Python side cannot see.
   shared: ['shared'],
@@ -376,6 +383,35 @@ function activityOf(relPath) {
   return parts[0] === 'activities' && parts.length > 1 ? `activities/${parts[1]}` : null;
 }
 
+/**
+ * Which zone a repo-relative path belongs to, or null if it is not one.
+ *
+ * `core/zones/intertidal.ts` -> `core/zones/intertidal`. The extension is
+ * stripped so a zone is identified by name rather than by file, which is what
+ * makes a future `core/zones/surf/` directory the same zone as
+ * `core/zones/surf.ts` would have been.
+ *
+ * `.test` comes off with it. A zone's own test file IS that zone and imports it
+ * by definition; without this, `core/zones/intertidal.test.ts` resolved to a
+ * zone named `intertidal.test` and its first import was reported as one zone
+ * reaching into another. This check found that the moment the test existed,
+ * which is the argument for deriving the rule from paths rather than listing
+ * rows -- and the argument for reading what it says rather than widening the
+ * table until it goes quiet.
+ *
+ * Same device as activityOf, for the same reason it exists: `core` has to
+ * permit `core` so a zone can read core/time.ts, and `core` is a prefix of
+ * `core/zones/anything`, so no ALLOWED row can express "a zone may not import
+ * another zone". Derived from the paths it holds for a zone nobody has written
+ * yet -- and #129's surf zone is exactly the case, since a surf module tempted
+ * to read the intertidal's floor is the boundary this protects.
+ */
+function zoneOf(relPath) {
+  const parts = toPosix(relPath).split('/');
+  if (parts[0] !== 'core' || parts[1] !== 'zones' || parts.length < 3) return null;
+  return `core/zones/${parts[2].replace(/\.[^.]+$/, '').replace(/\.(test|spec)$/, '')}`;
+}
+
 function pointsAtAFile(relTarget) {
   for (const suffix of CANDIDATE_SUFFIXES) {
     try {
@@ -396,8 +432,24 @@ const unresolved = [];
 let filesScanned = 0;
 let edgesChecked = 0;
 
+/*
+ * Each file is read once, however many declared roots contain it.
+ *
+ * ROOTS comes from the table's keys, and a key can sit inside another --
+ * `activities/tidepool` inside `activities`, `core/zones` inside `core`. Those
+ * nested rows are the point of the table, but they made the walk visit their
+ * files twice: the count printed at the end was inflated, and a single
+ * forbidden edge under one of them was REPORTED TWICE, which reads as two
+ * problems in a check whose whole output is a list of problems. Classification
+ * is unaffected either way -- sliceOf resolves by longest prefix from the path,
+ * not from which root the walk arrived by.
+ */
+const scanned = new Set();
+
 for (const root of ROOTS) {
   for (const file of walk(join(ROOT, root))) {
+    if (scanned.has(file)) continue;
+    scanned.add(file);
     filesScanned++;
     const rel = toPosix(relative(ROOT, file));
     const from = sliceOf(rel);
@@ -449,6 +501,17 @@ for (const root of ROOTS) {
         continue;
       }
 
+      // Sibling zones, on the same terms. A zone answers what is physically
+      // true of one cross-shore band; one reading another would make the two
+      // bands' facts depend on each other, and the four are explicitly not a
+      // partition -- nothing may assume they tile a spot's profile.
+      const myZone = zoneOf(rel);
+      const theirZone = zoneOf(target);
+      if (myZone && theirZone && myZone !== theirZone) {
+        violations.push({ rel, line, spec, from: myZone, to: theirZone });
+        continue;
+      }
+
       if (permits(ALLOWED[from], to)) continue;
 
       const excused = TEMPORARY.find((t) => t.from === from && t.to === to);
@@ -483,7 +546,11 @@ if (violations.length > 0) {
     const list = ALLOWED[v.from] ?? ALLOWED[v.from.split('/')[0]] ?? [];
     console.error(`    ${v.from} may import: ${list.join(', ') || '(nothing)'}`);
     if (!ALLOWED[v.from]) {
-      console.error('    (no row of its own; one activity may never import another)');
+      console.error(
+        v.from.startsWith('core/zones/')
+          ? '    (no row of its own; one zone may never import another)'
+          : '    (no row of its own; one activity may never import another)',
+      );
     }
     console.error('');
   }

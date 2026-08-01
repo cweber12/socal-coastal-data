@@ -35,8 +35,26 @@ const OUT = `${HERE}__fixtures__`;
 const taxa = JSON.parse(await readFile(`${REPO}shared/target_taxa.json`, 'utf8'));
 const ids = [...taxa.targets, ...taxa.denominator].map((t: { taxon_id: number }) => t.taxon_id);
 
-const spots = JSON.parse(await readFile(`${REPO}shared/spots.json`, 'utf8'))
-  .spots.filter((s: { tidepool_floor_ft: number | null }) => s.tidepool_floor_ft !== null);
+/*
+ * The intertidal members, joined to the inventory on slug, throwing on a member
+ * that does not resolve. Same shape as run.ts and for the same reason: the old
+ * filter on `tidepool_floor_ft !== null` would match nothing now that the field
+ * lives in shared/intertidal.json, and this would capture fixtures for zero
+ * spots without failing.
+ */
+const inventory = JSON.parse(await readFile(`${REPO}shared/spots.json`, 'utf8')).spots as {
+  slug: string;
+  lat: number;
+  lon: number;
+}[];
+const members = JSON.parse(await readFile(`${REPO}shared/intertidal.json`, 'utf8')).membership
+  .members as { slug: string }[];
+
+const spots = members.map((member) => {
+  const spot = inventory.find((s) => s.slug === member.slug);
+  if (!spot) throw new Error(`intertidal.json member '${member.slug}' is not in spots.json`);
+  return spot;
+});
 
 const pulledAt = new Date().toISOString().slice(0, 10);
 

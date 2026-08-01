@@ -19,8 +19,7 @@ to fill the slot would be worse than leaving it out.
 Belongs next door:
 
 - **A fact about one band** goes to `core/zones/` — the tide height at which a
-  reef surfaces is true of the intertidal, not of the spot. That directory does
-  not exist yet; #124 creates it.
+  reef surfaces is true of the intertidal, not of the spot.
 - **A judgement built on these facts** belongs to an activity. `dark` and
   `closed` are *states*, and states are the window predicate's, not this
   directory's. What lives here is the bound and the rule, not the verdict.

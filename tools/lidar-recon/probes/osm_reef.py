@@ -40,8 +40,8 @@ UA = {"User-Agent": "socal-coastal-data-recon/1.0 "
 OVERPASS = "https://overpass-api.de/api/interpreter"
 OSM_API = "https://api.openstreetmap.org/api/0.6"
 
-# The 8 spots carrying a tidepool_floor_ft, read from spots.json rather than
-# listed, so a spot gaining or losing a floor changes this probe's scope.
+# The 8 members of the intertidal zone, read from the files rather than listed,
+# so a spot joining or leaving the zone changes this probe's scope.
 SEARCH_RADIUS_M = 1200
 
 # Overpass 504s under load often enough that a single attempt is not a
@@ -52,8 +52,23 @@ BACKOFF_S = 20
 
 
 def spots():
-    d = json.load(open(os.path.join(ROOT, "shared", "spots.json")))
-    return [s for s in d["spots"] if s.get("tidepool_floor_ft") is not None]
+    """The intertidal members, joined to their inventory records on slug.
+
+    EVERY LOOKUP HERE IS `[]`, NEVER `.get()`, and that is not a style
+    preference. This scope used to read `s.get("tidepool_floor_ft") is not None`
+    off spots.json. When the floor moved to shared/intertidal.json in spots.json
+    2.0.0, `.get()` would have returned None for a key that no longer exists,
+    the comprehension would have matched nothing, and this probe would have
+    reported NO REEF ANYWHERE -- silently, with a zero exit code. That is the
+    failure this file's own header forbids: a failure is reported per spot,
+    never turned into "no reef here", because that reads as a measured absence.
+
+    With `[]` the same drift raises KeyError and stops the run.
+    """
+    spots_file = json.load(open(os.path.join(ROOT, "shared", "spots.json")))
+    zone = json.load(open(os.path.join(ROOT, "shared", "intertidal.json")))
+    by_slug = {s["slug"]: s for s in spots_file["spots"]}
+    return [by_slug[m["slug"]] for m in zone["membership"]["members"]]
 
 
 def post(url, body, attempts=ATTEMPTS):

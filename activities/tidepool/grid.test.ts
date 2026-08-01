@@ -42,7 +42,7 @@ import coops240h from '../../core/feeds/__fixtures__/coops-9410230-20260727-240h
 import coops384h from '../../core/feeds/__fixtures__/coops-9410230-20260713-384h.json';
 import coops72h from '../../core/feeds/__fixtures__/coops-9410230-20260727-6min.json';
 import sunsetCliffsPage from '../../core/feeds/__fixtures__/inat-sunset-cliffs-20260728.json';
-import { SPOTS_WITHOUT_FLOOR, TIDEPOOL_SPOTS } from '@/shared/spots.generated';
+import { INTERTIDAL_SPOTS, SPOTS_OUTSIDE_INTERTIDAL } from '../../core/zones/intertidal';
 import { readFileSync } from 'node:fs';
 
 const NDBC_FIXTURE = readFileSync(
@@ -128,7 +128,7 @@ describe('loadGrid', () => {
     const grid = await loadGrid(NOW_MS);
 
     expect(grid.failure).toBeNull();
-    expect(grid.rows).toHaveLength(TIDEPOOL_SPOTS.length);
+    expect(grid.rows).toHaveLength(INTERTIDAL_SPOTS.length);
     expect(grid.days).toHaveLength(HORIZON_DAYS);
     expect(grid.today).toEqual(TODAY);
     expect(grid.evaluatedAtMs).toBe(NOW_MS);
@@ -145,7 +145,7 @@ describe('loadGrid', () => {
 
     const grid = await loadGrid(NOW_MS);
 
-    expect(grid.excludedSpotNames).toHaveLength(SPOTS_WITHOUT_FLOOR.length);
+    expect(grid.excludedSpotNames).toHaveLength(SPOTS_OUTSIDE_INTERTIDAL.length);
     expect(grid.excludedSpotNames.length).toBeGreaterThan(0);
   });
 
@@ -190,7 +190,7 @@ describe('loadGrid', () => {
     const grid = await loadGrid(NOW_MS);
 
     expect(grid.failure).toBeNull();
-    expect(grid.rows).toHaveLength(TIDEPOOL_SPOTS.length);
+    expect(grid.rows).toHaveLength(INTERTIDAL_SPOTS.length);
 
     const states = grid.rows.flatMap((r) => r.days.map((d) => d?.state));
     // Unknown swell is not calm. `go` requires a known reading, and `veto`
@@ -249,7 +249,7 @@ describe('loadGrid', () => {
     const grid = await loadGrid(NOW_MS);
 
     expect(grid.failure).toBeNull();
-    expect(grid.rows).toHaveLength(TIDEPOOL_SPOTS.length);
+    expect(grid.rows).toHaveLength(INTERTIDAL_SPOTS.length);
 
     for (const row of grid.rows) {
       expect(row.days[0]).not.toBeNull();
@@ -257,7 +257,7 @@ describe('loadGrid', () => {
     }
 
     const unevaluated = grid.notices.filter((n) => n.message.includes('could not be evaluated'));
-    expect(unevaluated).toHaveLength(TIDEPOOL_SPOTS.length * (HORIZON_DAYS - 1));
+    expect(unevaluated).toHaveLength(INTERTIDAL_SPOTS.length * (HORIZON_DAYS - 1));
     expect(unevaluated[0]!.severity).toBe('warn');
     expect(unevaluated[0]!.message).toMatch(/does not cover/);
   });
@@ -271,8 +271,13 @@ describe('tidepoolSpotBySlug', () => {
   it('resolves a spot the grid can evaluate', () => {
     const spot = tidepoolSpotBySlug('cabrillo-tidepools');
     expect(spot).not.toBeNull();
-    expect(spot!.tidepool_floor_ft).toBeTypeOf('number');
-    expect(spot!.tidepool_floor_confidence).not.toBeNull();
+    expect(spot!.floorFt).toBeTypeOf('number');
+    expect(spot!.floorConfidence).not.toBeNull();
+    // The facts arrive from shared/intertidal.json and the bindings from
+    // shared/spots.json, joined on slug. A member missing either half is the
+    // join having quietly half-failed.
+    expect(spot!.tide_station).toBe('9410230');
+    expect(spot!.floorEvidence.length).toBeGreaterThan(0);
   });
 
   it('returns null for an unknown slug', () => {
@@ -284,9 +289,13 @@ describe('tidepoolSpotBySlug', () => {
     /*
      * The slug arrives from a URL segment. While SPOT_BY_SLUG inherited
      * Object.prototype these four all returned something truthy, and the guard
-     * in tidepoolSpotBySlug is `tidepool_floor_ft !== null` -- which `undefined`
+     * in tidepoolSpotBySlug was `tidepool_floor_ft !== null` -- which `undefined`
      * satisfies. So each one got past notFound() and was handed on as a Spot,
      * then threw on `spot.wave.intended_primary`: a 500 where a 404 belongs.
+     *
+     * The lookup is a membership test against shared/intertidal.json now, and
+     * these keys have to keep missing there for the same reason they had to
+     * start missing here.
      */
     for (const key of ['constructor', 'toString', 'valueOf', '__proto__', 'hasOwnProperty']) {
       expect(tidepoolSpotBySlug(key)).toBeNull();
@@ -294,10 +303,20 @@ describe('tidepoolSpotBySlug', () => {
   });
 
   it('returns null for a real spot with no floor rather than guessing one', () => {
-    // Eighteen of twenty-six are in this state. A null floor is unresolved, and
-    // inventing one produces a confident state for a reef nobody has measured.
-    const floorless = SPOTS_WITHOUT_FLOOR[0]!;
-    expect(tidepoolSpotBySlug(floorless.slug)).toBeNull();
+    /*
+     * Eighteen of twenty-six are in this state, and inventing a floor for one
+     * produces a confident state for a reef nobody has measured.
+     *
+     * Both exclusion buckets are checked, not just the first entry: a harbor
+     * that is NOT IN the zone and a reef whose floor is UNMEASURED are different
+     * facts about different places, and the only thing this function may do with
+     * either is refuse. #126 is where they stop reading the same on the page.
+     */
+    expect(SPOTS_OUTSIDE_INTERTIDAL.some((n) => n.membership === 'not_in_zone')).toBe(true);
+    expect(SPOTS_OUTSIDE_INTERTIDAL.some((n) => n.membership === 'unresolved')).toBe(true);
+    for (const nonMember of SPOTS_OUTSIDE_INTERTIDAL) {
+      expect(tidepoolSpotBySlug(nonMember.spot.slug)).toBeNull();
+    }
   });
 });
 
@@ -382,12 +401,12 @@ describe('isServableDate', () => {
  */
 
 describe('sightings', () => {
-  const sunsetCliffs = TIDEPOOL_SPOTS.find((s) => s.slug === 'sunset-cliffs')!;
+  const sunsetCliffs = INTERTIDAL_SPOTS.find((s) => s.slug === 'sunset-cliffs')!;
 
   it('issues exactly one request per spot', async () => {
     route();
     await loadGrid(NOW_MS);
-    expect(inatCalls()).toBe(TIDEPOOL_SPOTS.length);
+    expect(inatCalls()).toBe(INTERTIDAL_SPOTS.length);
   });
 
   it('carries iNaturalist own count into the row summary', async () => {
@@ -424,7 +443,7 @@ describe('sightings', () => {
     const grid = await loadGrid(NOW_MS);
 
     expect(grid.failure).toBeNull();
-    expect(grid.rows).toHaveLength(TIDEPOOL_SPOTS.length);
+    expect(grid.rows).toHaveLength(INTERTIDAL_SPOTS.length);
     // Every day still evaluated: the tide is what this page is about.
     expect(grid.rows.every((r) => r.days.every((d) => d !== null))).toBe(true);
 
@@ -540,7 +559,7 @@ describe('sightings', () => {
  * ========================================================================= */
 
 describe('loadSpotWeek', () => {
-  const spot = TIDEPOOL_SPOTS.find((s) => s.slug === 'cabrillo-tidepools')!;
+  const spot = INTERTIDAL_SPOTS.find((s) => s.slug === 'cabrillo-tidepools')!;
 
   it('evaluates one spot across the horizon', async () => {
     route();
@@ -576,7 +595,7 @@ describe('loadSpotWeek', () => {
  * ========================================================================= */
 
 describe('loadSpotDay', () => {
-  const spot = TIDEPOOL_SPOTS.find((s) => s.slug === 'cabrillo-tidepools')!;
+  const spot = INTERTIDAL_SPOTS.find((s) => s.slug === 'cabrillo-tidepools')!;
 
   it('slices the local day and finds its turning points', async () => {
     route();
@@ -628,7 +647,7 @@ describe('loadSpotDay', () => {
  * ========================================================================= */
 
 describe("loadSpotDay's dayLowFt", () => {
-  const spot = TIDEPOOL_SPOTS.find((s) => s.slug === 'cabrillo-tidepools')!;
+  const spot = INTERTIDAL_SPOTS.find((s) => s.slug === 'cabrillo-tidepools')!;
 
   it('is the minimum over the whole local day, night included', async () => {
     route();
@@ -696,7 +715,7 @@ describe("loadSpotDay's dayLowFt", () => {
  */
 function row(name: string, floorFt: number, lows: number[], usableCount = 0): SpotRow {
   return {
-    spot: { name, slug: name.toLowerCase().replace(/\W+/g, '-'), tidepool_floor_ft: floorFt } as SpotRow['spot'],
+    spot: { name, slug: name.toLowerCase().replace(/\W+/g, '-'), floorFt } as SpotRow['spot'],
     swell: {} as SpotRow['swell'],
     ceiling: {} as SpotRow['ceiling'],
     days: lows.map(
@@ -757,7 +776,7 @@ describe('sortRows', () => {
     const names = sortRows(week(), 'usable').map((r) => r.spot.name);
     /*
      * Cabrillo first, and the direction is worth pinning because it is easy to
-     * get backwards. A HIGHER tidepool_floor_ft is more permissive -- the reef
+     * get backwards. A HIGHER floor is more permissive -- the reef
      * is called workable at higher water. spots.json says so itself: the 1.2.0
      * shift 'moved every floor in the PERMISSIVE direction', and Sunset Cliffs
      * at 0.7 is 'deliberately kept the strictest of the eight'.

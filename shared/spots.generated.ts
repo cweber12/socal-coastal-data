@@ -1,6 +1,6 @@
 // GENERATED FILE -- do not edit by hand.
 //
-// Source:    shared/spots.json (version 1.4.0, generated 2026-07-30)
+// Source:    shared/spots.json (version 2.0.0, generated 2026-07-31)
 // Generator: scripts/gen-spots-types.mjs
 // Regen:     npm run gen:types      Verify: npm run gen:types:check
 //
@@ -20,15 +20,6 @@ export type BuoyId = '46224' | '46225' | '46232' | '46235' | '46254' | '46258' |
 
 /** NOAA CO-OPS tide station ids known to the inventory. */
 export type TideStationId = '9410170' | '9410230';
-
-/**
- * Slugs carrying a non-null tidepool_floor_ft, derived from the data rather
- * than hand-listed. These are the only spots the window grid can evaluate: a
- * null floor is unresolved, and the window predicate refuses to guess one.
- */
-export type TidepoolSpotSlug = 'swamis' | 'cardiff-reef' | 'torrey-pines-beach' | 'la-jolla-shores' | 'la-jolla-cove' | 'windansea' | 'sunset-cliffs' | 'cabrillo-tidepools';
-
-export type FloorConfidence = 'low' | 'verified';
 
 export interface WaveBinding {
   /** Buoy actually queried today. null for non-wave sites (lagoons, estuaries). */
@@ -72,6 +63,13 @@ export interface MpaBinding {
   mpa_resolved: boolean;
 }
 
+/**
+ * A spot: where it is, and what it is bound to. No zone facts.
+ *
+ * The tidepool floor was a field here up to 1.4.0. It is a measured zone fact,
+ * it lives in shared/intertidal.json, and core/zones/intertidal.ts is what joins
+ * it back to a Spot -- see docs/adr/0002-measured-zone-facts-are-a-third-provenance-class.md.
+ */
 export type Spot = {
   slug: SpotSlug;
   name: string;
@@ -80,18 +78,9 @@ export type Spot = {
   wave: WaveBinding;
   tide_station: TideStationId;
   audiences: Audience[];
-  tidepool_floor_ft: number | null;
-  tidepool_floor_confidence: FloorConfidence | null;
   notes: string;
 } & CountyStationBinding &
   MpaBinding;
-
-/** A Spot narrowed to those the window grid can evaluate. */
-export type TidepoolSpot = Spot & {
-  slug: TidepoolSpotSlug;
-  tidepool_floor_ft: number;
-  tidepool_floor_confidence: FloorConfidence;
-};
 
 export interface Buoy {
   name: string;
@@ -132,8 +121,8 @@ export const BUOYS = SPOTS_FILE.buoys;
 export const TIDE_STATIONS = SPOTS_FILE.tide_stations;
 
 /** Inventory version, surfaced in the UI so a stale deploy is visible. */
-export const SPOTS_VERSION = '1.4.0';
-export const SPOTS_GENERATED = '2026-07-30';
+export const SPOTS_VERSION = '2.0.0';
+export const SPOTS_GENERATED = '2026-07-31';
 
 /** Display timezone for the whole corridor, read from the file's conventions. */
 export const DISPLAY_TIME_ZONE = "America/Los_Angeles";
@@ -155,11 +144,13 @@ export const DEAD_BUOY_IDS: readonly BuoyId[] = ['46235'];
  *
  * This map is looked up by a URL segment, which is untrusted input. Built with
  * a bare Object.fromEntries it inherits Object.prototype, so `constructor`,
- * `toString`, `valueOf` and `__proto__` all answer with something truthy.
- * tidepoolSpotBySlug's guard is `tidepool_floor_ft !== null`, and `undefined
- * !== null` is true, so every one of those inherited values passed as an
- * evaluable spot: /spot/constructor got past notFound() and then threw on
- * `spot.wave.intended_primary`, serving a 500 where a 404 belongs.
+ * `toString`, `valueOf` and `__proto__` all answer with something truthy. The
+ * slug resolver's guard was `tidepool_floor_ft !== null`, and `undefined !==
+ * null` is true, so every one of those inherited values passed as an evaluable
+ * spot: /spot/constructor got past notFound() and then threw on
+ * `spot.wave.intended_primary`, serving a 500 where a 404 belongs. The guard is
+ * a membership lookup in core/zones/intertidal.ts now, and it is exactly as
+ * dependent on a miss being a miss.
  *
  * Object.create(null) has no such keys, so a miss is a miss.
  */
@@ -170,20 +161,3 @@ export const SPOT_BY_SLUG: Readonly<Record<SpotSlug, Spot>> = Object.freeze(
   ) as Record<SpotSlug, Spot>,
 );
 
-/**
- * The window grid's scope. 8 of 26 spots carry a floor; the
- * other 18 are excluded because a null floor is unresolved, and the
- * page discloses the exclusion rather than quietly omitting them.
- */
-export const TIDEPOOL_SPOTS: readonly TidepoolSpot[] = SPOTS.filter(
-  (s): s is TidepoolSpot => s.tidepool_floor_ft !== null && s.tidepool_floor_confidence !== null,
-);
-
-/** Spots with no floor, kept addressable so the UI can name what it left out. */
-export const SPOTS_WITHOUT_FLOOR: readonly Spot[] = SPOTS.filter(
-  (s) => s.tidepool_floor_ft === null,
-);
-
-export function isTidepoolSpot(spot: Spot): spot is TidepoolSpot {
-  return spot.tidepool_floor_ft !== null && spot.tidepool_floor_confidence !== null;
-}

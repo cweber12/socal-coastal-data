@@ -165,7 +165,7 @@ export default async function GridPage({
               spotName={row.spot.name}
               spotSlug={row.spot.slug}
               usableCount={row.usableCount}
-              floorFt={row.spot.tidepool_floor_ft}
+              floorFt={row.spot.floorFt}
               rowLabel={rowAriaLabel(row.spot.name, row.usableCount, HORIZON_DAYS)}
               columnCount={grid.days.length + 1}
               cells={row.days.map((result, i) =>
@@ -398,9 +398,18 @@ function legendGloss(state: (typeof WINDOW_STATES)[number]): string {
 /**
  * The spots this grid does not cover, named rather than silently absent.
  *
- * Eighteen of the twenty-six have a null tidepool_floor_ft. A null is unresolved,
- * and inventing floors to fill the grid out would be exactly the hand-populated
+ * Eighteen of the twenty-six are not members of the intertidal zone, and
+ * inventing floors to fill the grid out would be exactly the hand-populated
  * number spots.json warns against.
+ *
+ * THE PARAGRAPH BELOW IS STALE AND #126 REWRITES IT. It tells a reader the
+ * eighteen "carry no tidepool_floor_ft in spots.json", which no spot does since
+ * 2.0.0, and it describes all eighteen as unresolved when four of them are
+ * shared/intertidal.json's `not_in_zone` -- two lagoons, a harbor and the
+ * Strand, reported here as reefs nobody has measured. That misclaim is the bug
+ * #101 is named for. It is deliberately not fixed here: #124 moves the data and
+ * changes nothing a reader sees, which is what makes the before/after control
+ * meaningful, and the reasons this needs are in the zone file waiting.
  */
 function Excluded({ names }: { names: readonly string[] }) {
   if (names.length === 0) return null;

@@ -1,4 +1,5 @@
-# The four checks that already existed and that nothing ran.
+# The four checks that already existed and that nothing ran, plus what has been
+# added since. #124 added the zone-types check, making eight.
 #
 # Ordered cheapest-first so the fastest signal comes back first, and so a stale
 # generated file is reported before three minutes of build.
@@ -70,6 +71,16 @@ jobs:
       # so this runs before anything that trusts those types.
       - name: Generated types are in step with the inventory
         run: npm run gen:types:check
+
+      # shared/intertidal.generated.ts is derived from shared/intertidal.json,
+      # and this is the only check that reads that file and the spot inventory
+      # together -- so it is the only one that can fail when a spot is in no
+      # membership bucket or in two. A spot in none is one the intertidal
+      # silently omits, which is the bug #126 is about, one layer down. It also
+      # refuses a floor marked `verified` that the evidence ledger does not
+      # support.
+      - name: Generated zone types are in step with the intertidal
+        run: npm run gen:intertidal:check
 
       # shared/calibration.generated.ts is derived from shared/calibration.json,
       # and its discriminated union is what stops a refused spot's rate being

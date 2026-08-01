@@ -96,16 +96,35 @@ const spotsFile = JSON.parse(await readFile(`${REPO}shared/spots.json`, 'utf8'))
     lat: number;
     lon: number;
     tide_station: string;
-    tidepool_floor_ft: number | null;
   }[];
 };
 
+const intertidalFile = JSON.parse(await readFile(`${REPO}shared/intertidal.json`, 'utf8')) as {
+  version: string;
+  membership: { members: { slug: string }[] };
+};
+
 /**
- * The eight spots the grid can evaluate, derived from the file rather than
- * listed. A spot with no floor is not in the grid, so a rate for it would have
- * nothing to sit beside.
+ * The eight spots the grid can evaluate: the members of the intertidal zone,
+ * joined to their inventory records on slug.
+ *
+ * Derived from the files rather than listed, and it THROWS on a slug it cannot
+ * resolve rather than dropping it. This filtered spots.json on
+ * `tidepool_floor_ft !== null` until that field moved to intertidal.json, at
+ * which point the filter would have matched nothing and the pipeline would have
+ * pulled a corpus for zero spots and written a calibration of nothing. Same
+ * silent-emptiness failure the Python probes changed to `[]` lookups to avoid.
  */
-const SPOTS = spotsFile.spots.filter((s) => s.tidepool_floor_ft !== null);
+const SPOTS = intertidalFile.membership.members.map((member) => {
+  const spot = spotsFile.spots.find((s) => s.slug === member.slug);
+  if (!spot) {
+    throw new Error(
+      `shared/intertidal.json holds a member '${member.slug}' with no record in shared/spots.json. ` +
+        'A rate needs a coordinate and a tide station, and this join is where both come from.',
+    );
+  }
+  return spot;
+});
 
 const TARGET_IDS = new Set(taxaFile.targets.map((t) => t.taxon_id));
 const ALL_IDS = new Set([
@@ -436,6 +455,11 @@ if (live) {
     version: CALIBRATION_VERSION,
     taxa_version: taxaFile.version,
     spots_version: spotsFile.version,
+    // Which zone file decided WHICH SPOTS this run covers. spots_version alone
+    // stopped answering that when membership moved out of it, and a corpus is
+    // only reproducible if the scope that produced it is named. Appears from the
+    // next --fetch onward; the committed 1.1.0 predates it.
+    intertidal_version: intertidalFile.version,
     pulled_at: PULLED_AT,
     corpus_from: `${CORPUS_FROM.year}-01-01`,
     radius_m: RADIUS_KM * 1000,

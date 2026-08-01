@@ -21,7 +21,7 @@ import {
   isPublished,
   type SpotCalibration,
 } from './calibration';
-import { TIDEPOOL_SPOTS } from '@/shared/spots.generated';
+import { INTERTIDAL_SPOTS } from '@/core/zones/intertidal';
 
 /** A spot that publishes, for the cases that need real bins. */
 const PUBLISHED = calibrationFor(PUBLISHED_SLUGS[0]!) as Extract<
@@ -40,7 +40,7 @@ describe('the file this module reads', () => {
   it('covers every spot the grid can evaluate', () => {
     // A spot in the grid with no calibration entry would leave the day page
     // silently panel-less for a reason nobody stated.
-    for (const spot of TIDEPOOL_SPOTS) {
+    for (const spot of INTERTIDAL_SPOTS) {
       expect(calibrationFor(spot.slug)).not.toBeNull();
     }
   });
@@ -49,13 +49,13 @@ describe('the file this module reads', () => {
     // Three of eight on the current corpus. If this ever became eight of eight
     // without the gates changing, something upstream would have changed a great
     // deal and it should be looked at rather than celebrated.
-    expect(PUBLISHED_SLUGS.length).toBeLessThan(TIDEPOOL_SPOTS.length);
+    expect(PUBLISHED_SLUGS.length).toBeLessThan(INTERTIDAL_SPOTS.length);
     expect(PUBLISHED_SLUGS.length).toBeGreaterThan(0);
   });
 });
 
 describe('a refused spot', () => {
-  const refused = TIDEPOOL_SPOTS.map((s) => calibrationFor(s.slug)).filter(
+  const refused = INTERTIDAL_SPOTS.map((s) => calibrationFor(s.slug)).filter(
     (c): c is Extract<SpotCalibration, { published: false }> => c?.published === false,
   );
 
@@ -70,7 +70,7 @@ describe('a refused spot', () => {
      * it might be missing. A `null` rate that does not say why is exactly what
      * shared/spots.json warns must never render as a pass.
      */
-    for (const spot of TIDEPOOL_SPOTS) {
+    for (const spot of INTERTIDAL_SPOTS) {
       const calibration = calibrationFor(spot.slug)!;
       if (calibration.published) {
         expect(calibration.null_reason).toBeNull();

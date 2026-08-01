@@ -36,13 +36,12 @@ import {
   type LocalDate,
 } from '../../core/time';
 import {
-  DISPLAY_TIME_ZONE,
-  SPOT_BY_SLUG,
-  SPOTS_WITHOUT_FLOOR,
-  TIDEPOOL_SPOTS,
-  isTidepoolSpot,
-  type TidepoolSpot,
-} from '@/shared/spots.generated';
+  INTERTIDAL_SPOTS,
+  SPOTS_OUTSIDE_INTERTIDAL,
+  intertidalSpotBySlug,
+  type IntertidalSpot,
+} from '../../core/zones/intertidal';
+import { DISPLAY_TIME_ZONE } from '@/shared/spots.generated';
 
 /** Columns in the grid, today inclusive. */
 export const HORIZON_DAYS = 7;
@@ -84,7 +83,7 @@ export type SpotSightingsSummary =
   | { kind: 'unavailable'; reason: string; drift: boolean };
 
 export interface SpotRow {
-  spot: TidepoolSpot;
+  spot: IntertidalSpot;
   swell: SpotSwell;
   ceiling: SwellCeiling;
   /** One entry per day in the horizon. null where evaluation failed. */
@@ -103,7 +102,12 @@ export interface GridData {
   notices: Notice[];
   /** Set when predictions could not be fetched, in which case rows is empty. */
   failure: { message: string; url: string } | null;
-  /** Spots left out for want of a floor, so the page can name them. */
+  /**
+   * Spots this grid does not cover, so the page can name them rather than
+   * silently omitting them. Corridor order, both exclusion buckets together --
+   * #126 splits them, which is where the reason each one gives starts being
+   * rendered.
+   */
   excludedSpotNames: string[];
 }
 
@@ -113,7 +117,7 @@ function horizon(today: LocalDate): LocalDate[] {
 
 /** All prediction series needed by a set of spots, fetched once per station. */
 async function loadSeriesByStation(
-  spots: readonly TidepoolSpot[],
+  spots: readonly IntertidalSpot[],
   today: LocalDate,
 ): Promise<Map<string, TideSeries>> {
   const stationIds = [...new Set(spots.map((s) => s.tide_station))];
@@ -127,7 +131,7 @@ async function loadSeriesByStation(
 }
 
 /** Notices a spot's swell resolution earns, phrased for a reader. */
-function swellNotices(spot: TidepoolSpot, swell: SpotSwell): Notice[] {
+function swellNotices(spot: IntertidalSpot, swell: SpotSwell): Notice[] {
   const notices: Notice[] = [];
 
   for (const problem of swell.problems) {
@@ -164,7 +168,7 @@ function swellNotices(spot: TidepoolSpot, swell: SpotSwell): Notice[] {
  * requests and a spot page's one are the same eight requests, not nine.
  */
 async function loadSightingsSummary(
-  spot: TidepoolSpot,
+  spot: IntertidalSpot,
   today: LocalDate,
 ): Promise<SpotSightingsSummary> {
   const result = await fetchSpotSightings(spot, today);
@@ -186,7 +190,7 @@ async function loadSightingsSummary(
  * result earns no notice at all, because it is not a problem -- the section
  * says so itself, in words, where a reader is looking for it.
  */
-function sightingsNotices(spot: TidepoolSpot, sightings: SpotSightingsSummary): Notice[] {
+function sightingsNotices(spot: IntertidalSpot, sightings: SpotSightingsSummary): Notice[] {
   if (sightings.kind === 'ok') return [];
   return [
     {
@@ -198,7 +202,7 @@ function sightingsNotices(spot: TidepoolSpot, sightings: SpotSightingsSummary): 
 
 /** Evaluate one spot across a set of days, collecting failures rather than throwing. */
 function evaluateDays(
-  spot: TidepoolSpot,
+  spot: IntertidalSpot,
   series: TideSeries,
   days: readonly LocalDate[],
   swell: SpotSwell,
@@ -211,7 +215,7 @@ function evaluateDays(
       return evaluateWindow({
         series,
         date,
-        floorFt: spot.tidepool_floor_ft,
+        floorFt: spot.floorFt,
         swellCeilingFt: ceiling.ceilingFt,
         currentSwellFt: swell.swellFt,
         nowMs,
@@ -252,12 +256,12 @@ export async function loadGrid(nowMs: number): Promise<GridData> {
     timeZone: DISPLAY_TIME_ZONE,
     today,
     days,
-    excludedSpotNames: SPOTS_WITHOUT_FLOOR.map((s) => s.name),
+    excludedSpotNames: SPOTS_OUTSIDE_INTERTIDAL.map((n) => n.spot.name),
   };
 
   let seriesByStation: Map<string, TideSeries>;
   try {
-    seriesByStation = await loadSeriesByStation(TIDEPOOL_SPOTS, today);
+    seriesByStation = await loadSeriesByStation(INTERTIDAL_SPOTS, today);
   } catch (cause) {
     return {
       ...base,
@@ -271,7 +275,7 @@ export async function loadGrid(nowMs: number): Promise<GridData> {
   }
 
   const rows = await Promise.all(
-    TIDEPOOL_SPOTS.map(async (spot): Promise<SpotRow> => {
+    INTERTIDAL_SPOTS.map(async (spot): Promise<SpotRow> => {
       // Swell and sightings are independent upstreams, so they go out together
       // rather than one behind the other. Neither can fail the row.
       const [swell, sightings] = await Promise.all([
@@ -339,13 +343,17 @@ export interface SpotWeek extends SpotRow {
   gallery: SpotSightingsGallery;
 }
 
-/** Resolve a slug to a spot the grid can actually evaluate, or null. */
-export function tidepoolSpotBySlug(slug: string): TidepoolSpot | null {
-  const spot = SPOT_BY_SLUG[slug as keyof typeof SPOT_BY_SLUG];
-  if (!spot) return null;
-  // A spot with no floor is not evaluable. Returning null rather than guessing a
-  // floor is the whole reason the grid is eight spots and not twenty-six.
-  return isTidepoolSpot(spot) ? spot : null;
+/**
+ * Resolve a slug to a spot the grid can actually evaluate, or null.
+ *
+ * Tidepooling reads the intertidal, so a spot this activity can evaluate is a
+ * member of that zone -- the question is the zone's to answer and this is a
+ * one-line delegation to it. A spot with no floor is not evaluable, and
+ * returning null rather than guessing one is the whole reason the grid is eight
+ * spots and not twenty-six.
+ */
+export function tidepoolSpotBySlug(slug: string): IntertidalSpot | null {
+  return intertidalSpotBySlug(slug);
 }
 
 /* ===========================================================================
@@ -403,7 +411,7 @@ export function servableDateParam(dateParam: string, nowMs: number): LocalDate |
   return isServableDate(date, localDateInZone(nowMs, DISPLAY_TIME_ZONE)) ? date : null;
 }
 
-export async function loadSpotWeek(spot: TidepoolSpot, nowMs: number): Promise<SpotWeek> {
+export async function loadSpotWeek(spot: IntertidalSpot, nowMs: number): Promise<SpotWeek> {
   const today = localDateInZone(nowMs, DISPLAY_TIME_ZONE);
   const dates = horizon(today);
   const notices: Notice[] = [];
@@ -471,7 +479,7 @@ export async function loadSpotWeek(spot: TidepoolSpot, nowMs: number): Promise<S
  * render; they render without tide heights, each carrying the reason.
  */
 async function loadSpotGallery(
-  spot: TidepoolSpot,
+  spot: IntertidalSpot,
   today: LocalDate,
 ): Promise<SpotSightingsGallery> {
   const result = await fetchSpotSightings(spot, today);
@@ -515,7 +523,7 @@ async function loadSpotGallery(
  * ========================================================================= */
 
 export interface SpotDay {
-  spot: TidepoolSpot;
+  spot: IntertidalSpot;
   date: LocalDate;
   today: LocalDate;
   evaluatedAtMs: number;
@@ -570,7 +578,7 @@ function lowestOverLocalDay(
 }
 
 export async function loadSpotDay(
-  spot: TidepoolSpot,
+  spot: IntertidalSpot,
   date: LocalDate,
   nowMs: number,
 ): Promise<SpotDay> {
@@ -692,10 +700,10 @@ export function bestGapFt(row: SpotRow): number {
  * The floor is the one thing that genuinely differs per spot, so when the
  * counts tie the rows are ranked by how close each got to its own floor.
  *
- * The direction is easy to get backwards, so: a HIGHER tidepool_floor_ft is
- * more PERMISSIVE. It means the stack calls the reef workable at higher water.
+ * The direction is easy to get backwards, so: a HIGHER floor is more
+ * PERMISSIVE. It means the stack calls the reef workable at higher water.
  * spots.json states this in its own unresolved array -- the 1.2.0 shift "moved
- * every floor in the PERMISSIVE direction", and Sunset Cliffs at 0.7 ft is
+ * every floor in the PERMISSIVE direction", and Sunset Cliffs at 0.7 ft was
  * "deliberately kept the strictest of the eight".
  *
  * So against one shared tide, Cabrillo at 1.3 ft ranks first and Sunset Cliffs
@@ -708,7 +716,7 @@ export function bestGapFt(row: SpotRow): number {
 export function sortRows(rows: readonly SpotRow[], sort: SortKey): SpotRow[] {
   if (sort === 'geographic') {
     // spots.json is already ordered north to south, from Oceanside Harbour down
-    // to Border Field, and TIDEPOOL_SPOTS preserves that order. Geographic sort
+    // to Border Field, and INTERTIDAL_SPOTS preserves that order. Geographic sort
     // is the file's own order -- deriving it from latitude again would be a
     // second source of truth that could disagree with the file.
     return [...rows];
