@@ -97,12 +97,13 @@ Stay in your lane: do not edit any file outside shared/spots.json and
 shared/spots.generated.ts. #44, #45 and #46 also write spots.json and are
 running in parallel.
 
-In the PR body, write `Closes #41.` and reference no other issue by number.
-Use full URLs for anything else you need to link.
+In the PR body and in every commit message, write `Closes #41.` once and
+reference no other issue by number. Use full URLs for anything else you
+need to link.
 ```
 
 That last paragraph belongs in every agent's prompt. See
-[The PR body rule](#the-pr-body-rule) for why.
+[The issue-reference rule](#the-issue-reference-rule) for why.
 
 For #45, add:
 
@@ -118,12 +119,13 @@ prompts are the last thing standing between a bad join and `main`.
 
 ---
 
-## The PR body rule
+## The issue-reference rule
 
-**Write one issue reference in a PR body: the closing keyword. Link everything
-else by full URL.**
+**Across everything a merge publishes — PR body and commit messages alike — write
+one issue reference with a closing keyword, the one you mean to close. Link every
+other issue by full URL.**
 
-PR #47 carried this, on separate lines:
+PR #47 carried this in its body, on separate lines:
 
 ```
 Closes #39.
@@ -145,6 +147,41 @@ Part of https://github.com/cweber12/socal-coastal-data/issues/38.
 
 A full URL still renders as a link and still shows up in the issue's timeline as
 a cross-reference. It is not parsed as a closing keyword.
+
+### The commit message is the half that gets missed
+
+PR #159 got the body right — one `Closes #151`, everything else by full URL — and
+closed PRD #148 anyway. The keyword was in the **commit message**:
+
+```
+This closes #148 open question 2 rather than leaving it open.
+```
+
+GitHub parses closing keywords in commit messages on the default branch, so the
+merge fired it. The intent was to close one open question *inside* the PRD; the
+PRD had five unshipped child deliverables and was reopened by hand.
+
+Two things that incident settles:
+
+- **Prose around a keyword does not disarm it.** "closes #148 open question 2"
+  reads unambiguously to a human and is parsed as `closes #148`. There is no
+  phrasing that makes a keyword safe — only not using one.
+- **Guarding the PR body is not enough**, which is why this section is no longer
+  called "the PR body rule". An agent can follow the old heading exactly, write a
+  clean body, and still close a PRD from the commit.
+
+In a commit message, write the reference the same way:
+
+```
+Re-argue the inference against HAT rather than one year
+
+Part of https://github.com/cweber12/socal-coastal-data/issues/148.
+```
+
+If you need to say a keyword-shaped thing about an issue you are not closing,
+name the part instead of the issue — "this closes open question 2 of
+https://github.com/cweber12/socal-coastal-data/issues/148" puts the URL where the
+`#148` was, and the parser has nothing to match.
 
 After the merge, check rather than assume:
 
@@ -265,8 +302,8 @@ One per delegatable issue. The guardrails in each are the repo rules an agent
 would otherwise breach while doing exactly what it was asked — they are not
 deducible from the issue text.
 
-Every one of them ends with the same PR-body rule. It is not boilerplate; it is
-the trap in [The PR body rule](#the-pr-body-rule).
+Every one of them ends with the same issue-reference rule. It is not boilerplate;
+it is the trap in [The issue-reference rule](#the-issue-reference-rule).
 
 ### #41 — `feat/41-floor-evidence`
 
