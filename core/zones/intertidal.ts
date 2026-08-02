@@ -40,6 +40,7 @@
 
 import {
   INTERTIDAL_DATUM,
+  INTERTIDAL_FILE_UNRESOLVED,
   INTERTIDAL_FLOOR_UNITS,
   INTERTIDAL_GENERATED,
   INTERTIDAL_MEMBERS,
@@ -60,6 +61,31 @@ export {
   INTERTIDAL_VERSION,
 };
 export type { FloorConfidence, FloorEvidence, IntertidalMember, IntertidalMemberSlug };
+
+/**
+ * The zone FILE's own caveats channel, passed through so a reader can be told.
+ *
+ * Re-exported rather than imported straight from shared/intertidal.generated.ts
+ * by app/unresolved-sources.ts, because that generated file says in its own
+ * header that nothing outside core/zones/ should need to import it directly:
+ * the file is the shape, this module is the zone, and an import that skips the
+ * module is one more place that has to be found when the file moves. It arrives
+ * here on the same terms as INTERTIDAL_VERSION above -- carried, never re-worded.
+ *
+ * A DIFFERENT array from membership.unresolved, which is the 14 spots whose
+ * membership is unmeasured and which this module consumes into
+ * SPOTS_OUTSIDE_INTERTIDAL below. The file names them the same because both
+ * names are load-bearing elsewhere; the `FILE` in this one is what tells them
+ * apart at a call site, and it is why membership.unresolved is NOT re-exported
+ * from here under a name a reader could confuse with this.
+ *
+ * #169: this export existed in the generated file with zero call sites for as
+ * long as the file did, so all three entries were loaded and dropped -- the
+ * exact failure core/components/unresolved.tsx was built to end, one file later.
+ * #132 replaces the hand-wiring in app/unresolved-sources.ts with a walk over
+ * every zone file's array; until then this is the wire.
+ */
+export { INTERTIDAL_FILE_UNRESOLVED };
 
 /*
  * Asserted on load rather than trusted, and asserted here as well as in the

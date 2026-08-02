@@ -1,6 +1,7 @@
 import { THRESHOLDS_UNRESOLVED, THRESHOLDS_VERSION } from '@/core/thresholds';
 import { SURF_THRESHOLDS_VERSION, SURF_UNRESOLVED } from '@/activities/surf/thresholds';
 import { SURF_ZONE_UNRESOLVED } from '@/core/zones/surf';
+import { INTERTIDAL_FILE_UNRESOLVED, INTERTIDAL_VERSION } from '@/core/zones/intertidal';
 import { SPOTS_FILE, SPOTS_VERSION } from '@/shared/spots.generated';
 import type { UnresolvedSource } from '@/core/components/unresolved';
 
@@ -59,14 +60,41 @@ export const UNRESOLVED_SOURCES: readonly UnresolvedSource[] = [
    * from, and the subject says where the entries actually live.
    *
    * It sits between the thresholds and the inventory because that is the order
-   * of the argument: here are the numbers, here is what the zone they apply to
-   * does and does not claim, here is the inventory underneath both.
+   * of the argument: here are the numbers, here is what the zones they apply to
+   * do and do not claim, here is the inventory underneath all of it.
    */
   {
     subject: 'The surf zone (derived from shared/spots.json)',
     file: 'core/zones/surf.ts',
     version: SPOTS_VERSION,
     entries: SURF_ZONE_UNRESOLVED,
+  },
+  /*
+   * The intertidal zone, whose caveats ARE a file's -- which is why this entry
+   * names shared/intertidal.json where the one above it names a module.
+   *
+   * Second of the two zones, matching the order they were written, and both
+   * before the inventory underneath them. All three of these entries are about
+   * membership: what a reader would otherwise take the eight-row tidepool grid
+   * to be claiming, when nothing has surveyed a bench at any of the 26
+   * coordinates and the four spots ruled out were ruled out by hand.
+   *
+   * Wired here by #169, which found INTERTIDAL_FILE_UNRESOLVED exported from
+   * shared/intertidal.generated.ts with zero call sites: three caveats recorded
+   * and shown to nobody, in a file created after the list below this comment was
+   * hand-written. The third of them is a pointer at shared/spots.json's array
+   * explaining why the eight floor caveats live there and not here -- so it only
+   * does its job when both files reach the page, and until now only one did.
+   *
+   * Read that as the argument for #132 rather than against it. A fifth
+   * hand-wired entry is the honest interim; a walk over every zone file is what
+   * stops a sixth file being added and forgotten the same way.
+   */
+  {
+    subject: 'The intertidal zone — what membership rests on',
+    file: 'shared/intertidal.json',
+    version: INTERTIDAL_VERSION,
+    entries: INTERTIDAL_FILE_UNRESOLVED,
   },
   {
     subject: 'The spot inventory',
