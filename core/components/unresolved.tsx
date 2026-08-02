@@ -56,9 +56,31 @@ export interface UnresolvedSource {
   subject: string;
   /** The path, so a reader can go and read the whole thing. */
   file: string;
-  version: string;
+  /**
+   * The revision the entries were read from, or null where the source has none.
+   *
+   * Null is not a missing value to be filled in later. Since #132 a source can
+   * be a MODULE rather than a file -- core/zones/surf.ts derives its membership
+   * from shared/spots.json's wave bindings and has nothing to put a version on
+   * -- and stamping such a source with a borrowed version would tell a reader
+   * that a number governs these words when none does. The composition root
+   * supplies one where a borrowed version is defensible and says so; where it
+   * does not, the path renders alone.
+   */
+  version: string | null;
   entries: readonly string[];
 }
+
+/**
+ * "shared/spots.json 3.1.1", or just the path where there is no version.
+ *
+ * Built as one string rather than interpolated as two nodes on purpose. The
+ * alternative renders a trailing space before the comma in the safety panel
+ * whenever version is null -- invisible on screen and present in `innerText`,
+ * which is what a screen reader and tools/ui-capture both read.
+ */
+const stamp = (source: UnresolvedSource) =>
+  source.version === null ? source.file : `${source.file} ${source.version}`;
 
 /**
  * The sources arrive as a prop, and this component names none of them.
@@ -110,7 +132,7 @@ export function UnresolvedDisclosure({ sources }: { sources: readonly Unresolved
           </h3>
           <p className="mt-1.5 text-ui">{text}</p>
           <p className="tint-panel-source mt-2 text-meta">
-            {source.file} {source.version}, <code>unresolved</code>
+            {stamp(source)}, <code>unresolved</code>
           </p>
         </div>
       ))}
@@ -139,7 +161,7 @@ export function UnresolvedDisclosure({ sources }: { sources: readonly Unresolved
             <h3 className="text-meta font-semibold tracking-wide uppercase text-[var(--text-dim)]">
               {source.subject}{' '}
               <span className="font-normal normal-case tracking-normal text-[var(--text-dimmer)]">
-                {source.file} {source.version}
+                {stamp(source)}
               </span>
             </h3>
             <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-meta text-[var(--text-dimmer)]">
