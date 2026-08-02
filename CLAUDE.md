@@ -183,12 +183,64 @@ MPA boundaries are legally meaningful and follow the shoreline, so a
 point-in-polygon result within 150 m of a boundary is not trustworthy in either
 direction and must be flagged unresolved.
 
+**Edit data files textually. Never round-trip one through a formatter.** Four are
+hand-formatted, with paired keys on shared lines — `"lat": 32.669, "lon":
+-117.245`:
+
+| hand-formatted | round-trips clean |
+| --- | --- |
+| `shared/spots.json` | `shared/intertidal.json` |
+| `shared/thresholds.json` | `shared/calibration.json` |
+| `shared/gate-hours.json` | |
+| `activities/surf/thresholds.json` | |
+
+Re-serialising one with `json.dumps`, `JSON.stringify` or format-on-save reflows
+every line and turns a three-line change into a whole-file diff nobody can
+review. The split is the reason this is written down: the habit cannot be learned
+from whichever file you happened to open, and the right-hand column is an
+observation as of 2026-08-01, not a guarantee. `.gitattributes` and the
+line-ending note in `scripts/gen-spots-types.mjs` exist because this repo has
+already lost a review to a diff that was formatting rather than content.
+
 ## Running things
+
+### The eight checks
+
+What a commit body means by *"verified with all eight checks"*. CI runs them on
+`ubuntu-latest` and `windows-latest`, cheapest first, so a stale generated file is
+reported before three minutes of build.
+
+```bash
+npm run check:boundaries        # import direction between slices
+npm run gen:types:check         # shared/spots.generated.ts against spots.json
+npm run gen:intertidal:check    # zone types, and every spot in exactly one membership bucket
+npm run gen:calibration:check   # calibration types against calibration.json
+npm run typecheck
+npm run test
+npm run calibrate               # the pipeline, offline against committed fixtures
+npm run build
+```
+
+Do not reconstruct this list from `package.json`. That file also carries `dev`,
+`start`, the `:fetch` and write modes, and the `ui:` capture tools, none of which
+belong here. `.github/workflows/ci.yml` is the source, and it carries the reason
+for each step and for why the Windows leg exists.
+
+### The probes, which are deliberately not in CI
+
+Each reaches a live upstream, so a per-push run would be both flaky and rude.
 
 ```bash
 python tools/verify-apis/verify_coastal_apis.py          # exits nonzero only on real failures
 EBIRD_API_KEY=xxx python tools/verify-apis/verify_coastal_apis.py   # includes the eBird check
+python tools/county-station/rejoin.py                    # exit 1 if any station match moved
+python tools/mpa/rejoin.py                               # exit 1 if any MPA binding moved, or ds582 was re-issued
 ```
+
+The two `rejoin.py` tools are the executable form of *do not hand-populate
+resolved fields*: they re-run a join from a recorded URL and diff it against what
+is committed, so "fix the join and re-run it" is something a reviewer can do
+rather than something the rule asserts.
 
 Standard library only — no dependencies, and it should stay that way.
 
