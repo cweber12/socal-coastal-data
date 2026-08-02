@@ -1,6 +1,6 @@
 // GENERATED FILE -- do not edit by hand.
 //
-// Source:    shared/spots.json (version 3.0.0, generated 2026-08-01)
+// Source:    shared/spots.json (version 3.1.0, generated 2026-08-01)
 // Generator: scripts/gen-spots-types.mjs
 // Regen:     npm run gen:types      Verify: npm run gen:types:check
 //
@@ -98,14 +98,75 @@ export const COUNTY_STATION_IN_SCOPE: readonly SpotSlug[] = [
 ];
 
 /**
- * mpa and mpa_resolved are paired deliberately. `{ mpa: null, mpa_resolved:
- * false }` means UNKNOWN, not unprotected -- the spot sits inside the file's own
- * ~100 m coordinate error bar of a boundary, so the in/out call is not
- * trustworthy in either direction. Legally load-bearing for tidepooling.
+ * The designations CDFW publishes for this corridor, from
+ * joins.mpa.types_published rather than written here.
+ *
+ * Three values, and the third is the one that catches a careless renderer: an
+ * `SMCA (No-Take)` prohibits take the way a reserve does while not being one.
+ * Splitting only reserve-from-not, or only take-from-no-take, gets it wrong.
+ * The corridor holds 11 areas across these 3 designations.
  */
-export interface MpaBinding {
-  mpa: string | null;
-  mpa_resolved: boolean;
+export type MpaType = 'SMCA' | 'SMCA (No-Take)' | 'SMR';
+
+/** The same set at runtime, for exhaustiveness checks and tests. */
+export const MPA_TYPES: readonly MpaType[] = ['SMCA', 'SMCA (No-Take)', 'SMR'];
+
+/**
+ * mpa, mpa_type, ccr_section and mpa_resolved are paired deliberately.
+ *
+ * `{ mpa: null, mpa_resolved: false }` means UNKNOWN, not unprotected -- the spot
+ * sits inside the file's own ~100 m coordinate error bar of a boundary, so the
+ * in/out call is not trustworthy in either direction.
+ *
+ * The union also makes `mpa_type` non-null whenever `mpa` is, so a consumer that
+ * has an area name always has the designation deciding what may be taken there.
+ * Reading the type off the end of the name would compile and would be wrong for
+ * the same reason hand-populating any join result is.
+ */
+export type MpaBinding =
+  | {
+      mpa: string;
+      /** What may be taken: SMR and SMCA (No-Take) prohibit take, SMCA permits specified take. */
+      mpa_type: MpaType;
+      /** 14 CCR § 632(b) subsection. The join key back to ds582, and what a warden cites. */
+      ccr_section: number;
+      mpa_resolved: boolean;
+    }
+  | {
+      mpa: null;
+      mpa_type: null;
+      ccr_section: null;
+      mpa_resolved: boolean;
+    };
+
+/**
+ * Where the mpa join's polygons came from, and when.
+ *
+ * `content_date` and `layer_last_edit_date` are five years apart and neither on
+ * its own is the layer's age -- see the file's `joins.mpa.dates`. Carried in the
+ * types so a disclosure can render the disclaimer and the vintage from the
+ * record rather than from a string in a component.
+ */
+export interface MpaJoinRecord {
+  layer: string;
+  publisher: string;
+  service_url: string;
+  method: string;
+  attributes_read: readonly string[];
+  /** When this repo last ran the join. */
+  retrieved: string;
+  /** What the layer says its data are, as opposed to when the service was touched. */
+  content_date: string;
+  /** editingInfo.lastEditDate: the in-band signal that the polygons were re-issued. */
+  layer_last_edit_date: string;
+  service_version: number;
+  service_item_id: string;
+  types_published: readonly MpaType[];
+  corridor_areas: number;
+  /** CDFW's own words. Present so a renderer quotes rather than paraphrases it. */
+  disclaimer: string;
+  dates: string;
+  rerun: string;
 }
 
 /**
@@ -152,6 +213,12 @@ export interface SpotsFile {
     timezone_display: string;
     timezone_storage: string;
   };
+  /**
+   * Upstream provenance per join. Only `mpa` is recorded today; county_station's
+   * lives in tools/county-station/rejoin.py's pinned constants, and the
+   * asymmetry is deliberate -- see the file's `_schema.joins`.
+   */
+  joins: { mpa: MpaJoinRecord };
   buoys: Record<BuoyId, Buoy>;
   tide_stations: Record<TideStationId, TideStation>;
   spots: Spot[];
@@ -164,8 +231,17 @@ export const SPOTS: readonly Spot[] = SPOTS_FILE.spots;
 export const BUOYS = SPOTS_FILE.buoys;
 export const TIDE_STATIONS = SPOTS_FILE.tide_stations;
 
+/**
+ * The ds582 pull behind every `mpa` value: service, dates, version, disclaimer.
+ *
+ * Exported so a disclosure quotes CDFW's own wording and states the layer's real
+ * age from the record, rather than carrying either as a string in a component
+ * where it would drift from the join it describes.
+ */
+export const MPA_JOIN = SPOTS_FILE.joins.mpa;
+
 /** Inventory version, surfaced in the UI so a stale deploy is visible. */
-export const SPOTS_VERSION = '3.0.0';
+export const SPOTS_VERSION = '3.1.0';
 export const SPOTS_GENERATED = '2026-08-01';
 
 /** Display timezone for the whole corridor, read from the file's conventions. */

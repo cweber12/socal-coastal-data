@@ -13,6 +13,11 @@
  *   - mpa: null is not "unprotected". It means unresolved unless mpa_resolved
  *     is true. The generated type pairs them so they cannot be read apart.
  *
+ *   - mpa, mpa_type and ccr_section are one join result in three fields. The
+ *     generated type makes them null together or set together, so a renderer
+ *     that has a named area always has the designation that says what may be
+ *     taken there, and cannot fall back to assuming.
+ *
  * It also derives the slug, audience, buoy and station unions from the data, so
  * adding a spot to the JSON is the only edit needed.
  *
@@ -45,6 +50,21 @@ const data = JSON.parse(raw);
 const problems = [];
 const seenSlugs = new Set();
 
+/*
+ * The designations the corridor's layer publishes, read from the file rather
+ * than written here. tools/mpa/rejoin.py asserts this set against the live
+ * service, so it is a measured property of ds582 and not a guess about it.
+ */
+const mpaTypes = data.joins?.mpa?.types_published;
+if (!Array.isArray(mpaTypes) || mpaTypes.length === 0) {
+  console.error(
+    'shared/spots.json: joins.mpa.types_published is missing or empty. It is the domain of ' +
+      'mpa_type, it is emitted as a union, and a renderer branches on it -- so generating ' +
+      'types without it would produce a designation nothing has been told how to write.',
+  );
+  process.exit(1);
+}
+
 for (const [i, s] of data.spots.entries()) {
   const at = `spots[${i}] ${s.slug ?? '(no slug)'}`;
 
@@ -69,6 +89,39 @@ for (const [i, s] of data.spots.entries()) {
 
   if (typeof s.mpa_resolved !== 'boolean') {
     problems.push(`${at}: mpa_resolved must be a boolean, got ${JSON.stringify(s.mpa_resolved)}`);
+  }
+
+  /*
+   * mpa, mpa_type and ccr_section are one join result. They are null together
+   * or set together, and nothing in between is a state the join can produce.
+   *
+   * The pairing is the point rather than tidiness: mpa_type is what decides
+   * whether take is permitted, so a named area carrying no designation leaves a
+   * renderer with a legally load-bearing field and nothing behind it -- which is
+   * exactly how spot-protection.tsx came to call every resolved area a reserve.
+   */
+  const mpaTriple = [s.mpa, s.mpa_type, s.ccr_section];
+  const nulls = mpaTriple.filter((v) => v === null).length;
+  if (nulls !== 0 && nulls !== 3) {
+    problems.push(
+      `${at}: mpa/mpa_type/ccr_section are ${JSON.stringify(mpaTriple)}. One join result in ` +
+        'three fields: null together, or set together.',
+    );
+  }
+  if (s.mpa !== null) {
+    if (!mpaTypes.includes(s.mpa_type)) {
+      problems.push(
+        `${at}: mpa_type ${JSON.stringify(s.mpa_type)} is not one of ` +
+          `${mpaTypes.map((t) => JSON.stringify(t)).join(', ')}. That set is ` +
+          'joins.mpa.types_published, which tools/mpa/rejoin.py checks against the live layer.',
+      );
+    }
+    if (!Number.isInteger(s.ccr_section)) {
+      problems.push(
+        `${at}: ccr_section must be the integer § 632(b) subsection, got ` +
+          `${JSON.stringify(s.ccr_section)}`,
+      );
+    }
   }
 
   // A floor that came back here would be a second copy of a value
@@ -220,14 +273,75 @@ ${inScopeList}
 ];
 
 /**
- * mpa and mpa_resolved are paired deliberately. \`{ mpa: null, mpa_resolved:
- * false }\` means UNKNOWN, not unprotected -- the spot sits inside the file's own
- * ~100 m coordinate error bar of a boundary, so the in/out call is not
- * trustworthy in either direction. Legally load-bearing for tidepooling.
+ * The designations CDFW publishes for this corridor, from
+ * joins.mpa.types_published rather than written here.
+ *
+ * Three values, and the third is the one that catches a careless renderer: an
+ * \`SMCA (No-Take)\` prohibits take the way a reserve does while not being one.
+ * Splitting only reserve-from-not, or only take-from-no-take, gets it wrong.
+ * The corridor holds ${data.joins.mpa.corridor_areas} areas across these ${mpaTypes.length} designations.
  */
-export interface MpaBinding {
-  mpa: string | null;
-  mpa_resolved: boolean;
+export type MpaType = ${union(mpaTypes)};
+
+/** The same set at runtime, for exhaustiveness checks and tests. */
+export const MPA_TYPES: readonly MpaType[] = [${mpaTypes.map((t) => `'${t}'`).join(', ')}];
+
+/**
+ * mpa, mpa_type, ccr_section and mpa_resolved are paired deliberately.
+ *
+ * \`{ mpa: null, mpa_resolved: false }\` means UNKNOWN, not unprotected -- the spot
+ * sits inside the file's own ~100 m coordinate error bar of a boundary, so the
+ * in/out call is not trustworthy in either direction.
+ *
+ * The union also makes \`mpa_type\` non-null whenever \`mpa\` is, so a consumer that
+ * has an area name always has the designation deciding what may be taken there.
+ * Reading the type off the end of the name would compile and would be wrong for
+ * the same reason hand-populating any join result is.
+ */
+export type MpaBinding =
+  | {
+      mpa: string;
+      /** What may be taken: SMR and SMCA (No-Take) prohibit take, SMCA permits specified take. */
+      mpa_type: MpaType;
+      /** 14 CCR § 632(b) subsection. The join key back to ds582, and what a warden cites. */
+      ccr_section: number;
+      mpa_resolved: boolean;
+    }
+  | {
+      mpa: null;
+      mpa_type: null;
+      ccr_section: null;
+      mpa_resolved: boolean;
+    };
+
+/**
+ * Where the mpa join's polygons came from, and when.
+ *
+ * \`content_date\` and \`layer_last_edit_date\` are five years apart and neither on
+ * its own is the layer's age -- see the file's \`joins.mpa.dates\`. Carried in the
+ * types so a disclosure can render the disclaimer and the vintage from the
+ * record rather than from a string in a component.
+ */
+export interface MpaJoinRecord {
+  layer: string;
+  publisher: string;
+  service_url: string;
+  method: string;
+  attributes_read: readonly string[];
+  /** When this repo last ran the join. */
+  retrieved: string;
+  /** What the layer says its data are, as opposed to when the service was touched. */
+  content_date: string;
+  /** editingInfo.lastEditDate: the in-band signal that the polygons were re-issued. */
+  layer_last_edit_date: string;
+  service_version: number;
+  service_item_id: string;
+  types_published: readonly MpaType[];
+  corridor_areas: number;
+  /** CDFW's own words. Present so a renderer quotes rather than paraphrases it. */
+  disclaimer: string;
+  dates: string;
+  rerun: string;
 }
 
 /**
@@ -274,6 +388,12 @@ export interface SpotsFile {
     timezone_display: string;
     timezone_storage: string;
   };
+  /**
+   * Upstream provenance per join. Only \`mpa\` is recorded today; county_station's
+   * lives in tools/county-station/rejoin.py's pinned constants, and the
+   * asymmetry is deliberate -- see the file's \`_schema.joins\`.
+   */
+  joins: { mpa: MpaJoinRecord };
   buoys: Record<BuoyId, Buoy>;
   tide_stations: Record<TideStationId, TideStation>;
   spots: Spot[];
@@ -285,6 +405,15 @@ export const SPOTS_FILE = spotsJson as unknown as SpotsFile;
 export const SPOTS: readonly Spot[] = SPOTS_FILE.spots;
 export const BUOYS = SPOTS_FILE.buoys;
 export const TIDE_STATIONS = SPOTS_FILE.tide_stations;
+
+/**
+ * The ds582 pull behind every \`mpa\` value: service, dates, version, disclaimer.
+ *
+ * Exported so a disclosure quotes CDFW's own wording and states the layer's real
+ * age from the record, rather than carrying either as a string in a component
+ * where it would drift from the join it describes.
+ */
+export const MPA_JOIN = SPOTS_FILE.joins.mpa;
 
 /** Inventory version, surfaced in the UI so a stale deploy is visible. */
 export const SPOTS_VERSION = '${data.version}';
