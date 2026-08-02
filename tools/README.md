@@ -7,6 +7,7 @@ investigate a question — never things the app imports.
 | --- | --- |
 | `county-station/` | Re-runs the `county_station` nearest-neighbour join against data.ca.gov and diffs it against `shared/spots.json`, so the repo's "fix the join and re-run it" rule is executable rather than aspirational. Python, standard library only. |
 | `calibration/` | The revealed-preference pipeline. Turns iNaturalist observations and CO-OPS predictions into `shared/calibration.json`, with a refusal and a reason wherever the evidence does not support a rate. |
+| `mpa/` | Re-runs the `mpa` point-in-polygon join against CDFW ds582 and diffs it against `shared/spots.json`, including the layer's own vintage — `lastEditDate` moving means the polygons served today are not the ones the file resolved against. Python, standard library only. |
 | `lidar-recon/` | Point-cloud and DEM investigation of the intertidal benches. Produces the findings under `lidar-recon/findings/` that back `floor_evidence` entries. Python, standard library only. |
 | `tide-station/` | Measures what a predicate inherits from binding tide station 9410230 rather than 9410170 — a 7% scale term that is invisible at a floor and worth up to 0.6 ft at high water. `--check` re-derives the committed coefficients from the live endpoint. Python, standard library only. |
 | `ui-capture/` | Captures the rendered pages before and after a refactor and diffs the text, so a behaviour-preserving move can be proved rather than asserted. Playwright, `devDependency` only. |
@@ -42,6 +43,8 @@ npm run calibrate                                    # offline, against committe
 npm run calibrate:fetch                              # live; the only mode that may write shared/calibration.json
 npm run calibrate:taxa:check                         # re-verify every taxon id upstream
 python tools/verify-apis/verify_coastal_apis.py      # exits nonzero only on real failures
+python tools/county-station/rejoin.py                # exit 1 if any station match moved
+python tools/mpa/rejoin.py                           # exit 1 if any MPA binding moved, or ds582 was re-issued
 python tools/lidar-recon/probes/<probe>.py           # each writes one findings file
 npm run ui:capture -- <out-dir>                      # needs `npm run build` first
 npm run ui:compare -- <before> <after>               # non-zero on any difference
