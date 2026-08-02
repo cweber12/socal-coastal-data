@@ -1,5 +1,6 @@
 # The four checks that already existed and that nothing ran, plus what has been
-# added since. #124 added the zone-types check, making eight.
+# added since. #124 added the zone-types check, making eight; #132 added the
+# unresolved-sources walk, making nine.
 #
 # Ordered cheapest-first so the fastest signal comes back first, and so a stale
 # generated file is reported before three minutes of build.
@@ -88,6 +89,18 @@ jobs:
       # same reason it runs on windows-latest too.
       - name: Generated calibration types are in step with the calibration
         run: npm run gen:calibration:check
+
+      # app/unresolved-sources.generated.ts is a walk over every `unresolved`
+      # array in shared/, core/zones/ and activities/, and this is the only check
+      # that can fail when a data file's caveats reach no reader. Twice now a
+      # file has carried caveats that nothing imported -- shared/intertidal.json
+      # for its whole life (#169) and shared/gate-hours.json for its whole life
+      # (#132) -- and neither was catchable by anything that ran here.
+      #
+      # A source appearing in the diff that the author did not add is the check
+      # working, not a false positive.
+      - name: Every unresolved array is discovered and rendered
+        run: npm run gen:unresolved:check
 
       - name: Typecheck
         run: npm run typecheck

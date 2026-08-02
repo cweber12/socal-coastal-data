@@ -18,6 +18,8 @@
     "gen:intertidal:check": "node scripts/gen-intertidal-types.mjs --check",
     "gen:calibration": "node scripts/gen-calibration-types.mjs",
     "gen:calibration:check": "node scripts/gen-calibration-types.mjs --check",
+    "gen:unresolved": "node scripts/gen-unresolved-sources.mjs",
+    "gen:unresolved:check": "node scripts/gen-unresolved-sources.mjs --check",
     "calibrate": "node --import ./tools/calibration/loader.mjs tools/calibration/run.ts",
     "calibrate:fetch": "node --import ./tools/calibration/loader.mjs tools/calibration/run.ts --fetch",
     "calibrate:taxa:check": "node tools/calibration/resolve-taxa.mjs --check",

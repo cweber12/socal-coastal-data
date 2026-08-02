@@ -204,9 +204,9 @@ already lost a review to a diff that was formatting rather than content.
 
 ## Running things
 
-### The eight checks
+### The nine checks
 
-What a commit body means by *"verified with all eight checks"*. CI runs them on
+What a commit body means by *"verified with all nine checks"*. CI runs them on
 `ubuntu-latest` and `windows-latest`, cheapest first, so a stale generated file is
 reported before three minutes of build.
 
@@ -215,11 +215,18 @@ npm run check:boundaries        # import direction between slices
 npm run gen:types:check         # shared/spots.generated.ts against spots.json
 npm run gen:intertidal:check    # zone types, and every spot in exactly one membership bucket
 npm run gen:calibration:check   # calibration types against calibration.json
+npm run gen:unresolved:check    # every unresolved array is discovered and rendered
 npm run typecheck
 npm run test
 npm run calibrate               # the pipeline, offline against committed fixtures
 npm run build
 ```
+
+`gen:unresolved:check` is the youngest and the one whose failure reads oddest: a
+source appearing in its diff that you did not add is the check working. It walks
+`shared/`, `core/zones/` and `activities/` for `unresolved` arrays, so a data
+file whose caveats reach no reader fails it. Two already had —
+`shared/intertidal.json` and `shared/gate-hours.json`, each for its whole life.
 
 Do not reconstruct this list from `package.json`. That file also carries `dev`,
 `start`, the `:fetch` and write modes, and the `ui:` capture tools, none of which
