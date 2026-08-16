@@ -5,6 +5,7 @@ investigate a question — never things the app imports.
 
 | | |
 | --- | --- |
+| `cdip-station/` | Re-derives the eight `cdip` ids in `shared/spots.json`'s `buoys` block from CDIP's published active-station list, and checks each buoy's live/dead claim against it. Compares the published station NAME, not merely the presence of the id — every id in the file is a real station, so a transposed pair passes a presence check. Python, standard library only. |
 | `county-station/` | Re-runs the `county_station` nearest-neighbour join against data.ca.gov and diffs it against `shared/spots.json`, so the repo's "fix the join and re-run it" rule is executable rather than aspirational. Python, standard library only. |
 | `calibration/` | The revealed-preference pipeline. Turns iNaturalist observations and CO-OPS predictions into `shared/calibration.json`, with a refusal and a reason wherever the evidence does not support a rate. |
 | `mpa/` | Re-runs the `mpa` point-in-polygon join against CDFW ds582 and diffs it against `shared/spots.json`, including the layer's own vintage — `lastEditDate` moving means the polygons served today are not the ones the file resolved against. Python, standard library only. |
@@ -45,6 +46,7 @@ npm run calibrate:taxa:check                         # re-verify every taxon id 
 python tools/verify-apis/verify_coastal_apis.py      # exits nonzero only on real failures
 python tools/county-station/rejoin.py                # exit 1 if any station match moved
 python tools/mpa/rejoin.py                           # exit 1 if any MPA binding moved, or ds582 was re-issued
+python tools/cdip-station/rejoin.py                  # exit 1 if a buoy's CDIP mapping or live/dead claim moved
 python tools/lidar-recon/probes/<probe>.py           # each writes one findings file
 npm run ui:capture -- <out-dir>                      # needs `npm run build` first
 npm run ui:compare -- <before> <after>               # non-zero on any difference
