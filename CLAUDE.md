@@ -242,9 +242,10 @@ python tools/verify-apis/verify_coastal_apis.py          # exits nonzero only on
 EBIRD_API_KEY=xxx python tools/verify-apis/verify_coastal_apis.py   # includes the eBird check
 python tools/county-station/rejoin.py                    # exit 1 if any station match moved
 python tools/mpa/rejoin.py                               # exit 1 if any MPA binding moved, or ds582 was re-issued
+python tools/cdip-station/rejoin.py                      # exit 1 if a buoy's CDIP mapping or live/dead claim moved
 ```
 
-The two `rejoin.py` tools are the executable form of *do not hand-populate
+The three `rejoin.py` tools are the executable form of *do not hand-populate
 resolved fields*: they re-run a join from a recorded URL and diff it against what
 is committed, so "fix the join and re-run it" is something a reviewer can do
 rather than something the rule asserts.
