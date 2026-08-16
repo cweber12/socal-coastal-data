@@ -10,9 +10,16 @@ npm run ui:capture -- tools/ui-capture/out/after
 npm run ui:compare -- tools/ui-capture/out/before tools/ui-capture/out/after
 ```
 
-5 pages × 375/768/1280 × light and dark = 30 captures, each written as a PNG and
+8 pages × 375/768/1280 × light and dark = 48 captures, each written as a PNG and
 as the page's rendered text. **Only the text is diffed.** The PNG is there for a
 human to look at once something is known to have moved.
+
+It was 5 pages and 30 captures until #129 added the three surf pages. The count
+is not pinned anywhere — `capture.mjs` derives it from its own `pages` list — so
+this sentence is the thing that goes stale, and it did, for two releases.
+**The other counts below are history and stay as written**: "#124 diffed 30
+captures" is a statement about a run that happened, and correcting it to 48 would
+falsify the evidence for the argument it is making.
 
 Exits non-zero on any difference, so it can gate a move PR.
 
