@@ -1,5 +1,6 @@
 """Re-derive the eight `cdip` ids in spots.json's `buoys` block from CDIP's own
-active-station list, and check the live/dead claims against it.
+active-station list, check the live/dead claims against it, and re-derive each
+dead buoy's `dead_since` from the deployment file that value names.
 
 The `buoys` block maps every NDBC id to a CDIP id by hand. Eight values, no join
 behind them, no recorded retrieval, no re-run path -- the state
@@ -32,7 +33,33 @@ WHAT THIS SCRIPT DOES NOT DO is watch for that redeployment. Watching CDIP for a
 `155p1` deployment beyond 14 is
 https://github.com/cweber12/socal-coastal-data/issues/180 and belongs beside the
 other tripwires in `verify_coastal_apis.py`, not here. This script answers
-"does the committed mapping still hold", once, on demand.
+"does the committed record still hold", once, on demand.
+
+---------------------------------------------------------------------------
+Why `dead_since` is re-derived here, and `status` is not
+---------------------------------------------------------------------------
+
+`status: dead` is INFERRED, and inferred from absence -- a 404, an empty payload,
+a row missing from the active list. That is a judgement, and a tool does not
+commit one: this script reports the disagreement and exits 1 so a human moves the
+field. `dead_since` is PUBLISHED. CDIP states `time_coverage_end` as a global
+attribute of the deployment file, so the value is transcribed rather than
+decided, which makes it the same kind of thing as `mpa` and `county_station` --
+and hand-typing one of those is the violation, not the safeguard. The axis is
+docs/adr/0017-published-is-a-join-inferred-is-a-judgement.md.
+
+THE NAMED FILE IS PINNED, NEVER "THE LATEST". The committed value says which
+deployment it was read from, and this reads exactly that one. So a future
+`155p1_d15` leaves this check green -- "d14 ended 2026-05-03" stays true forever
+-- and noticing the d15 remains issue 180's job. The corollary, stated because it
+is a real gap and not a design flourish: the committed value's "the fourteenth
+and LAST" is NOT verified here. Only the date, its two quoted attributes, and
+that the file belongs to this buoy.
+
+A `dead_since` that does not parse as a re-derivable claim is REPORTED, never
+fatal. "unknown; realtime2 404 as of 2026-07-27" was an honest answer while
+nobody had asked CDIP, and an unstated date cannot be a wrong one. Only a value
+claiming to be resolved can fail.
 
 ---------------------------------------------------------------------------
 What is pinned, and what is only reported
@@ -99,8 +126,11 @@ import argparse
 import json
 import math
 import os
+import re
 import sys
+import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -125,6 +155,38 @@ CLOSE_MARKER = "</pre>"
 
 FIELDS = 10
 F_TIME, F_STATION, F_NAME, F_LAT, F_LON, F_UNKNOWN6, F_HS, F_PERIOD, F_DIR, F_TEMP = range(FIELDS)
+
+# One archived deployment, on the dodsC path. `.das` is the Dataset Attribute
+# Structure: the file's attributes as plain text, which is why no netCDF reader
+# and no dependency is needed to read a global attribute out of it.
+#
+# The archive CATALOG at
+# thredds.cdip.ucsd.edu/thredds/catalog/cdip/archive/<station>p1/catalog.xml
+# lists the deployments and is deliberately not fetched -- see the docstring.
+# Reading it would make this the d15 tripwire, which lives elsewhere.
+ARCHIVE_DAS = ("https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/archive/"
+               "{station}p1/{station}p1_d{deployment}.nc.das")
+
+# The attribute block the values are read from. SCOPED, not grepped: the three
+# keys below are unique in the file today, but a variable-level `date_created` is
+# a legitimate thing for CDIP to add, and it would silently shift the read.
+GLOBAL_BLOCK = re.compile(r"^\s*NC_GLOBAL\s*\{", re.M)
+DAS_STRING_ATTR = re.compile(r'^\s*String\s+(\w+)\s+"(.*)";\s*$', re.M)
+
+# What makes a `dead_since` re-derivable. BOTH are required before anything is
+# fetched: the date it claims, and the deployment file it claims to have read it
+# from. A value carrying one and not the other is a claim with no provenance, and
+# is reported rather than verified against a guess.
+DEAD_SINCE_DATE = re.compile(r"^(\d{4}-\d{2}-\d{2})\b")
+DEAD_SINCE_FILE = re.compile(r"\b(\d{3})p1_d(\d{2})\.nc\b")
+
+# Attribute values the committed string quotes verbatim, checked against the
+# publisher whenever they appear. This is what stops the prose drifting away from
+# the date while the date itself still matches.
+DEAD_SINCE_QUOTED = re.compile(
+    r"\b(time_coverage_end|date_created)\s+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)\b")
+
+ISO_Z = "%Y-%m-%dT%H:%M:%SZ"
 
 # Feed names carry a state suffix the committed names do not. Stripped, both
 # sides upper-cased, and compared exactly -- never fuzzily. A near-match is how
@@ -196,6 +258,142 @@ def fetch_active():
         }
 
     return stations
+
+
+def das_global_attrs(text, url):
+    """The String attributes of the .das's NC_GLOBAL block, and only that block."""
+    opener = GLOBAL_BLOCK.search(text)
+    if opener is None:
+        die(f"{url} has no NC_GLOBAL block. The .das is not the shape this reads, and "
+            "guessing at an unscoped attribute would verify a date against whatever "
+            "else happens to carry the name.")
+
+    # Walk to the matching close brace rather than trusting the indentation. The
+    # block holds nested DODS {...} groups, so a first-} scan reads short.
+    depth, i = 0, opener.end() - 1
+    while i < len(text):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                break
+        i += 1
+    else:
+        die(f"{url}'s NC_GLOBAL block is unterminated. A truncated read is not a file "
+            "with fewer attributes.")
+
+    return dict(DAS_STRING_ATTR.findall(text[opener.end():i]))
+
+
+def fetch_deployment_globals(station, deployment):
+    """(url, attrs, error) for one archived deployment. Never raises on a 404."""
+    url = ARCHIVE_DAS.format(station=station, deployment=deployment)
+    req = urllib.request.Request(url, headers=UA)
+    try:
+        body = urllib.request.urlopen(req, timeout=120).read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as exc:
+        return url, None, f"HTTP {exc.code}"
+    except urllib.error.URLError as exc:
+        return url, None, f"unreachable ({exc.reason})"
+    return url, das_global_attrs(body, url), None
+
+
+def check_dead_since(ndbc_id, buoy, problems):
+    """Re-derive one committed dead_since from the deployment file it names.
+
+    Appends to `problems` (exit 1: a human decides) only when a value that CLAIMS
+    to be resolved disagrees with the publisher. An unstated or non-parsing date
+    is printed and passed over.
+    """
+    claim = buoy.get("dead_since")
+    if not claim:
+        print(f"   {ndbc_id} is marked {buoy['status']} with no dead_since. Nothing to "
+              "re-derive -- an unstated date cannot be a wrong one.")
+        return
+
+    m_date, m_file = DEAD_SINCE_DATE.match(claim), DEAD_SINCE_FILE.search(claim)
+    if not (m_date and m_file):
+        print(f"   {ndbc_id} dead_since is not a re-derivable claim, so it is REPORTED "
+              f"and not failed: {claim[:64]!r}...")
+        print("     A leading ISO date AND a <station>p1_dNN.nc filename are what make "
+              "one checkable. This value states no provenance to re-run.")
+        return
+
+    claimed_date = m_date.group(1)
+    station, deployment = m_file.group(1), m_file.group(2)
+
+    if station != buoy.get("cdip"):
+        problems.append((
+            ndbc_id,
+            f"dead_since names deployment {station}p1_d{deployment}.nc, but the buoy binds "
+            f"CDIP {buoy.get('cdip')!r}. The date would be verified against another "
+            "station's file, which is worse than not verifying it."))
+        return
+
+    url, attrs, error = fetch_deployment_globals(station, deployment)
+    if error:
+        problems.append((
+            ndbc_id,
+            f"dead_since names {station}p1_d{deployment}.nc and the archive answers "
+            f"{error}. The file the committed date was read from is no longer being "
+            f"served: {url}"))
+        return
+
+    # The file must be THIS buoy's. Every station's deployments are named the same
+    # way, so a transposed station id would otherwise verify a plausible date
+    # against the wrong water -- the same failure the name check exists to catch.
+    wmo = attrs.get("wmo_id")
+    if wmo != ndbc_id:
+        problems.append((
+            ndbc_id,
+            f"{station}p1_d{deployment}.nc publishes wmo_id {wmo!r}, not {ndbc_id}. "
+            "Refusing to confirm a death date from another buoy's deployment."))
+        return
+
+    end = attrs.get("time_coverage_end")
+    if not end:
+        die(f"{url} carries no time_coverage_end in NC_GLOBAL. The attribute this "
+            "re-derivation rests on is gone, so the check cannot be made -- which is "
+            "reported rather than passed.")
+
+    if end[:10] != claimed_date:
+        problems.append((
+            ndbc_id,
+            f"dead_since claims {claimed_date}; {station}p1_d{deployment}.nc publishes "
+            f"time_coverage_end {end}, i.e. {end[:10]}. One side moved."))
+        return
+
+    for name, quoted in DEAD_SINCE_QUOTED.findall(claim):
+        published = attrs.get(name)
+        if published != quoted:
+            problems.append((
+                ndbc_id,
+                f"dead_since quotes {name} {quoted}; {station}p1_d{deployment}.nc "
+                f"publishes {published!r}. The date still matches, so this is the prose "
+                "drifting off the file it cites."))
+            return
+
+    print(f"   {ndbc_id} / cdip {station}  dead_since {claimed_date} reproduces from "
+          f"{station}p1_d{deployment}.nc")
+    print(f"     time_coverage_end {end}   wmo_id {wmo} confirms the file is this buoy")
+
+    created = attrs.get("date_created")
+    if created:
+        try:
+            hours = (datetime.strptime(created, ISO_Z).replace(tzinfo=timezone.utc)
+                     - datetime.strptime(end, ISO_Z).replace(tzinfo=timezone.utc)
+                     ).total_seconds() / 3600
+            gap = f"archived {hours:.1f} h after it stopped"
+        except ValueError:
+            gap = f"archived {created}, gap not computable from these two stamps"
+        print(f"     {gap} -- REPORTED, never asserted. CDIP publishes no recovery event, "
+              "so a short gap is what 'recovered rather than left silent' rests on.")
+
+    print("     NOT CHECKED HERE: that this is still the LAST deployment. A "
+          f"{station}p1_d15 is the REVIVED signal, it belongs to "
+          "https://github.com/cweber12/socal-coastal-data/issues/180, and this check "
+          "stays green when one appears.")
 
 
 def normalised(name):
@@ -278,6 +476,13 @@ def main():
             print(f"{mark} {ndbc_id} / cdip {cdip_id}  {buoy['name']:26} "
                   f"not in the active list  (file says {status})")
 
+    dead_ids = [i for i in sorted(buoys) if buoys[i]["status"] != "live"]
+    if dead_ids:
+        print()
+        print(f"  dead_since, re-derived from the archive ({len(dead_ids)} dead):")
+        for ndbc_id in dead_ids:
+            check_dead_since(ndbc_id, buoys[ndbc_id], problems)
+
     print()
     if problems:
         for ndbc_id, message in problems:
@@ -291,8 +496,12 @@ def main():
 
     live = sum(1 for b in buoys.values() if b["status"] == "live")
     dead = len(buoys) - live
+    rederived = sum(1 for i in buoys if buoys[i]["status"] != "live"
+                    and DEAD_SINCE_DATE.match(buoys[i].get("dead_since") or "")
+                    and DEAD_SINCE_FILE.search(buoys[i].get("dead_since") or ""))
     print(f"cdip-station: all {len(buoys)} buoys reproduce -- {live} live and present under the "
-          f"published name, {dead} marked dead and absent.")
+          f"published name, {dead} marked dead and absent, "
+          f"{rederived} of {dead} dead_since re-derived from the deployment file named.")
     return 0
 
 

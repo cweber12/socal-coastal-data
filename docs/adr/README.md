@@ -50,3 +50,4 @@ is worth as much as the fact that it was.
 | [0014](0014-the-surf-zone-is-derived-membership-and-no-measured-fact.md) | The surf zone is derived membership and no measured fact |
 | [0015](0015-the-solver-reports-anchors-rather-than-taking-one.md) | The solver reports the extrema an interval contains, rather than taking one |
 | [0016](0016-the-swell-gate-is-a-window-not-a-ceiling.md) | The swell gate is a window, not a ceiling |
+| [0017](0017-published-is-a-join-inferred-is-a-judgement.md) | A published value is a join result; an inferred one is a judgement |

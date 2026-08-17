@@ -1,8 +1,9 @@
 # tools/cdip-station
 
 Re-derives the eight `cdip` ids in `shared/spots.json`'s `buoys` block from
-CDIP's own active-station list, and checks each buoy's live/dead claim against
-it.
+CDIP's own active-station list, checks each buoy's live/dead claim against it,
+and re-derives each dead buoy's `dead_since` from the deployment file that value
+names.
 
 ```bash
 python tools/cdip-station/rejoin.py            # exit 1 if a mapping or a claim moved
@@ -63,6 +64,49 @@ or a name that disagrees. The middle one is the `REVIVED` signal in its weakest
 form, and CLAUDE.md's rule applies — either it came back or the reason it was
 written off no longer holds, and both need a human.
 
+## It re-derives `dead_since`, and deliberately not `status`
+
+`status: dead` is **inferred**, and inferred from absence — a 404, an empty
+payload, a row missing from the active list. That is a judgement, so this script
+reports the disagreement and exits 1 for a human to act on; it never writes the
+field. `dead_since` is **published**: CDIP states `time_coverage_end` as a global
+attribute of the deployment file, so the value is transcribed rather than
+decided, which makes it the same kind of thing as `mpa` and `county_station` —
+and for those, hand-typing is the violation rather than the safeguard. The axis
+is [ADR 0017](../../docs/adr/0017-published-is-a-join-inferred-is-a-judgement.md).
+
+The read is one request to the `.das` on the dodsC path — the Dataset Attribute
+Structure, which is the file's attributes as plain text, so no netCDF reader and
+no dependency is needed:
+
+```
+https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/archive/155p1/155p1_d14.nc.das
+```
+
+**Pinned:** the deployment file **named in the committed value**, never "the
+latest". Attributes are read from the `NC_GLOBAL` block by brace-matching rather
+than grepped out of the whole file — the three keys are unique today, but a
+variable-level `date_created` is a legitimate addition and would silently shift
+the read. `wmo_id` must equal the NDBC key, so a transposed station id cannot
+confirm a date from another buoy's file. Both timestamps the committed prose
+quotes are compared to the publisher, which is what stops the prose drifting
+while the date still matches.
+
+**Reported, never fatal:** the gap between `time_coverage_end` and
+`date_created` — 36.9 h for `155p1_d14.nc`. That short gap is what the `note`'s
+"recovered rather than left silent" rests on, and it is printed rather than
+asserted because CDIP publishes no recovery event.
+
+**Reported, never fatal:** a `dead_since` that does not parse as a re-derivable
+claim. `"unknown; realtime2 404 as of 2026-07-27"` was an honest answer while
+nobody had asked CDIP, and an unstated date cannot be a wrong one. Only a value
+claiming to be resolved can fail.
+
+Pointing the committed value one deployment earlier is the case worth knowing
+about: `155p1_d13.nc` ends `2025-01-22T17:59:59Z`, two hours before d14 begins.
+Deployments abut, so the wrong file yields a **plausible** date rather than an
+absurd one, which is why the filename is pinned and not inferred.
+
 ## Two things it refuses to do
 
 **Field 6 has no published unit, and this script does not invent one.** Reading
@@ -86,20 +130,34 @@ it gets redeployed, and that appears at CDIP as a `155p1` deployment beyond 14
 before any byte reaches NDBC. Watching for it is
 <https://github.com/cweber12/socal-coastal-data/issues/180> and belongs beside
 the other tripwires in `verify_coastal_apis.py`. This script answers "does the
-committed mapping still hold", once, on demand.
+committed record still hold", once, on demand.
+
+Pinning the named deployment is what keeps that boundary: because the check reads
+`155p1_d14.nc` rather than the newest file, a `155p1_d15` appearing leaves it
+**green**. The committed value's "the fourteenth and **last**" is therefore not
+verified here — only the date, its two quoted attributes, and that the file
+belongs to this buoy.
 
 ## What a clean run looks like
 
-As of 2026-08-15, against the live feed:
+As of 2026-08-17, against the live feed:
 
 ```
-shared/spots.json 3.1.1 | https://cdip.ucsd.edu/data_access/sccoos.cdip
+shared/spots.json 3.1.2 | https://cdip.ucsd.edu/data_access/sccoos.cdip
   79 active stations published; 8 buoys in the inventory
-  newest row stamped 08.16.2026-02:00:00 -- VERBATIM: the feed states no offset,
+  newest row stamped 08.17.2026-13:00:00 -- VERBATIM: the feed states no offset,
   and nothing here derives from it
 
+  dead_since, re-derived from the archive (1 dead):
+   46235 / cdip 155  dead_since 2026-05-03 reproduces from 155p1_d14.nc
+     time_coverage_end 2026-05-03T05:59:59Z   wmo_id 46235 confirms the file is
+     this buoy
+     archived 36.9 h after it stopped -- REPORTED, never asserted.
+     NOT CHECKED HERE: that this is still the LAST deployment.
+
 cdip-station: all 8 buoys reproduce -- 7 live and present under the published
-name, 1 marked dead and absent.
+name, 1 marked dead and absent, 1 of 1 dead_since re-derived from the deployment
+file named.
 ```
 
 `--verbose` adds a line per buoy. The distances that run shows are 1.1 km at Del
