@@ -1,6 +1,6 @@
 {
-  "version": "3.1.1",
-  "generated": "2026-08-01",
+  "version": "3.1.2",
+  "generated": "2026-08-17",
   "corridor": "Oceanside Harbor to Border Field, San Diego County, CA",
 
   "_moved": {
@@ -72,8 +72,8 @@
       "name": "Imperial Beach Nearshore",
       "cdip": "155",
       "status": "dead",
-      "dead_since": "unknown; realtime2 404 as of 2026-07-27",
-      "note": "Station page serves 200 while realtime2 404s. Six south-corridor spots fall back to 46232 across ~15 mi of differing exposure. Reassign on REVIVED."
+      "dead_since": "2026-05-03, read from CDIP rather than from the relay: archive deployment 155p1_d14.nc, the fourteenth and last in thredds.cdip.ucsd.edu/thredds/catalog/cdip/archive/155p1/catalog.xml, carries time_coverage_end 2026-05-03T05:59:59Z and date_created 2026-05-04T18:54:56Z. Global attributes read from the .das on the matching dodsC path, 2026-08-17.",
+      "note": "Station page serves 200 while realtime2 404s, and that is not a contradiction anyone needs to investigate: the deployment was archived the day after it ended, so the buoy was recovered rather than left silent. Six south-corridor spots fall back to 46232 across ~15 mi of differing exposure. Reassign on REVIVED."
     }
   },
 
