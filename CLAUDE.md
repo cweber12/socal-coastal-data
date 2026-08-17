@@ -174,9 +174,17 @@ parsing markup.
 `mpa_resolved: false` means unknown, not unprotected. When a field cannot be
 resolved, leave it null, give the reason, and list it in `unresolved`.
 
-**Do not hand-populate resolved fields.** `county_station` and `mpa` come from
-joins against upstream authorities. If a join is wrong, fix the join and re-run
-it. Legally load-bearing values are never typed in by hand.
+**Do not hand-populate resolved fields.** `county_station`, `mpa` and
+`dead_since` come from joins against upstream authorities. If a join is wrong,
+fix the join and re-run it. Legally load-bearing values are never typed in by
+hand.
+
+`dead_since` is on that list and `status` beside it is not, which looks
+arbitrary and is the point: a published value is transcribed, an inferred one is
+decided. CDIP states the death date outright, so hand-typing it is the
+violation; `status: dead` is read off a 404, so a human commits it and no
+scheduled job ever does. Three lines apart in one object, opposite provenance —
+`docs/adr/0017-published-is-a-join-inferred-is-a-judgement.md`.
 
 **Respect the coordinate error bar.** `spots.json` coordinates are ~100 m.
 MPA boundaries are legally meaningful and follow the shoreline, so a
